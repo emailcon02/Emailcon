@@ -183,6 +183,7 @@
     .header-front h1 {
         font-size: 25px;
     }
+    .ct
 
     .header-front {
         width: 90%;
@@ -200,6 +201,6 @@
     }
 
     .card-front {
-        width: 100% !important;
+        width: 88% !important;
     }
 }

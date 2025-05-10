@@ -59,8 +59,6 @@ const Footer = () => {
           </ul>
         </div>
 
-      
-
         {/* Contact Info */}
         <div className="footer-section">
           <h6>Contact</h6>

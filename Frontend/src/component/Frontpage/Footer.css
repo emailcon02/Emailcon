@@ -136,6 +136,9 @@
     .footer-container {
         padding: 20px;
     }
+    .cta-container{
+        width: 330px !important;
+    }
 
     .top-section,
     .footer-content {
