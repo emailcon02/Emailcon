@@ -1,0 +1,275 @@
+/* * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+} */
+/* Navbar Styles */
+.navbarfront {
+    position: relative;
+    width: 95%;
+    top: 40px;
+    left: 0;
+    background-color: #ffffff;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    padding: 30px 20px;
+    z-index: 1000;
+    margin: 0 auto;
+    border-radius:10px;
+}
+.navmain{
+    background: linear-gradient(to right, #fff7e8, #fad584);
+}
+.navbarfront.sticky {
+    position: fixed;
+    top: 0;
+    width: 100%;
+    background-color: #ffffff;
+    border-radius: 0px;
+    padding: 20px;
+}
+
+.navbar-container {
+    display: flex;
+    justify-content:flex-start;
+    align-items: center;
+    gap: 44%;
+}
+
+.logoimg{
+    width:80px;
+    height:40px;
+   
+}
+.logoContent{
+    font-weight:550;
+    font-size: 28px;
+    color: #2f327d;
+}
+/* Menu Items */
+.menu {
+    list-style: none;
+    display: flex;
+    gap:30px;
+    align-items: center;
+    
+}
+
+.menu li {
+    cursor: pointer;
+    font-size:16px;
+    border-bottom: none;
+}
+.menu li a{
+    text-decoration: none;
+    color: #2f327d;
+    font-weight: 600;
+    transition: color 0.3s ease;
+}
+.menu li:hover a{
+    color:#f48c06;
+}
+/* H1 animation - from top */
+.slide-down {
+    opacity: 0;
+    transform: translateY(-50px);
+    animation: slideDown 0.9s ease-in-out forwards;
+}
+
+/* P and Button animation - from left */
+.slide-left {
+    opacity: 0;
+    transform: translateX(-50px);
+    animation: slideLeft 0.9s ease-in-out forwards;
+}
+/* Button animation - from bottom to top */
+.slide-up {
+    opacity: 0;
+    transform: translateY(50px);
+    animation: slideUp 0.8s ease-out forwards;
+}
+
+@keyframes slideUp {
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Keyframes */
+@keyframes slideDown {
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes slideLeft {
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.slide-left {
+    animation-delay: 0.3s;
+}
+
+.slide-up {
+    animation-delay: 0.6s;
+}
+
+.demo-btn {
+    background: linear-gradient(to left, #899ab8, #122f60);
+    color: #fff;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 15px;
+}
+
+.demo-btn:hover {
+    background-color: #0f8c4a;
+}
+
+/* Hamburger Menu */
+.menu-toggle {
+    display: none;
+    flex-direction: column;
+    cursor: pointer;
+}
+
+
+.menu.active {
+    display: flex;
+    flex-direction: column;
+    position: absolute;
+    top: 80px;
+    left: 0;
+    width: 100%;
+    background-color: #ffffff;
+    padding: 15px 0;
+    z-index: 100;
+}
+
+.menu.active li {
+    margin: 10px 0;
+}
+.arrow-icon {
+    font-size: 14px;
+}
+
+/* Banner Section */
+.banner {
+    background: linear-gradient(to right, #fff7e8, #fad584);
+    color:#122d5c;
+    padding:70px 10px;
+    display: flex;    
+    justify-content: space-between;
+}
+.Banner-Image{
+    width:45%;
+    
+}
+
+.Banner-Image img{
+    width:100%;
+    align-items: center;
+    /* margin-left: 20px; */
+   animation: floating 2.5s ease-in-out infinite;
+}
+
+
+
+@keyframes floating {
+    from {
+        transform: translate(0, 0);
+    }
+
+    65% {
+        transform: translate(0, 1rem);
+    }
+
+    to {
+        transform: translate(0, 0);
+    }
+}
+
+
+
+
+.banner-content{
+    width:55%;
+    padding-left: 20px;
+    padding-top: 80px;
+}
+
+.banner-content h1 {
+    font-size:40px;
+    line-height: 1.6;
+    font-weight: bold;
+    margin-bottom: 20px;
+     color:#2f327d;
+}
+
+.banner-content .highlight {
+    color: #ff8434;
+}
+
+.banner-content {
+    position: relative;
+}
+
+.banner-content p {
+    line-height: 1.5;
+    font-size: 1.2rem;
+    margin-bottom: 20px;
+    color: #1a1dca;
+}
+
+.schedule-btn {
+    background-color:#ff8434;
+    color: #fff;
+    padding: 10px 20px;
+    font-size: 1rem;
+    border: none;
+    margin-top: 10px;
+    cursor: pointer;
+    border-radius: 10px;
+    outline:none;
+}
+
+.schedule-btn:hover {
+    background-color:#fd7a22;
+}
+
+/* Responsive Styles */
+@media (max-width: 768px) {
+    .menu {
+        display: none;
+    }
+
+    .menu-toggle {
+        display: flex;
+    }
+    .banner-content h1{
+        font-size: 45px;
+    }
+    .banner{
+        flex-direction: column;
+        align-items: center;
+        padding: 50px 10px;
+    }
+    .banner-content{
+        width: 100%;
+        padding-left: 0px;
+        padding-top: 20px;
+        text-align: center;
+    }
+    .Banner-Image{
+        width: 100%;
+        padding-top: 20px;
+    }
+}
+
+

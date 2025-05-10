@@ -1,0 +1,205 @@
+/* Header Section */
+.header-front h3 {
+    font-size: 15px;
+    color: black;
+    letter-spacing: 1px;
+    margin-top: 50px;
+    text-align: center;
+}
+
+.header-front h1 {
+    font-size: 36px;
+    font-weight: bold;
+    margin-bottom: 30px;
+    color: #000;
+    text-align: center;
+    margin-top: 10px;
+}
+
+/* Cards Container */
+.card-container-front {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    margin: 0 80px;
+}
+
+/* Individual Card */
+.card-front {
+    background-color: white;
+    border-radius: 10px;
+    box-shadow: 0 5px 8px rgba(0, 0, 0, 0.2);
+    padding: 20px;
+    text-align: center;
+    width: 40%;
+    transition: transform 0.5s ease, box-shadow 0.3s ease;
+    position: relative;
+    overflow: hidden;
+    z-index: 1;
+}
+
+/* Sliding background effect */
+.card-front::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+    transition: all 0.5s ease-in-out;
+}
+
+/* Hover state background animation */
+.card-front[data-type="edu"]:hover::before {
+    left: 0;
+    background-color: #dfe0ff;
+}
+.card-front[data-type="apps"]:hover::before {
+    left: 0;
+    background-color: #dbffd0;
+}
+.card-front[data-type="ecom"]:hover::before {
+    left: 0;
+    background-color: #fae4ca;
+}
+.card-front[data-type="heal"]:hover::before {
+    left: 0;
+    background-color: #ffd9d9;
+}
+.card-front[data-type="real"]:hover::before {
+    left: 0;
+    background-color: #ffffc9;
+}
+.card-front[data-type="bank"]:hover::before {
+    left: 0;
+    background-color: #e8d4fd;
+}
+
+/* Card content above animation layer */
+.card-front > * {
+    position: relative;
+    z-index: 1;
+}
+
+.icon-circle {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 15px;
+}
+
+.edu {
+    background-color: #e6e7ff;
+}
+
+.apps {
+    background-color: #e0ffda;
+}
+
+.ecom {
+    background-color: #fde9d4;
+}
+
+.heal {
+    background-color: #ffeaea;
+}
+
+.real {
+    background-color: #fefee2;
+}
+
+.bank {
+    background-color: #f2e6ff;
+}
+
+/* Individual icon colors */
+.icon-education {
+    color: #5e60ce;
+}
+
+.icon-apps {
+    color: #06d6a0;
+}
+
+.icon-ecommerce {
+    color: #ff6d00;
+}
+
+.icon-healthcare {
+    color: #f9296f;
+}
+
+.icon-realestate {
+    color: yellow;
+}
+
+.icon-finance {
+    color: #8338ec;
+}
+
+.icon-style {
+    width: 25px;
+    height: 25px;
+}
+
+.cards-separation {
+    margin-top: 30px;
+    margin-bottom: 30px;
+}
+
+.card-front img {
+    width: 40px;
+    height: auto;
+    margin-bottom: 15px;
+}
+
+.card-front h2 {
+    font-size: 20px;
+    margin: 10px 0;
+    font-weight: bold;
+}
+
+.card-front p {
+    font-size: 15px;
+    color: rgb(99, 99, 99);
+    line-height: 1.5;
+}
+
+.card-front:hover {
+    transform: scale(1.05);
+}
+
+/* Icon circle becomes white on hover */
+.card-front:hover .icon-circle {
+    background-color: white !important;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .header-front h1 {
+        font-size: 25px;
+    }
+
+    .header-front {
+        width: 90%;
+        margin: 0 auto;
+    }
+    .cards-separation{
+        margin-top:25px !important;
+    }
+
+    .card-container-front {
+        flex-direction: column;
+        text-align: center;
+        margin: 0 auto;
+        width: 90%;
+    }
+
+    .card-front {
+        width: 100% !important;
+    }
+}
