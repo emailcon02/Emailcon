@@ -19,7 +19,6 @@ function Signup() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isModalOpenpassword, setIsModalOpenpassword] =useState(false);
   const navigate = useNavigate();
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true); // Start loading
@@ -35,16 +34,14 @@ function Signup() {
           smtppassword,
         }
       );
-
       toast.success(response.data.message || "Account created successfully!");
-
+      const userId = response.data.user.id; 
       setTimeout(() => {
-        navigate("/user-login");
-      }, 4000);
+        navigate(`/userpayment/${userId}`);
+      }, 3000);
     } catch (error) {
       if (error.response) {
         const errorMessage = error.response.data.message || "Error signing up";
-
         if (error.response.status === 400) {
           if (errorMessage.includes("User already exists")) {
             toast.warning(
@@ -63,7 +60,7 @@ function Signup() {
       setIsLoading(false);
     }
   };
-
+ 
   return (
     <div className="signup-page">
       <div className="signup-cover">

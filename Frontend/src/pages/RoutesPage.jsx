@@ -25,6 +25,7 @@ import Resetpasswords from "../component/Resetpassword";
 import Frontpageroute from "./Frontpageroute";
 import Form from "../component/Frontpage/Form";
 import AdminUserform from "../component/Admin/AdminUserform";
+import PaymentPage from "../component/PaymentPage";
 
 function RoutesPage() {
   const [isOnline, setIsOnline] = useState(navigator.onLine);
@@ -53,6 +54,7 @@ function RoutesPage() {
         <Route path="/user-login" element={<Login />} />
         <Route path="/" element={<Frontpageroute />} />
         <Route path="/user-enroll" element={<AdminUserform />} />
+        <Route path="/userpayment/:userId" element={<PaymentPage/>} />
         <Route path="/register-form" element={<Form/>} />
         <Route path="/admin-login" element={<AdminLogin />} />
         <Route path="/admin-dashboard" element={<AdminDashboard />} />
@@ -61,7 +63,6 @@ function RoutesPage() {
         <Route path="/click-editor/:userId/:campaignId" element={<Clickmainpage />} />
         <Route path="/clicksingle-editor/:userId/:campaignId" element={<Clicksinglemainpage />} />
         <Route path="/home" element={<Home />} />
-
         <Route path="/campaigntable" element={<CampaignTable />} />
         <Route path="/campaign" element={<Campaign />} />
         <Route path="/TemMainpage" element={<TemMainpage />} />

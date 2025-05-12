@@ -30,7 +30,16 @@ const userSchema = new mongoose.Schema({
     avatar: {
         type: String,
         default: "https://cdn-icons-png.flaticon.com/512/847/847969.png" 
-    }
+    },
+    paymentStatus: {
+        type: String,
+        enum: ["pending", "paid", "failed", "expired"], 
+        default: "pending",
+    },   
+    expiryDate: { type: Date }, 
+    duration: { type: Number }, 
+    amount: { type: Number },   
+
 });
 
 const User = mongoose.model("User", userSchema);

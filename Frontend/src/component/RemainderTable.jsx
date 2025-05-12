@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import "./CampaignTable.css";
-import { FaArrowLeft, FaSearch,FaEdit } from "react-icons/fa";
+import { FaArrowLeft, FaSearch,FaEdit, FaTrash } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -73,6 +73,31 @@ function RemainderTable() {
   const handleBackCampaign = () => {
     navigate("/home");
   };
+  const handleDeleteRemainderCampaignHistory = async (campaignHistoryId) => {
+    try {
+      // Send a DELETE request to the backend with the campaign history ID
+      const response = await axios.delete(
+        `${apiConfig.baseURL}/api/stud/camhistory/${campaignHistoryId}`
+      );
+  
+      // Handle success response
+      if (response.status === 200) {
+        toast.success("Campaign history deleted successfully!");
+        // Optionally, update UI or navigate to a different page
+        // For example: navigate("/campaigntable");
+        setTimeout(() => {
+        window.location.reload();
+      }, 1000); // Optional delay to let toast display
+    
+      }
+    } catch (error) {
+      // Handle error response
+      console.error("Error deleting campaign history:", error);
+      toast.error("Failed to delete campaign history.");
+    }
+  };
+  
+
 
   const handleViewFailedEmails = (emails) => {
     setFailedEmails(emails);
@@ -257,9 +282,9 @@ const handlesaveEditcampaign = async (campaignId) => {
               <th>Failed Count</th>
               <th>Scheduled Time</th>
               <th>Status</th>
-              <th>Action</th>
+              <th>On/Off Automation</th>
               <th>Report</th>
-              <th>Edit Campaign</th>
+              <th>Action</th>
             </tr>
           </thead>
           <tbody>
@@ -368,7 +393,7 @@ const handlesaveEditcampaign = async (campaignId) => {
                       View
                     </button>
                   </td>
-                  <td>
+                  <td className="action-btn-campaign">
                     <button
                       className="resend-btn edit-btn-campaign"
                       onClick={() => {
@@ -378,7 +403,12 @@ const handlesaveEditcampaign = async (campaignId) => {
                       >
 <FaEdit/>
 </button>
-                  </td>
+  <button
+                      className="resend-btn edit-btn-campaign"
+                      onClick={() => handleDeleteRemainderCampaignHistory(campaign._id)}
+                      >
+<FaTrash/>
+</button></td>
 
                 </tr>
               ))

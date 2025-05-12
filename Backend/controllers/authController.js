@@ -1,7 +1,6 @@
 import jwt from "jsonwebtoken";
 import User from "../models/User.js";
 import { encryptPassword } from "../config/encryption.js";
-// import transporter from "../config/nodemailer.js";
 import nodemailer from "nodemailer";
 import apiconfigfrontend from "../api/apiconfigfrontend.js";
 import otptransporter from "../config/otp-mailer.js";
@@ -11,6 +10,7 @@ export const signup = async (req, res) => {
   const { email, username, password, smtppassword, gender } = req.body;
 
   try {
+    // Check for existing user by email or username
     const existingUser = await User.findOne({ $or: [{ email }, { username }] });
     if (existingUser) {
       return res
@@ -33,30 +33,42 @@ export const signup = async (req, res) => {
       } catch (smtpError) {
         console.error("SMTP verification failed:", smtpError);
         return res.status(400).json({
-          message: "Invalid Gmail SMTP credentials. Please check your email or app password.",
+          message:
+            "Invalid Gmail SMTP credentials. Please check your email or app password.",
         });
       }
     }
 
+    // Encrypt SMTP password
     const encryptedSmtpPassword = encryptPassword(smtppassword);
+
+    // Save user to DB
     const user = new User({
       email,
       username,
       gender,
-      password, // Hash this using bcrypt in production
+      password, // Use bcrypt to hash this in production
       smtppassword: encryptedSmtpPassword,
+      paymentStatus: "pending",
+      isActive: false,
     });
 
     await user.save();
 
     res.status(201).json({
       message: "Your details are saved. Wait for account activation.",
+      user: {
+        id: user._id,
+        email: user.email,
+        username: user.username,
+      },
     });
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: "Error saving user." });
   }
 };
+
 
 
 export const login = async (req, res) => {

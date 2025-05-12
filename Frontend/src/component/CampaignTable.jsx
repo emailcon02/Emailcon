@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import "./CampaignTable.css";
-import { FaArrowLeft, FaSearch } from "react-icons/fa";
+import { FaArrowLeft, FaSearch,FaTrash } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -51,7 +51,29 @@ function CampaignTable() {
   const handleview = (userId, campaignId) => {
     navigate(`/readreport/${userId}/${campaignId}`);
   };
-
+  const handleDeleteCampaignHistory = async (campaignHistoryId) => {
+    try {
+      // Send a DELETE request to the backend with the campaign history ID
+      const response = await axios.delete(
+        `${apiConfig.baseURL}/api/stud/camhistory/${campaignHistoryId}`
+      );
+  
+      // Handle success response
+      if (response.status === 200) {
+        toast.success("Campaign history deleted successfully!");
+        setTimeout(() => {
+          window.location.reload();
+        }, 1000); // Optional delay to let toast display
+       
+      }
+    } catch (error) {
+      // Handle error response
+      console.error("Error deleting campaign history:", error);
+      toast.error("Failed to delete campaign history.");
+    }
+  };
+  
+  
   const handleOpenModal = (campaignId, scheduledTime) => {
     console.log(
       "Opening modal for campaign:",
@@ -441,6 +463,7 @@ function CampaignTable() {
               <th>Scheduled Time</th>
               <th>Status</th>
               <th>Report</th>
+              <th>Action</th>
             </tr>
           </thead>
           <tbody>
@@ -579,6 +602,12 @@ function CampaignTable() {
                       View
                     </button>
                   </td>
+                  <td>  <button
+                                        className="resend-btn edit-btn-campaign"
+                                        onClick={() => handleDeleteCampaignHistory(campaign._id)}
+                                        >
+                  <FaTrash/>
+                  </button></td>
                 </tr>
               ))
             ) : (

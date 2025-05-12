@@ -1925,4 +1925,27 @@ router.put("/updateStudent/:id", async (req, res) => {
   }
 });
 
+router.delete('/camhistory/:id', async (req, res) => {
+  const campaignId = req.params.id;
+  console.log('Deleting campaign history:', campaignId);
+
+  try {
+    // Use the Camhistory model to delete the campaign history
+    const deletedCampaign = await Camhistory.findByIdAndDelete(campaignId);
+    if (!deletedCampaign) {
+      return res.status(404).json({
+        message: 'Campaign history not found'
+      });
+    }
+    res.status(200).json({
+      message: 'Campaign history deleted successfully'
+    });
+  } catch (error) {
+    console.error('Error deleting campaign history:', error);
+    res.status(500).json({
+      message: 'Server error while deleting campaign history'
+    });
+  }
+});
+
 export default router;

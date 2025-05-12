@@ -2,6 +2,25 @@
 .admin-dashboard-page {
   color: #343a40;
 }
+.userstatus.pending {
+  color: orange;
+}
+.userstatus.paid {
+  color: green;
+}
+.userstatus.failed {
+  color: red;
+}
+.send-btn {
+  background:#2f327d;
+  color: #fff;
+  border: none;
+  padding: 8px 15px;
+  border-radius: 18px;
+  font-size: 12px; 
+   font-weight: bold;
+   cursor: pointer;
+} 
 
 .admin-dashboard-header {
   padding-top: 10px;

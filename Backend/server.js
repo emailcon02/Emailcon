@@ -8,6 +8,7 @@ import dotenv from 'dotenv';
 import './config/cron-scheduler.js';
 import './config/cron-birthday.js';
 // import './config/cron-payment.js';
+import './config/cron-userexpiry.js';
 import bodyParser from 'body-parser';
 
 // Load environment variables
@@ -24,11 +25,11 @@ app.use(express.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
 
-
 // Routes
 app.use('/api/stud', studentRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/admin', adminRoutes);
+
 
 app.get('/', (req, res) => {
     res.json('Hello');
