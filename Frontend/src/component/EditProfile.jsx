@@ -9,6 +9,7 @@ import "react-toastify/dist/ReactToastify.css";
 const EditProfile = ({ users, handleLogout }) => {
   const [modalOpen, setModalOpen] = useState(false);
   const [editField, setEditField] = useState(null);
+  const [saveLoading,setSaveLoading] = useState(false);
   const [formData, setFormData] = useState({
     username: users?.username || "",
     userPassword: "",
@@ -30,21 +31,21 @@ const EditProfile = ({ users, handleLogout }) => {
     confirmSmtpPassword: false,
   });
 
-  const handleFileChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setFormData(prev => ({
-          ...prev,
-          avatar: reader.result
-        }));
-      };
-      reader.readAsDataURL(file);
-    }
-  };
+  // const handleFileChange = (e) => {
+  //   const file = e.target.files[0];
+  //   if (file) {
+  //     const reader = new FileReader();
+  //     reader.onloadend = () => {
+  //       setFormData(prev => ({
+  //         ...prev,
+  //         avatar: reader.result
+  //       }));
+  //     };
+  //     reader.readAsDataURL(file);
+  //   }
+  // };
 
-  const togglePasswordVisibility = (field) => {
+  const togglePassword = (field) => {
     setShowPassword(prev => ({
       ...prev,
       [field]: !prev[field]
@@ -151,6 +152,7 @@ const saveUsername = async () => {
       toast.error("Old password is incorrect.");
       return;
     }
+    setSaveLoading(true);
     try {
       await axios.put(`${apiConfig.baseURL}/api/auth/update-password`, {
         userId: users?._id,
@@ -165,6 +167,7 @@ const saveUsername = async () => {
       });
       setEditField(null);
     } catch (error) {
+      setSaveLoading(false);
       toast.error("Error updating user password.");
       console.error(error);
     }
@@ -175,6 +178,7 @@ const saveUsername = async () => {
       toast.error("Passwords do not match.");
       return;
     }
+    setSaveLoading(true);
 
     try {
       await axios.put(`${apiConfig.baseURL}/api/auth/update-smtp-password`, {
@@ -185,6 +189,7 @@ const saveUsername = async () => {
       toast.success("SMTP password updated successfully!");
       setEditField(null);
     } catch (error) {
+      setSaveLoading(false);
       if (error.response) {
         const errorMessage = error.response.data.message || "Error updating SMTP password";
         if (error.response.status === 400) {
@@ -257,7 +262,7 @@ const saveUsername = async () => {
         
             setFormData(prev => ({
               ...prev,
-              avatar: uploadRes.data.imageUrl, // ✅ permanent Cloudinary URL
+              avatar: uploadRes.data.imageUrl, 
             }));
           } catch (err) {
             console.error("Error uploading default avatar:", err);
@@ -431,11 +436,25 @@ const saveUsername = async () => {
                 <button onClick={savegender} className="ep-save">Save</button>
               )}
               {editField === "userPassword" && (
-                <button onClick={saveUserPassword} className="ep-save">Save</button>
+                <button onClick={saveUserPassword} className="ep-save"
+                disabled={saveLoading}>
+                    {saveLoading ?(
+                      <span className="loader-create-remainder"></span>
+                    ) : (
+                      "Save"
+                    )}
+                  </button>
               )}
 
               {editField === "smtpPassword" && (
-                <button onClick={saveSmtpPassword} className="ep-save">Save</button>
+                <button onClick={saveSmtpPassword} className="ep-save"
+                disabled={saveLoading}>
+                    {saveLoading ?(
+                      <span className="loader-create-remainder"></span>
+                    ) : (
+                      "Save"
+                    )}
+                    </button>
               )}
             </div>
           </div>

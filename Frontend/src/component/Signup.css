@@ -3,43 +3,37 @@
   justify-content: center;
   align-items: center;
   color: #333;
-  /* background-color: ; */
-  /* background-color: #f0feff; */
+  height: 100vh;
+  overflow: hidden;
 }
 
 .signup-cover {
   display: flex;
   background: #fff;
   width: 100%;
-  height: 105vh !important;
-
-  }
+  height: 100vh;
+}
 
 .signup-image {
   width: 450px;
 }
 
-.signup-aside h2 {
-  color: #2f327d;
-}
-
 .signup-aside {
   background-color: #faeedf;
-  display: block;
   width: 55%;
-  padding: 10px 0px;
-  height: 105vh !important;
-  align-content: center;
+  padding: 75px 0px 10px 0px;
   text-align: center;
-
+  overflow: hidden; /* ensure it's not scrollable */
 }
 
 .signup-container {
   background: #fff;
   width: 45%;
-  padding: 0.6rem 2rem;
-  height: 105vh !important;
+  padding:2rem;
+  height: 90vh;
+  overflow-y: auto; /* makes it scrollable */
 }
+
 .gender-options label{
   color: gray !important;
   font-size: 14px !important;

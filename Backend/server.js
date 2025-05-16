@@ -7,9 +7,10 @@ import adminRoutes from './routes/adminRoutes.js';
 import dotenv from 'dotenv';
 import './config/cron-scheduler.js';
 import './config/cron-birthday.js';
-// import './config/cron-payment.js';
 import './config/cron-userexpiry.js';
 import bodyParser from 'body-parser';
+import createOrderRoute from './routes/create-order.js';
+
 
 // Load environment variables
 dotenv.config();
@@ -29,6 +30,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use('/api/stud', studentRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/admin', adminRoutes);
+app.use("/api", createOrderRoute);
 
 
 app.get('/', (req, res) => {

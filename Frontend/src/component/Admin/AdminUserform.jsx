@@ -51,8 +51,10 @@ function AdminUserform() {
               <th>Name</th>
               <th>Email</th>
               <th>Phone</th>
+              <th>State</th>
+              <th>District</th>
               <th>Gender</th>
-              <th>Address</th>
+              <th>Type</th>
               <th>Profession</th>
             </tr>
           </thead>
@@ -62,8 +64,10 @@ function AdminUserform() {
                 <td>{user.name}</td>
                 <td>{user.email}</td>
                 <td>{user.phone}</td>
+                <td>{user.state}</td>
+                <td>{user.district}</td>
                 <td>{user.gender}</td>
-                <td>{user.address}</td>
+                <td>{user.type}</td>
                 <td>{user.profession}</td>             
               </tr>
             ))}

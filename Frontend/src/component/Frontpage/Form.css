@@ -53,7 +53,10 @@
     flex-direction: column;
     /* justify-content: center; */
     gap:20px;
-
+    position: sticky;
+    right: 0;
+    top: 0;
+    height: 100vh;
 }
 
 .img-text h1 {
@@ -129,6 +132,15 @@
     border-radius: 3px;
     transition: border-color 0.3s ease, box-shadow 0.3s ease;
 }
+.form-select{
+    width: 93% !important;
+    padding: 10px 14px;
+    margin-bottom: 8px;
+    outline: none;
+    border: 1px solid #dbdbdb;
+    border-radius: 3px;
+    transition: border-color 0.3s ease,box-shadow 0.3s ease;
+}
 
 .form-input:hover,
 .form-input:focus {
@@ -151,6 +163,7 @@
     cursor: pointer;
     transition: background-color 0.3s ease;
 }
+
 
 .submit-button:hover {
     background-color:#ff8434;
@@ -214,3 +227,4 @@
         width: 80%;
     }
 }
+

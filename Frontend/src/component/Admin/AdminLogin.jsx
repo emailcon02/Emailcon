@@ -64,7 +64,7 @@ function AdminLogin() {
             className="admin-login-header"
             style={{ fontWeight: "550", color: "#2f327d" }}
           >
-            Admin <span style={{ color: "#f48c06" }}>Login</span>
+            <span> Email<span style={{ color: "#f48c06" }}>con </span> <span>Admin<span style={{ color: "#f48c06" }}> Login</span></span></span>            
           </h2>
           <form onSubmit={handleSubmit}>
             <div className="lab">

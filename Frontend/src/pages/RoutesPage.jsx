@@ -26,6 +26,8 @@ import Frontpageroute from "./Frontpageroute";
 import Form from "../component/Frontpage/Form";
 import AdminUserform from "../component/Admin/AdminUserform";
 import PaymentPage from "../component/PaymentPage";
+import SignupOption from "../component/SignupOption";
+import UserPaymenthistory from "../component/Admin/UserPaymenthistory";
 
 function RoutesPage() {
   const [isOnline, setIsOnline] = useState(navigator.onLine);
@@ -54,7 +56,9 @@ function RoutesPage() {
         <Route path="/user-login" element={<Login />} />
         <Route path="/" element={<Frontpageroute />} />
         <Route path="/user-enroll" element={<AdminUserform />} />
+        <Route path="/signup-option/:userId" element={<SignupOption />} />
         <Route path="/userpayment/:userId" element={<PaymentPage/>} />
+        <Route path="/user-payment-history/:userId" element={<UserPaymenthistory/>} />
         <Route path="/register-form" element={<Form/>} />
         <Route path="/admin-login" element={<AdminLogin />} />
         <Route path="/admin-dashboard" element={<AdminDashboard />} />

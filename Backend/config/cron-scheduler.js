@@ -11,14 +11,15 @@ cron.schedule('*/10 * * * *', async () => {
   try {
     const nowUTC = new Date();
     nowUTC.setSeconds(0, 0);
-    const nextMinute = new Date(nowUTC);
-    nextMinute.setMinutes(nowUTC.getMinutes() + 1);
 
-    console.log("Checking for scheduled emails at:", new Date().toLocaleString());
+    const tenMinutesAgo = new Date(nowUTC);
+    tenMinutesAgo.setMinutes(nowUTC.getMinutes() - 10);
+
+    console.log("⏰ Checking for scheduled emails between:", tenMinutesAgo.toISOString(), "and", nowUTC.toISOString());
 
     const camhistories = await Camhistory.find({
       status: "Scheduled On",
-      scheduledTime: { $gte: nowUTC.toISOString(), $lt: nextMinute.toISOString() },
+      scheduledTime: { $gte: tenMinutesAgo.toISOString(), $lt: nowUTC.toISOString() },
     });
 
     if (camhistories.length === 0) {

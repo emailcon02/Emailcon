@@ -13,6 +13,8 @@ function RemainderTable() {
   const [isPreviewOpenauto, setIsPreviewOpenauto] = useState(false);
   const [selectedGroup, setSelectedGroup] = useState(null);
   const [selectedTemplatepre, setSelectedTemplatepre] = useState(null);
+    const [showBirthdayDeleteModal, setShowBirthdayDeleteModal] = useState(false);
+    const [selectedBirthdayCampaignId, setSelectedBirthdayCampaignId] = useState(null);
   const [bgColortem, setBgColortem] = useState("#ffffff"); // Default background color
   const [previewContenttem, setPreviewContenttem] = useState([]); // Default preview content
   const [bdyCampaignname, setBdyCampaignname] = useState("");
@@ -405,8 +407,11 @@ const handlesaveEditcampaign = async (campaignId) => {
 </button>
   <button
                       className="resend-btn edit-btn-campaign"
-                      onClick={() => handleDeleteRemainderCampaignHistory(campaign._id)}
-                      >
+                      onClick={() => {
+                        setSelectedBirthdayCampaignId(campaign._id);
+                        setShowBirthdayDeleteModal(true);
+                      }}
+                                            >
 <FaTrash/>
 </button></td>
 
@@ -433,6 +438,73 @@ const handlesaveEditcampaign = async (campaignId) => {
         draggable={true}
         theme="light"
       />
+
+        {/* delete modal */}
+        {showBirthdayDeleteModal && (
+  <div
+    style={{
+      position: "fixed",
+      top: 0,
+      left: 0,
+      width: "100%",
+      height: "100%",
+      backgroundColor: "rgba(0, 0, 0, 0.4)", // <-- Less opaque for more transparency
+      display: "flex",
+      justifyContent: "center",
+      alignItems: "center",
+      zIndex: 9999,
+    }}
+  >
+    <div
+      style={{
+        backgroundColor: "#fff",
+        padding: "20px",
+        borderRadius: "8px",
+        textAlign: "center",
+        minWidth: "300px",
+        boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
+      }}
+    >
+      <h3>Delete Birthday Reminder?</h3>
+      <p>Are you sure you want to delete this birthday reminder campaign?</p>
+      <div style={{ marginTop: "20px" }}>
+        <button
+          onClick={() => {
+            handleDeleteRemainderCampaignHistory(selectedBirthdayCampaignId);
+            setShowBirthdayDeleteModal(false);
+            setSelectedBirthdayCampaignId(null);
+          }}
+          style={{
+            marginRight: "10px",
+            backgroundColor: "#f48c06",
+            color: "#fff",
+            border: "none",
+            padding: "8px 16px",
+            borderRadius: "4px",
+            cursor: "pointer",
+          }}
+        >
+          OK
+        </button>
+        <button
+          onClick={() => {
+            setShowBirthdayDeleteModal(false);
+            setSelectedBirthdayCampaignId(null);
+          }}
+          style={{
+            backgroundColor: "#ccc",
+            border: "none",
+            padding: "8px 16px",
+            borderRadius: "4px",
+            cursor: "pointer",
+          }}
+        >
+          Cancel
+        </button>
+      </div>
+    </div>
+  </div>
+)}
 
 
  {/* create Automation section */}

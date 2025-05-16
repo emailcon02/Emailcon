@@ -5,6 +5,19 @@
     width: 100%;
     
 }
+.resend-button {
+    background-color: transparent;
+    border: none;
+    color: #2f327d;
+    cursor: pointer;
+    font-weight: bold;
+    text-decoration: underline;
+  }
+  
+  .resend-button:hover {
+    color: #26296b;
+  }
+  
 
 .verify-head{
     /* font-size:2rem;

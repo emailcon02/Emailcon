@@ -61,22 +61,6 @@ function Login() {
     }
   };
   const handleforgetPassword = () => {
-    const today = new Date().toLocaleDateString(); // Only date part
-    const storedData = JSON.parse(localStorage.getItem("forgotPasswordAttempts")) || {};
-  
-    if (storedData.date === today) {
-      if (storedData.count >= 2) {
-        toast.warn("You've reached the reset limit for today.");
-        return;
-      } else {
-        storedData.count += 1;
-      }
-    } else {
-      storedData.date = today;
-      storedData.count = 1;
-    }
-  
-    localStorage.setItem("forgotPasswordAttempts", JSON.stringify(storedData));
     navigate("/forgetpassword");
   };
   

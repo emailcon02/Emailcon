@@ -13,6 +13,7 @@ function Signup() {
   const [isLoading, setIsLoading] = useState(false); // Loading state
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [phone, setPhone] = useState("");
   const [smtppassword, setSmtppassword] = useState("");
   const [gender, setGender] = useState("");
   const [authMethod, setAuthMethod] = useState("Gmail");
@@ -31,13 +32,14 @@ function Signup() {
           username,
           password,
           gender,
+          phone,
           smtppassword,
         }
       );
       toast.success(response.data.message || "Account created successfully!");
       const userId = response.data.user.id; 
       setTimeout(() => {
-        navigate(`/userpayment/${userId}`);
+        navigate(`/signup-option/${userId}`);
       }, 3000);
     } catch (error) {
       if (error.response) {
@@ -130,6 +132,22 @@ function Signup() {
                 className="signup-input"
                 placeholder="Enter the Name of the User"
               />
+            </div>
+            <div className="label">
+              <label>Contact Number</label>
+            </div>
+            <div className="input-container-sign">
+            <input
+  type="text"
+  value={phone}
+  onChange={(e) => {
+    const numericValue = e.target.value.replace(/\D/g, ''); // Remove all non-digits
+    setPhone(numericValue);
+  }}
+  required
+  className="signup-input"
+  placeholder="Enter the contact number"
+/>
             </div>
             <div className="label">
   <label>Gender</label>
@@ -256,7 +274,7 @@ function Signup() {
             <ol>
               <li>Go to your Google Account Security Settings.</li>
               <li>Enable 2-Step Verification.</li>
-              <li>Navigate to "App Passwords" section.</li>
+              <li> Use the top-left search box to find and Simply type “App Password” in the search input and press Enter to automatically scroll to that section.</li>
               <li>
                 Generate a new app password for "Mail" and select your device.
               </li>

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import "./AdminDashboard.css"; // Import the CSS file
+import "./AdminDashboard.css";
 import { FaSignOutAlt } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
@@ -9,15 +9,14 @@ import apiconfig from "../../apiconfig/apiConfig.js";
 
 function AdminDashboard() {
   const [users, setUsers] = useState([]);
-  const [loading, setLoading] = useState(false); // State for the loader
-  const [loadingUserId, setLoadingUserId] = useState(null); // State for the specific user being updated
+  const [statusLoadingId, setStatusLoadingId] = useState(null);
+  const [sendLoadingId, setSendLoadingId] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Check if the adminToken is present in localStorage
     const adminToken = localStorage.getItem("adminToken");
     if (!adminToken) {
-      navigate("/admin-login"); // Redirect to login page if no adminToken
+      navigate("/admin-login");
     } else {
       const fetchUsers = async () => {
         const response = await axios.get(
@@ -31,21 +30,23 @@ function AdminDashboard() {
 
   const handleLogout = () => {
     localStorage.removeItem("adminToken");
-    navigate("/user-login"); // Redirect to homepage or login page after logout
+    navigate("/user-login");
   };
-  const handleenroll = () =>{
-    navigate("/user-enroll")
-  }
+
+  const handleenroll = () => {
+    navigate("/user-enroll");
+  };
+
+  const handlepaymentview = (userId) => {
+    navigate(`/user-payment-history/${userId}`);
+  };
+
   const handleSendCredentials = async (userId) => {
-    setLoadingUserId(userId); // Indicate which user email is being sent
-
+    setSendLoadingId(userId);
     try {
-      // Make the API call to send credentials
       await axios.post(`${apiconfig.baseURL}/api/admin/send-credentials`, {
-        id: userId, // Pass the user ID
+        id: userId,
       });
-
-      // Show success toast
       toast.success(`Login credentials sent successfully!`, {
         autoClose: 3000,
       });
@@ -55,23 +56,24 @@ function AdminDashboard() {
         autoClose: 3000,
       });
     } finally {
-      setLoadingUserId(null); // Reset the loading state
+      setSendLoadingId(null);
     }
   };
 
   const handleStatusChange = async (id, status) => {
-    setLoading(true);
-    setLoadingUserId(id); // Set the ID of the user being updated
-
+    setStatusLoadingId(id);
     try {
-      await axios.post(`${apiconfig.baseURL}/api/admin/update-status`, {
+      // Step 1: Update user status
+      await axios.post(`${apiconfig.baseURL}/api/admin/update-status-manually`, {
         id,
-        status,
-        paymentStatus: status ? "paid" : "pending", // Update payment status based on activation
+        status
       });
+  
+      // Step 2: Update frontend state
       toast.success(`Account ${status ? "Activated" : "Deactivated"}`, {
         autoClose: 3000,
       });
+  
       setUsers((prev) =>
         prev.map((user) =>
           user._id === id ? { ...user, isActive: status } : user
@@ -80,31 +82,32 @@ function AdminDashboard() {
     } catch (error) {
       toast.error("Error updating status", { autoClose: 3000 });
     } finally {
-      setLoading(false);
-      setLoadingUserId(null); // Reset the ID after update
+      setStatusLoadingId(null);
     }
   };
-
+  
 
   return (
     <div className="admin-dashboard-page">
       <div className="admin-navnew">
         <div>
-        <h2 className="admin-dashboard-header">Emailcon Admin Dashboard</h2>
+          <h2 className="admin-dashboard-header">Emailcon Admin Dashboard</h2>
         </div>
         <div className="admin-nav-btn">
-        <button onClick={handleenroll} className="admin-nav-buttonnew">
-          <span className="nav-names">User Enrollment</span>
-        </button>
-        <button onClick={handleLogout} className="admin-nav-buttonnew">
-          <span className="admin-nav-icons">
-            <FaSignOutAlt />
-          </span>{" "}
-          <span className="nav-names">Logout</span>
-        </button>
+          <button onClick={handleenroll} className="admin-nav-buttonnew">
+            <span className="nav-names">Demo Request</span>
+          </button>
+          <button onClick={handleLogout} className="admin-nav-buttonnew">
+            <span className="admin-nav-icons">
+              <FaSignOutAlt />
+            </span>{" "}
+            <span className="nav-names">Logout</span>
+          </button>
         </div>
       </div>
+
       <h2 className="admin-dashboard-heading">User Signup Details</h2>
+
       <div className="cam-scroll" style={{ overflowX: "auto" }}>
         <table className="admin-dashboard-table">
           <thead>
@@ -112,12 +115,11 @@ function AdminDashboard() {
               <th>Email</th>
               <th>Username</th>
               <th>Password</th>
-              <th>smtp passcode</th>
+              <th>SMTP Passcode</th>
               <th>Status</th>
-              <th>Action</th>
-              <th>Payment Status</th>
+              <th>Activate / Deactivate</th>
               <th>Send Login Details</th>
-
+              <th>Payment History</th>
             </tr>
           </thead>
           <tbody>
@@ -126,13 +128,11 @@ function AdminDashboard() {
                 <td>{user.email}</td>
                 <td>{user.username}</td>
                 <td>{user.password}</td>
-                <td>
-                  {user.smtppassword ? user.smtppassword.substring(0, 8) : ""}
-                </td>
+                <td>{user.smtppassword ? user.smtppassword.substring(0, 8) : ""}</td>
                 <td>{user.isActive ? "Active" : "Inactive"}</td>
                 <td>
-                  {loading && loadingUserId === user._id ? (
-                    <div className="loader"></div> // Render a loader for the specific user
+                  {statusLoadingId === user._id ? (
+                    <div className="loader"></div>
                   ) : (
                     <label className="toggle-switch">
                       <input
@@ -146,21 +146,26 @@ function AdminDashboard() {
                     </label>
                   )}
                 </td>
-                <td><span className={`userstatus ${user.paymentStatus}`}>
-                {user.paymentStatus}</span></td>
+              
                 <td>
                   <button
                     className="send-btn"
-                    onClick={() =>
-                      handleSendCredentials(user._id, user.email, user.password)
-                    }
-                    >
-  {loadingUserId === user._id ? (
-                        <span className="loader-create-remainder"></span> // Spinner
-                      ) : (
-                        "Send"
-                      )}{" "}
+                    onClick={() => handleSendCredentials(user._id)}
+                  >
+                    {sendLoadingId === user._id ? (
+                      <span className="loader-create-remainder"></span>
+                    ) : (
+                      "Send"
+                    )}
                   </button>
+                </td>
+                <td>
+                <button
+                      className="payment-view"
+                      onClick={() => handlepaymentview(user._id)}
+                    >
+                      View
+                    </button>
                 </td>
               </tr>
             ))}
@@ -172,12 +177,12 @@ function AdminDashboard() {
         className="custom-toast"
         position="bottom-center"
         autoClose={3000}
-        hideProgressBar={true} // Disable progress bar
+        hideProgressBar={true}
         closeOnClick={false}
         closeButton={false}
         pauseOnHover={true}
         draggable={true}
-        theme="light" // Optional: Choose theme ('light', 'dark', 'colored')
+        theme="light"
       />
     </div>
   );

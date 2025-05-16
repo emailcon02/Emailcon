@@ -32,23 +32,53 @@ const handleBackCampaign = () => {
     navigate("/user-login");
     };
 
-  const handleSendOtp = async () => {
-    if (!forgotEmail) return toast.error("Enter your registered email.");
-    setSendOtpLoading(true);
-    try {
-      const res = await axios.post(`${apiConfig.baseURL}/api/auth/send-otp`, { email: forgotEmail });
-      toast.success("OTP sent to your registered email.");
-      setOtp(res.data.otp);
-      setTimeout(() => {
-      navigate("/verifyotp", { state: { email: forgotEmail, otp: res.data.otp } });
-        }, 2000); // Redirect after 2 seconds
-    } catch (error) {
-      toast.error(error.response?.data || "Error sending OTP");
-    } finally {
-      setSendOtpLoading(false);
-    }
-  };
-
+    const handleSendOtp = async () => {
+      if (!forgotEmail) {
+        toast.error("Enter your registered email.");
+        return;
+      }
+    
+      setSendOtpLoading(true);
+      try {
+        const res = await axios.post(`${apiConfig.baseURL}/api/auth/send-otp`, {
+          email: forgotEmail,
+        });
+    
+        // OTP sent successfully, now increment attempt count
+        const today = new Date().toLocaleDateString();
+        const storedData =
+          JSON.parse(localStorage.getItem("forgotPasswordAttempts")) || {};
+    
+        if (storedData.date === today) {
+          if (storedData.count >= 2) {
+            toast.warn("You've reached the reset limit for today.");
+            setSendOtpLoading(false);
+            return;
+          } else {
+            storedData.count += 1;
+          }
+        } else {
+          storedData.date = today;
+          storedData.count = 1;
+        }
+    
+        localStorage.setItem("forgotPasswordAttempts", JSON.stringify(storedData));
+    
+        toast.success("OTP sent to your registered email.");
+        setOtp(res.data.otp);
+    
+        setTimeout(() => {
+          navigate("/verifyotp", {
+            state: { email: forgotEmail, otp: res.data.otp },
+          });
+        }, 2000);
+      } catch (error) {
+        toast.error(error.response?.data || "Error sending OTP");
+      } finally {
+        setSendOtpLoading(false);
+      }
+    };
+    
   return (
     
     <div class="unique-container">

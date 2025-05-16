@@ -11,8 +11,10 @@ import { decryptPassword } from "../config/encryption.js";
 import EmailOpen from "../models/EmailOpen.js";
 import ClickTracking from "../models/ClickTracking.js";
 import apiConfig from "../api/apiconfigbackend.js";
+import authMiddleware from "../config/authMiddleware.js";
 import mongoose from "mongoose";
 import BirthdayTemplate from "../models/BirthdayTemplates.js";
+import PaymentHistory from "../models/PaymentHistory.js";
 const router = express.Router();
 
 // Upload image to s3 bucket
@@ -1276,6 +1278,22 @@ router.get('/groups/:userId', async (req, res) => {
     });
   }
 });
+//getting user payment-history
+router.get('/payment-history/:userId', async (req, res) => {
+  try {
+    const payments = await PaymentHistory.find({
+      userId: req.params.userId
+    });
+    res.json(payments);
+  } catch (error) {
+    res.status(500).json({
+      message: 'Error fetching payments'
+    });
+  }
+});
+
+
+
 //getting user
 router.get('/userdata/:id', async (req, res) => {
   const userId = req.params.id;
@@ -1947,5 +1965,17 @@ router.delete('/camhistory/:id', async (req, res) => {
     });
   }
 });
+
+// user-expiry-check
+
+router.get("/validate", authMiddleware, async (req, res) => {
+  const user = await User.findById(req.user._id); // or req.user.id if `req.user` is just the payload
+  if (!user) return res.status(404).send("User not found");
+
+  res.send({ user });
+});
+
+
+
 
 export default router;

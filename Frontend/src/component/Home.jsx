@@ -85,6 +85,35 @@ const Home = () => {
   const [isDeleting, setIsDeleting] = useState(false);
 
   const [hours, minutes] = scheduledTime.split(":").map(Number); // scheduledTime is "HH:MM"
+
+  useEffect(() => {
+    const interval = setInterval(async () => {
+      const token = localStorage.getItem("token");
+  
+      if (!token) return;
+  
+      try {
+        const res = await axios.get(`${apiConfig.baseURL}/api/stud/validate`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+  
+        if (!res.data.user.isActive) {
+          localStorage.removeItem("token");
+          localStorage.removeItem("user");
+          toast.error("Your account is expired. Please renew your subscription.");
+          setTimeout(() => {
+            window.location.href = "/user-login";
+          }, 5000); // 5 second delay        
+          }
+      } catch (err) {
+        console.log("Validation failed:", err.message);
+      }
+    }, 30000); // Every 30 sec
+  
+    return () => clearInterval(interval);
+  }, []);
+  
+
   useEffect(() => {
     const fetchAllStudentData = async () => {
       if (!user?.id) {

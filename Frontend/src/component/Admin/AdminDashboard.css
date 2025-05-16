@@ -21,6 +21,16 @@
    font-weight: bold;
    cursor: pointer;
 } 
+.payment-view {
+  background:#f48c06;
+  color: #fff;
+  border: none;
+  padding: 8px 15px;
+  border-radius: 5px;
+  font-size: 12px; 
+   font-weight: bold;
+   cursor: pointer;
+} 
 
 .admin-dashboard-header {
   padding-top: 10px;
@@ -30,6 +40,12 @@
 .admin-dashboard-heading {
   padding-top: 20px;
   color: #2f327d;
+  font-size: 30px;
+  text-align: center;
+}
+.admin-dashboard-payment-heading {
+  padding-top: 20px;
+  color:#f48c06;
   font-size: 30px;
   text-align: center;
 }
