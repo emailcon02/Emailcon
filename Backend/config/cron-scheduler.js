@@ -19,7 +19,7 @@ cron.schedule('*/10 * * * *', async () => {
 
     const camhistories = await Camhistory.find({
       status: "Scheduled On",
-      scheduledTime: { $gte: tenMinutesAgo.toISOString(), $lt: nowUTC.toISOString() },
+      scheduledTime: { $gte: tenMinutesAgo.toISOString(), $lte: nowUTC.toISOString() },
     });
 
     if (camhistories.length === 0) {
@@ -55,6 +55,7 @@ cron.schedule('*/10 * * * *', async () => {
             recipientEmail: email,
             subject: camhistory.subject,
             aliasName: camhistory.aliasName,
+            replyTo:camhistory.replyTo,
             body: JSON.stringify(personalizedContent),
             bgColor: camhistory.bgColor,
             previewtext: camhistory.previewtext,
@@ -108,6 +109,7 @@ cron.schedule('*/10 * * * *', async () => {
                 recipientEmail: email,
                 subject: camhistory.subject,
                 aliasName: camhistory.aliasName,
+                replyTo:camhistory.replyTo,
                 body: JSON.stringify(personalizedContent),
                 bgColor: camhistory.bgColor,
                 previewtext: camhistory.previewtext,
@@ -164,6 +166,7 @@ cron.schedule('*/10 * * * *', async () => {
                 recipientEmail: email,
                 subject: personalizedSubject,
                 aliasName: camhistory.aliasName,
+                replyTo:camhistory.replyTo,
                 body: JSON.stringify(personalizedContent),
                 bgColor: camhistory.bgColor,
                 previewtext: camhistory.previewtext,

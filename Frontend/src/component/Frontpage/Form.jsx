@@ -108,7 +108,7 @@ const Form = () => {
       <div className="form-container">
         <form onSubmit={handleSubmit} className="form">
           <h2 className="form-heading">
-            Enrollment <span style={{ color: "#ff8434" }}>Form</span>
+            Demo Request <span style={{ color: "#ff8434" }}>Form</span>
           </h2>
 
           <label className="form-label">Name</label>

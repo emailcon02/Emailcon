@@ -28,6 +28,9 @@ import AdminUserform from "../component/Admin/AdminUserform";
 import PaymentPage from "../component/PaymentPage";
 import SignupOption from "../component/SignupOption";
 import UserPaymenthistory from "../component/Admin/UserPaymenthistory";
+import Smtppage from "../component/Smtppage";
+import Createusers from "../component/Admin/Createusers";
+import AllUserPaymenthistory from "../component/Admin/AlluserPaymenthistory";
 
 function RoutesPage() {
   const [isOnline, setIsOnline] = useState(navigator.onLine);
@@ -57,8 +60,11 @@ function RoutesPage() {
         <Route path="/" element={<Frontpageroute />} />
         <Route path="/user-enroll" element={<AdminUserform />} />
         <Route path="/signup-option/:userId" element={<SignupOption />} />
+        <Route path="/admin-user-create" element={<Createusers />} />
+        <Route path="/smtppage" element={<Smtppage />} />   
         <Route path="/userpayment/:userId" element={<PaymentPage/>} />
         <Route path="/user-payment-history/:userId" element={<UserPaymenthistory/>} />
+        <Route path="/all-user-payment-history" element={<AllUserPaymenthistory/>} />
         <Route path="/register-form" element={<Form/>} />
         <Route path="/admin-login" element={<AdminLogin />} />
         <Route path="/admin-dashboard" element={<AdminDashboard />} />

@@ -12,22 +12,20 @@ function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-
   const [showForgotModal, setShowForgotModal] = useState(false);
   const [showResetModal, setShowResetModal] = useState(false);
-
   const [forgotEmail, setForgotEmail] = useState("");
   const [otp, setOtp] = useState("");
   const [enteredOtp, setEnteredOtp] = useState("");
-
   const [sendOtpLoading, setSendOtpLoading] = useState(false);
   const [verifyOtpLoading, setVerifyOtpLoading] = useState(false);
-
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-
+  const [showExpiryModal, setShowExpiryModal] = useState(false);
+  const [expiryDate,setExpiryDate] = useState(null);
+  const [userId,setUserId] = useState("");
   const [resendTimer, setResendTimer] = useState(0);
   const navigate = useNavigate();
 
@@ -46,6 +44,7 @@ function Login() {
     return () => clearInterval(timer);
   }, [resendTimer]);
 
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
@@ -55,11 +54,25 @@ function Login() {
       localStorage.setItem("user", JSON.stringify(res.data.user));
       navigate("/home");
     } catch (error) {
-      toast.error(error.response?.data || "Error logging in");
+      const response = error.response; 
+  
+      if (response?.status === 403 && response.data === "Account not activated.") {
+        toast.error("Your account is not activated.");
+      } else if (response?.status === 402 && response.data?.message === "Payment expired.") {
+        const expiryDate = new Date(response.data.expiryDate).toLocaleDateString();
+        const userId =response.data.userId;
+        setUserId(userId);
+        setExpiryDate(expiryDate);  // setState to show in modal
+        setShowExpiryModal(true);   // open modal
+      } else {
+        toast.error(response?.data || "Error logging in");
+      }
     } finally {
       setIsLoading(false);
     }
   };
+  
+  
   const handleforgetPassword = () => {
     navigate("/forgetpassword");
   };
@@ -234,6 +247,36 @@ function Login() {
           </div>
         </div>
       )}
+
+      {/* payment expiry modal */}
+
+{showExpiryModal && (
+  <div className="expiry-modal-overlay">
+    <div className="expiry-modal-content">
+    <h2>Access Expired</h2>
+<p>
+  Your account was deactivated on <strong>{expiryDate}</strong> due to <strong>payment expiry</strong>.<br />
+  Please renew your subscription to regain access.
+</p>
+
+      <div className="expiry-modal-buttons">
+        <button
+          onClick={() =>navigate(`/userpayment/${userId}`)}
+          className="expiry-button-renew"
+        >
+          Renew
+        </button>
+        <button
+          onClick={() => setShowExpiryModal(false)}
+          className="expiry-button-close"
+        >
+          Close
+        </button>
+      </div>
+    </div>
+  </div>
+)}
+
 
       {/* Reset Password Modal */}
       {showResetModal && (

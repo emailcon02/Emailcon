@@ -50,7 +50,6 @@ function PaymentPage() {
 
   const handlePayment = async () => {
     if (!user) return;
-    setProcessing(true);
   
     const expiryDate = new Date();
     expiryDate.setTime(expiryDate.getTime() + duration * 24 * 60 * 60 * 1000);
@@ -86,9 +85,10 @@ function PaymentPage() {
             razorpayOrderId: response.razorpay_order_id,
             razorpaySignature: response.razorpay_signature,
           });
-  
-          toast.success("Payment successful! Account credentials send to your registered email.");
+ 
+          // toast.success("Payment successful!");
           setPaymentCompleted(true);
+          setProcessing(true);
           setTimeout(() => navigate("/user-login"), 3000);
         },
         prefill: {
@@ -121,13 +121,17 @@ function PaymentPage() {
         });
   
         toast.error("Payment failed. Please try again.");
+        setProcessing(false);
       });
   
     } catch (error) {
+      setProcessing(false);
       toast.error("Something went wrong.");
     } 
   }; 
-  const handleCancel = () => navigate(`/signup-option/${userId}`);
+
+  const handleCancel = () => navigate(-1);
+  
   if (paymentCompleted) {
     return (
       <div className="redirect-screen">
@@ -149,14 +153,14 @@ function PaymentPage() {
       </div>
       <div className="card-content">
         <h2>
-          Activate <span style={{ color: "#f48c06" }}>Account</span>
+          Emailcon <span style={{ color: "#f48c06" }}>Payment</span>
         </h2>
         <p>
           Proceed with payment for <strong>{user?.username}</strong>
         </p>
 
         <div className="form-group">
-          <label>Select Duration</label>
+          <label>Select Emailcon Plan</label>
           <select value={String(duration)} onChange={handleDurationChange}>
             {DURATION_OPTIONS.map((opt) => (
               <option key={opt.value} value={String(opt.value)}>
@@ -169,15 +173,16 @@ function PaymentPage() {
         <div className="amount-display">
           Amount to Pay: <span>₹{amount}</span>
         </div>
-        <div className="payment-summary">
-  <h3>Payment Summary</h3>
-  <ul>
+        <div className="payment-summary-box">
+  <h3 className="payment-summary-title">Payment Summary</h3>
+  <ul className="payment-summary-list">
     <li><strong>User:</strong> {user?.username}</li>
     <li><strong>Duration:</strong> {DURATION_OPTIONS.find(d => d.value === duration)?.label}</li>
     <li><strong>Amount:</strong> ₹{amount}</li>
     <li><strong>Account Expiry:</strong> {new Date(Date.now() + duration * 86400000).toDateString()}</li>
   </ul>
 </div>
+
 
         <div className="button-group">
           <button

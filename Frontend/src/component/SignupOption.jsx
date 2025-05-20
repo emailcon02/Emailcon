@@ -35,7 +35,7 @@ function SignupOption() {
       <div className="signupopt-left">
         <div className="signupopt-buttons">
           <h1 className="signupopt-title">
-            Welcome Back To Email<span style={{ color: "#f48c06" }}>con</span>
+            Welcome To Email<span style={{ color: "#f48c06" }}>con</span>
           </h1>
           <h2 className="signupopt-heading">
             Start Your Journey with a 1-Day Free Demo
@@ -51,7 +51,7 @@ function SignupOption() {
           </p>
           <div className="btns-trial">
             <div onClick={handleDemoClick} className="signupopt-demo-btn">
-              Free Demo
+              Free Trail
             </div>
             <div onClick={handlePayment} className="signupopt-pay-btn">
               Pay Now

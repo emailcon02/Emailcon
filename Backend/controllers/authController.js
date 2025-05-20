@@ -1,10 +1,13 @@
 import jwt from "jsonwebtoken";
 import User from "../models/User.js";
+import PaymentHistory from "../models/PaymentHistory.js";
 import { encryptPassword } from "../config/encryption.js";
 import nodemailer from "nodemailer";
 import apiConfig from "../api/apiconfigbackend.js";
 import otptransporter from "../config/otp-mailer.js";
 import resettransporter from "../config/reset-mailer.js";
+import Adminuser from "../models/Adminuser.js";
+
 
 export const signup = async (req, res) => {
   const { email, username, password, smtppassword, gender,phone } = req.body;
@@ -46,6 +49,8 @@ export const signup = async (req, res) => {
 
     // Encrypt SMTP password
     const encryptedSmtpPassword = encryptPassword(smtppassword);
+    const encryptedUserPassword = encryptPassword(password);
+
 
     // Save user to DB
     const user = new User({
@@ -53,7 +58,7 @@ export const signup = async (req, res) => {
       username,
       gender,
       phone,
-      password, 
+      password: encryptedUserPassword, 
       smtppassword: encryptedSmtpPassword,
       paymentStatus: "pending",
       isActive: false,
@@ -76,30 +81,53 @@ export const signup = async (req, res) => {
 };
 
 
-
 export const login = async (req, res) => {
   const { email, password } = req.body;
   try {
     const user = await User.findOne({ email });
     if (!user) return res.status(404).send("User not found.");
-    if (!user.isActive) return res.status(403).send("Account not activated.");
+
     if (password !== user.password) {
       return res.status(401).send("Invalid credentials.");
     }
-    const token = jwt.sign({ id: user._id },process.env.JWT_SECRET,{ expiresIn: "1h" });
+
+    const latestPayment = await PaymentHistory.findOne({ userId: user._id })
+      .sort({ createdAt: -1 });
+
+    if (!latestPayment) {
+      return res.status(403).send("No payment history found.");
+    }
+
+    if (latestPayment.paymentStatus === "pending") {
+      return res.status(403).send("Account not activated.");
+    }
+
+
+    if (latestPayment.paymentStatus === "expired" || user.isActive === false) {
+      return res.status(402).json({
+        message: "Payment expired.",
+        expiryDate: latestPayment.expiryDate,
+        userId:latestPayment.userId
+      });
+    }
+
+    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: "10d" });
+
     res.json({
       token,
       user: {
         id: user._id,
         username: user.username,
-        email: user.email,
-        isActive:user.isActive
-      },
+        email: user.email
+      }
     });
   } catch (err) {
+    console.error(err);
     res.status(500).send("Login failed.");
   }
 };
+
+
 export const sendOtp = async (req, res) => {
   const { email } = req.body;
   try {
@@ -198,21 +226,53 @@ export const resetPassword = async (req, res) => {
 };
 
 
-// Dummy Admin Credentials
 const ADMIN_EMAIL = "admin@emailcon.com";
 const ADMIN_PASSWORD = "admin123";
+const ADMIN_ROLE = "super-admin";
+
 export const adminLogin = async (req, res) => {
-  const { email, password } = req.body;
-  
-  if (email === ADMIN_EMAIL && password === ADMIN_PASSWORD) {
+  const { email, password, role } = req.body;
+
+  try {
+    // 1. SUPER-ADMIN HARDCODED LOGIN
+    if (
+      email === ADMIN_EMAIL &&
+      password === ADMIN_PASSWORD &&
+      role === ADMIN_ROLE
+    ) {
+      return res.json({
+        success: true,
+        role: ADMIN_ROLE,
+        token: "super_admin_token",
+      });
+    }
+
+    // 2. NORMAL ADMIN OR USER FROM DB
+    const user = await Adminuser.findOne({ email, role });
+    if (!user) {
+      return res.status(404).json({ success: false, message: "User not found" });
+    }
+
+    // OPTIONAL: Use bcrypt if passwords are hashed
+    const isMatch = password === user.password; // use bcrypt.compare(password, user.password) if hashed
+    if (!isMatch) {
+      return res.status(401).json({ success: false, message: "Invalid password" });
+    }
+
+
     res.json({
       success: true,
-      token: "secret_key" // you should ideally generate JWT token here
+      role: user.role,
+      token: "sub-admin-token", // send real JWT token
     });
-  } else {
-    res.status(401).json({ success: false, message: "Invalid credentials" });
+
+  } catch (error) {
+    console.error("Login error:", error);
+    res.status(500).json({ success: false, message: "Server error" });
   }
 };
+
+
 export const updateUserpassword = async (req, res) => {
   const { userId, newPassword } = req.body;
 

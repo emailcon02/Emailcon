@@ -53,8 +53,7 @@
 }
 
 .form-group {
-    margin-bottom: 20px;
-    
+    margin-bottom: 15px;    
 }
 
 .form-group label {
@@ -72,7 +71,7 @@
 .amount-display {
     font-size: 1.2em;
     font-weight: bold;
-    margin-bottom: 30px;
+    margin-bottom: 20px;
 }
 
 .button-group {
@@ -121,30 +120,45 @@
     }
 }
 
-
-.payment-summary {
-    background: #f9f9f9;
-    border: 1px solid #eee;
-    border-radius: 6px;
-    padding: 1rem;
-    margin-top: 1rem;
+.payment-summary-box {
+    background: #f9fafe;
+    border: 1px solid #dce1f0;
+    border-radius: 10px;
+    max-width: 500px;
+    padding: 20px;
+    /* margin: 10px; */
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    color: #2a2a2a;
   }
   
-  .payment-summary h3 {
-    margin-bottom: 0.5rem;
-    color: #f4a106;
+  .payment-summary-title {
+    font-size: 1.4rem;
+    margin-bottom: 15px;
+    color:#f4c806;
+    border-bottom: 1px solid #e0e6f7;
+    padding-bottom: 8px;
   }
   
-  .payment-summary ul {
+  .payment-summary-list {
     list-style: none;
     padding: 0;
+    margin: 0;
   }
   
-  .payment-summary li {
-    margin-bottom: 0.4rem;
-    font-size: 14px;
-    border-bottom: none !important;
+  .payment-summary-list li {
+    padding: 8px 0;
+    font-size: 1rem;
+    border-bottom: 1px dashed #e3e7f3;
   }
+  
+  .payment-summary-list li:last-child {
+    border-bottom: none;
+  }
+  
+  .payment-summary-list strong {
+    color: #1e40af;
+  }
+  
   
   .payment-status {
     text-align: center;

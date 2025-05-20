@@ -10,6 +10,8 @@ const paymentHistorySchema = new mongoose.Schema({
     expiryDate: { type: Date },
     duration: { type: String },
     amount: { type: Number },
+    invoiceUrl: { type: String, default: null },
+
 
     // Razorpay fields
     razorpayPaymentId: { type: String, default: null },

@@ -2,6 +2,13 @@ import User from "../models/User.js";
 import PaymentHistory from "../models/PaymentHistory.js";
 import FormData from "../models/FormData.js";
 import accounttransporter from "../config/account-mailer.js";
+import PDFDocument from "pdfkit";
+import fs from "fs";
+import path from "path";
+import { uploadToS3 } from "../config/s3Uploder.js";
+import { decryptPassword } from "../config/encryption.js";
+import { Admin } from "mongodb";
+import Adminuser from "../models/Adminuser.js";
 export const getUsers = async (req, res) => {
   const users = await User.find({});
   res.json(users);
@@ -28,8 +35,16 @@ export const getUserById = async (req, res) => {
   }
 };
 // --- Helper Function 1: Send Payment Details Email ---
-const sendPaymentDetailsEmail = async (user, paymentInfo) => {
+
+
+const generateInvoiceNumber = (paymentId) => {
+  const timestamp = Date.now();
+  return `INV-${paymentId || Math.floor(Math.random() * 10000)}-${timestamp}`;
+};
+
+export const sendPaymentDetailsEmail = async (user, paymentInfo) => {
   const {
+    _id: paymentId,
     paymentStatus,
     amount,
     duration,
@@ -37,60 +52,132 @@ const sendPaymentDetailsEmail = async (user, paymentInfo) => {
     razorpayPaymentId,
   } = paymentInfo;
 
-  const paymentHtml = `
-    <body style="margin: 0; padding: 20px; font-family: Arial, sans-serif; background-color: #f7f7f7; color: #333;">
-          <table role="presentation" style="width: 100%; background-color: #f9f9f9; padding: 30px;" cellpadding="0" cellspacing="0">
-            <tr>
-              <td align="center">
-                <table role="presentation" style="max-width: 600px; width: 100%; background: #fff; border: 1px solid #e0e0e0; border-radius: 10px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);" cellpadding="0" cellspacing="0">
-                  <tr>
-                    <td align="center" style="background: #2f327d; color: white; padding: 20px; border-top-left-radius: 10px; border-top-right-radius: 10px;">
-                      <div style="font-size: 50px; margin-bottom: 10px;">💳</div>
-                      <h1 style="margin: 0; font-size: 24px;">Email<span style="color: #f48c06;">con</span> Payment Confirmation</h1>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td align="left" style="padding: 20px;">
-                      <p style="margin: 10px 0; font-size: 16px;">Hello <strong>${user.username}</strong>,</p>
-                      <p style="margin: 10px 0; font-size: 14px;">Your payment has been <strong>received successfully</strong>.</p>
-                      <div style="margin-top: 20px;">
-                        <p style="font-size: 16px; font-weight: bold;">Payment Details:</p>
-                        <ul style="padding-left: 20px; font-size: 14px; line-height: 1.6;">
-                          <li><strong>Status:</strong> ${paymentStatus}</li>
-                          <li><strong>Amount:</strong> ₹${amount}</li>
-                          <li><strong>Duration:</strong> ${duration}</li>
-                          <li><strong>Expiry Date:</strong> ${new Date(expiryDate).toDateString()}</li>
-                          <li><strong>Payment ID:</strong> ${razorpayPaymentId || 'N/A'}</li>
-                        </ul>
-                      </div>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td align="center" style="padding: 20px; background: #f7f7f7; border-bottom-left-radius: 10px; border-bottom-right-radius: 10px;">
-                      <p style="font-size: 12px; color: #666;">
-                        If you have any questions, contact us at
-                        <a href="mailto:support@emailcon.in" style="color: #1a5eb8; text-decoration: none;">support@emailcon.in</a>.
-                      </p>
-                    </td>
-                  </tr>
-                </table>
-              </td>
-            </tr>
-          </table>
-        </body>
-  `;
+  const invoiceNumber = generateInvoiceNumber(razorpayPaymentId);
+  const doc = new PDFDocument({ margin: 50 });
+  const buffers = [];
 
-  await accounttransporter.sendMail({
-    from: `"Emailcon Support" <account-noreply@account.emailcon.in>`,
-    to: user.email,
-    subject: `💳 Payment Confirmation`,
-    replyTo: "support@emailcon.in",
-    html: paymentHtml,
+  doc.on("data", buffers.push.bind(buffers));
+  doc.on("end", async () => {
+    const pdfBuffer = Buffer.concat(buffers);
+    const fileName = `${invoiceNumber}.pdf`;
+    const mimeType = "application/pdf";
+
+    // Upload to S3
+    const s3Url = await uploadToS3(pdfBuffer, fileName, mimeType);
+
+    // Save invoice URL in DB
+    await PaymentHistory.findByIdAndUpdate(paymentId, { invoiceUrl: s3Url });
+
+    // Send Email
+    const paymentHtml = `
+      <body style="margin: 0; padding: 20px; font-family: Arial, sans-serif; background-color: #f7f7f7; color: #333;">
+        <table role="presentation" style="width: 100%; background-color: #f9f9f9; padding: 30px;" cellpadding="0" cellspacing="0">
+          <tr>
+            <td align="center">
+              <table role="presentation" style="max-width: 600px; width: 100%; background: #fff; border: 1px solid #e0e0e0; border-radius: 10px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);" cellpadding="0" cellspacing="0">
+                <tr>
+                  <td align="center" style="background: #2f327d; color: white; padding: 20px; border-top-left-radius: 10px; border-top-right-radius: 10px;">
+                    <div style="font-size: 50px; margin-bottom: 10px;">💳</div>
+                    <h1 style="margin: 0; font-size: 24px;">Email<span style="color: #f48c06;">con</span> Payment Confirmation</h1>
+                  </td>
+                </tr>
+                <tr>
+                  <td align="left" style="padding: 20px;">
+                    <p style="margin: 10px 0; font-size: 16px;">Hello <strong>${user.username}</strong>,</p>
+                    <p style="margin: 10px 0; font-size: 14px;">Your payment has been <strong>received successfully</strong>.</p>
+                    <div style="margin-top: 20px;">
+                      <p style="font-size: 16px; font-weight: bold;">Payment Details:</p>
+                      <ul style="padding-left: 20px; font-size: 14px; line-height: 1.6;">
+                        <li><strong>Status:</strong> ${paymentStatus}</li>
+                        <li><strong>Amount:</strong> ₹${amount}</li>
+                        <li><strong>Duration:</strong> ${duration}</li>
+                        <li><strong>Expiry Date:</strong> ${new Date(expiryDate).toDateString()}</li>
+                        <li><strong>Payment ID:</strong> ${razorpayPaymentId || 'N/A'}</li>
+                        <li><strong>Invoice:</strong> <a href="${s3Url}">Download Invoice</a></li>
+                      </ul>
+                    </div>
+                  </td>
+                </tr>
+                <tr>
+                  <td align="center" style="padding: 20px; background: #f7f7f7; border-bottom-left-radius: 10px; border-bottom-right-radius: 10px;">
+                    <p style="font-size: 12px; color: #666;">
+                      If you have any questions, contact us at
+                      <a href="mailto:support@emailcon.in" style="color: #1a5eb8; text-decoration: none;">support@emailcon.in</a>.
+                    </p>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+        </table>
+      </body>
+    `;
+
+    await accounttransporter.sendMail({
+      from: `"Emailcon Support" <account-noreply@account.emailcon.in>`,
+      to: user.email,
+      subject: `💳 Payment Confirmation`,
+      replyTo: "support@emailcon.in",
+      html: paymentHtml,
+      attachments: [
+        {
+          filename: fileName,
+          path: s3Url,
+        },
+      ],
+    });
   });
+
+  // PDF Content with logo and table
+  const logoPath = path.join(process.cwd(), "../Frontend/public/images/logo-4.png");
+  if (fs.existsSync(logoPath)) {
+    doc.image(logoPath, 50, 45, { width: 100 });
+  }
+  doc.fontSize(20).text("Emailcon Invoice", 200, 50, { align: "right" });
+  doc.moveDown(2);
+
+  doc.fontSize(12).text(`Invoice Number: ${invoiceNumber}`);
+  doc.text(`Date: ${new Date().toLocaleDateString()}`);
+  doc.text(`Payment ID: ${razorpayPaymentId}`);
+  doc.moveDown();
+
+  doc.font("Helvetica-Bold").text("Billed To:");
+  doc.font("Helvetica")
+    .text(user.username)
+    .text(user.email)
+    .moveDown();
+
+  doc.moveTo(50, doc.y).lineTo(550, doc.y).stroke();
+  doc.moveDown();
+
+  doc.font("Helvetica-Bold").text("Description", 50);
+  doc.text("Amount", 450, doc.y - 15);
+  doc.moveDown();
+
+  doc.moveTo(50, doc.y).lineTo(550, doc.y).stroke();
+  doc.moveDown();
+
+  doc.font("Helvetica")
+    .text(`Subscription for ${duration}`, 50)
+    .text(`₹${amount}`, 450, doc.y - 15)
+    .moveDown();
+
+  doc.moveDown(2);
+  doc.font("Helvetica-Bold").text("Total", 50);
+  doc.text(`₹${amount}`, 450, doc.y - 15);
+
+  doc.moveDown();
+  doc.fontSize(10).text(`Invoice valid till: ${new Date(expiryDate).toDateString()}`);
+  doc.moveDown();
+  doc.fontSize(10).text("This is an auto-generated invoice. Thank you for using Emailcon.");
+
+  doc.end();
 };
+
 
 // --- Helper Function 2: Send Activation + Login Email ---
 const sendActivationEmail = async (user) => {
+  const userpassword=decryptPassword(user.password);
   const activationHtml = `
           <body style="margin: 0; padding: 20px; font-family: Arial, sans-serif; background-color: #f7f7f7; color: #333;">
           <table role="presentation" style="width: 100%; background-color: #f9f9f9; padding: 30px;" cellpadding="0" cellspacing="0">
@@ -113,7 +200,7 @@ const sendActivationEmail = async (user) => {
                       <div style="text-align: left; margin-top: 20px;">
                         <p><strong>Login Credentials:</strong></p>
                         <p>Email: <span style="color: #333;">${user.email}</span></p>
-                        <p>Password: <span style="color: #333;">${user.password || "N/A"}</span></p>
+                        <p>Password: <span style="color: #333;">${userpassword || "N/A"}</span></p>
                         <p><strong>Tip:Don't share your login credentials to others for security reasons.keep it safe and secure.</strong></p>
 
                         </div>
@@ -147,8 +234,7 @@ export const updateStatus = async (req, res) => {
   const {
     id,
     status,
-    expiryDate,
-    duration,
+    duration, // example: "30 days"
     amount,
     paymentStatus,
     razorpayPaymentId,
@@ -157,7 +243,6 @@ export const updateStatus = async (req, res) => {
   } = req.body;
 
   try {
-    // 🔍 1. Find the user before updating to check current isActive status
     const existingUser = await User.findById(id);
     if (!existingUser) {
       return res.status(404).json({ message: "User not found" });
@@ -165,35 +250,51 @@ export const updateStatus = async (req, res) => {
 
     const wasPreviouslyInactive = !existingUser.isActive;
 
-    // 🔄 2. Update the user status
+    // Fetch last payment to calculate remaining time if not expired
+    const lastPayment = await PaymentHistory.findOne({ userId: id, paymentStatus: "paid" })
+      .sort({ createdAt: -1 });
+      let newExpiryDate = new Date();
+      let durationDays = parseInt(duration); // incoming new duration (e.g., "30" from "30 days")
+      let combinedDuration = durationDays;
+      
+      if (lastPayment && lastPayment.expiryDate && new Date(lastPayment.expiryDate) > new Date()) {
+        // Remaining time from last plan
+        const remainingMs = new Date(lastPayment.expiryDate) - new Date();
+        const remainingDays = Math.ceil(remainingMs / (1000 * 60 * 60 * 24));
+      
+        combinedDuration = remainingDays + durationDays;
+        newExpiryDate.setDate(newExpiryDate.getDate() + combinedDuration);
+      } else {
+        newExpiryDate.setDate(newExpiryDate.getDate() + durationDays);
+      }
+    // 1. Update user status
     const user = await User.findByIdAndUpdate(
       id,
       { isActive: status },
       { new: true }
     );
 
-    // 🧾 3. Log payment
+    // 2. Log new payment
     await PaymentHistory.create({
       userId: id,
       paymentStatus,
-      expiryDate,
-      duration,
+      expiryDate: newExpiryDate,
+      duration:combinedDuration,
       amount,
       razorpayPaymentId,
       razorpayOrderId,
       razorpaySignature,
     });
 
-    // 📧 4. Always send payment details
+    // 3. Email
     await sendPaymentDetailsEmail(user, {
       paymentStatus,
       amount,
       duration,
-      expiryDate,
+      expiryDate: newExpiryDate,
       razorpayPaymentId,
     });
 
-    // ✅ 5. Only for FIRST-TIME activation, send login & activation emails after 30s
     if (status && wasPreviouslyInactive) {
       setTimeout(() => {
         sendActivationEmail(user).catch((err) =>
@@ -214,6 +315,7 @@ export const updateStatus = async (req, res) => {
     res.status(500).send("Failed to update status or send email.");
   }
 };
+
 
 
 
@@ -250,6 +352,8 @@ export const updateStatusmanually = async (req, res) => {
       });
     }
 
+    const userpassword=decryptPassword(user.password);
+
     // Step 3: Compose Email Template
     const htmlContent = `
       <body style="margin: 0; padding: 20px; font-family: Arial, sans-serif; background-color: #f7f7f7; color: #333;">
@@ -276,7 +380,7 @@ export const updateStatusmanually = async (req, res) => {
                       <div style="text-align: left; margin-top: 20px;">
                         <p><strong>Login Credentials:</strong></p>
                         <p>Email: <span style="color: #333;">${user.email}</span></p>
-                        <p>Password: <span style="color: #333;">${user.password || "N/A"}</span></p>
+                        <p>Password: <span style="color: #333;">${userpassword || "N/A"}</span></p>
                         <p style="color: red; font-size: 14px; margin-top: 15px;"><strong>Note:</strong> This is a <strong>trial account</strong> and will <strong>expire on ${expiryDate.toDateString()}</strong>.</p>
                       </div>
                     `
@@ -346,7 +450,7 @@ export const sendCredentials = async (req, res) => {
         message: "User not found",
       });
     }
-
+    const userpassword=decryptPassword(user.password);
     // Define the email options
     const mailOptions = {
       from: `"Emailcon Support" <account-noreply@account.emailcon.in>`,
@@ -370,7 +474,7 @@ export const sendCredentials = async (req, res) => {
               <p style="margin: 10px 0; font-size: 16px;">Hello <strong>${user.username}</strong>,</p>
               <p style="margin: 10px 0; font-size: 16px;">Here are your login credentials:</p>
               <p style="margin: 10px 0; font-size: 16px;"><strong>Email:</strong> ${user.email}</p>
-              <p style="margin: 10px 0; font-size: 16px;"><strong>Password:</strong> ${user.password}</p>
+              <p style="margin: 10px 0; font-size: 16px;"><strong>Password:</strong> ${userpassword}</p>
               <p style="margin: 10px 0; font-size: 14px; text-align: center; font-weight: bold;">
                 &#8220;Please keep this info safe. For best security practices, it's recommended to change your password and avoid sharing it with anyone.&#8221;
               </p>
@@ -411,5 +515,43 @@ export const sendCredentials = async (req, res) => {
     res.status(500).json({
       message: "An error occurred",
     });
+  }
+};
+ 
+
+
+
+// Create admin user
+
+export const createAdminUser = async (req, res) => {
+  const { email, username, password, role } = req.body;
+
+  try {
+    const existingUser = await Adminuser.findOne({ email });
+    if (existingUser) {
+      return res.status(400).json({ message: "Admin user already exists" });
+    }
+    const newAdminUser = new Adminuser({
+      email,
+      username,
+      password,
+      role,
+    });
+    await newAdminUser.save();
+    res.status(201).json({ message: "Admin user created successfully" });
+  }
+  catch (error) {
+    console.error("Error creating admin user:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+}
+// Get all admin users
+export const getAdminUsers = async (req, res) => {
+  try {
+    const adminUsers = await Adminuser.find();
+    res.status(200).json(adminUsers);
+  } catch (error) {
+    console.error("Error fetching admin users:", error);
+    res.status(500).json({ message: "Server error" });
   }
 };

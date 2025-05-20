@@ -11,6 +11,7 @@ import "./Home.css";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import apiConfig from "../apiconfig/apiConfig.js";
+import { MdNotificationsActive } from "react-icons/md";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import SendbulkModal from "./SendbulkModal.jsx";
@@ -83,9 +84,22 @@ const Home = () => {
   const [showautoModal, setShowautoModal] = useState(false);
   const [step, setStep] = useState(1);
   const [isDeleting, setIsDeleting] = useState(false);
-
+  const [paymentdetails,setPaymentdetails] = useState([]);
   const [hours, minutes] = scheduledTime.split(":").map(Number); // scheduledTime is "HH:MM"
+  
+  let daysRemaining = null;
 
+  if (paymentdetails?.expiryDate) {
+    const expiryDate = new Date(paymentdetails.expiryDate);
+    const today = new Date();
+  
+    const expiryMidnight = new Date(expiryDate.getFullYear(), expiryDate.getMonth(), expiryDate.getDate());
+    const todayMidnight = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+  
+    const timeDiff = expiryMidnight.getTime() - todayMidnight.getTime();
+    daysRemaining = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
+  }
+  
   useEffect(() => {
     const interval = setInterval(async () => {
       const token = localStorage.getItem("token");
@@ -122,22 +136,23 @@ const Home = () => {
       }
   
       try {
-        const [campaignsRes, groupsRes, studentsRes, templatesRes,birthtemplatesRes,userdata] = await Promise.all([
+        const [campaignsRes, groupsRes, studentsRes, templatesRes,birthtemplatesRes,userdata,paymentdetails] = await Promise.all([
           axios.get(`${apiConfig.baseURL}/api/stud/campaigns/${user.id}`),
           axios.get(`${apiConfig.baseURL}/api/stud/groups/${user.id}`),
           axios.get(`${apiConfig.baseURL}/api/stud/students`),
           axios.get(`${apiConfig.baseURL}/api/stud/templates/${user.id}`),
           axios.get(`${apiConfig.baseURL}/api/stud/birthtemplates/${user.id}`),
           axios.get(`${apiConfig.baseURL}/api/stud/userdata/${user.id}`),
+          axios.get(`${apiConfig.baseURL}/api/stud/payment-history-latest/${user.id}`),
 
         ]);
-        // console.log("Fetched data:", userdata.data);
         setUsers(userdata.data);
         setCampaigns(campaignsRes.data);
         setGroups(groupsRes.data);
         setStudents(studentsRes.data);
         setTemplates(templatesRes.data);
         setBirthTemplates(birthtemplatesRes.data);
+        setPaymentdetails(paymentdetails.data);
       } catch (error) {
         console.error("Error fetching student dashboard data:", {
           message: error.message,
@@ -334,9 +349,13 @@ const handlebirthDelete = async (templateId) => {
   const handleLogout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
+    localStorage.removeItem("campaign");
     localStorage.removeItem("modalShown"); // Reset modalShown for next login
     localStorage.setItem("hasvisit", true);
     navigate("/user-login");
+  };
+  const handlepayment = () => {
+    navigate(`/userpayment/${user.id}`);
   };
 
   const closePopup = () => {
@@ -876,12 +895,12 @@ const handlebirthDelete = async (templateId) => {
             >
               Automation
             </button>
-            {/* <button
+            <button
               className="sidebar-button contact-button"
-              onClick={openModal}
+              onClick={handlepayment}
             >
-              Automation
-            </button> */}
+              Upgrade Plan
+            </button>
           </div>
           <div className="side-img">
             <img src={imghome} alt="Home img" className="home-image" />
@@ -1357,7 +1376,33 @@ const handlebirthDelete = async (templateId) => {
                 Email<span style={{ color: "#f48c06" }}>Con</span>
               </h2>
             </div>
-            <div className="nav-split">
+            <div className="expiry-date"> 
+  {daysRemaining !== null && (
+    <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+      <p
+        style={{
+          color:
+            daysRemaining <= 2 && daysRemaining > 0
+              ? "red"
+              : daysRemaining <= 0
+              ? "#f18b05"
+              : "green",
+          fontWeight: "bold",
+          margin: 0,
+        }}
+      >
+        {daysRemaining > 0
+          ? `Expires in ${daysRemaining} day${daysRemaining > 1 ? "s" : ""}`
+          : "Account expired"}
+      </p>
+      <button className="upgrade-btn-home" onClick={handlepayment}>
+        Upgrade
+      </button>
+    </div>
+  )}
+</div>
+
+            <div className="nav-split">                 
               <h4>
                 <span
                   style={{
@@ -3102,12 +3147,12 @@ const handlebirthDelete = async (templateId) => {
             >
             Automation
           </button>
-          {/* <button
-            className="sidebar-button contact-button"
-            onClick={handleOpenModal}
-          >
-            Automation
-          </button> */}
+          <button
+              className="sidebar-button contact-button"
+              onClick={handlepayment}
+            >
+              Upgrade Plan
+            </button>
         </div>
       </div>
     </>

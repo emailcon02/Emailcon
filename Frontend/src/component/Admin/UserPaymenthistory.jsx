@@ -62,8 +62,6 @@ function UserPaymenthistory() {
     navigate("/admin-dashboard");
   };
 
- 
-  
 
   return (
     <div className="admin-dashboard-page">

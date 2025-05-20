@@ -5,6 +5,8 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import {FaBars, FaTimes} from "react-icons/fa";
 import { FiEdit } from 'react-icons/fi'; // Importing icons
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
 
 import {
   FaParagraph,
@@ -38,12 +40,13 @@ const Mainpage = () => {
   const [templateName, setTemplateName] = useState("");
   const [isMobileView, setIsMobileView] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
+  const [aliasName,setAliasName] = useState("");
+  const [replyTo,setReplyTo] = useState("");
+  const [scheduledTime,setScheduledTime] = useState("");
   const [emailData, setEmailData] = useState({
     recipient: "",
     subject: "",
     previewtext: "",
-    scheduledTime: "",
-    aliasName: "",
     attachments: [],
   });
   const [selectedIndex, setSelectedIndex] = useState(null); // Track selected content index
@@ -63,168 +66,333 @@ const Mainpage = () => {
   const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState(false);
   const modalRef = useRef(null);
-const [isNavOpen, setIsNavOpen] = useState(false);
-const [isMobilestyle, setIsMobilestyle] = useState(window.innerWidth <= 600);
-const [isModalOpenstyle, setIsModalOpenstyle] = useState(false);
-const [isOpentemplate, setIsOpentemplate] = useState(false); // Manage dropdown visibility
-const [templates, setTemplates] = useState([]); // Store fetched templates
-const [selectedTemplate, setSelectedTemplate] = useState(null);
-const [selectedTemplatepre, setSelectedTemplatepre] = useState(null);
-const [isPreviewOpen, setIsPreviewOpen] = useState(false);
-const [groups, setGroups] = useState([]); // Stores group names
-const [students, setStudents] = useState([]); // Stores all students
-const [selectedGroup, setSelectedGroup] = useState({});
-const [fieldNames, setFieldNames] = useState({});
-const templateRef = useRef(null);
-const [openedGroups, setOpenedGroups] = useState({});
-const dropdownRef = useRef(null);
+  const [isNavOpen, setIsNavOpen] = useState(false);
+  const [isMobilestyle, setIsMobilestyle] = useState(window.innerWidth <= 600);
+  const [isModalOpenstyle, setIsModalOpenstyle] = useState(false);
+  const [isOpentemplate, setIsOpentemplate] = useState(false); // Manage dropdown visibility
+  const [templates, setTemplates] = useState([]); // Store fetched templates
+  const [selectedTemplate, setSelectedTemplate] = useState(null);
+  const [selectedTemplatepre, setSelectedTemplatepre] = useState(null);
+  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
+  const [groups, setGroups] = useState([]); // Stores group names
+  const [students, setStudents] = useState([]); // Stores all students
+  const [selectedGroup, setSelectedGroup] = useState({});
+  const [fieldNames, setFieldNames] = useState({});
+  const templateRef = useRef(null);
+  const [openedGroups, setOpenedGroups] = useState({});
+  const dropdownRef = useRef(null);
+  const [isLoadingreply, setIsLoadingreply] = useState(false); // State for loader
+    const [aliasOptions, setAliasOptions] = useState([]);
+    const [showModal, setShowModal] = useState(false);
+    const [replyOptions, setReplyOptions] = useState([]);
+    const [showModalreply, setShowModalreply] = useState(false);
 
-
-
-const handleGroupChange = (e, index) => {
-  const groupName = e.target.value;
-
-  setSelectedGroup((prev) => ({
-    ...prev,
-    [index]: groupName,
-  }));
-
-  // Allow reopening if selecting the same group again
-  setOpenedGroups((prev) => ({
-    ...prev,
-    [index]: !prev[index] || prev[index] !== groupName, // Toggle if same group selected
-  }));
-
-  if (!students || students.length === 0) {
-    console.log("No students available yet.");
-    return;
-  }
-
-  console.log(`All students:`, students);
-  console.log(`Selected Group for Heading ${index}:`, groupName);
-
-  const filteredStudents = students.filter(
-    (student) => student.group && student.group._id === groupName
+  const VerticalSpacingIcon = () => (
+    <div
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        gap: "8px",
+      }}
+    >
+      <div
+        style={{
+          width: "18px",
+          height: "2px",
+          backgroundColor: "#313030",
+          borderRadius: "4px",
+        }}
+      ></div>
+      <div
+        style={{
+          width: "18px",
+          height: "2px",
+          backgroundColor: "#313030",
+          borderRadius: "4px",
+        }}
+      ></div>
+    </div>
   );
 
-  const sampleStudent = filteredStudents.length > 0 ? filteredStudents[0] : null;
+  useEffect(() => {
+    const fetchaliasname = async () => {
+      if (!user?.id) {
+        navigate("/user-login"); // Redirect to login if user is not found
+        return;
+      }
 
-  const newFieldNames = sampleStudent
-    ? Object.keys(sampleStudent).filter(
-        (key) => key !== "_id" && key !== "group" && key !== "__v"
-      )
-    : [];
+      try {
+        const res = await axios.get(
+          `${apiConfig.baseURL}/api/stud/aliasname/${user.id}`
+        );
+        setAliasOptions(res.data);
+      } catch (err) {
+        console.error(err);
+        console.log("Failed to fetch aliasname");
+      }
+    };
 
-  setFieldNames((prev) => ({
-    ...prev,
-    [index]: newFieldNames,
-  }));
-};
+    fetchaliasname();
+  }, [user?.id, navigate]); // Ensure useEffect is dependent on `user` and `navigate`
 
-const handleClickOutsidegroup = (event) => {
-  if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
-    setOpenedGroups({});
-  }
-};
-useEffect(() => {
-  document.addEventListener("mousedown", handleClickOutsidegroup);
-  return () => {
-    document.removeEventListener("mousedown", handleClickOutsidegroup);
-  };
-}, []);
+  const handleAddAlias = () => {
+    if (!user || !user.id) {
+      toast.error("Please ensure the user is valid");
+      return; // Stop further execution if user is invalid
+    }
+    if (!aliasName) {
+      toast.error("Aliasname cannot be empty");
+      return; // Stop further execution if aliasname is empty
+    }
 
+    // Proceed with aliasname creation
+    setIsLoading(true); // Start loading
+    if (aliasName && user && user.id) {
+      axios
+        .post(`${apiConfig.baseURL}/api/stud/aliasname`, {
+          aliasname:aliasName,
+          userId: user.id,
+        })
+        .then((response) => {
+          setAliasOptions([...aliasOptions, response.data]);
+          toast.success("Aliasname created");
+          setShowModal(false);
+          setAliasName("");
+          setIsLoading(false);
+        })
+        .catch((error) => {
+          setIsLoading(false); // Stop loading
+          // Handle error response
+          console.error("Error:", error);
+          // Dismiss previous toasts before showing a new one
+          toast.dismiss();
 
-
-const toggletemplate = (event) => {
-  event.stopPropagation(); // Prevent event from bubbling up
-  setIsOpentemplate((prev) => !prev);
-};
-const styleControlsRef = useRef(null);
-
-useEffect(() => {
-  if (selectedIndex !== null && styleControlsRef.current) {
-    styleControlsRef.current.scrollIntoView({ behavior: "smooth", block: "center" });
-  }
-}, [selectedIndex]);
-
-useEffect(() => {
-  const handleClickOutside = (event) => {
-    if (templateRef.current && !templateRef.current.contains(event.target)) {
-      setIsOpentemplate(false);
+          if (
+            error.response &&
+            error.response.data &&
+            error.response.data.message
+          ) {
+            toast.warning(error.response.data.message, { autoClose: 3000 });
+          } else {
+            toast.error("Failed to create aliasname", { autoClose: 3000 });
+          }
+        });
+    } else {
+      toast.error("Please ensure all fields are filled and user is valid");
     }
   };
 
-  window.addEventListener("mousedown", handleClickOutside);
 
-  return () => {
-    window.removeEventListener("mousedown", handleClickOutside);
+  useEffect(() => {
+    const fetchreplyto = async () => {
+      if (!user?.id) {
+        navigate("/user-login"); // Redirect to login if user is not found
+        return;
+      }
+
+      try {
+        const res = await axios.get(
+          `${apiConfig.baseURL}/api/stud/replyTo/${user.id}`
+        );
+        setReplyOptions(res.data);
+      } catch (err) {
+        console.error(err);
+        console.log("Failed to fetch replyto mail");
+      }
+    };
+
+    fetchreplyto();
+  }, [user?.id, navigate]); // Ensure useEffect is dependent on `user` and `navigate`
+
+  const handleAddReply = () => {
+    if (!user || !user.id) {
+      toast.error("Please ensure the user is valid");
+      return; // Stop further execution if user is invalid
+    }
+    if (!replyTo) {
+      toast.error("Reply to mail cannot be empty");
+      return; // Stop further execution if replyto is empty
+    }
+
+    // Proceed with replyto creation
+    setIsLoadingreply(true); // Start loading
+    if (replyTo && user && user.id) {
+      axios
+        .post(`${apiConfig.baseURL}/api/stud/replyTo`, {
+          replyTo,
+          userId: user.id,
+        })
+        .then((response) => {
+          setReplyOptions([...replyOptions, response.data]);
+          toast.success("Replyto mail created");
+          setShowModalreply(false);
+          setReplyTo("");
+          setIsLoadingreply(false);
+        })
+        .catch((error) => {
+          setIsLoadingreply(false); // Stop loading
+          // Handle error response
+          console.error("Error:", error);
+          // Dismiss previous toasts before showing a new one
+          toast.dismiss();
+
+          if (
+            error.response &&
+            error.response.data &&
+            error.response.data.message
+          ) {
+            toast.warning(error.response.data.message, { autoClose: 3000 });
+          } else {
+            toast.error("Failed to create reply to mail", { autoClose: 3000 });
+          }
+        });
+    } else {
+      toast.error("Please ensure all fields are filled and user is valid");
+    }
   };
-}, []);
 
 
+  const handleGroupChange = (e, index) => {
+    const groupName = e.target.value;
 
-useEffect(() => {
-  const fetchAllStudentData = async () => {
-    if (!user?.id) {
-      console.warn("User ID is missing. Skipping data fetch.");
+    setSelectedGroup((prev) => ({
+      ...prev,
+      [index]: groupName,
+    }));
+
+    // Allow reopening if selecting the same group again
+    setOpenedGroups((prev) => ({
+      ...prev,
+      [index]: !prev[index] || prev[index] !== groupName, // Toggle if same group selected
+    }));
+
+    if (!students || students.length === 0) {
+      console.log("No students available yet.");
       return;
     }
 
-    try {
-      const [ groupsRes, studentsRes, templatesRes] = await Promise.all([
-        axios.get(`${apiConfig.baseURL}/api/stud/groups/${user.id}`),
-        axios.get(`${apiConfig.baseURL}/api/stud/students`),
-        axios.get(`${apiConfig.baseURL}/api/stud/templates/${user.id}`),
+    console.log(`All students:`, students);
+    console.log(`Selected Group for Heading ${index}:`, groupName);
 
+    const filteredStudents = students.filter(
+      (student) => student.group && student.group._id === groupName
+    );
 
-      ]);
-      // console.log("Fetched data:", userdata.data);
-      setGroups(groupsRes.data);
-      setStudents(studentsRes.data);
-      setTemplates(templatesRes.data);
-    } catch (error) {
-      console.error("Error fetching student dashboard data:", {
-        message: error.message,
-        stack: error.stack,
-        response: error.response?.data,
-      });
+    const sampleStudent =
+      filteredStudents.length > 0 ? filteredStudents[0] : null;
+
+    const newFieldNames = sampleStudent
+      ? Object.keys(sampleStudent).filter(
+          (key) => key !== "_id" && key !== "group" && key !== "__v"
+        )
+      : [];
+
+    setFieldNames((prev) => ({
+      ...prev,
+      [index]: newFieldNames,
+    }));
+  };
+
+  const handleClickOutsidegroup = (event) => {
+    if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+      setOpenedGroups({});
     }
   };
+  useEffect(() => {
+    document.addEventListener("mousedown", handleClickOutsidegroup);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutsidegroup);
+    };
+  }, []);
 
-  fetchAllStudentData();
-}, [user?.id]);
-
-
-
-useEffect(() => {
-  const handleResize = () => {
-    setIsMobilestyle(window.innerWidth <= 600);
+  const toggletemplate = (event) => {
+    event.stopPropagation(); // Prevent event from bubbling up
+    setIsOpentemplate((prev) => !prev);
   };
+  const styleControlsRef = useRef(null);
 
-  window.addEventListener("resize", handleResize);
-  return () => window.removeEventListener("resize", handleResize);
-}, []);
-const handlePreview=(template)=>{
-  setIsOpentemplate(false); // Close the dropdown
-  setIsNavOpen(false);
-  setIsPreviewOpen(true);
-  setSelectedTemplatepre(template);
-  setBgColorpre(template.bgColor || "#ffffff"); // Update background color
-  setPreviewContentpre(template.previewContent || []); // Update previewContent
-}
-const handlecancel=()=>{
-  setIsPreviewOpen(false);
-  setShowTemplateModal(false);
-  setIsNavOpen(false);
-}
-const handleTemplateSelect = (template) => {
-  setIsPreviewOpen(false);
-  setIsNavOpen(false);
-  setIsOpentemplate(false); // Close the dropdown
-  setSelectedTemplate(template);
-  setBgColor(template.bgColor || "#ffffff"); // Update background color
-  setPreviewContent(template.previewContent || []); // Update previewContent
-};
+  useEffect(() => {
+    if (selectedIndex !== null && styleControlsRef.current) {
+      styleControlsRef.current.scrollIntoView({
+        behavior: "smooth",
+        block: "center",
+      });
+    }
+  }, [selectedIndex]);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (templateRef.current && !templateRef.current.contains(event.target)) {
+        setIsOpentemplate(false);
+      }
+    };
+
+    window.addEventListener("mousedown", handleClickOutside);
+
+    return () => {
+      window.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
+  useEffect(() => {
+    const fetchAllStudentData = async () => {
+      if (!user?.id) {
+        console.warn("User ID is missing. Skipping data fetch.");
+        return;
+      }
+
+      try {
+        const [groupsRes, studentsRes, templatesRes] = await Promise.all([
+          axios.get(`${apiConfig.baseURL}/api/stud/groups/${user.id}`),
+          axios.get(`${apiConfig.baseURL}/api/stud/students`),
+          axios.get(`${apiConfig.baseURL}/api/stud/templates/${user.id}`),
+        ]);
+        // console.log("Fetched data:", userdata.data);
+        setGroups(groupsRes.data);
+        setStudents(studentsRes.data);
+        setTemplates(templatesRes.data);
+      } catch (error) {
+        console.error("Error fetching student dashboard data:", {
+          message: error.message,
+          stack: error.stack,
+          response: error.response?.data,
+        });
+      }
+    };
+
+    fetchAllStudentData();
+  }, [user?.id]);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobilestyle(window.innerWidth <= 600);
+    };
+
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+  const handlePreview = (template) => {
+    setIsOpentemplate(false); // Close the dropdown
+    setIsNavOpen(false);
+    setIsPreviewOpen(true);
+    setSelectedTemplatepre(template);
+    setBgColorpre(template.bgColor || "#ffffff"); // Update background color
+    setPreviewContentpre(template.previewContent || []); // Update previewContent
+  };
+  const handlecancel = () => {
+    setIsPreviewOpen(false);
+    setShowTemplateModal(false);
+    setIsNavOpen(false);
+  };
+  const handleTemplateSelect = (template) => {
+    setIsPreviewOpen(false);
+    setIsNavOpen(false);
+    setIsOpentemplate(false); // Close the dropdown
+    setSelectedTemplate(template);
+    setBgColor(template.bgColor || "#ffffff"); // Update background color
+    setPreviewContent(template.previewContent || []); // Update previewContent
+  };
 
   const handlebackcampaign = () => {
     navigate("/home");
@@ -254,47 +422,75 @@ const handleTemplateSelect = (template) => {
   };
   const addMultipleImage = () => {
     //  const isMobile = window.innerWidth <= 600; // Check if screen width is 600px or less
-  
-     setPreviewContent([
-       ...previewContent,
-       {
-         type: "multipleimage",
-         src1: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTjCoUtOal33JWLqals1Wq7p6GGCnr3o-lwpQ&s",
-         src2: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTjCoUtOal33JWLqals1Wq7p6GGCnr3o-lwpQ&s",
-         style: {
+
+    setPreviewContent([
+      ...previewContent,
+      {
+        type: "multipleimage",
+        src1: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTjCoUtOal33JWLqals1Wq7p6GGCnr3o-lwpQ&s",
+        src2: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTjCoUtOal33JWLqals1Wq7p6GGCnr3o-lwpQ&s",
+        style: {
           width: "100%",
           height: "auto",
           borderRadius: "10px",
           textAlign: "center",
         },
-        },
-       
-     ]);
-   };
+      },
+    ]);
+  };
 
-   const addCardImage = () => {
+  // addBreak
+  const addBreak = () => {
     setPreviewContent([
       ...previewContent,
       {
-        type: "cardimage",
-         style:{
-             width: "80%",
-              height: "auto",
-              margin: "0px auto",
-              
-         },
-        src1: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTjCoUtOal33JWLqals1Wq7p6GGCnr3o-lwpQ&s", // Default image source
-        content1:
-          "Artificial intelligence is transforming the way we interact with technology, enabling machines to process data with efficiency.", // Default paragraph text
-        style1: {
-          color: "#000000",
-          backgroundColor: "#f4f4f4",         
+        type: "break",
+        style: {
+          width: "100%",
+          backgroundColor: "#000000",
+          margin: "30px 0", // optional: adds spacing above and below
         },
       },
     ]);
   };
 
-  
+  //  add Gap
+  const addGap = () => {
+    setPreviewContent([
+      ...previewContent,
+      {
+        type: "gap",
+        style: {
+          width: "100%",
+          height: "60px",
+          backgroundColor: "#000000", // optional, usually gaps are transparent or white
+          margin: "30px 0", // optional spacing
+        },
+      },
+    ]);
+  };
+
+  const addCardImage = () => {
+    setPreviewContent([
+      ...previewContent,
+      {
+        type: "cardimage",
+        style: {
+          width: "80%",
+          height: "auto",
+          margin: "0px auto",
+        },
+        src1: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTjCoUtOal33JWLqals1Wq7p6GGCnr3o-lwpQ&s", // Default image source
+        content1:
+          "Artificial intelligence is transforming the way we interact with technology, enabling machines to process data with efficiency.", // Default paragraph text
+        style1: {
+          color: "#000000",
+          backgroundColor: "#f4f4f4",
+        },
+      },
+    ]);
+  };
+
   const addHeading = () => {
     saveToUndoStack(); // Save the current state before deleting
 
@@ -422,7 +618,7 @@ const handleTemplateSelect = (template) => {
             i === index
               ? {
                   ...item,
-                  url: imageUrl3, 
+                  url: imageUrl3,
                   [imageNumber === 1 ? "src1" : "src2"]: imageUrl3,
                 }
               : item
@@ -575,52 +771,52 @@ const handleTemplateSelect = (template) => {
   };
 
   //add multimage with button
- const addMultiImage = () => {
-   const isMobile = window.innerWidth <= 600; // Check if screen width is 600px or less
+  const addMultiImage = () => {
+    const isMobile = window.innerWidth <= 600; // Check if screen width is 600px or less
 
-   setPreviewContent([
-     ...previewContent,
-     {
-       type: "multi-image",
-       src1: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTjCoUtOal33JWLqals1Wq7p6GGCnr3o-lwpQ&s",
-       src2: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTjCoUtOal33JWLqals1Wq7p6GGCnr3o-lwpQ&s",
-       link1: "https://www.imageconindia.com/",
-       link2: "https://www.imageconindia.com/",
-       buttonStyle1: {
-         textAlign: "center",
-         padding: isMobile ? "8px 8px" : "12px 25px", // Adjust padding based on screen size
-         backgroundColor: "#000000",
-         color: "#ffffff",
-         width: "auto",
-         marginTop: "20px",
-         alignItems: "center",
-         borderRadius: "5px",
-         fontWeight: "bold",
-         fontSize: "18px",
-       },
-       buttonStyle2: {
-         textAlign: "center",
-         padding: isMobile ? "8px 8px" : "12px 25px", // Adjust padding based on screen size
-         backgroundColor: "#000000",
-         color: "#ffffff",
-         width: "auto",
-         marginTop: "20px",
-         alignItems: "center",
-         borderRadius: "5px",
-         fontWeight: "bold",
-         fontSize: "18px",
-       },
-       content1: "Click Me",
-       content2: "Click Me",
-       style: {
-         width: "100%",
-         height: "auto",
-         borderRadius: "10px",
-         textAlign: "center",
-       },
-     },
-   ]);
- };
+    setPreviewContent([
+      ...previewContent,
+      {
+        type: "multi-image",
+        src1: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTjCoUtOal33JWLqals1Wq7p6GGCnr3o-lwpQ&s",
+        src2: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTjCoUtOal33JWLqals1Wq7p6GGCnr3o-lwpQ&s",
+        link1: "https://www.imageconindia.com/",
+        link2: "https://www.imageconindia.com/",
+        buttonStyle1: {
+          textAlign: "center",
+          padding: isMobile ? "8px 8px" : "12px 25px", // Adjust padding based on screen size
+          backgroundColor: "#000000",
+          color: "#ffffff",
+          width: "auto",
+          marginTop: "20px",
+          alignItems: "center",
+          borderRadius: "5px",
+          fontWeight: "bold",
+          fontSize: "18px",
+        },
+        buttonStyle2: {
+          textAlign: "center",
+          padding: isMobile ? "8px 8px" : "12px 25px", // Adjust padding based on screen size
+          backgroundColor: "#000000",
+          color: "#ffffff",
+          width: "auto",
+          marginTop: "20px",
+          alignItems: "center",
+          borderRadius: "5px",
+          fontWeight: "bold",
+          fontSize: "18px",
+        },
+        content1: "Click Me",
+        content2: "Click Me",
+        style: {
+          width: "100%",
+          height: "auto",
+          borderRadius: "10px",
+          textAlign: "center",
+        },
+      },
+    ]);
+  };
 
   const addButton = () => {
     saveToUndoStack(); // Save the current state before deleting
@@ -661,9 +857,9 @@ const handleTemplateSelect = (template) => {
   //delete
   const deleteContent = async (index) => {
     saveToUndoStack(); // Preserve the current state
-  
+
     const fileToDelete = previewContent[index];
-  
+
     // If no URL, it's local/default content — just delete from state
     if (!fileToDelete?.url) {
       const updated = previewContent.filter((_, i) => i !== index);
@@ -675,36 +871,40 @@ const handleTemplateSelect = (template) => {
       }
       return;
     }
-  
+
     // Extract the S3 key from the URL
-    const s3Key = decodeURIComponent(fileToDelete.url.split('.amazonaws.com/')[1]);
+    const s3Key = decodeURIComponent(
+      fileToDelete.url.split(".amazonaws.com/")[1]
+    );
     if (!s3Key) return;
-  
+
     try {
-      const res = await fetch(`${apiConfig.baseURL}/api/stud/file?key=${encodeURIComponent(s3Key)}`, {
-        method: 'DELETE',
-      });
-  
+      const res = await fetch(
+        `${apiConfig.baseURL}/api/stud/file?key=${encodeURIComponent(s3Key)}`,
+        {
+          method: "DELETE",
+        }
+      );
+
       if (!res.ok) {
         const err = await res.json();
-        throw new Error(err?.error || 'Unknown error from server');
+        throw new Error(err?.error || "Unknown error from server");
       }
-  
+
       // Remove from state
       const updated = previewContent.filter((_, i) => i !== index);
       setPreviewContent(updated);
-  
+
       if (selectedIndex === index) {
         setSelectedIndex(null);
       } else if (selectedIndex > index) {
         setSelectedIndex(selectedIndex - 1);
       }
     } catch (error) {
-      console.error('Error deleting file from S3:', error);
+      console.error("Error deleting file from S3:", error);
     }
   };
-  
-  
+
   const saveToUndoStack = () => {
     setUndoStack([...undoStack, [...previewContent]]);
     setRedoStack([]); // Clear redo stack whenever a new action is performed
@@ -740,105 +940,129 @@ const handleTemplateSelect = (template) => {
       toast.warning("No preview content available.");
       return;
     }
-  
+
     setIsLoading(true);
     if (templateName && user && user.id && previewContent) {
       axios
-        .post(`${apiConfig.baseURL}/api/stud/template`, { temname:templateName, userId: user.id,previewContent,bgColor,camname:campaign.camname })
+        .post(`${apiConfig.baseURL}/api/stud/template`, {
+          temname: templateName,
+          userId: user.id,
+          previewContent,
+          bgColor,
+          camname: campaign.camname,
+        })
         .then((res) => {
           console.log("Template saved successfully:", res.data);
           toast.success("Template Saved Successfully");
-          setTimeout(()=>{
-          setShowTemplateModal(false);
-          setTemplateName("");
-          setIsLoading(false);
-          },(2000))
+          setTimeout(() => {
+            setShowTemplateModal(false);
+            setTemplateName("");
+            setIsLoading(false);
+          }, 2000);
         })
         .catch((error) => {
           setIsLoading(false);
-           // Dismiss previous toasts before showing a new one
-                      toast.dismiss();              
-                      if (error.response && error.response.data && error.response.data.message) {
-                        toast.warning(error.response.data.message, { autoClose: 3000 });
-                      } else {
-                        toast.error("Failed to Save template", { autoClose: 3000 });
-                      }
+          // Dismiss previous toasts before showing a new one
+          toast.dismiss();
+          if (
+            error.response &&
+            error.response.data &&
+            error.response.data.message
+          ) {
+            toast.warning(error.response.data.message, { autoClose: 3000 });
+          } else {
+            toast.error("Failed to Save template", { autoClose: 3000 });
+          }
         });
     } else {
       setIsLoading(false);
       toast.error("Please ensure all fields are filled and user is valid");
     }
   };
-const sendscheduleEmail = async () => {
-  if (!previewContent || previewContent.length === 0) {
-    toast.warning("No preview content available.");
-    return;
-  }
-  if (!emailData || !emailData.recipient || !emailData.subject || !emailData.previewtext || !emailData.aliasName || !emailData.scheduledTime) {
-    toast.warning("Please fill in all required fields.");
-    return;
-  }
-  setIsLoadingsch(true);
-
-  try {
-    let recipients = emailData.recipient.split(",").map((email) => email.trim());
-    let attachments = [];
-    if (emailData.attachments && emailData.attachments.length > 0) {
-      const formData = new FormData();
-      
-      emailData.attachments.forEach((file) => {
-        formData.append("attachments", file);
-      });
-    
-      const uploadResponse = await axios.post(
-        `${apiConfig.baseURL}/api/stud/uploadfile`,
-        formData,
-        { headers: { "Content-Type": "multipart/form-data" } }
-      );
-    
-      console.log("Uploaded Files:", uploadResponse.data);    
-      // Structure the uploaded files with original name and URL
-        attachments = uploadResponse.data.fileUrls.map((file, index) => ({
-        originalName: emailData.attachments[index].name, // Get original file name
-        fileUrl: file // Cloudinary URL
-      }));
+  const sendscheduleEmail = async () => {
+    if (!previewContent || previewContent.length === 0) {
+      toast.warning("No preview content available.");
+      return;
     }
-    // Store campaign history with uploaded file data
-    const campaignHistoryData = {
-      campaignname: campaign.camname,
-      groupname: "No Group",
-      totalcount: recipients.length,
-      recipients: emailData.recipient,
-      sendcount: 0,
-      failedcount: 0,
-      sendEmails: 0,
-      failedEmails: 0,
-      subject: emailData.subject,
-      previewtext: emailData.previewtext,
-      aliasName: emailData.aliasName,
-      attachments, // Store objects with originalName & fileUrl
-      previewContent,
-      bgColor,
-      exceldata: [{}],
-      status: "Scheduled On",
-      progress: 0,
-      scheduledTime: new Date(emailData.scheduledTime).toISOString(),
-      senddate: new Date().toLocaleString(),
-      user: user.id,
-      groupId: "no group",
-    };
+    if (
+      !emailData ||
+      !emailData.recipient ||
+      !emailData.subject ||
+      !emailData.previewtext ||
+      !aliasName ||
+      !replyTo ||
+      !scheduledTime
+    ) {
+      toast.warning("Please fill in all required fields.");
+      return;
+    }
+    setIsLoadingsch(true);
 
-    await axios.post(`${apiConfig.baseURL}/api/stud/camhistory`, campaignHistoryData);
+    try {
+      let recipients = emailData.recipient
+        .split(",")
+        .map((email) => email.trim());
+      let attachments = [];
+      if (emailData.attachments && emailData.attachments.length > 0) {
+        const formData = new FormData();
 
-    toast.success("Email scheduled successfully!");
-    navigate("/campaigntable");
-  } catch (error) {
-    console.error("Error scheduling email:", error);
-    toast.error("Failed to schedule email.");
-  } finally {
-    setIsLoadingsch(false);
-  }
-};
+        emailData.attachments.forEach((file) => {
+          formData.append("attachments", file);
+        });
+
+        const uploadResponse = await axios.post(
+          `${apiConfig.baseURL}/api/stud/uploadfile`,
+          formData,
+          { headers: { "Content-Type": "multipart/form-data" } }
+        );
+
+        console.log("Uploaded Files:", uploadResponse.data);
+        // Structure the uploaded files with original name and URL
+        attachments = uploadResponse.data.fileUrls.map((file, index) => ({
+          originalName: emailData.attachments[index].name, // Get original file name
+          fileUrl: file, // Cloudinary URL
+        }));
+      }
+      // Store campaign history with uploaded file data
+      const campaignHistoryData = {
+        campaignname: campaign.camname,
+        groupname: "No Group",
+        totalcount: recipients.length,
+        recipients: emailData.recipient,
+        sendcount: 0,
+        failedcount: 0,
+        sendEmails: 0,
+        failedEmails: 0,
+        subject: emailData.subject,
+        previewtext: emailData.previewtext,
+        aliasName,
+        replyTo,
+        attachments, // Store objects with originalName & fileUrl
+        previewContent,
+        bgColor,
+        exceldata: [{}],
+        status: "Scheduled On",
+        progress: 0,
+        scheduledTime: new Date(scheduledTime).toISOString(),
+        senddate: new Date().toLocaleString(),
+        user: user.id,
+        groupId: "no group",
+      };
+
+      await axios.post(
+        `${apiConfig.baseURL}/api/stud/camhistory`,
+        campaignHistoryData
+      );
+
+      toast.success("Email scheduled successfully!");
+      navigate("/campaigntable");
+    } catch (error) {
+      console.error("Error scheduling email:", error);
+      toast.error("Failed to schedule email.");
+    } finally {
+      setIsLoadingsch(false);
+    }
+  };
 
   //Normal Send Email
   const sendEmail = async () => {
@@ -851,41 +1075,46 @@ const sendscheduleEmail = async () => {
       !emailData.recipient ||
       !emailData.subject ||
       !emailData.previewtext ||
-      !emailData.aliasName
+      !aliasName ||
+      !replyTo
     ) {
       toast.warning("Please fill in all required fields.");
       return;
     }
-  
+
     setIsLoading(true);
     navigate("/campaigntable");
     sessionStorage.removeItem("firstVisit");
     sessionStorage.removeItem("toggled");
-  
+
     try {
-      const recipients = emailData.recipient.split(",").map((email) => email.trim());
+      const recipients = emailData.recipient
+        .split(",")
+        .map((email) => email.trim());
       const totalEmails = recipients.length;
       const sentEmails = [];
       const failedEmails = [];
       let attachments = [];
-  
+
       // Upload attachments
       if (emailData.attachments?.length > 0) {
         const formData = new FormData();
-        emailData.attachments.forEach((file) => formData.append("attachments", file));
-  
+        emailData.attachments.forEach((file) =>
+          formData.append("attachments", file)
+        );
+
         const uploadResponse = await axios.post(
           `${apiConfig.baseURL}/api/stud/uploadfile`,
           formData,
           { headers: { "Content-Type": "multipart/form-data" } }
         );
-  
+
         attachments = uploadResponse.data.fileUrls.map((file, index) => ({
           originalName: emailData.attachments[index].name,
           fileUrl: file,
         }));
       }
-  
+
       // Create initial campaign record
       const campaignHistoryData = {
         campaignname: campaign.camname,
@@ -898,7 +1127,7 @@ const sendscheduleEmail = async () => {
         failedEmails: 0,
         subject: emailData.subject,
         previewtext: emailData.previewtext,
-        aliasName: emailData.aliasName,
+        aliasName,replyTo,
         previewContent,
         attachments,
         bgColor,
@@ -910,22 +1139,29 @@ const sendscheduleEmail = async () => {
         groupId: "no group",
         progress: 0,
       };
-  
-      const campaignResponse = await axios.post(`${apiConfig.baseURL}/api/stud/camhistory`, campaignHistoryData);
+
+      const campaignResponse = await axios.post(
+        `${apiConfig.baseURL}/api/stud/camhistory`,
+        campaignHistoryData
+      );
       const campaignId = campaignResponse.data.id;
-  
+
       // Send emails one by one
       for (const email of recipients) {
         try {
-          const response = await axios.post(`${apiConfig.baseURL}/api/stud/sendtestmail`, {
-            emailData: { ...emailData, recipient: email },
-            previewContent,
-            bgColor,
-            attachments,
-            campaignId,
-            userId: user.id,
-          });
-  
+          const response = await axios.post(
+            `${apiConfig.baseURL}/api/stud/sendtestmail`,
+            {
+              emailData: { ...emailData, recipient: email },
+              previewContent,
+              aliasName,replyTo,
+              bgColor,
+              attachments,
+              campaignId,
+              userId: user.id,
+            }
+          );
+
           if (response.status === 200) {
             sentEmails.push(email);
           } else {
@@ -936,24 +1172,26 @@ const sendscheduleEmail = async () => {
           failedEmails.push(email);
         }
       }
-  
+
       // Final progress & status
       const failedCount = failedEmails.length;
       const successCount = sentEmails.length;
-      const progress = failedCount > 0
-        ? Math.round((failedCount / totalEmails) * 100)
-        : 100;
+      const progress =
+        failedCount > 0 ? Math.round((failedCount / totalEmails) * 100) : 100;
       const finalStatus = failedCount > 0 ? "Failed" : "Success";
-  
-      await axios.put(`${apiConfig.baseURL}/api/stud/camhistory/${campaignId}`, {
-        sendcount: successCount,
-        failedcount: failedCount,
-        sentEmails,
-        failedEmails,
-        status: finalStatus,
-        progress,
-      });
-  
+
+      await axios.put(
+        `${apiConfig.baseURL}/api/stud/camhistory/${campaignId}`,
+        {
+          sendcount: successCount,
+          failedcount: failedCount,
+          sentEmails,
+          failedEmails,
+          status: finalStatus,
+          progress,
+        }
+      );
+
       console.log("Emails sent. Final Progress:", progress);
     } catch (error) {
       console.error("Error in sendEmail:", error);
@@ -961,8 +1199,7 @@ const sendscheduleEmail = async () => {
       setIsLoading(false);
     }
   };
-  
-  
+
   //add variable
   const handleInsertName = (index, name) => {
     const updatedPreviewContent = [...previewContent];
@@ -1013,8 +1250,8 @@ const sendscheduleEmail = async () => {
     else if (type === "icons") addSocialMedia();
     else if (type === "multipleimage") addMultipleImage();
     else if (type === "cardimage") addCardImage();
-
-
+    else if (type === "break") addBreak();
+    else if (type === "gap") addGap();
 
     dragIndex.current = null; // Reset the type after drop
   };
@@ -1022,9 +1259,6 @@ const sendscheduleEmail = async () => {
   const handleDragOver = (e) => {
     e.preventDefault(); // Allow drop by preventing default
   };
- 
- 
-
 
   //  // Toggle function that only works on mobile devices
   //  const handleToggle = () => {
@@ -1032,7 +1266,6 @@ const sendscheduleEmail = async () => {
   //      setShowMobileContent((prev) => !prev);
   //    }
   //  };
-
 
   const handleLinkClick = (e, index) => {
     e.preventDefault(); // Prevent default navigation
@@ -1044,9 +1277,7 @@ const sendscheduleEmail = async () => {
 
   return (
     <div>
-      <div
-        className="mobile-content"
-      >
+      <div className="mobile-content">
         <div className="desktop-nav">
           <nav className="navbar">
             <div>
@@ -1102,8 +1333,9 @@ const sendscheduleEmail = async () => {
                 </span>{" "}
                 <span className="nav-names">Save</span>
               </button>
-              
-              <button  ref={templateRef}
+
+              <button
+                ref={templateRef}
                 onClick={(e) => toggletemplate(e)}
                 className="navbar-button-send"
               >
@@ -1196,12 +1428,14 @@ const sendscheduleEmail = async () => {
 
             {isNavOpen && (
               <div className="navbar-content">
-                <button onClick={() => {
-    setShowTemplateModal(true);
-    if (window.innerWidth < 768) {
-      setIsNavOpen(false); // Close toggle only in mobile view
-    }
-  }}                  className="navbar-button-sends"
+                <button
+                  onClick={() => {
+                    setShowTemplateModal(true);
+                    if (window.innerWidth < 768) {
+                      setIsNavOpen(false); // Close toggle only in mobile view
+                    }
+                  }}
+                  className="navbar-button-sends"
                 >
                   <span className="Nav-icons">
                     <FaSave />
@@ -1209,8 +1443,8 @@ const sendscheduleEmail = async () => {
                   <span className="nav-names">Save</span>
                 </button>
                 <button
-                onClick={(e) => toggletemplate(e)}
-                className="navbar-button-send"
+                  onClick={(e) => toggletemplate(e)}
+                  className="navbar-button-send"
                 >
                   <span className="Nav-icons">
                     <FaEye />
@@ -1231,7 +1465,7 @@ const sendscheduleEmail = async () => {
                             key={template._id}
                             className="template-item"
                             onClick={() => handlePreview(template)}
-                            >
+                          >
                             {template.temname}
                           </div>
                         ))}
@@ -1341,7 +1575,7 @@ const sendscheduleEmail = async () => {
                   draggable
                   onDragStart={(e) => handleDragStart("cardimage")}
                 >
-                  <FaIdCard/> Image-Card
+                  <FaIdCard /> Image-Card
                 </button>
 
                 <button
@@ -1379,6 +1613,32 @@ const sendscheduleEmail = async () => {
                   <FaGlobe />
                   Social Icons
                 </button>
+                 <button
+                  onClick={addBreak}
+                  className="editor-button"
+                  draggable
+                  onDragStart={(e) => handleDragStart("break")}
+                >
+                  <svg
+                    className="horizontal-line-icon"
+                    width="24"
+                    height="2"
+                    viewBox="0 0 24 2"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <rect width="24" height="4" fill="#555" />
+                  </svg>
+                  Line Break
+                </button>
+                <button
+                  onClick={addGap}
+                  className="editor-button"
+                  draggable
+                  onDragStart={(e) => handleDragStart("gap")}
+                >
+                  <VerticalSpacingIcon />
+                  Gap
+                </button>
                 <button
                   onClick={addButton}
                   className="editor-button"
@@ -1406,7 +1666,7 @@ const sendscheduleEmail = async () => {
                   {isMobilestyle ? (
                     <>
                       {isModalOpenstyle && (
-                        <div className="modal-overlay-send" >
+                        <div className="modal-overlay-send">
                           <div className="modal-content-style">
                             <button
                               className="close-btn-style"
@@ -1419,67 +1679,69 @@ const sendscheduleEmail = async () => {
                               {previewContent[selectedIndex].type ===
                                 "para" && (
                                 <>
-                  <ColorPicker
-        label="Text Color"
-        objectKey="style.color"
-        previewContent={previewContent}
-        selectedIndex={selectedIndex}
-        updateContent={updateContent}
-      />
-      <ColorPicker 
-        label="Text Background"
-        objectKey="style.backgroundColor"
-        previewContent={previewContent}
-        selectedIndex={selectedIndex}
-        updateContent={updateContent}
-      />
-       <label>Border Radius:</label>
-                            <input
-                              type="range"
-                              min="0"
-                              max="50"
-                              value={parseInt(
-                                previewContent[
-                                  selectedIndex
-                                ].style.borderRadius.replace("px", "")
-                              )}
-                              onChange={(e) =>
-                                updateContent(selectedIndex, {
-                                  style: {
-                                    ...previewContent[selectedIndex].style,
-                                    borderRadius: `${e.target.value}px`,
-                                  },
-                                })
-                              }
-                            />
-      
+                                  <ColorPicker
+                                    label="Text Color"
+                                    objectKey="style.color"
+                                    previewContent={previewContent}
+                                    selectedIndex={selectedIndex}
+                                    updateContent={updateContent}
+                                  />
+                                  <ColorPicker
+                                    label="Text Background"
+                                    objectKey="style.backgroundColor"
+                                    previewContent={previewContent}
+                                    selectedIndex={selectedIndex}
+                                    updateContent={updateContent}
+                                  />
+                                  <label>Border Radius:</label>
+                                  <input
+                                    type="range"
+                                    min="0"
+                                    max="50"
+                                    value={parseInt(
+                                      previewContent[
+                                        selectedIndex
+                                      ].style.borderRadius.replace("px", "")
+                                    )}
+                                    onChange={(e) =>
+                                      updateContent(selectedIndex, {
+                                        style: {
+                                          ...previewContent[selectedIndex]
+                                            .style,
+                                          borderRadius: `${e.target.value}px`,
+                                        },
+                                      })
+                                    }
+                                  />
                                 </>
                               )}
-                              {previewContent[selectedIndex].type === "multipleimage" && (
-                          <>
-                          <div style={{textAlign:"center"}}>No style control for this type</div>
-                           </>
+                              {previewContent[selectedIndex].type ===
+                                "multipleimage" && (
+                                <>
+                                  <div style={{ textAlign: "center" }}>
+                                    No style control for this type
+                                  </div>
+                                </>
                               )}
-{previewContent[selectedIndex].type === "cardimage" && (
-                          <>
-                           <ColorPicker
-        label="Text Color"
-        objectKey="style1.color"
-        previewContent={previewContent}
-        selectedIndex={selectedIndex}
-        updateContent={updateContent}
-      />
-      <ColorPicker 
-        label="Text Background"
-        objectKey="style1.backgroundColor"
-        previewContent={previewContent}
-        selectedIndex={selectedIndex}
-        updateContent={updateContent}
-      />
-                           
-                          </>
-                        )}
-
+                              {previewContent[selectedIndex].type ===
+                                "cardimage" && (
+                                <>
+                                  <ColorPicker
+                                    label="Text Color"
+                                    objectKey="style1.color"
+                                    previewContent={previewContent}
+                                    selectedIndex={selectedIndex}
+                                    updateContent={updateContent}
+                                  />
+                                  <ColorPicker
+                                    label="Text Background"
+                                    objectKey="style1.backgroundColor"
+                                    previewContent={previewContent}
+                                    selectedIndex={selectedIndex}
+                                    updateContent={updateContent}
+                                  />
+                                </>
+                              )}
 
                               {previewContent[selectedIndex].type ===
                                 "head" && (
@@ -1502,20 +1764,20 @@ const sendscheduleEmail = async () => {
                                       })
                                     }
                                   />
-                                 <ColorPicker
-        label="Text Color"
-        objectKey="style.color"
-        previewContent={previewContent}
-        selectedIndex={selectedIndex}
-        updateContent={updateContent}
-      />
-      <ColorPicker 
-        label="Text Background"
-        objectKey="style.backgroundColor"
-        previewContent={previewContent}
-        selectedIndex={selectedIndex}
-        updateContent={updateContent}
-      />
+                                  <ColorPicker
+                                    label="Text Color"
+                                    objectKey="style.color"
+                                    previewContent={previewContent}
+                                    selectedIndex={selectedIndex}
+                                    updateContent={updateContent}
+                                  />
+                                  <ColorPicker
+                                    label="Text Background"
+                                    objectKey="style.backgroundColor"
+                                    previewContent={previewContent}
+                                    selectedIndex={selectedIndex}
+                                    updateContent={updateContent}
+                                  />
                                   <label>Text Alignment:</label>
                                   <select
                                     value={
@@ -1555,20 +1817,20 @@ const sendscheduleEmail = async () => {
                                       })
                                     }
                                   />
-                                <ColorPicker
-        label="Text Color"
-        objectKey="style.color"
-        previewContent={previewContent}
-        selectedIndex={selectedIndex}
-        updateContent={updateContent}
-      />
-      <ColorPicker 
-        label="Text Background"
-        objectKey="style.backgroundColor"
-        previewContent={previewContent}
-        selectedIndex={selectedIndex}
-        updateContent={updateContent}
-      />
+                                  <ColorPicker
+                                    label="Text Color"
+                                    objectKey="style.color"
+                                    previewContent={previewContent}
+                                    selectedIndex={selectedIndex}
+                                    updateContent={updateContent}
+                                  />
+                                  <ColorPicker
+                                    label="Text Background"
+                                    objectKey="style.backgroundColor"
+                                    previewContent={previewContent}
+                                    selectedIndex={selectedIndex}
+                                    updateContent={updateContent}
+                                  />
                                   <label>Text Alignment:</label>
                                   <select
                                     value={
@@ -1590,50 +1852,53 @@ const sendscheduleEmail = async () => {
                                     <option value="right">Right</option>
                                   </select>
                                   <label>Button Size:</label>
-<div>
-  <button
-    className="modal-btn-size"
-    onClick={() =>
-      updateContent(selectedIndex, {
-        style: {
-          ...previewContent[selectedIndex].style,
-          width: "50%",
-          margin: "0 auto", // Centering the button
-        },
-      })
-    }
-  >
-    Small
-  </button>
-  <button
-    className="modal-btn-size"
-    onClick={() =>
-      updateContent(selectedIndex, {
-        style: {
-          ...previewContent[selectedIndex].style,
-          width: "70%",
-          margin: "0 auto",
-        },
-      })
-    }
-  >
-    Medium
-  </button>
-  <button
-    className="modal-btn-size"
-    onClick={() =>
-      updateContent(selectedIndex, {
-        style: {
-          ...previewContent[selectedIndex].style,
-          width: "90%",
-          margin: "0 auto",
-        },
-      })
-    }
-  >
-    Large
-  </button>
-</div>
+                                  <div>
+                                    <button
+                                      className="modal-btn-size"
+                                      onClick={() =>
+                                        updateContent(selectedIndex, {
+                                          style: {
+                                            ...previewContent[selectedIndex]
+                                              .style,
+                                            width: "50%",
+                                            margin: "0 auto", // Centering the button
+                                          },
+                                        })
+                                      }
+                                    >
+                                      Small
+                                    </button>
+                                    <button
+                                      className="modal-btn-size"
+                                      onClick={() =>
+                                        updateContent(selectedIndex, {
+                                          style: {
+                                            ...previewContent[selectedIndex]
+                                              .style,
+                                            width: "70%",
+                                            margin: "0 auto",
+                                          },
+                                        })
+                                      }
+                                    >
+                                      Medium
+                                    </button>
+                                    <button
+                                      className="modal-btn-size"
+                                      onClick={() =>
+                                        updateContent(selectedIndex, {
+                                          style: {
+                                            ...previewContent[selectedIndex]
+                                              .style,
+                                            width: "90%",
+                                            margin: "0 auto",
+                                          },
+                                        })
+                                      }
+                                    >
+                                      Large
+                                    </button>
+                                  </div>
 
                                   <label>Border Radius:</label>
                                   <input
@@ -1656,24 +1921,26 @@ const sendscheduleEmail = async () => {
                                     }
                                   />
                                   <label>Button Text Size:</label>
-                            <input
-                              type="range"
-                              min="10"
-                              max="30"
-                              value={parseInt(
-                                (previewContent[selectedIndex]?.style?.fontSize || "15px").replace("px", "")
-                              )}
-                              onChange={(e) =>
-                                updateContent(selectedIndex, {
-                                  style: {
-                                    ...previewContent[selectedIndex].style,
-                                    fontSize: `${e.target.value}px`,
-                                  },
-                                })
-                              }
-                            />
-
-
+                                  <input
+                                    type="range"
+                                    min="10"
+                                    max="30"
+                                    value={parseInt(
+                                      (
+                                        previewContent[selectedIndex]?.style
+                                          ?.fontSize || "15px"
+                                      ).replace("px", "")
+                                    )}
+                                    onChange={(e) =>
+                                      updateContent(selectedIndex, {
+                                        style: {
+                                          ...previewContent[selectedIndex]
+                                            .style,
+                                          fontSize: `${e.target.value}px`,
+                                        },
+                                      })
+                                    }
+                                  />
 
                                   <label>Link:</label>
                                   <input
@@ -1724,19 +1991,19 @@ const sendscheduleEmail = async () => {
                                       }
                                     />
                                     <ColorPicker
-        label="Button Text Color"
-        objectKey="buttonStyle1.color"
-        previewContent={previewContent}
-        selectedIndex={selectedIndex}
-        updateContent={updateContent}
-      />
-      <ColorPicker 
-        label="Button Text Background"
-        objectKey="buttonStyle1.backgroundColor"
-        previewContent={previewContent}
-        selectedIndex={selectedIndex}
-        updateContent={updateContent}
-      />
+                                      label="Button Text Color"
+                                      objectKey="buttonStyle1.color"
+                                      previewContent={previewContent}
+                                      selectedIndex={selectedIndex}
+                                      updateContent={updateContent}
+                                    />
+                                    <ColorPicker
+                                      label="Button Text Background"
+                                      objectKey="buttonStyle1.backgroundColor"
+                                      previewContent={previewContent}
+                                      selectedIndex={selectedIndex}
+                                      updateContent={updateContent}
+                                    />
                                     <label>Text Alignment:</label>
                                     <select
                                       value={
@@ -1825,7 +2092,6 @@ const sendscheduleEmail = async () => {
                                         })
                                       }
                                     />
-                                 
                                   </div>
                                   <h4>Button-2 Style</h4>
                                   <div>
@@ -1857,20 +2123,20 @@ const sendscheduleEmail = async () => {
                                       }
                                     />
 
-<ColorPicker
-        label="Button Text Color"
-        objectKey="buttonStyle2.color"
-        previewContent={previewContent}
-        selectedIndex={selectedIndex}
-        updateContent={updateContent}
-      />
-              <ColorPicker
-        label="Button Text Background"
-        objectKey="buttonStyle2.backgroundColor"
-        previewContent={previewContent}
-        selectedIndex={selectedIndex}
-        updateContent={updateContent}
-      />
+                                    <ColorPicker
+                                      label="Button Text Color"
+                                      objectKey="buttonStyle2.color"
+                                      previewContent={previewContent}
+                                      selectedIndex={selectedIndex}
+                                      updateContent={updateContent}
+                                    />
+                                    <ColorPicker
+                                      label="Button Text Background"
+                                      objectKey="buttonStyle2.backgroundColor"
+                                      previewContent={previewContent}
+                                      selectedIndex={selectedIndex}
+                                      updateContent={updateContent}
+                                    />
 
                                     <label>Text Alignment:</label>
                                     <select
@@ -1969,14 +2235,13 @@ const sendscheduleEmail = async () => {
                               {previewContent[selectedIndex]?.type ===
                                 "icons" && (
                                 <>
-        
-              <ColorPicker
-        label="Background Color"
-        objectKey="ContentStyle.backgroundColor"
-        previewContent={previewContent}
-        selectedIndex={selectedIndex}
-        updateContent={updateContent}
-      />
+                                  <ColorPicker
+                                    label="Background Color"
+                                    objectKey="ContentStyle.backgroundColor"
+                                    previewContent={previewContent}
+                                    selectedIndex={selectedIndex}
+                                    updateContent={updateContent}
+                                  />
                                   <label>Link1:</label>
                                   <input
                                     type="text"
@@ -2070,33 +2335,33 @@ const sendscheduleEmail = async () => {
                                   </span>
 
                                   <label>Border Radius:</label>
-                            <input
-                              type="range"
-                              min="0"
-                              max="50"
-                              value={parseInt(
-                                previewContent[
-                                  selectedIndex
-                                ].style.borderRadius.replace("px", "")
-                              )}
-                              onChange={(e) =>
-                                updateContent(selectedIndex, {
-                                  style: {
-                                    ...previewContent[selectedIndex].style,
-                                    borderRadius: `${e.target.value}px`,
-                                  },
-                                })
-                              }
-                            />
-
+                                  <input
+                                    type="range"
+                                    min="0"
+                                    max="50"
+                                    value={parseInt(
+                                      previewContent[
+                                        selectedIndex
+                                      ].style.borderRadius.replace("px", "")
+                                    )}
+                                    onChange={(e) =>
+                                      updateContent(selectedIndex, {
+                                        style: {
+                                          ...previewContent[selectedIndex]
+                                            .style,
+                                          borderRadius: `${e.target.value}px`,
+                                        },
+                                      })
+                                    }
+                                  />
 
                                   <ColorPicker
-        label="Image Background"
-        objectKey="style.backgroundColor"
-        previewContent={previewContent}
-        selectedIndex={selectedIndex}
-        updateContent={updateContent}
-      />
+                                    label="Image Background"
+                                    objectKey="style.backgroundColor"
+                                    previewContent={previewContent}
+                                    selectedIndex={selectedIndex}
+                                    updateContent={updateContent}
+                                  />
 
                                   <label>Link:</label>
                                   <input
@@ -2170,54 +2435,53 @@ const sendscheduleEmail = async () => {
                                       })
                                     }
                                   />
-              <ColorPicker
-        label="Image Background"
-        objectKey="style.backgroundColor"
-        previewContent={previewContent}
-        selectedIndex={selectedIndex}
-        updateContent={updateContent}
-      />
-                                 
+                                  <ColorPicker
+                                    label="Image Background"
+                                    objectKey="style.backgroundColor"
+                                    previewContent={previewContent}
+                                    selectedIndex={selectedIndex}
+                                    updateContent={updateContent}
+                                  />
                                 </>
                               )}
 
                               {previewContent[selectedIndex].type ===
                                 "textwithimage" && (
                                 <>
-                                 <ColorPicker
-        label="Text Color"
-        objectKey="style.color"
-        previewContent={previewContent}
-        selectedIndex={selectedIndex}
-        updateContent={updateContent}
-      />
-              <ColorPicker
-        label="Text Background"
-        objectKey="style.backgroundColor"
-        previewContent={previewContent}
-        selectedIndex={selectedIndex}
-        updateContent={updateContent}
-      />
+                                  <ColorPicker
+                                    label="Text Color"
+                                    objectKey="style.color"
+                                    previewContent={previewContent}
+                                    selectedIndex={selectedIndex}
+                                    updateContent={updateContent}
+                                  />
+                                  <ColorPicker
+                                    label="Text Background"
+                                    objectKey="style.backgroundColor"
+                                    previewContent={previewContent}
+                                    selectedIndex={selectedIndex}
+                                    updateContent={updateContent}
+                                  />
                                 </>
                               )}
 
                               {previewContent[selectedIndex].type ===
                                 "imagewithtext" && (
                                 <>
-                                 <ColorPicker
-        label="Text Color"
-        objectKey="style1.color"
-        previewContent={previewContent}
-        selectedIndex={selectedIndex}
-        updateContent={updateContent}
-      />
-              <ColorPicker
-        label="Text Background"
-        objectKey="style1.backgroundColor"
-        previewContent={previewContent}
-        selectedIndex={selectedIndex}
-        updateContent={updateContent}
-      />
+                                  <ColorPicker
+                                    label="Text Color"
+                                    objectKey="style1.color"
+                                    previewContent={previewContent}
+                                    selectedIndex={selectedIndex}
+                                    updateContent={updateContent}
+                                  />
+                                  <ColorPicker
+                                    label="Text Background"
+                                    objectKey="style1.backgroundColor"
+                                    previewContent={previewContent}
+                                    selectedIndex={selectedIndex}
+                                    updateContent={updateContent}
+                                  />
                                 </>
                               )}
 
@@ -2304,34 +2568,33 @@ const sendscheduleEmail = async () => {
                                     %
                                   </span>
                                   <label>Border Radius:</label>
-                            <input
-                              type="range"
-                              min="0"
-                              max="50"
-                              value={parseInt(
-                                previewContent[
-                                  selectedIndex
-                                ].style.borderRadius.replace("px", "")
-                              )}
-                              onChange={(e) =>
-                                updateContent(selectedIndex, {
-                                  style: {
-                                    ...previewContent[selectedIndex].style,
-                                    borderRadius: `${e.target.value}px`,
-                                  },
-                                })
-                              }
-                            />
+                                  <input
+                                    type="range"
+                                    min="0"
+                                    max="50"
+                                    value={parseInt(
+                                      previewContent[
+                                        selectedIndex
+                                      ].style.borderRadius.replace("px", "")
+                                    )}
+                                    onChange={(e) =>
+                                      updateContent(selectedIndex, {
+                                        style: {
+                                          ...previewContent[selectedIndex]
+                                            .style,
+                                          borderRadius: `${e.target.value}px`,
+                                        },
+                                      })
+                                    }
+                                  />
 
-       
-              <ColorPicker
-        label="Image Background"
-        objectKey="style.backgroundColor"
-        previewContent={previewContent}
-        selectedIndex={selectedIndex}
-        updateContent={updateContent}
-      />
-                                 
+                                  <ColorPicker
+                                    label="Image Background"
+                                    objectKey="style.backgroundColor"
+                                    previewContent={previewContent}
+                                    selectedIndex={selectedIndex}
+                                    updateContent={updateContent}
+                                  />
                                 </>
                               )}
                             </div>
@@ -2380,7 +2643,7 @@ const sendscheduleEmail = async () => {
                                 }
                               />
                             </div>
-                            
+
                             <label>Border Radius:</label>
                             <input
                               type="range"
@@ -2547,51 +2810,50 @@ const sendscheduleEmail = async () => {
                               <option value="right">Right</option>
                             </select>
                             <label>Button Size:</label>
-<div>
-  <button
-    className="modal-btn-size"
-    onClick={() =>
-      updateContent(selectedIndex, {
-        style: {
-          ...previewContent[selectedIndex].style,
-          width: "50%",
-          margin: "0 auto", // Centering the button
-        },
-      })
-    }
-  >
-    Small
-  </button>
-  <button
-    className="modal-btn-size"
-    onClick={() =>
-      updateContent(selectedIndex, {
-        style: {
-          ...previewContent[selectedIndex].style,
-          width: "70%",
-          margin: "0 auto",
-        },
-      })
-    }
-  >
-    Medium
-  </button>
-  <button
-    className="modal-btn-size"
-    onClick={() =>
-      updateContent(selectedIndex, {
-        style: {
-          ...previewContent[selectedIndex].style,
-          width: "90%",
-          margin: "0 auto",
-        },
-      })
-    }
-  >
-    Large
-  </button>
-</div>
-
+                            <div>
+                              <button
+                                className="modal-btn-size"
+                                onClick={() =>
+                                  updateContent(selectedIndex, {
+                                    style: {
+                                      ...previewContent[selectedIndex].style,
+                                      width: "50%",
+                                      margin: "0 auto", // Centering the button
+                                    },
+                                  })
+                                }
+                              >
+                                Small
+                              </button>
+                              <button
+                                className="modal-btn-size"
+                                onClick={() =>
+                                  updateContent(selectedIndex, {
+                                    style: {
+                                      ...previewContent[selectedIndex].style,
+                                      width: "70%",
+                                      margin: "0 auto",
+                                    },
+                                  })
+                                }
+                              >
+                                Medium
+                              </button>
+                              <button
+                                className="modal-btn-size"
+                                onClick={() =>
+                                  updateContent(selectedIndex, {
+                                    style: {
+                                      ...previewContent[selectedIndex].style,
+                                      width: "90%",
+                                      margin: "0 auto",
+                                    },
+                                  })
+                                }
+                              >
+                                Large
+                              </button>
+                            </div>
 
                             <label>Border Radius:</label>
                             <input
@@ -2612,13 +2874,16 @@ const sendscheduleEmail = async () => {
                                 })
                               }
                             />
-                             <label>Button Text Size:</label>
+                            <label>Button Text Size:</label>
                             <input
                               type="range"
                               min="10"
                               max="30"
                               value={parseInt(
-                                (previewContent[selectedIndex]?.style?.fontSize || "15px").replace("px", "")
+                                (
+                                  previewContent[selectedIndex]?.style
+                                    ?.fontSize || "15px"
+                                ).replace("px", "")
                               )}
                               onChange={(e) =>
                                 updateContent(selectedIndex, {
@@ -2629,7 +2894,6 @@ const sendscheduleEmail = async () => {
                                 })
                               }
                             />
-
 
                             <label>Link:</label>
                             <input
@@ -2648,22 +2912,26 @@ const sendscheduleEmail = async () => {
                         {/* New Editor for Multi-Image Links and Button Styling */}
                         {previewContent[selectedIndex].type ===
                           "multi-image" && (
-                            <div>
+                          <div>
                             <div className="tab-container-style">
                               <button
-                                className={`tab-style ${activeTab === "button1" ? "active" : ""}`}
+                                className={`tab-style ${
+                                  activeTab === "button1" ? "active" : ""
+                                }`}
                                 onClick={() => setActiveTab("button1")}
                               >
                                 Button-1
                               </button>
                               <button
-                                className={`tab-style ${activeTab === "button2" ? "active" : ""}`}
+                                className={`tab-style ${
+                                  activeTab === "button2" ? "active" : ""
+                                }`}
                                 onClick={() => setActiveTab("button2")}
                               >
                                 Button-2
                               </button>
                             </div>
-                      
+
                             {activeTab === "button1" && (
                               <div className="style-editor">
                                 <h4>Button-1 Styles</h4>
@@ -2671,145 +2939,155 @@ const sendscheduleEmail = async () => {
                                 <input
                                   type="text"
                                   placeholder="Enter button name"
-                                  value={previewContent[selectedIndex].content1 || ""}
-                                  onChange={(e) => updateContent(selectedIndex, { content1: e.target.value })}
+                                  value={
+                                    previewContent[selectedIndex].content1 || ""
+                                  }
+                                  onChange={(e) =>
+                                    updateContent(selectedIndex, {
+                                      content1: e.target.value,
+                                    })
+                                  }
                                 />
                                 <label>Button Link:</label>
                                 <input
                                   type="text"
                                   value={previewContent[selectedIndex].link1}
-                                  onChange={(e) => updateContent(selectedIndex, { link1: e.target.value })}
+                                  onChange={(e) =>
+                                    updateContent(selectedIndex, {
+                                      link1: e.target.value,
+                                    })
+                                  }
                                 />
-                               <div className="editor-bg">
-                                      Button Text Color:
-                                      <input
-                                        type="color"
-                                        value={
-                                          previewContent[selectedIndex]
-                                            .buttonStyle1.color
-                                        }
-                                        onChange={(e) =>
-                                          updateContent(selectedIndex, {
-                                            buttonStyle1: {
-                                              ...previewContent[selectedIndex]
-                                                .buttonStyle1,
-                                              color: e.target.value,
-                                            },
-                                          })
-                                        }
-                                      />
-                                    </div>
-                                    <div className="editor-bg">
-                                      Button Background Color:
-                                      <input
-                                        type="color"
-                                        value={
-                                          previewContent[selectedIndex]
-                                            .buttonStyle1.backgroundColor
-                                        }
-                                        onChange={(e) =>
-                                          updateContent(selectedIndex, {
-                                            buttonStyle1: {
-                                              ...previewContent[selectedIndex]
-                                                .buttonStyle1,
-                                              backgroundColor: e.target.value,
-                                            },
-                                          })
-                                        }
-                                      />
-                                    </div>
+                                <div className="editor-bg">
+                                  Button Text Color:
+                                  <input
+                                    type="color"
+                                    value={
+                                      previewContent[selectedIndex].buttonStyle1
+                                        .color
+                                    }
+                                    onChange={(e) =>
+                                      updateContent(selectedIndex, {
+                                        buttonStyle1: {
+                                          ...previewContent[selectedIndex]
+                                            .buttonStyle1,
+                                          color: e.target.value,
+                                        },
+                                      })
+                                    }
+                                  />
+                                </div>
+                                <div className="editor-bg">
+                                  Button Background Color:
+                                  <input
+                                    type="color"
+                                    value={
+                                      previewContent[selectedIndex].buttonStyle1
+                                        .backgroundColor
+                                    }
+                                    onChange={(e) =>
+                                      updateContent(selectedIndex, {
+                                        buttonStyle1: {
+                                          ...previewContent[selectedIndex]
+                                            .buttonStyle1,
+                                          backgroundColor: e.target.value,
+                                        },
+                                      })
+                                    }
+                                  />
+                                </div>
 
-                                    <label>Text Alignment:</label>
-                                    <select
-                                      value={
-                                        previewContent[selectedIndex]
-                                          ?.buttonStyle1?.textAlign || ""
-                                      }
-                                      onChange={(e) =>
-                                        updateContent(selectedIndex, {
-                                          buttonStyle1: {
-                                            ...previewContent[selectedIndex]
-                                              .buttonStyle1,
-                                            textAlign: e.target.value,
-                                          },
-                                        })
-                                      }
-                                    >
-                                      <option value="left">Left</option>
-                                      <option value="center">Center</option>
-                                      <option value="right">Right</option>
-                                    </select>
-                                    <label>Button Size:</label>
-                                    <div>
-                                      <button
-                                        className="modal-btn-size"
-                                        onClick={() =>
-                                          updateContent(selectedIndex, {
-                                            buttonStyle1: {
-                                              ...previewContent[selectedIndex]
-                                                .buttonStyle1,
-                                              width: "auto",
-                                            },
-                                          })
-                                        }
-                                      >
-                                        Small
-                                      </button>
-                                      <button
-                                        className="modal-btn-size"
-                                        onClick={() =>
-                                          updateContent(selectedIndex, {
-                                            buttonStyle1: {
-                                              ...previewContent[selectedIndex]
-                                                .buttonStyle1,
-                                              width: "50%",
-                                            },
-                                          })
-                                        }
-                                      >
-                                        Medium
-                                      </button>
-                                      <button
-                                        className="modal-btn-size"
-                                        onClick={() =>
-                                          updateContent(selectedIndex, {
-                                            buttonStyle1: {
-                                              ...previewContent[selectedIndex]
-                                                .buttonStyle1,
-                                              width: "80%",
-                                            },
-                                          })
-                                        }
-                                      >
-                                        Large
-                                      </button>
-                                    </div>
-                                    <label>Border Radius:</label>
-                                    <input
-                                      type="range"
-                                      min="0"
-                                      max="50"
-                                      value={parseInt(
-                                        previewContent[
-                                          selectedIndex
-                                        ].buttonStyle1.borderRadius.replace(
-                                          "px",
-                                          ""
-                                        )
-                                      )}
-                                      onChange={(e) =>
-                                        updateContent(selectedIndex, {
-                                          buttonStyle1: {
-                                            ...previewContent[selectedIndex]
-                                              .buttonStyle1,
-                                            borderRadius: `${e.target.value}px`,
-                                          },
-                                        })
-                                      }
-                                    />
+                                <label>Text Alignment:</label>
+                                <select
+                                  value={
+                                    previewContent[selectedIndex]?.buttonStyle1
+                                      ?.textAlign || ""
+                                  }
+                                  onChange={(e) =>
+                                    updateContent(selectedIndex, {
+                                      buttonStyle1: {
+                                        ...previewContent[selectedIndex]
+                                          .buttonStyle1,
+                                        textAlign: e.target.value,
+                                      },
+                                    })
+                                  }
+                                >
+                                  <option value="left">Left</option>
+                                  <option value="center">Center</option>
+                                  <option value="right">Right</option>
+                                </select>
+                                <label>Button Size:</label>
+                                <div>
+                                  <button
+                                    className="modal-btn-size"
+                                    onClick={() =>
+                                      updateContent(selectedIndex, {
+                                        buttonStyle1: {
+                                          ...previewContent[selectedIndex]
+                                            .buttonStyle1,
+                                          width: "auto",
+                                        },
+                                      })
+                                    }
+                                  >
+                                    Small
+                                  </button>
+                                  <button
+                                    className="modal-btn-size"
+                                    onClick={() =>
+                                      updateContent(selectedIndex, {
+                                        buttonStyle1: {
+                                          ...previewContent[selectedIndex]
+                                            .buttonStyle1,
+                                          width: "50%",
+                                        },
+                                      })
+                                    }
+                                  >
+                                    Medium
+                                  </button>
+                                  <button
+                                    className="modal-btn-size"
+                                    onClick={() =>
+                                      updateContent(selectedIndex, {
+                                        buttonStyle1: {
+                                          ...previewContent[selectedIndex]
+                                            .buttonStyle1,
+                                          width: "80%",
+                                        },
+                                      })
+                                    }
+                                  >
+                                    Large
+                                  </button>
+                                </div>
+                                <label>Border Radius:</label>
+                                <input
+                                  type="range"
+                                  min="0"
+                                  max="50"
+                                  value={parseInt(
+                                    previewContent[
+                                      selectedIndex
+                                    ].buttonStyle1.borderRadius.replace(
+                                      "px",
+                                      ""
+                                    )
+                                  )}
+                                  onChange={(e) =>
+                                    updateContent(selectedIndex, {
+                                      buttonStyle1: {
+                                        ...previewContent[selectedIndex]
+                                          .buttonStyle1,
+                                        borderRadius: `${e.target.value}px`,
+                                      },
+                                    })
+                                  }
+                                />
                               </div>
                             )}
-                      
+
                             {activeTab === "button2" && (
                               <div className="style-editor">
                                 <h4>Button-2 Styles</h4>
@@ -2817,149 +3095,158 @@ const sendscheduleEmail = async () => {
                                 <input
                                   type="text"
                                   placeholder="Enter button name"
-                                  value={previewContent[selectedIndex].content2 || ""}
-                                  onChange={(e) => updateContent(selectedIndex, { content2: e.target.value })}
+                                  value={
+                                    previewContent[selectedIndex].content2 || ""
+                                  }
+                                  onChange={(e) =>
+                                    updateContent(selectedIndex, {
+                                      content2: e.target.value,
+                                    })
+                                  }
                                 />
                                 <label>Button Link:</label>
                                 <input
                                   type="text"
                                   value={previewContent[selectedIndex].link2}
-                                  onChange={(e) => updateContent(selectedIndex, { link2: e.target.value })}
+                                  onChange={(e) =>
+                                    updateContent(selectedIndex, {
+                                      link2: e.target.value,
+                                    })
+                                  }
                                 />
-                                 <div className="editor-bg">
-                                      Button Text Color:
-                                      <input
-                                        type="color"
-                                        value={
-                                          previewContent[selectedIndex]
-                                            .buttonStyle2.color
-                                        }
-                                        onChange={(e) =>
-                                          updateContent(selectedIndex, {
-                                            buttonStyle2: {
-                                              ...previewContent[selectedIndex]
-                                                .buttonStyle2,
-                                              color: e.target.value,
-                                            },
-                                          })
-                                        }
-                                      />
-                                    </div>
+                                <div className="editor-bg">
+                                  Button Text Color:
+                                  <input
+                                    type="color"
+                                    value={
+                                      previewContent[selectedIndex].buttonStyle2
+                                        .color
+                                    }
+                                    onChange={(e) =>
+                                      updateContent(selectedIndex, {
+                                        buttonStyle2: {
+                                          ...previewContent[selectedIndex]
+                                            .buttonStyle2,
+                                          color: e.target.value,
+                                        },
+                                      })
+                                    }
+                                  />
+                                </div>
 
-                                    <div className="editor-bg">
-                                      Button Background Color:
-                                      <input
-                                        type="color"
-                                        value={
-                                          previewContent[selectedIndex]
-                                            .buttonStyle2.backgroundColor
-                                        }
-                                        onChange={(e) =>
-                                          updateContent(selectedIndex, {
-                                            buttonStyle2: {
-                                              ...previewContent[selectedIndex]
-                                                .buttonStyle2,
-                                              backgroundColor: e.target.value,
-                                            },
-                                          })
-                                        }
-                                      />
-                                    </div>
+                                <div className="editor-bg">
+                                  Button Background Color:
+                                  <input
+                                    type="color"
+                                    value={
+                                      previewContent[selectedIndex].buttonStyle2
+                                        .backgroundColor
+                                    }
+                                    onChange={(e) =>
+                                      updateContent(selectedIndex, {
+                                        buttonStyle2: {
+                                          ...previewContent[selectedIndex]
+                                            .buttonStyle2,
+                                          backgroundColor: e.target.value,
+                                        },
+                                      })
+                                    }
+                                  />
+                                </div>
 
-                                    <label>Text Alignment:</label>
-                                    <select
-                                      value={
-                                        previewContent[selectedIndex]
-                                          ?.buttonStyle2?.textAlign || ""
-                                      }
-                                      onChange={(e) =>
-                                        updateContent(selectedIndex, {
-                                          buttonStyle2: {
-                                            ...previewContent[selectedIndex]
-                                              .buttonStyle2,
-                                            textAlign: e.target.value,
-                                          },
-                                        })
-                                      }
-                                    >
-                                      <option value="left">Left</option>
-                                      <option value="center">Center</option>
-                                      <option value="right">Right</option>
-                                    </select>
+                                <label>Text Alignment:</label>
+                                <select
+                                  value={
+                                    previewContent[selectedIndex]?.buttonStyle2
+                                      ?.textAlign || ""
+                                  }
+                                  onChange={(e) =>
+                                    updateContent(selectedIndex, {
+                                      buttonStyle2: {
+                                        ...previewContent[selectedIndex]
+                                          .buttonStyle2,
+                                        textAlign: e.target.value,
+                                      },
+                                    })
+                                  }
+                                >
+                                  <option value="left">Left</option>
+                                  <option value="center">Center</option>
+                                  <option value="right">Right</option>
+                                </select>
 
-                                    <label>Button Size:</label>
-                                    <div>
-                                      <button
-                                        className="modal-btn-size"
-                                        onClick={() =>
-                                          updateContent(selectedIndex, {
-                                            buttonStyle2: {
-                                              ...previewContent[selectedIndex]
-                                                .buttonStyle2,
-                                              width: "auto",
-                                            },
-                                          })
-                                        }
-                                      >
-                                        Small
-                                      </button>
-                                      <button
-                                        className="modal-btn-size"
-                                        onClick={() =>
-                                          updateContent(selectedIndex, {
-                                            buttonStyle2: {
-                                              ...previewContent[selectedIndex]
-                                                .buttonStyle2,
-                                              width: "50%",
-                                            },
-                                          })
-                                        }
-                                      >
-                                        Medium
-                                      </button>
-                                      <button
-                                        className="modal-btn-size"
-                                        onClick={() =>
-                                          updateContent(selectedIndex, {
-                                            buttonStyle2: {
-                                              ...previewContent[selectedIndex]
-                                                .buttonStyle2,
-                                              width: "80%",
-                                            },
-                                          })
-                                        }
-                                      >
-                                        Large
-                                      </button>
-                                    </div>
+                                <label>Button Size:</label>
+                                <div>
+                                  <button
+                                    className="modal-btn-size"
+                                    onClick={() =>
+                                      updateContent(selectedIndex, {
+                                        buttonStyle2: {
+                                          ...previewContent[selectedIndex]
+                                            .buttonStyle2,
+                                          width: "auto",
+                                        },
+                                      })
+                                    }
+                                  >
+                                    Small
+                                  </button>
+                                  <button
+                                    className="modal-btn-size"
+                                    onClick={() =>
+                                      updateContent(selectedIndex, {
+                                        buttonStyle2: {
+                                          ...previewContent[selectedIndex]
+                                            .buttonStyle2,
+                                          width: "50%",
+                                        },
+                                      })
+                                    }
+                                  >
+                                    Medium
+                                  </button>
+                                  <button
+                                    className="modal-btn-size"
+                                    onClick={() =>
+                                      updateContent(selectedIndex, {
+                                        buttonStyle2: {
+                                          ...previewContent[selectedIndex]
+                                            .buttonStyle2,
+                                          width: "80%",
+                                        },
+                                      })
+                                    }
+                                  >
+                                    Large
+                                  </button>
+                                </div>
 
-                                    <label>Border Radius:</label>
-                                    <input
-                                      type="range"
-                                      min="0"
-                                      max="50"
-                                      value={parseInt(
-                                        previewContent[
-                                          selectedIndex
-                                        ].buttonStyle2.borderRadius.replace(
-                                          "px",
-                                          ""
-                                        )
-                                      )}
-                                      onChange={(e) =>
-                                        updateContent(selectedIndex, {
-                                          buttonStyle2: {
-                                            ...previewContent[selectedIndex]
-                                              .buttonStyle2,
-                                            borderRadius: `${e.target.value}px`,
-                                          },
-                                        })
-                                      }
-                                    />
+                                <label>Border Radius:</label>
+                                <input
+                                  type="range"
+                                  min="0"
+                                  max="50"
+                                  value={parseInt(
+                                    previewContent[
+                                      selectedIndex
+                                    ].buttonStyle2.borderRadius.replace(
+                                      "px",
+                                      ""
+                                    )
+                                  )}
+                                  onChange={(e) =>
+                                    updateContent(selectedIndex, {
+                                      buttonStyle2: {
+                                        ...previewContent[selectedIndex]
+                                          .buttonStyle2,
+                                        borderRadius: `${e.target.value}px`,
+                                      },
+                                    })
+                                  }
+                                />
                               </div>
                             )}
-                            </div>
-                      
+                          </div>
                         )}
 
                         {previewContent[selectedIndex]?.type === "icons" && (
@@ -3278,8 +3565,7 @@ const sendscheduleEmail = async () => {
                           </>
                         )}
 
-
-{previewContent[selectedIndex].type === "cardimage" && (
+                        {previewContent[selectedIndex].type === "cardimage" && (
                           <>
                             <label>Size (%):</label>
                             <input
@@ -3448,7 +3734,6 @@ const sendscheduleEmail = async () => {
                               }
                             />
 
-
                             <div className="editor-bg">
                               Image Background
                               <input
@@ -3475,7 +3760,7 @@ const sendscheduleEmail = async () => {
                 </>
               )}
             </>
-    </div>
+          </div>
 
           {/* Right Preview */}
           <div className="preview-container item-1">
@@ -3510,36 +3795,36 @@ const sendscheduleEmail = async () => {
                       onClick={() => handleItemClick(index)}
                       style={item.style}
                     >
-                  {item.type === "para" && (
-  <>
-    <p
-      className="border"
-      contentEditable
-      suppressContentEditableWarning
-      onClick={() => {
-        setSelectedIndex(index);
-        setSelectedContent(item.content); // Store the correct content
-        setIsModalOpen(true); // Open the modal
-      }}
-      style={item.style}
-      dangerouslySetInnerHTML={{ __html: item.content }}
-    />
-    {isModalOpen && selectedIndex === index && (
-      <ParaEditor
-        isOpen={isModalOpen}
-        content={selectedContent} // Pass the correct content
-        style={item.style}
-        onSave={(newContent) => {
-          updateContent(index, { content: newContent }); // Save the new content
-          setIsModalOpen(false);
-        }}
-        onClose={() => setIsModalOpen(false)}
-      />
-    )}
-  </>
-)}
+                      {item.type === "para" && (
+                        <>
+                          <p
+                            className="border"
+                            contentEditable
+                            suppressContentEditableWarning
+                            onClick={() => {
+                              setSelectedIndex(index);
+                              setSelectedContent(item.content); // Store the correct content
+                              setIsModalOpen(true); // Open the modal
+                            }}
+                            style={item.style}
+                            dangerouslySetInnerHTML={{ __html: item.content }}
+                          />
+                          {isModalOpen && selectedIndex === index && (
+                            <ParaEditor
+                              isOpen={isModalOpen}
+                              content={selectedContent} // Pass the correct content
+                              style={item.style}
+                              onSave={(newContent) => {
+                                updateContent(index, { content: newContent }); // Save the new content
+                                setIsModalOpen(false);
+                              }}
+                              onClose={() => setIsModalOpen(false)}
+                            />
+                          )}
+                        </>
+                      )}
 
-{item.type === "multipleimage" ? (
+                      {item.type === "multipleimage" ? (
                         <div className="Layout-img">
                           <div className="Layout">
                             <img
@@ -3641,8 +3926,7 @@ const sendscheduleEmail = async () => {
                         </div>
                       ) : null}
 
-                      
-{item.type === "cardimage" ? (
+                      {item.type === "cardimage" ? (
                         <div
                           className="card-image-container"
                           style={item.style1}
@@ -3680,72 +3964,78 @@ const sendscheduleEmail = async () => {
                         </div>
                       ) : null}
 
+                      {item.type === "head" && (
+                        <div ref={dropdownRef}>
+                          <p
+                            className="border"
+                            contentEditable
+                            suppressContentEditableWarning
+                            onBlur={(e) =>
+                              updateContent(index, {
+                                content: e.target.textContent,
+                              })
+                            }
+                            onMouseUp={(e) => handleCursorPosition(e, index)}
+                            onSelect={(e) => handleCursorPosition(e, index)}
+                            style={item.style}
+                          >
+                            {item.content}
+                          </p>
 
-    {item.type === "head" && (
-      <div ref={dropdownRef}>
-        <p
-          className="border"
-          contentEditable
-          suppressContentEditableWarning
-          onBlur={(e) =>
-            updateContent(index, {
-              content: e.target.textContent,
-            })
-          }
-          onMouseUp={(e) => handleCursorPosition(e, index)}
-          onSelect={(e) => handleCursorPosition(e, index)}
-          style={item.style}
-        >
-          {item.content}
-        </p>
+                          {/* Local state for each heading */}
+                          <div className="select-group-container">
+                            {/* Select Group */}
+                            <select
+                              onChange={(e) => handleGroupChange(e, index)}
+                              value={selectedGroup[index] || ""}
+                              className="select-variable"
+                            >
+                              <option
+                                value=""
+                                disabled
+                                className="template-title"
+                              >
+                                Add Variable
+                              </option>
+                              <option value="" disabled>
+                                Select Group
+                              </option>
+                              {groups.map((group, idx) => (
+                                <option key={idx} value={group._id}>
+                                  {group.name}
+                                </option>
+                              ))}
+                            </select>
 
-        {/* Local state for each heading */}
-        <div className="select-group-container">
-          {/* Select Group */}
-          <select
-            onChange={(e) => handleGroupChange(e, index)}
-            value={selectedGroup[index] || ""}
-            className="select-variable"
-          >
-            <option value="" disabled className="template-title">
-              Add Variable
-            </option>
-            <option value="" disabled>
-              Select Group
-            </option>
-            {groups.map((group, idx) => (
-              <option key={idx} value={group._id}>
-                {group.name}
-              </option>
-            ))}
-          </select>
-
-          {/* Show fields only for the selected heading */}
-          {selectedGroup[index] && openedGroups[index] && (
-            <div className="dropdown-container">
-              <p className="template-title">
-                <span>Add</span> Variable
-              </p>
-              {fieldNames[index] && fieldNames[index].length > 0 ? (
-                <div>
-                  {fieldNames[index].map((field, idx) => (
-                    <div
-                      className="list-field"
-                      key={idx}
-                      onClick={() => handleInsertName(index, `{${field}}`)}
-                    >
-                      {field}
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <p className="no-variables">No Variables</p>
-              )}
-            </div>
-          )}
-        </div>
-      </div>
-    )}
+                            {/* Show fields only for the selected heading */}
+                            {selectedGroup[index] && openedGroups[index] && (
+                              <div className="dropdown-container">
+                                <p className="template-title">
+                                  <span>Add</span> Variable
+                                </p>
+                                {fieldNames[index] &&
+                                fieldNames[index].length > 0 ? (
+                                  <div>
+                                    {fieldNames[index].map((field, idx) => (
+                                      <div
+                                        className="list-field"
+                                        key={idx}
+                                        onClick={() =>
+                                          handleInsertName(index, `{${field}}`)
+                                        }
+                                      >
+                                        {field}
+                                      </div>
+                                    ))}
+                                  </div>
+                                ) : (
+                                  <p className="no-variables">No Variables</p>
+                                )}
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      )}
                       {item.type === "link-image" && (
                         <div className="border">
                           <a
@@ -3840,6 +4130,17 @@ const sendscheduleEmail = async () => {
                           </div>
                         </div>
                       )}
+                       {item.type === "break" && (
+                              <div className="border-break">
+                                <hr style={item.style} />
+                              </div>
+                            )}
+
+                            {item.type === "gap" && (
+                              <div className="border-break">
+                                {<div style={item.styles}></div>}
+                              </div>
+                            )}
 
                       {item.type === "imagewithtext" ? (
                         <div className="image-text-container">
@@ -3976,442 +4277,476 @@ const sendscheduleEmail = async () => {
             </div>
           </div>
 
-
           {/* Modal for preview Content */}
-            {/* Right Preview */}
+          {/* Right Preview */}
 
-           {isPreviewOpen &&(
-              <div className="preview-modal-overlay-tem">
+          {isPreviewOpen && (
+            <div className="preview-modal-overlay-tem">
               <div className="preview-modal-content">
-            <div className="preview-con item-1">
-            {selectedTemplatepre && (
-              <h3 className="temname">{selectedTemplatepre.temname} Preview</h3>
-            )}{" "}
-            {/* Now it's used */}
-            <div
-              className={`template-preview ${
-                isMobileView ? "mobile-view" : ""
-              }`}
-              style={{ backgroundColor: bgColorpre }}
-              onDrop={handleEditorDrop}
-              onDragOver={handleDragOver}
-            >
-              <div
-                className="preview-card"
-                style={{ backgroundColor: bgColorpre }}
-              >
-                {previewContentpre.map((item, index) => {
-                  if (!item || !item.type) {
-                    return null; // Skip rendering undefined or malformed items
-                  }
-                  return (
+                <div className="preview-con item-1">
+                  {selectedTemplatepre && (
+                    <h3 className="temname">
+                      {selectedTemplatepre.temname} Preview
+                    </h3>
+                  )}{" "}
+                  {/* Now it's used */}
+                  <div
+                    className={`template-preview ${
+                      isMobileView ? "mobile-view" : ""
+                    }`}
+                    style={{ backgroundColor: bgColorpre }}
+                    onDrop={handleEditorDrop}
+                    onDragOver={handleDragOver}
+                  >
                     <div
-                      className="content-item-preview"
-                      style={item.style}
+                      className="preview-card"
+                      style={{ backgroundColor: bgColorpre }}
                     >
-                      {item.type === "para" && (
-                        <>
-                          <p
-                            className="border"
-                            contentEditable
-                            suppressContentEditableWarning
-                            onClick={() => {
-                              setSelectedIndex(index);
-                              setIsModalOpen(true); // Open the modal
-                            }}
-                            style={item.style}
-                            dangerouslySetInnerHTML={{ __html: item.content }} // Render HTML content here
-                          />
-                        </>
-                      )}
-
-                      {item.type === "multi-image" ? (
-                        <div className="Layout-img">
-                          <div className="Layout">
-                            <img
-                              src={
-                                item.src1 || "https://via.placeholder.com/200"
-                              }
-                              alt="Editable"
-                              className="multiimg"
-                              title="Upload Image"
-                              style={item.style}
-                              onClick={() => uploadImage(index, 1)}
-                            />
-                            <a
-                              href={item.link1}
-                              target="_blank"
-                              className="button-preview"
-                              rel="noopener noreferrer"
-                              style={item.buttonStyle1}
-                            >
-                              {item.content1}
-                            </a>
-                          </div>
-
-                          <div className="Layout">
-                            <img
-                              src={
-                                item.src2 || "https://via.placeholder.com/200"
-                              }
-                              alt="Editable"
-                              className="multiimg"
-                              title="Upload Image"
-                              style={item.style}
-                              onClick={() => uploadImage(index, 2)}
-                            />
-                            <a
-                              href={item.link2}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="button-preview"
-                              style={item.buttonStyle2}
-                            >
-                              {item.content2}
-                            </a>
-                          </div>
-                        </div>
-                      ) : null}
-
-                      {item.type === "video-icon" ? (
-                        <div className="video-icon">
-                          <img
-                            src={item.src1 || "https://via.placeholder.com/200"}
-                            alt="Editable"
-                            className="videoimg"
-                            title="Upload Thumbnail Image"
-                            style={item.style}
-                            onClick={() => uploadImage(index, 1)}
-                          />
-                          <a
-                            href={item.link}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                          >
-                            <img
-                              src={item.src2}
-                              className="video-btn"
-                              alt="icon"
-                            />
-                          </a>
-                        </div>
-                      ) : null}
-
-                      
-                      
-{item.type === "cardimage" ? (
-                        <div
-                          className="card-image-container"
-                          style={item.style1}
-                        >
-                          <img
-                            src={item.src1 || "https://via.placeholder.com/200"}
-                            style={item.style}
-                            alt="Editable"
-                            className="card-image"
-                            title="Upload Image"
-                            onClick={() => uploadImage(index, 1)}
-                          />
-                          <p
-                            className="card-text"
-                            contentEditable
-                            suppressContentEditableWarning
-                            onClick={() => setModalIndex(index)} // Open modal for this index
-                            style={item.style}
-                            dangerouslySetInnerHTML={{
-                              __html: item.content1,
-                            }}
-                          />
-
-                          {modalIndex === index && ( // Open only for the selected index
-                            <ParaEditor
-                              isOpen={true}
-                              content={item.content1}
-                              onSave={(newContent) => {
-                                updateContent(index, { content1: newContent });
-                                setModalIndex(null); // Close modal after save
-                              }}
-                              onClose={() => setModalIndex(null)}
-                            />
-                          )}
-                        </div>
-                      ) : null}
-
-                      {item.type === "head" && (
-                        <div>
-                          <p
-                            className="border"
-                            contentEditable
-                            suppressContentEditableWarning
-                            onBlur={(e) =>
-                              updateContent(index, {
-                                content: e.target.textContent,
-                              })
-                            }
-                            onMouseUp={(e) => handleCursorPosition(e, index)}
-                            onSelect={(e) => handleCursorPosition(e, index)}
+                      {previewContentpre.map((item, index) => {
+                        if (!item || !item.type) {
+                          return null; // Skip rendering undefined or malformed items
+                        }
+                        return (
+                          <div
+                            className="content-item-preview"
                             style={item.style}
                           >
-                            {item.content}
-                          </p>
+                            {item.type === "para" && (
+                              <>
+                                <p
+                                  className="border"
+                                  contentEditable
+                                  suppressContentEditableWarning
+                                  onClick={() => {
+                                    setSelectedIndex(index);
+                                    setIsModalOpen(true); // Open the modal
+                                  }}
+                                  style={item.style}
+                                  dangerouslySetInnerHTML={{
+                                    __html: item.content,
+                                  }} // Render HTML content here
+                                />
+                              </>
+                            )}
                           
-                        </div>
-                      )}
 
-                      {item.type === "link-image" && (
-                        <div className="border">
-                          <a
-                            href={item.link || "#"}
-                            onClick={(e) => handleLinkClick(e, index)}
-                          >
-                            <img
-                              src={
-                                item.src || "https://via.placeholder.com/200"
-                              }
-                              alt="Editable"
-                              className="img"
-                              style={item.style}
-                            />
-                          </a>
-                        </div>
-                      )}
-                      {item.type === "image" && (
-                        <div className="border">
-                          <img
-                            src={item.src || "https://via.placeholder.com/200"}
-                            alt="Editable"
-                            className="img"
-                            style={item.style}
-                          />
-                        </div>
-                      )}
+                            {item.type === "multi-image" ? (
+                              <div className="Layout-img">
+                                <div className="Layout">
+                                  <img
+                                    src={
+                                      item.src1 ||
+                                      "https://via.placeholder.com/200"
+                                    }
+                                    alt="Editable"
+                                    className="multiimg"
+                                    title="Upload Image"
+                                    style={item.style}
+                                    onClick={() => uploadImage(index, 1)}
+                                  />
+                                  <a
+                                    href={item.link1}
+                                    target="_blank"
+                                    className="button-preview"
+                                    rel="noopener noreferrer"
+                                    style={item.buttonStyle1}
+                                  >
+                                    {item.content1}
+                                  </a>
+                                </div>
 
-                      {item.type === "icons" && (
-                        <div
-                          className="border"
-                          style={item.ContentStyle}
-                          key={index}
-                        >
-                          <div className="icon-containers">
-                            <a
-                              href={item.links1 || "#"}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              onClick={(e) => handleLinksClick2(e, item.links1)}
-                            >
-                              <img
-                                src={item.iconsrc1}
-                                alt="Facebook"
-                                className="icon"
+                                <div className="Layout">
+                                  <img
+                                    src={
+                                      item.src2 ||
+                                      "https://via.placeholder.com/200"
+                                    }
+                                    alt="Editable"
+                                    className="multiimg"
+                                    title="Upload Image"
+                                    style={item.style}
+                                    onClick={() => uploadImage(index, 2)}
+                                  />
+                                  <a
+                                    href={item.link2}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="button-preview"
+                                    style={item.buttonStyle2}
+                                  >
+                                    {item.content2}
+                                  </a>
+                                </div>
+                              </div>
+                            ) : null}
+
+                            {item.type === "video-icon" ? (
+                              <div className="video-icon">
+                                <img
+                                  src={
+                                    item.src1 ||
+                                    "https://via.placeholder.com/200"
+                                  }
+                                  alt="Editable"
+                                  className="videoimg"
+                                  title="Upload Thumbnail Image"
+                                  style={item.style}
+                                  onClick={() => uploadImage(index, 1)}
+                                />
+                                <a
+                                  href={item.link}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                >
+                                  <img
+                                    src={item.src2}
+                                    className="video-btn"
+                                    alt="icon"
+                                  />
+                                </a>
+                              </div>
+                            ) : null}
+
+                            {item.type === "cardimage" ? (
+                              <div
+                                className="card-image-container"
                                 style={item.style1}
-                              />
-                            </a>
+                              >
+                                <img
+                                  src={
+                                    item.src1 ||
+                                    "https://via.placeholder.com/200"
+                                  }
+                                  style={item.style}
+                                  alt="Editable"
+                                  className="card-image"
+                                  title="Upload Image"
+                                  onClick={() => uploadImage(index, 1)}
+                                />
+                                <p
+                                  className="card-text"
+                                  contentEditable
+                                  suppressContentEditableWarning
+                                  onClick={() => setModalIndex(index)} // Open modal for this index
+                                  style={item.style}
+                                  dangerouslySetInnerHTML={{
+                                    __html: item.content1,
+                                  }}
+                                />
 
-                            <a
-                              href={item.links2 || "#"}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              onClick={(e) => handleLinksClick2(e, item.links2)}
-                            >
-                              <img
-                                src={item.iconsrc2}
-                                alt="Twitter"
-                                className="icon"
-                                rel="noopener noreferrer"
-                                style={item.style2}
-                              />
-                            </a>
+                                {modalIndex === index && ( // Open only for the selected index
+                                  <ParaEditor
+                                    isOpen={true}
+                                    content={item.content1}
+                                    onSave={(newContent) => {
+                                      updateContent(index, {
+                                        content1: newContent,
+                                      });
+                                      setModalIndex(null); // Close modal after save
+                                    }}
+                                    onClose={() => setModalIndex(null)}
+                                  />
+                                )}
+                              </div>
+                            ) : null}
 
-                            <a
-                              href={item.links3 || "#"}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              onClick={(e) => handleLinksClick2(e, item.links3)}
-                            >
-                              <img
-                                src={item.iconsrc3}
-                                alt="Instagram"
-                                className="icon"
-                                style={item.style3}
-                              />
-                            </a>
+                            {item.type === "head" && (
+                              <div>
+                                <p
+                                  className="border"
+                                  contentEditable
+                                  suppressContentEditableWarning
+                                  onBlur={(e) =>
+                                    updateContent(index, {
+                                      content: e.target.textContent,
+                                    })
+                                  }
+                                  onMouseUp={(e) =>
+                                    handleCursorPosition(e, index)
+                                  }
+                                  onSelect={(e) =>
+                                    handleCursorPosition(e, index)
+                                  }
+                                  style={item.style}
+                                >
+                                  {item.content}
+                                </p>
+                              </div>
+                            )}
 
-                            <a
-                              href={item.links4 || "#"}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              onClick={(e) => handleLinksClick2(e, item.links4)}
-                            >
-                              <img
-                                src={item.iconsrc4}
-                                alt="Youtube"
-                                className="icon"
-                                style={item.style4}
-                              />
-                            </a>
+                            {item.type === "link-image" && (
+                              <div className="border">
+                                <a
+                                  href={item.link || "#"}
+                                  onClick={(e) => handleLinkClick(e, index)}
+                                >
+                                  <img
+                                    src={
+                                      item.src ||
+                                      "https://via.placeholder.com/200"
+                                    }
+                                    alt="Editable"
+                                    className="img"
+                                    style={item.style}
+                                  />
+                                </a>
+                              </div>
+                            )}
+                            {item.type === "image" && (
+                              <div className="border">
+                                <img
+                                  src={
+                                    item.src ||
+                                    "https://via.placeholder.com/200"
+                                  }
+                                  alt="Editable"
+                                  className="img"
+                                  style={item.style}
+                                />
+                              </div>
+                            )}
+
+                            {item.type === "icons" && (
+                              <div
+                                className="border"
+                                style={item.ContentStyle}
+                                key={index}
+                              >
+                                <div className="icon-containers">
+                                  <a
+                                    href={item.links1 || "#"}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    onClick={(e) =>
+                                      handleLinksClick2(e, item.links1)
+                                    }
+                                  >
+                                    <img
+                                      src={item.iconsrc1}
+                                      alt="Facebook"
+                                      className="icon"
+                                      style={item.style1}
+                                    />
+                                  </a>
+
+                                  <a
+                                    href={item.links2 || "#"}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    onClick={(e) =>
+                                      handleLinksClick2(e, item.links2)
+                                    }
+                                  >
+                                    <img
+                                      src={item.iconsrc2}
+                                      alt="Twitter"
+                                      className="icon"
+                                      rel="noopener noreferrer"
+                                      style={item.style2}
+                                    />
+                                  </a>
+
+                                  <a
+                                    href={item.links3 || "#"}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    onClick={(e) =>
+                                      handleLinksClick2(e, item.links3)
+                                    }
+                                  >
+                                    <img
+                                      src={item.iconsrc3}
+                                      alt="Instagram"
+                                      className="icon"
+                                      style={item.style3}
+                                    />
+                                  </a>
+
+                                  <a
+                                    href={item.links4 || "#"}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    onClick={(e) =>
+                                      handleLinksClick2(e, item.links4)
+                                    }
+                                  >
+                                    <img
+                                      src={item.iconsrc4}
+                                      alt="Youtube"
+                                      className="icon"
+                                      style={item.style4}
+                                    />
+                                  </a>
+                                </div>
+                              </div>
+                            )}
+
+                            {item.type === "imagewithtext" ? (
+                              <div className="image-text-container">
+                                <div
+                                  className="image-text-wrapper"
+                                  style={item.style1}
+                                >
+                                  <img
+                                    src={
+                                      item.src1 ||
+                                      "https://via.placeholder.com/200"
+                                    }
+                                    alt="Editable"
+                                    className="image-item"
+                                    title="Upload Image"
+                                    onClick={() => uploadImage(index, 1)}
+                                  />
+                                  <p
+                                    className="text-item"
+                                    contentEditable
+                                    suppressContentEditableWarning
+                                    onClick={() => setModalIndex(index)} // Open modal for this index
+                                    style={item.style}
+                                    dangerouslySetInnerHTML={{
+                                      __html: item.content1,
+                                    }}
+                                  />
+                                </div>
+                                {modalIndex === index && ( // Open only for the selected index
+                                  <ParaEditor
+                                    isOpen={true}
+                                    content={item.content1}
+                                    onSave={(newContent) => {
+                                      updateContent(index, {
+                                        content1: newContent,
+                                      });
+                                      setModalIndex(null); // Close modal after save
+                                    }}
+                                    onClose={() => setModalIndex(null)}
+                                  />
+                                )}
+                              </div>
+                            ) : null}
+
+                            {item.type === "multipleimage" ? (
+                              <div className="Layout-img">
+                                <div className="Layout">
+                                  <img
+                                    src={
+                                      item.src1 ||
+                                      "https://via.placeholder.com/200"
+                                    }
+                                    alt="Editable"
+                                    className="multiple-img"
+                                    title="Upload Image"
+                                    style={item.style}
+                                    onClick={() => uploadImage(index, 1)}
+                                  />
+                                </div>
+
+                                <div className="Layout">
+                                  <img
+                                    src={
+                                      item.src2 ||
+                                      "https://via.placeholder.com/200"
+                                    }
+                                    alt="Editable"
+                                    className="multiple-img"
+                                    title="Upload Image"
+                                    style={item.style}
+                                    onClick={() => uploadImage(index, 2)}
+                                  />
+                                </div>
+                              </div>
+                            ) : null}
+
+                            {item.type === "textwithimage" ? (
+                              <div className="image-text-container">
+                                <div
+                                  className="image-text-wrapper"
+                                  style={item.style}
+                                >
+                                  <p
+                                    className="text-item"
+                                    contentEditable
+                                    suppressContentEditableWarning
+                                    onClick={() => setModalIndex(index)} // Open modal for this index
+                                    style={item.style}
+                                    dangerouslySetInnerHTML={{
+                                      __html: item.content2,
+                                    }}
+                                  />
+                                  <img
+                                    src={
+                                      item.src2 ||
+                                      "https://via.placeholder.com/200"
+                                    }
+                                    alt="Editable"
+                                    className="image-item"
+                                    title="Upload Image"
+                                    onClick={() => uploadImage(index, 2)}
+                                  />
+                                </div>
+                                {modalIndex === index && ( // Open only for the selected index
+                                  <ParaEditor
+                                    isOpen={true}
+                                    content={item.content2}
+                                    onSave={(newContent) => {
+                                      updateContent(index, {
+                                        content2: newContent,
+                                      });
+                                      setModalIndex(null); // Close modal after save
+                                    }}
+                                    onClose={() => setModalIndex(null)}
+                                  />
+                                )}
+                              </div>
+                            ) : null}
+
+                            {item.type === "logo" && (
+                              <div className="border">
+                                <img
+                                  src={
+                                    item.src ||
+                                    "https://via.placeholder.com/200"
+                                  }
+                                  alt="Editable"
+                                  className="logo"
+                                  style={item.style}
+                                />
+                              </div>
+                            )}
+                            {item.type === "button" && (
+                              <div className="border-btn">
+                                <a
+                                  href={item.link || "#"}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  style={item.style}
+                                  className="button-preview"
+                                >
+                                  {item.content}
+                                </a>
+                              </div>
+                            )}
+                            {item.type === "link" && (
+                              <div className="border-btn">
+                                <a
+                                  href={item.href || "#"}
+                                  onClick={(e) => handleLinkClick(e, index)}
+                                  style={item.style}
+                                >
+                                  {item.content}
+                                </a>
+                              </div>
+                            )}
                           </div>
-                        </div>
-                      )}
-
-                      {item.type === "imagewithtext" ? (
-                        <div className="image-text-container">
-                          <div
-                            className="image-text-wrapper"
-                            style={item.style1}
-                          >
-                            <img
-                              src={
-                                item.src1 || "https://via.placeholder.com/200"
-                              }
-                              alt="Editable"
-                              className="image-item"
-                              title="Upload Image"
-                              onClick={() => uploadImage(index, 1)}
-                            />
-                            <p
-                              className="text-item"
-                              contentEditable
-                              suppressContentEditableWarning
-                              onClick={() => setModalIndex(index)} // Open modal for this index
-                              style={item.style}
-                              dangerouslySetInnerHTML={{
-                                __html: item.content1,
-                              }}
-                            />
-                          </div>
-                          {modalIndex === index && ( // Open only for the selected index
-                            <ParaEditor
-                              isOpen={true}
-                              content={item.content1}
-                              onSave={(newContent) => {
-                                updateContent(index, { content1: newContent });
-                                setModalIndex(null); // Close modal after save
-                              }}
-                              onClose={() => setModalIndex(null)}
-                            />
-                          )}
-                        </div>
-                      ) : null}
-                      
-
-{item.type === "multipleimage" ? (
-                        <div className="Layout-img">
-                          <div className="Layout">
-                            <img
-                              src={
-                                item.src1 || "https://via.placeholder.com/200"
-                              }
-                              alt="Editable"
-                              className="multiple-img"
-                              title="Upload Image"
-                              style={item.style}
-                              onClick={() => uploadImage(index, 1)}
-                            />
-                           
-                          </div>
-
-                          <div className="Layout">
-                            <img
-                              src={
-                                item.src2 || "https://via.placeholder.com/200"
-                              }
-                              alt="Editable"
-                              className="multiple-img"
-                              title="Upload Image"
-                              style={item.style}
-                              onClick={() => uploadImage(index, 2)}
-                            />
-                         
-                          </div>
-                        </div>
-                      ) : null}
-
-                      {item.type === "textwithimage" ? (
-                        <div className="image-text-container">
-                          <div
-                            className="image-text-wrapper"
-                            style={item.style}
-                          >
-                            <p
-                              className="text-item"
-                              contentEditable
-                              suppressContentEditableWarning
-                              onClick={() => setModalIndex(index)} // Open modal for this index
-                              style={item.style}
-                              dangerouslySetInnerHTML={{
-                                __html: item.content2,
-                              }}
-                            />
-                            <img
-                              src={
-                                item.src2 || "https://via.placeholder.com/200"
-                              }
-                              alt="Editable"
-                              className="image-item"
-                              title="Upload Image"
-                              onClick={() => uploadImage(index, 2)}
-                            />
-                          </div>
-                          {modalIndex === index && ( // Open only for the selected index
-                            <ParaEditor
-                              isOpen={true}
-                              content={item.content2}
-                              onSave={(newContent) => {
-                                updateContent(index, { content2: newContent });
-                                setModalIndex(null); // Close modal after save
-                              }}
-                              onClose={() => setModalIndex(null)}
-                            />
-                          )}
-                        </div>
-                      ) : null}
-
-                      {item.type === "logo" && (
-                        <div className="border">
-                          <img
-                            src={item.src || "https://via.placeholder.com/200"}
-                            alt="Editable"
-                            className="logo"
-                            style={item.style}
-                          />
-                        </div>
-                      )}
-                      {item.type === "button" && (
-                        <div className="border-btn">
-                          <a
-                            href={item.link || "#"}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            style={item.style}
-                            className="button-preview"
-                          >
-                            {item.content}
-                          </a>
-                        </div>
-                      )}
-                      {item.type === "link" && (
-                        <div className="border-btn">
-                          <a
-                            href={item.href || "#"}
-                            onClick={(e) => handleLinkClick(e, index)}
-                            style={item.style}
-                          >
-                            {item.content}
-                          </a>
-                        </div>
-                      )}
-                 
+                        );
+                      })}
                     </div>
-                  );
-                })}
-              </div>
-            </div>
-          </div>
-          <button
+                  </div>
+                </div>
+                <button
                   className="preview-create-button"
                   onClick={() => handleTemplateSelect(selectedTemplatepre)}
-                  >
-                Select
+                >
+                  Select
                 </button>
                 <button
                   onClick={() => setIsPreviewOpen(false)}
@@ -4419,11 +4754,9 @@ const sendscheduleEmail = async () => {
                 >
                   Cancel
                 </button>
-          </div>
-          </div>
+              </div>
+            </div>
           )}
-        
-
 
           {/* Modal for Save Template */}
           {showTemplateModal && (
@@ -4520,163 +4853,271 @@ const sendscheduleEmail = async () => {
             </div>
           )}
 
-        {/* Modal */}
-{modalOpen && (
-  
-  <div className="modal">
-    <div className="modal-content testmail-content">
-      <h2>Send Single Mail</h2>
-      <button className="close-btn" onClick={()=>setModalOpen(false)}>&times;</button>
-      <label htmlFor="Email">Email:</label>
-      <input
-        type="email"
-        placeholder="Recipient Email"
-        value={emailData.recipient}
-        onChange={(e) =>
-          setEmailData({ ...emailData, recipient: e.target.value })
-        }/>
-      <label htmlFor="Alias Name">Alias Name:</label>
-      <input
-        type="text"
-        placeholder="Alias Name"
-        value={emailData.aliasName}
-        onChange={(e) =>
-          setEmailData({ ...emailData, aliasName: e.target.value })
-        }
-      />
-    <label htmlFor="subject">Subject:</label>
-      <input
-        type="text"
-        placeholder="Subject"
-        value={emailData.subject}
-        onChange={(e) =>
-          setEmailData({ ...emailData, subject: e.target.value })
-        }
-      />
-     
-      <label htmlFor="preview-text">Preview Text:</label>
-      <input
-        type="text"
-        placeholder="Preview Text"
-        value={emailData.previewtext}
-        onChange={(e) =>
-          setEmailData({ ...emailData, previewtext: e.target.value })
-        }
-      />
-
-      {/* Attachment File Input */}
-      <label htmlFor="attachments">Attach Files(Max-10):</label>
-        {/* Attachment File Input */}
-        <input
-        type="file"
-        multiple
-        onChange={(e) => {
-          const newFiles = Array.from(e.target.files);
-          const allFiles = [...(emailData.attachments || []), ...newFiles];
-
-          if (allFiles.length > 10) {
-            toast.warning("You can only attach up to 10 files.");
-            return;
-          }
-
-          setEmailData({ ...emailData, attachments: allFiles });
-        }}
-      />
-
-      {/* Display Attached Files */}
-      <div className="file-list">
-        {emailData.attachments && emailData.attachments.length > 0 ? (
-          <ol>
-            {emailData.attachments.map((file, index) => (
-              <li key={index}>
-                {file.name} - {Math.round(file.size / 1024)} KB
-                <button className="attach-close"
-                  onClick={() => {
-                    const newAttachments = emailData.attachments.filter(
-                      (_, i) => i !== index
-                    );
-                    setEmailData({ ...emailData, attachments: newAttachments });
-                  }}
+          {/* Modal */}
+          {modalOpen && (
+            <div className="modal">
+              <div className="modal-content testmail-content">
+                <h2>Send Single Mail</h2>
+                <button
+                  className="close-btn"
+                  onClick={() => setModalOpen(false)}
                 >
-                  X
+                  &times;
                 </button>
-              </li>
-            ))}
-          </ol>
-        ) : (
-          <p>No files selected</p>
-        )}
+                <label htmlFor="Email">Email:</label>
+                <input
+                  type="email"
+                  placeholder="Recipient Email"
+                  value={emailData.recipient}
+                  onChange={(e) =>
+                    setEmailData({ ...emailData, recipient: e.target.value })
+                  }
+                />
+               
+    <div className="alias-container-wrapper">
+      <label htmlFor="aliasName-select" className="alias-container-label">Alias Name:</label>
+      <div className="alias-container-flex">
+        <select
+          style={{padding:"10px"}}
+          id="aliasName-select"
+          value={aliasName}
+          onChange={(e) => setAliasName(e.target.value)}
+          className="alias-container-select"
+        >
+          <option value="">Select alias</option>
+          {aliasOptions.map((alias) => (
+    <option key={alias._id} value={alias.aliasName}>
+      {alias.aliasname}
+    </option>
+  ))}
+        </select>
+
       </div>
-
-
-      {/* Toggle Button for Scheduled Mail */}
-      <div className="toggle-container">
-        <span>
-          {isScheduled
-            ? "Scheduled Mail Enabled :"
-            : "Scheduled Mail Disabled :"}
-        </span>
-        <label className="switch">
-          <input
-            type="checkbox"
-            checked={isScheduled}
-            onChange={() => setIsScheduled(!isScheduled)}
-          />
-          <span className="slider-send round"></span>
-        </label>
+      <div className="alias-container-add-button">
+      <button type="button" onClick={() => setShowModal(true)} >
+          Add
+      </button>
       </div>
+    
 
-      {/* Show scheduled time input only if the toggle is enabled */}
-      {isScheduled && (
-        <div>
-          <label htmlFor="schedule-time">Set Schedule Time:</label>
-          <input
-            type="datetime-local"
-            value={emailData.scheduledTime}
-            onChange={(e) =>
-              setEmailData({
-                ...emailData,
-                scheduledTime: e.target.value,
-              })
-            }
-          />
+      {showModal && (
+        <div className="alias-container-modal-overlay">
+          <div className="alias-container-modal-box">
+            <h3>Add Alias Name</h3>
+            <input
+              type="text"
+              value={aliasName}
+              onChange={(e) => setAliasName(e.target.value)}
+              placeholder="Enter alias name"
+              className="alias-container-input"
+            />
+            <div className="alias-container-modal-actions">
+              <button onClick={() => setShowModal(false)} className="alias-container-cancel-btn">Cancel</button>
+              <button onClick={handleAddAlias} className="alias-container-save-btn"
+               disabled={isLoading}
+               >
+                 {isLoading ? (
+                   <span className="loader-create"></span> // Spinner
+                 ) : (
+                   "Save"
+                 )}{" "}              
+             </button>           
+            </div>
+          </div>
         </div>
       )}
-      <button
-        onClick={sendEmail}
-        className="modal-button"
-        disabled={isLoading || isScheduled} // Disable if scheduled is enabled
-      >
-        {isLoading ? "Processing..." : "Send Now"}
-      </button>
-      <button
-        onClick={sendscheduleEmail}
-        disabled={isLoadingsch || !isScheduled} // Disable if scheduled is not enabled
-        className="modal-button"
-      >
-        {isLoadingsch ? "Processing..." : "Scheduled"}
-      </button>
-      <button
-        onClick={() => setModalOpen(false)}
-        className="modal-button"
-      >
-        Cancel
-      </button>
     </div>
-  </div>
-)}
 
+    <div className="alias-container-wrapper">
+      <label htmlFor="aliasName-select" className="alias-container-label">Reply To:</label>
+      <div className="alias-container-flex">
+        <select
+          style={{padding:"10px"}}
+          id="replyTo-select"
+          value={replyTo}
+          onChange={(e) => setReplyTo(e.target.value)}
+          className="alias-container-select"
+        >
+          <option value="">Select ReplyTo</option>
+          {replyOptions.map((reply) => (
+    <option key={reply._id} value={reply.replyTo}>
+      {reply.replyTo}
+    </option>
+  ))}
+        </select>
+    
+      </div>
+      <div className="alias-container-add-button">
+      <button type="button" onClick={() => setShowModalreply(true)} >
+         Add
+      </button>
+      </div>
+
+      {showModalreply && (
+        <div className="alias-container-modal-overlay">
+          <div className="alias-container-modal-box">
+            <h3>Add Reply To Mail</h3>
+            <input
+              type="text"
+              value={replyTo}
+              onChange={(e) => setReplyTo(e.target.value)}
+              placeholder="Enter reply to mail"
+              className="alias-container-input"
+            />
+            <div className="alias-container-modal-actions">
+              <button onClick={() => setShowModalreply(false)} className="alias-container-cancel-btn">Cancel</button>
+              <button onClick={handleAddReply} className="alias-container-save-btn"
+               disabled={isLoadingreply}
+               >
+                 {isLoadingreply ? (
+                   <span className="loader-create"></span> // Spinner
+                 ) : (
+                   "Save"
+                 )}{" "}              
+             </button>          
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+                <label htmlFor="subject">Subject:</label>
+                <input
+                  type="text"
+                  placeholder="Subject"
+                  value={emailData.subject}
+                  onChange={(e) =>
+                    setEmailData({ ...emailData, subject: e.target.value })
+                  }
+                />
+
+                <label htmlFor="preview-text">Preview Text:</label>
+                <input
+                  type="text"
+                  placeholder="Preview Text"
+                  value={emailData.previewtext}
+                  onChange={(e) =>
+                    setEmailData({ ...emailData, previewtext: e.target.value })
+                  }
+                />
+
+                {/* Attachment File Input */}
+                <label htmlFor="attachments">Attach Files(Max-10):</label>
+                {/* Attachment File Input */}
+                <input
+                  type="file"
+                  multiple
+                  onChange={(e) => {
+                    const newFiles = Array.from(e.target.files);
+                    const allFiles = [
+                      ...(emailData.attachments || []),
+                      ...newFiles,
+                    ];
+
+                    if (allFiles.length > 10) {
+                      toast.warning("You can only attach up to 10 files.");
+                      return;
+                    }
+
+                    setEmailData({ ...emailData, attachments: allFiles });
+                  }}
+                />
+
+                {/* Display Attached Files */}
+                <div className="file-list">
+                  {emailData.attachments && emailData.attachments.length > 0 ? (
+                    <ol>
+                      {emailData.attachments.map((file, index) => (
+                        <li key={index}>
+                          {file.name} - {Math.round(file.size / 1024)} KB
+                          <button
+                            className="attach-close"
+                            onClick={() => {
+                              const newAttachments =
+                                emailData.attachments.filter(
+                                  (_, i) => i !== index
+                                );
+                              setEmailData({
+                                ...emailData,
+                                attachments: newAttachments,
+                              });
+                            }}
+                          >
+                            X
+                          </button>
+                        </li>
+                      ))}
+                    </ol>
+                  ) : (
+                    <p>No files selected</p>
+                  )}
+                </div>
+
+                {/* Toggle Button for Scheduled Mail */}
+                <div className="toggle-container">
+                  <span>
+                    {isScheduled
+                      ? "Scheduled Mail Enabled :"
+                      : "Scheduled Mail Disabled :"}
+                  </span>
+                  <label className="switch">
+                    <input
+                      type="checkbox"
+                      checked={isScheduled}
+                      onChange={() => setIsScheduled(!isScheduled)}
+                    />
+                    <span className="slider-send round"></span>
+                  </label>
+                </div>
+
+                {/* Show scheduled time input only if the toggle is enabled */}
+                {isScheduled && (
+                   <div style={{marginBottom:"10px"}}>
+                      <label htmlFor="schedule-time">Set Schedule Time:</label>{" "}
+                      <DatePicker
+                        id="schedule-time"
+                        selected={scheduledTime ? new Date(scheduledTime) : null}
+                        onChange={(date) => setScheduledTime(date.toISOString())}
+                        showTimeSelect
+                        timeIntervals={10} // Shows minutes as 0, 10, 20...
+                        dateFormat="dd-MM-yyyy h:mm aa"
+                        placeholderText="DD-MM-YYYY H:MM"
+                      />
+                    </div>
+                )}
+                <button
+                  onClick={sendEmail}
+                  className="modal-button"
+                  disabled={isLoading || isScheduled} // Disable if scheduled is enabled
+                >
+                  {isLoading ? "Processing..." : "Send Now"}
+                </button>
+                <button
+                  onClick={sendscheduleEmail}
+                  disabled={isLoadingsch || !isScheduled} // Disable if scheduled is not enabled
+                  className="modal-button"
+                >
+                  {isLoadingsch ? "Processing..." : "Scheduled"}
+                </button>
+                <button
+                  onClick={() => setModalOpen(false)}
+                  className="modal-button"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          )}
         </div>
         <ToastContainer
           className="custom-toast"
           position="bottom-center"
           autoClose={2000}
-          hideProgressBar={true} // Disable progress bar
+          hideProgressBar={true} 
           closeOnClick={false}
           closeButton={false}
           pauseOnHover={true}
           draggable={true}
-          theme="light" // Optional: Choose theme ('light', 'dark', 'colored')
+          theme="light" 
         />
       </div>
     </div>

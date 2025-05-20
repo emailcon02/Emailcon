@@ -171,3 +171,80 @@ input:checked + .slider-send:before {
     margin-top: 5px !important;
   }
 }
+
+
+.alias-container-label {
+  display: block;
+  margin-bottom: 8px;
+}
+
+.alias-container-flex {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.alias-container-select {
+  padding: 5px;
+}
+
+.alias-container-add-button {
+  display: flex;
+  justify-content: flex-end;
+}
+.alias-container-add-button button{
+  padding: 5px 10px;
+  cursor: pointer;
+  border: 1px solid rgb(209, 209, 209);
+  border-radius: 5px;
+  background-color: rgb(230, 227, 227);
+}
+
+.alias-container-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+}
+
+.alias-container-modal-box {
+  background: #fff;
+  padding: 20px;
+  border-radius: 10px;
+  width: 320px;
+}
+
+.alias-container-input {
+  width: 95% !important;
+  margin-bottom: 15px !important;
+  padding: 5px;
+}
+
+.alias-container-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.alias-container-save-btn {
+  background-color:#26286e;
+  color: white;
+  padding: 5px 10px;
+  cursor: pointer;
+  border: none;
+  border-radius: 5px;
+}
+.alias-container-cancel-btn {
+  background-color: #f4c806;
+  color: white;
+  padding: 5px 10px;
+  cursor: pointer;
+  border: none;
+  border-radius: 5px;
+}

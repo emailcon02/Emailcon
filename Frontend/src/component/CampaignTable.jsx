@@ -20,6 +20,50 @@ function CampaignTable() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [newTime, setNewTime] = useState({});
   const [activeCampaignId, setActiveCampaignId] = useState(null); 
+  const [selectedCampaigns, setSelectedCampaigns] = useState([]);
+  const [selectAll, setSelectAll] = useState(false);
+
+  // Function to handle "Select All" checkbox toggle
+  const handleSelectAll = () => {
+    setSelectAll((prev) => !prev);
+    if (!selectAll) {
+      // Select all campaigns
+      setSelectedCampaigns(campaigns.map((campaign) => campaign._id));
+    } else {
+      // Deselect all campaigns
+      setSelectedCampaigns([]);
+    }
+  };
+
+  // Update the "Delete All" button function
+  const handleDeleteAllSelected = async () => {
+    if (selectedCampaigns.length === 0) {
+      toast.warning("No campaigns selected for deletion.");
+      return;
+    }
+
+    try {
+      // Delete each selected campaign
+      await Promise.all(
+        selectedCampaigns.map((campaignId) =>
+          axios.delete(`${apiConfig.baseURL}/api/stud/camhistory/${campaignId}`)
+        )
+      );
+
+      // Update the UI after deletion
+      setCampaigns((prevCampaigns) =>
+        prevCampaigns.filter(
+          (campaign) => !selectedCampaigns.includes(campaign._id)
+        )
+      );
+      setSelectedCampaigns([]); // Clear selected campaigns
+      setSelectAll(false); // Reset "Select All" checkbox
+      toast.success("Selected campaigns deleted successfully!");
+    } catch (error) {
+      console.error("Error deleting selected campaigns:", error);
+      toast.error("Failed to delete selected campaigns.");
+    }
+  };
 
   useEffect(() => {
     const fetchCampaigns = async () => {
@@ -53,6 +97,15 @@ function CampaignTable() {
   const handleview = (userId, campaignId) => {
     navigate(`/readreport/${userId}/${campaignId}`);
   };
+
+  const handleCheckboxChange = (id) => {
+    setSelectedCampaigns((prevSelected) =>
+      prevSelected.includes(id)
+        ? prevSelected.filter((item) => item !== id)
+        : [...prevSelected, id]
+    );
+  };
+
   const handleDeleteCampaignHistory = async (campaignHistoryId) => {
     try {
       // Send a DELETE request to the backend with the campaign history ID
@@ -185,7 +238,8 @@ function CampaignTable() {
           const emailData = {
             recipientEmail: email,
             subject: campaign.subject,
-            aliasName: campaign.aliasName,
+            aliasName:campaign.aliasName,
+            replyTo:campaign.replyTo,
             body: JSON.stringify(personalizedContent),
             bgColor: campaign.bgColor,
             previewtext: campaign.previewtext,
@@ -270,6 +324,7 @@ function CampaignTable() {
           bgColor: campaign.bgColor,
           previewtext: campaign.previewtext,
           aliasName: campaign.aliasName,
+          replyTo:campaign.replyTo,
           attachments: campaign.attachments,
           userId: campaign.user,
           groupId: campaign.groupname,
@@ -359,6 +414,7 @@ function CampaignTable() {
           previewtext: campaign.previewtext,
           attachments: campaign.attachments,
           aliasName: campaign.aliasName,
+          replyTo:campaign.replyTo,
           userId: campaign.user,
           groupId: campaign.groupname,
           campaignId: campaignId,
@@ -451,10 +507,21 @@ function CampaignTable() {
           </button>
         </div>
       </div>
+      <button onClick={handleDeleteAllSelected} className="delete-all-btn">
+        Delete All
+      </button>
       <div className="cam-scroll" style={{ overflowX: "auto" }}>
         <table className="cam-dashboard-table">
           <thead>
             <tr>
+            <th>
+                Select{" "}
+                <input
+                  type="checkbox"
+                  checked={selectAll}
+                  onChange={handleSelectAll}
+                />
+              </th>
               <th>Send Date</th>
               <th>Campaign Name</th>
               <th>Alias Name</th>
@@ -472,6 +539,13 @@ function CampaignTable() {
             {campaigns.length > 0 ? (
               filteredCampaigns.map((campaign) => (
                 <tr key={campaign._id}>
+                   <td>
+                    <input
+                      type="checkbox"
+                      checked={selectedCampaigns.includes(campaign._id)}
+                      onChange={() => handleCheckboxChange(campaign._id)}
+                    />
+                  </td>
                   <td>{campaign.senddate}</td>
                   <td>{campaign.campaignname}</td>
                   <td>{campaign.aliasName}</td>

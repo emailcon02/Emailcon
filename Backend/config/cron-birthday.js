@@ -100,6 +100,7 @@ cron.schedule('*/30 * * * *', async () => {
                     bgColor: camhistory.bgColor,
                     previewtext: camhistory.previewtext,
                     aliasName: camhistory.aliasName,
+                    replyTo:camhistory.replyTo,
                     attachments: camhistory.attachments,
                     userId: camhistory.user,
                     groupId: camhistory.groupname,

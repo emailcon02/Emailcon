@@ -5,6 +5,8 @@ import "react-toastify/dist/ReactToastify.css";
 import "./SendbulkModal.css";
 import apiConfig from "../apiconfig/apiConfig";
 import { useNavigate } from "react-router-dom";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
 
 const SendbulkModal = ({ isOpen, onClose, previewContent = [], bgColor }) => {
   const [groups, setGroups] = useState([]);
@@ -16,11 +18,17 @@ const SendbulkModal = ({ isOpen, onClose, previewContent = [], bgColor }) => {
   const [isScheduled, setIsScheduled] = useState(false); // Toggle state
   const [previewtext, setPreviewtext] = useState("");
   const [aliasName, setAliasName] = useState("");
+  const [replyTo, setReplyTo] = useState("");
   const [scheduledTime, setScheduledTime] = useState("");
   const [selectedGroupsub,setSelectedGroupsub]= useState(false);
   const [fieldNames, setFieldNames] = useState({});
   const [students, setStudents] = useState([]); // Stores all students
-  
+  const [aliasOptions, setAliasOptions] = useState([]);
+  const [showModal, setShowModal] = useState(false);
+  const [replyOptions, setReplyOptions] = useState([]);
+  const [showModalreply, setShowModalreply] = useState(false);
+  const [isLoading,setIsLoading] = useState(false);
+  const [isLoadingreply,setIsLoadingreply] = useState(false);
   const user = JSON.parse(localStorage.getItem("user"));
   const campaign = JSON.parse(localStorage.getItem("campaign"));
   const navigate = useNavigate();
@@ -38,6 +46,142 @@ const SendbulkModal = ({ isOpen, onClose, previewContent = [], bgColor }) => {
         document.removeEventListener("mousedown", handleClickOutside);
       };
     }, []);
+    useEffect(() => {
+      const fetchaliasname = async () => {
+        if (!user?.id) {
+          navigate("/user-login"); // Redirect to login if user is not found
+          return;
+        }
+  
+        try {
+          const res = await axios.get(
+            `${apiConfig.baseURL}/api/stud/aliasname/${user.id}`
+          );
+          setAliasOptions(res.data);
+        } catch (err) {
+          console.error(err);
+          console.log("Failed to fetch aliasname");
+        }
+      };
+  
+      fetchaliasname();
+    }, [user?.id, navigate]); // Ensure useEffect is dependent on `user` and `navigate`
+  
+    const handleAddAlias = () => {
+      if (!user || !user.id) {
+        toast.error("Please ensure the user is valid");
+        return; // Stop further execution if user is invalid
+      }
+      if (!aliasName) {
+        toast.error("Aliasname cannot be empty");
+        return; // Stop further execution if aliasname is empty
+      }
+  
+      // Proceed with aliasname creation
+      setIsLoading(true); // Start loading
+      if (aliasName && user && user.id) {
+        axios
+          .post(`${apiConfig.baseURL}/api/stud/aliasname`, {
+            aliasname:aliasName,
+            userId: user.id,
+          })
+          .then((response) => {
+            setAliasOptions([...aliasOptions, response.data]);
+            toast.success("Aliasname created");
+            setShowModal(false);
+            setAliasName("");
+            setIsLoading(false);
+          })
+          .catch((error) => {
+            setIsLoading(false); // Stop loading
+            // Handle error response
+            console.error("Error:", error);
+            // Dismiss previous toasts before showing a new one
+            toast.dismiss();
+  
+            if (
+              error.response &&
+              error.response.data &&
+              error.response.data.message
+            ) {
+              toast.warning(error.response.data.message, { autoClose: 3000 });
+            } else {
+              toast.error("Failed to create aliasname", { autoClose: 3000 });
+            }
+          });
+      } else {
+        toast.error("Please ensure all fields are filled and user is valid");
+      }
+    };
+
+
+    useEffect(() => {
+      const fetchreplyto = async () => {
+        if (!user?.id) {
+          navigate("/user-login"); // Redirect to login if user is not found
+          return;
+        }
+  
+        try {
+          const res = await axios.get(
+            `${apiConfig.baseURL}/api/stud/replyTo/${user.id}`
+          );
+          setReplyOptions(res.data);
+        } catch (err) {
+          console.error(err);
+          console.log("Failed to fetch replyto mail");
+        }
+      };
+  
+      fetchreplyto();
+    }, [user?.id, navigate]); // Ensure useEffect is dependent on `user` and `navigate`
+  
+    const handleAddReply = () => {
+      if (!user || !user.id) {
+        toast.error("Please ensure the user is valid");
+        return; // Stop further execution if user is invalid
+      }
+      if (!replyTo) {
+        toast.error("Reply to mail cannot be empty");
+        return; // Stop further execution if replyto is empty
+      }
+  
+      // Proceed with replyto creation
+      setIsLoadingreply(true); // Start loading
+      if (replyTo && user && user.id) {
+        axios
+          .post(`${apiConfig.baseURL}/api/stud/replyTo`, {
+            replyTo,
+            userId: user.id,
+          })
+          .then((response) => {
+            setReplyOptions([...replyOptions, response.data]);
+            toast.success("Replyto mail created");
+            setShowModalreply(false);
+            setReplyTo("");
+            setIsLoadingreply(false);
+          })
+          .catch((error) => {
+            setIsLoadingreply(false); // Stop loading
+            // Handle error response
+            console.error("Error:", error);
+            // Dismiss previous toasts before showing a new one
+            toast.dismiss();
+  
+            if (
+              error.response &&
+              error.response.data &&
+              error.response.data.message
+            ) {
+              toast.warning(error.response.data.message, { autoClose: 3000 });
+            } else {
+              toast.error("Failed to create reply to mail", { autoClose: 3000 });
+            }
+          });
+      } else {
+        toast.error("Please ensure all fields are filled and user is valid");
+      }
+    };
   
   const handleGroupChangesubject = (e) => {
     const groupName = e.target.value;
@@ -106,9 +250,9 @@ const SendbulkModal = ({ isOpen, onClose, previewContent = [], bgColor }) => {
 
 
   const sendscheduleBulk = async () => {
-    if (!selectedGroup || !message || !previewtext || !aliasName) {
+    if (!selectedGroup || !message || !previewtext || !aliasName || !replyTo) {
       toast.warning(
-        "Please select a group and enter a aliasName, message and preview text."
+        "Please ensure all field are filled"
       );
       return;
     }
@@ -170,6 +314,7 @@ const SendbulkModal = ({ isOpen, onClose, previewContent = [], bgColor }) => {
         sentEmails: 0,
         subject: message,
         aliasName,
+        replyTo,
         attachments,
         exceldata: [{}],
         previewtext,
@@ -201,9 +346,9 @@ const SendbulkModal = ({ isOpen, onClose, previewContent = [], bgColor }) => {
   };
 
   const handleSend = async () => {
-    if (!selectedGroup || !message || !previewtext || !aliasName) {
+    if (!selectedGroup || !message || !previewtext || !aliasName || !replyTo) {
       toast.warning(
-        "Please select a group and enter aliasName, message, and preview text."
+        "Please ensure all fields are selected."
       );
       return;
     }
@@ -262,6 +407,7 @@ const SendbulkModal = ({ isOpen, onClose, previewContent = [], bgColor }) => {
         exceldata: [{}],
         previewtext,
         aliasName,
+        replyTo,
         previewContent,
         bgColor,
         scheduledTime: new Date(),
@@ -325,6 +471,7 @@ const SendbulkModal = ({ isOpen, onClose, previewContent = [], bgColor }) => {
              campaignId,
              previewtext,
              aliasName,
+             replyTo,
              userId: user.id,
              groupId: selectedGroup,
            };
@@ -396,15 +543,115 @@ const SendbulkModal = ({ isOpen, onClose, previewContent = [], bgColor }) => {
               </option>
             ))}
           </select>
-          <label htmlFor="subject-input">Alias Name:</label>
-          <textarea
-            id="aliasName-input"
-            value={aliasName}
-            onChange={(e) => setAliasName(e.target.value)}
-            placeholder="Enter your alias name here"
-          />
+          <div className="alias-container-wrapper">
+      <label htmlFor="aliasName-select" className="alias-container-label">Alias Name:</label>
+      <div className="alias-container-flex">
+        <select
+          id="aliasName-select"
+          value={aliasName}
+          onChange={(e) => setAliasName(e.target.value)}
+          className="alias-container-select"
+        >
+          <option value="">Select alias</option>
+          {aliasOptions.map((alias) => (
+    <option key={alias._id} value={alias.aliasName}>
+      {alias.aliasname}
+    </option>
+  ))}
+        </select>
 
-          <label htmlFor="subject-input">Subject:</label>
+      </div>
+      <div className="alias-container-add-button">
+      <button type="button" onClick={() => setShowModal(true)} >
+          Add
+      </button>
+      </div>
+    
+
+      {showModal && (
+        <div className="alias-container-modal-overlay">
+          <div className="alias-container-modal-box">
+            <h3>Add Alias Name</h3>
+            <input
+              type="text"
+              value={aliasName}
+              onChange={(e) => setAliasName(e.target.value)}
+              placeholder="Enter alias name"
+              className="alias-container-input"
+            />
+            <div className="alias-container-modal-actions">
+              <button onClick={() => setShowModal(false)} className="alias-container-cancel-btn">Cancel</button>
+              <button onClick={handleAddAlias} className="alias-container-save-btn"
+               disabled={isLoading}
+               >
+                 {isLoading ? (
+                   <span className="loader-create"></span> // Spinner
+                 ) : (
+                   "Save"
+                 )}{" "}              
+             </button>
+            
+            
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+
+    <div className="alias-container-wrapper">
+      <label htmlFor="aliasName-select" className="alias-container-label">Reply To:</label>
+      <div className="alias-container-flex">
+        <select
+          id="replyTo-select"
+          value={replyTo}
+          onChange={(e) => setReplyTo(e.target.value)}
+          className="alias-container-select"
+        >
+          <option value="">Select ReplyTo</option>
+          {replyOptions.map((reply) => (
+    <option key={reply._id} value={reply.replyTo}>
+      {reply.replyTo}
+    </option>
+  ))}
+        </select>
+    
+      </div>
+      <div className="alias-container-add-button">
+      <button type="button" onClick={() => setShowModalreply(true)} >
+         Add
+      </button>
+      </div>
+
+      {showModalreply && (
+        <div className="alias-container-modal-overlay">
+          <div className="alias-container-modal-box">
+            <h3>Add Reply To Mail</h3>
+            <input
+              type="text"
+              value={replyTo}
+              onChange={(e) => setReplyTo(e.target.value)}
+              placeholder="Enter reply to mail"
+              className="alias-container-input"
+            />
+            <div className="alias-container-modal-actions">
+              <button onClick={() => setShowModalreply(false)} className="alias-container-cancel-btn">Cancel</button>
+              <button onClick={handleAddReply} className="alias-container-save-btn"
+               disabled={isLoadingreply}
+               >
+                 {isLoadingreply ? (
+                   <span className="loader-create"></span> // Spinner
+                 ) : (
+                   "Save"
+                 )}{" "}              
+             </button>
+            
+            
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+        <label htmlFor="subject-input">Subject:</label>
           <textarea
             id="subject-input"
             value={message}
@@ -530,16 +777,19 @@ const SendbulkModal = ({ isOpen, onClose, previewContent = [], bgColor }) => {
 
           {/* Show scheduled time input only if the toggle is enabled */}
           {isScheduled && (
-            <div>
-              <label htmlFor="schedule-time">Set Schedule Time:</label>{" "}
-              <input
-                type="datetime-local"
-                id="schedule-time"
-                value={scheduledTime}
-                onChange={(e) => setScheduledTime(e.target.value)}
-              />
-            </div>
-          )}
+  <div style={{marginBottom:"10px"}}>
+    <label htmlFor="schedule-time">Set Schedule Time:</label>{" "}
+    <DatePicker
+      id="schedule-time"
+      selected={scheduledTime ? new Date(scheduledTime) : null}
+      onChange={(date) => setScheduledTime(date.toISOString())}
+      showTimeSelect
+      timeIntervals={10} // Shows minutes as 0, 10, 20...
+      dateFormat="dd-MM-yyyy h:mm aa"
+      placeholderText="DD-MM-YYYY H:MM"
+    />
+  </div>
+)}
 
           <div className="action-btn">
             <button

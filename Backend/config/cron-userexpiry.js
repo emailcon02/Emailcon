@@ -6,67 +6,94 @@ import apiConfig from "../api/apiconfigbackend.js";
 cron.schedule("*/10 * * * *", async () => {
   const now = new Date();
   const nowUTC = new Date(now.toISOString().slice(0, 19) + "Z");
-  nowUTC.setSeconds(0, 0);
 
-  const tenMinutesAgo = new Date(nowUTC);
-  tenMinutesAgo.setMinutes(nowUTC.getMinutes() - 10);
-
-  console.log("🔍 Checking for payment expiries between", tenMinutesAgo.toISOString(), "and", nowUTC.toISOString());
+  console.log("🔍 Running payment reminder check at:", nowUTC.toISOString());
 
   try {
-    const expiredPayments = await PaymentHistory.find({
-      paymentStatus: { $in: ["paid", "trial"] },
-      expiryDate: { $gte: tenMinutesAgo, $lt: nowUTC }
-    }).populate("userId");
-
-    if (expiredPayments.length === 0) {
-      console.log("No expired accounts found at:", now.toLocaleString());
-      return;
-    }
-
-    for (const payment of expiredPayments) {
-      const user = payment.userId;
-
-      // Deactivate user
-      if (user.isActive) {
-        user.isActive = false;
-        await user.save();
-      }
-
-      // Update payment status
-      payment.paymentStatus = "expired";
-      await payment.save();
-
-      // Send expiration email
-      const mailOptions = {
-        from: `"Emailcon Support" <account-noreply@account.emailcon.in>`,
-        to: user.email,
-        replyTo: "support@emailcon.in",
-        subject: `Your Emailcon access has expired`,
-        html: `
-          <div style="font-family: Arial, sans-serif; padding: 20px;">
-            <h2 style="color:#f48c06;">⏰ Access Expired</h2>
-            <p>Hi <strong>${user.username}</strong>,</p>
-            <p>Your account access has expired as of <strong>${now.toLocaleString()}</strong>.</p>
-            <p>To regain access, please log in and renew your subscription.</p>
-            <p style="margin-top: 20px;">
-              <a href="${apiConfig.baseURL}/userpayment/${user._id}" style="padding: 10px 20px; background-color:#2f327d; color: white; text-decoration: none; border-radius: 5px;">Renew Now</a>
-            </p>
-            <p style="font-size: 12px; color: gray;">If you have questions, reply to this email or contact support.</p>
-          </div>
-        `
-      };
-
-      accounttransporter.sendMail(mailOptions, (error) => {
-        if (error) {
-          console.error(`❌ Failed to send expiry email to ${user.email}`, error);
-        } else {
-          console.log(`📧 Sent expiry email to ${user.email}`);
+    const payments = await PaymentHistory.aggregate([
+      {
+        $match: {
+          paymentStatus: { $in: ["paid", "trial"] },
+          expiryDate: { $ne: null }
         }
-      });
-    }
+      },
+      {
+        $sort: { expiryDate: -1 }
+      },
+      {
+        $group: {
+          _id: "$userId",
+          latestPayment: { $first: "$$ROOT" }
+        }
+      }
+    ]);
 
-    console.log(`🔔 Deactivated ${expiredPayments.length} expired accounts at ${nowUTC.toISOString()}`);
+    for (const entry of payments) {
+      const payment = entry.latestPayment;
+      const expiryDate = new Date(payment.expiryDate);
+      const populatedPayment = await PaymentHistory.findById(payment._id).populate("userId");
+      const user = populatedPayment.userId;
+
+      const notifyDates = [
+        new Date(expiryDate.getTime() - 10 * 24 * 60 * 60 * 1000),
+        new Date(expiryDate.getTime() - 5 * 24 * 60 * 60 * 1000),
+        expiryDate
+      ];
+
+      for (const notifyDate of notifyDates) {
+        const timeDiff = Math.abs(notifyDate.getTime() - nowUTC.getTime());
+
+        if (timeDiff <= 10 * 60 * 1000) {
+          const isFinalNotice = notifyDate.getTime() === expiryDate.getTime();
+
+          const subject = isFinalNotice
+            ? "Your Emailcon access has expired"
+            : "Reminder: Your Emailcon access is expiring soon";
+
+          const message = isFinalNotice
+            ? `Your account access has expired as of <strong>${now.toLocaleString()}</strong>.`
+            : `Your Emailcon account will expire on <strong>${expiryDate.toLocaleDateString()}</strong>. Please renew to avoid interruption.`;
+
+          const mailOptions = {
+            from: `"Emailcon Support" <account-noreply@account.emailcon.in>`,
+            to: user.email,
+            replyTo: "support@emailcon.in",
+            subject,
+            html: `
+              <div style="font-family: Arial, sans-serif; padding: 20px;">
+                <h2 style="color:#f48c06;">${isFinalNotice ? "⏰ Access Expired" : "⚠️ Access Expiry Reminder"}</h2>
+                <p>Hi <strong>${user.username}</strong>,</p>
+                <p>${message}</p>
+                <p style="margin-top: 20px;">
+                  <a href="${apiConfig.baseURL}/userpayment/${user._id}" style="padding: 10px 20px; background-color:#2f327d; color: white; text-decoration: none; border-radius: 5px;">Renew Now</a>
+                </p>
+                <p style="font-size: 12px; color: gray;">If you have questions, reply to this email or contact support.</p>
+              </div>
+            `
+          };
+
+          accounttransporter.sendMail(mailOptions, (error) => {
+            if (error) {
+              console.error(`❌ Failed to send email to ${user.email}`, error);
+            } else {
+              console.log(`📧 Sent ${isFinalNotice ? "expiry" : "reminder"} email to ${user.email}`);
+            }
+          });
+
+          if (isFinalNotice && user.isActive) {
+            user.isActive = false;
+            await user.save();
+
+            populatedPayment.paymentStatus = "expired";
+            await populatedPayment.save();
+
+            console.log(`🔒 Deactivated user ${user.email} and marked payment as expired.`);
+          }
+
+          break; // Avoid sending multiple emails
+        }
+      }
+    }
   } catch (err) {
     console.error("❌ Cron job error:", err);
   }

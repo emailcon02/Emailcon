@@ -42,14 +42,21 @@ const bgColortem = location.state?.bgColortem || "ffffff";
   const [templateName, setTemplateName] = useState("");
   const [isMobileView, setIsMobileView] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
-  const [emailData, setEmailData] = useState({
-    recipient: "",
-    subject: "",
-    previewtext: "",
-    scheduledTime: "",
-    aliasName: "",
-    attachments: [],
-  });
+const [aliasName,setAliasName] = useState("");
+      const [replyTo,setReplyTo] = useState("");
+      const [scheduledTime,setScheduledTime] = useState("");
+    const [emailData, setEmailData] = useState({
+      recipient: "",
+      subject: "",
+      previewtext: "",
+      attachments: [],
+    });
+      const [isLoadingreply, setIsLoadingreply] = useState(false); // State for loader
+        const [aliasOptions, setAliasOptions] = useState([]);
+        const [showModal, setShowModal] = useState(false);
+        const [replyOptions, setReplyOptions] = useState([]);
+        const [showModalreply, setShowModalreply] = useState(false);
+
   const [selectedIndex, setSelectedIndex] = useState(null); // Track selected content index
   const [modalIndex, setModalIndex] = useState(null);
   const [selectedContent, setSelectedContent] = useState(""); // Store selected content
@@ -82,6 +89,170 @@ const [fieldNames, setFieldNames] = useState({});
 const templateRef = useRef(null);
 const [openedGroups, setOpenedGroups] = useState({});
 const dropdownRef = useRef(null);
+
+const VerticalSpacingIcon = () => (
+  <div
+    style={{
+      display: "flex",
+      flexDirection: "column",
+      alignItems: "center",
+      gap: "8px",
+    }}
+  >
+    <div
+      style={{
+        width: "18px",
+        height: "2px",
+        backgroundColor: "#313030",
+        borderRadius: "4px",
+      }}
+    ></div>
+    <div
+      style={{
+        width: "18px",
+        height: "2px",
+        backgroundColor: "#313030",
+        borderRadius: "4px",
+      }}
+    ></div>
+  </div>
+);
+
+ useEffect(() => {
+      const fetchaliasname = async () => {
+        if (!user?.id) {
+          navigate("/user-login"); // Redirect to login if user is not found
+          return;
+        }
+  
+        try {
+          const res = await axios.get(
+            `${apiConfig.baseURL}/api/stud/aliasname/${user.id}`
+          );
+          setAliasOptions(res.data);
+        } catch (err) {
+          console.error(err);
+          console.log("Failed to fetch aliasname");
+        }
+      };
+  
+      fetchaliasname();
+    }, [user?.id, navigate]); // Ensure useEffect is dependent on `user` and `navigate`
+  
+    const handleAddAlias = () => {
+      if (!user || !user.id) {
+        toast.error("Please ensure the user is valid");
+        return; // Stop further execution if user is invalid
+      }
+      if (!aliasName) {
+        toast.error("Aliasname cannot be empty");
+        return; // Stop further execution if aliasname is empty
+      }
+  
+      // Proceed with aliasname creation
+      setIsLoading(true); // Start loading
+      if (aliasName && user && user.id) {
+        axios
+          .post(`${apiConfig.baseURL}/api/stud/aliasname`, {
+            aliasname:aliasName,
+            userId: user.id,
+          })
+          .then((response) => {
+            setAliasOptions([...aliasOptions, response.data]);
+            toast.success("Aliasname created");
+            setShowModal(false);
+            setAliasName("");
+            setIsLoading(false);
+          })
+          .catch((error) => {
+            setIsLoading(false); // Stop loading
+            // Handle error response
+            console.error("Error:", error);
+            // Dismiss previous toasts before showing a new one
+            toast.dismiss();
+  
+            if (
+              error.response &&
+              error.response.data &&
+              error.response.data.message
+            ) {
+              toast.warning(error.response.data.message, { autoClose: 3000 });
+            } else {
+              toast.error("Failed to create aliasname", { autoClose: 3000 });
+            }
+          });
+      } else {
+        toast.error("Please ensure all fields are filled and user is valid");
+      }
+    };
+  
+  
+    useEffect(() => {
+      const fetchreplyto = async () => {
+        if (!user?.id) {
+          navigate("/user-login"); // Redirect to login if user is not found
+          return;
+        }
+  
+        try {
+          const res = await axios.get(
+            `${apiConfig.baseURL}/api/stud/replyTo/${user.id}`
+          );
+          setReplyOptions(res.data);
+        } catch (err) {
+          console.error(err);
+          console.log("Failed to fetch replyto mail");
+        }
+      };
+  
+      fetchreplyto();
+    }, [user?.id, navigate]); // Ensure useEffect is dependent on `user` and `navigate`
+  
+    const handleAddReply = () => {
+      if (!user || !user.id) {
+        toast.error("Please ensure the user is valid");
+        return; // Stop further execution if user is invalid
+      }
+      if (!replyTo) {
+        toast.error("Reply to mail cannot be empty");
+        return; // Stop further execution if replyto is empty
+      }
+  
+      // Proceed with replyto creation
+      setIsLoadingreply(true); // Start loading
+      if (replyTo && user && user.id) {
+        axios
+          .post(`${apiConfig.baseURL}/api/stud/replyTo`, {
+            replyTo,
+            userId: user.id,
+          })
+          .then((response) => {
+            setReplyOptions([...replyOptions, response.data]);
+            toast.success("Replyto mail created");
+            setShowModalreply(false);
+            setReplyTo("");
+            setIsLoadingreply(false);
+          })
+          .catch((error) => {
+            setIsLoadingreply(false); // Stop loading
+            // Handle error response
+            console.error("Error:", error);
+            // Dismiss previous toasts before showing a new one
+            toast.dismiss();
+            if (
+              error.response &&
+              error.response.data &&
+              error.response.data.message
+            ) {
+              toast.warning(error.response.data.message, { autoClose: 3000 });
+            } else {
+              toast.error("Failed to create reply to mail", { autoClose: 3000 });
+            }
+          });
+      } else {
+        toast.error("Please ensure all fields are filled and user is valid");
+      }
+  };
 
 const handleGroupChange = (e, index) => {
   const groupName = e.target.value;
@@ -355,6 +526,37 @@ const handleTemplateSelect = (template) => {
       }
     };
     fileInput.click();
+  };
+
+   // addBreak
+   const addBreak = () => {
+    setPreviewContent([
+      ...previewContent,
+      {
+        type: "break",
+        style: {
+          width: "100%",
+          backgroundColor: "#000000",
+          margin: "30px 0", // optional: adds spacing above and below
+        },
+      },
+    ]);
+  };
+
+  //  add Gap
+  const addGap = () => {
+    setPreviewContent([
+      ...previewContent,
+      {
+        type: "gap",
+        style: {
+          width: "100%",
+          height: "60px",
+          backgroundColor: "#000000", 
+          margin: "30px 0", 
+        },
+      },
+    ]);
   };
 
   const addLogo = () => {
@@ -767,7 +969,7 @@ const sendscheduleEmail = async () => {
     toast.warning("No preview content available.");
     return;
   }
-  if (!emailData || !emailData.recipient || !emailData.subject || !emailData.previewtext || !emailData.aliasName || !emailData.scheduledTime) {
+  if (!emailData || !emailData.recipient || !emailData.subject || !emailData.previewtext || !aliasName || !scheduledTime || !replyTo) {
     toast.warning("Please fill in all required fields.");
     return;
   }
@@ -808,14 +1010,14 @@ const sendscheduleEmail = async () => {
       failedEmails: 0,
       subject: emailData.subject,
       previewtext: emailData.previewtext,
-      aliasName: emailData.aliasName,
+      aliasName,replyTo,
       attachments, // Store objects with originalName & fileUrl
       previewContent,
       bgColor,
       exceldata: [{}],
       status: "Scheduled On",
       progress: 0,
-      scheduledTime: new Date(emailData.scheduledTime).toISOString(),
+      scheduledTime: new Date(scheduledTime).toISOString(),
       senddate: new Date().toLocaleString(),
       user: user.id,
       groupId: "no group",
@@ -839,7 +1041,7 @@ const sendscheduleEmail = async () => {
       toast.warning("No preview content available.");
       return;
     }
-    if (!emailData || !emailData.recipient || !emailData.subject || !emailData.previewtext || !emailData.aliasName) {
+    if (!emailData || !emailData.recipient || !emailData.subject || !emailData.previewtext || !aliasName || !replyTo) {
       toast.warning("Please fill in all required fields.");
       return;
     }
@@ -886,7 +1088,7 @@ const sendscheduleEmail = async () => {
         failedEmails: 0,
         subject: emailData.subject,
         previewtext: emailData.previewtext,
-        aliasName: emailData.aliasName,
+        aliasName,replyTo,
         previewContent,
         attachments,
         bgColor,
@@ -910,6 +1112,7 @@ const sendscheduleEmail = async () => {
             previewContent,
             bgColor,
             attachments,
+            replyTo,aliasName,
             campaignId,
             userId: user.id
           });
@@ -1000,6 +1203,8 @@ const sendscheduleEmail = async () => {
     else if (type === "icons") addSocialMedia();
     else if (type === "multipleimage") addMultipleImage();
     else if (type === "cardimage") addCardImage();
+    else if (type === "break") addBreak();
+    else if (type === "gap") addGap();
 
 
 
@@ -1355,6 +1560,32 @@ const sendscheduleEmail = async () => {
                 >
                   <FaGlobe />
                   Social Icons
+                </button>
+                <button
+                  onClick={addBreak}
+                  className="editor-button"
+                  draggable
+                  onDragStart={(e) => handleDragStart("break")}
+                >
+                  <svg
+                    className="horizontal-line-icon"
+                    width="24"
+                    height="2"
+                    viewBox="0 0 24 2"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <rect width="24" height="4" fill="#555" />
+                  </svg>
+                  Line Break
+                </button>
+                <button
+                  onClick={addGap}
+                  className="editor-button"
+                  draggable
+                  onDragStart={(e) => handleDragStart("gap")}
+                >
+                  <VerticalSpacingIcon />
+                  Gap
                 </button>
                 <button
                   onClick={addButton}
@@ -3916,6 +4147,18 @@ const sendscheduleEmail = async () => {
                           </a>
                         </div>
                       )}
+                         {item.type === "break" && (
+                        <div className="border-break">
+                          <hr style={item.style} />
+                        </div>
+                      )}
+
+                      {item.type === "gap" && (
+                        <div className="border-break">
+                          {<div style={item.styles}></div>}
+                        </div>
+                      )}
+
                       {item.type === "link" && (
                         <div className="border-btn">
                           <a
@@ -4523,16 +4766,113 @@ const sendscheduleEmail = async () => {
           setEmailData({ ...emailData, recipient: e.target.value })
         }
       />
-          <label htmlFor="Alias Name">Alias Name:</label>
+                <div className="alias-container-wrapper">
+      <label htmlFor="aliasName-select" className="alias-container-label">Alias Name:</label>
+      <div className="alias-container-flex">
+        <select
+          style={{padding:"10px"}}
+          id="aliasName-select"
+          value={aliasName}
+          onChange={(e) => setAliasName(e.target.value)}
+          className="alias-container-select"
+        >
+          <option value="">Select alias</option>
+          {aliasOptions.map((alias) => (
+    <option key={alias._id} value={alias.aliasName}>
+      {alias.aliasname}
+    </option>
+  ))}
+        </select>
 
-      <input
-        type="text"
-        placeholder="Alias Name"
-        value={emailData.aliasName}
-        onChange={(e) =>
-          setEmailData({ ...emailData, aliasName: e.target.value })
-        }
-      />
+      </div>
+      <div className="alias-container-add-button">
+      <button type="button" onClick={() => setShowModal(true)} >
+          Add
+      </button>
+      </div>
+    
+
+      {showModal && (
+        <div className="alias-container-modal-overlay">
+          <div className="alias-container-modal-box">
+            <h3>Add Alias Name</h3>
+            <input
+              type="text"
+              value={aliasName}
+              onChange={(e) => setAliasName(e.target.value)}
+              placeholder="Enter alias name"
+              className="alias-container-input"
+            />
+            <div className="alias-container-modal-actions">
+              <button onClick={() => setShowModal(false)} className="alias-container-cancel-btn">Cancel</button>
+              <button onClick={handleAddAlias} className="alias-container-save-btn"
+               disabled={isLoading}
+               >
+                 {isLoading ? (
+                   <span className="loader-create"></span> // Spinner
+                 ) : (
+                   "Save"
+                 )}{" "}              
+             </button>           
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+
+    <div className="alias-container-wrapper">
+      <label htmlFor="aliasName-select" className="alias-container-label">Reply To:</label>
+      <div className="alias-container-flex">
+        <select
+          style={{padding:"10px"}}
+          id="replyTo-select"
+          value={replyTo}
+          onChange={(e) => setReplyTo(e.target.value)}
+          className="alias-container-select"
+        >
+          <option value="">Select ReplyTo</option>
+          {replyOptions.map((reply) => (
+    <option key={reply._id} value={reply.replyTo}>
+      {reply.replyTo}
+    </option>
+  ))}
+        </select>
+    
+      </div>
+      <div className="alias-container-add-button">
+      <button type="button" onClick={() => setShowModalreply(true)} >
+         Add
+      </button>
+      </div>
+
+      {showModalreply && (
+        <div className="alias-container-modal-overlay">
+          <div className="alias-container-modal-box">
+            <h3>Add Reply To Mail</h3>
+            <input
+              type="text"
+              value={replyTo}
+              onChange={(e) => setReplyTo(e.target.value)}
+              placeholder="Enter reply to mail"
+              className="alias-container-input"
+            />
+            <div className="alias-container-modal-actions">
+              <button onClick={() => setShowModalreply(false)} className="alias-container-cancel-btn">Cancel</button>
+              <button onClick={handleAddReply} className="alias-container-save-btn"
+               disabled={isLoadingreply}
+               >
+                 {isLoadingreply ? (
+                   <span className="loader-create"></span> // Spinner
+                 ) : (
+                   "Save"
+                 )}{" "}              
+             </button>          
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+             
     <label htmlFor="subject">Subject:</label>
       <input
         type="text"
@@ -4616,19 +4956,18 @@ const sendscheduleEmail = async () => {
 
       {/* Show scheduled time input only if the toggle is enabled */}
       {isScheduled && (
-        <div>
-          <label htmlFor="schedule-time">Set Schedule Time:</label>
-          <input
-            type="datetime-local"
-            value={emailData.scheduledTime}
-            onChange={(e) =>
-              setEmailData({
-                ...emailData,
-                scheduledTime: e.target.value,
-              })
-            }
-          />
-        </div>
+       <div style={{marginBottom:"10px"}}>
+       <label htmlFor="schedule-time">Set Schedule Time:</label>{" "}
+       <DatePicker
+         id="schedule-time"
+         selected={scheduledTime ? new Date(scheduledTime) : null}
+         onChange={(date) => setScheduledTime(date.toISOString())}
+         showTimeSelect
+         timeIntervals={10} // Shows minutes as 0, 10, 20...
+         dateFormat="dd-MM-yyyy h:mm aa"
+         placeholderText="DD-MM-YYYY H:MM"
+       />
+     </div>
       )}
       <button
         onClick={sendEmail}

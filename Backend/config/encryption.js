@@ -1,3 +1,4 @@
+// encryption.js
 import crypto from "crypto";
 
 // Use a fixed salt for consistent key derivation
@@ -6,15 +7,18 @@ const salt = Buffer.from("fixed-salt-value", "utf-8"); // Keep this secret
 const secretKey = crypto.pbkdf2Sync(shortKey, salt, 100000, 32, "sha256");
 
 export function encryptPassword(password) {
-  const iv = crypto.randomBytes(16);  // Generate a 16-byte IV
+  const iv = crypto.randomBytes(16); // Generate a 16-byte IV
   const cipher = crypto.createCipheriv("aes-256-cbc", secretKey, iv);
   let encrypted = cipher.update(password, "utf-8", "hex");
   encrypted += cipher.final("hex");
-  return `${iv.toString("hex")}:${encrypted}`;  // Store IV and encrypted data
+  return `${iv.toString("hex")}:${encrypted}`; // Store IV and encrypted data
 }
 
 export function decryptPassword(encryptedPassword) {
   try {
+    if (!encryptedPassword) {
+      throw new Error("Encrypted password is undefined or empty.");
+    }
     const [ivHex, encrypted] = encryptedPassword.split(":");
 
     if (!ivHex || !encrypted) {

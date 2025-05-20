@@ -1,12 +1,12 @@
-import React, { useState } from "react";
-import axios from "axios";
+import React, { useState,useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import "./Signup.css";
 import { ToastContainer, toast } from "react-toastify";
 import { FaInfoCircle } from "react-icons/fa";
 import "react-toastify/dist/ReactToastify.css";
-import apiConfig from "../apiconfig/apiConfig.js";
 import sign from "../Images/ex1.png";
+import axios from "axios";
+import apiConfig from "../apiconfig/apiConfig";
 
 function Signup() {
   const [email, setEmail] = useState("");
@@ -14,54 +14,55 @@ function Signup() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [phone, setPhone] = useState("");
-  const [smtppassword, setSmtppassword] = useState("");
   const [gender, setGender] = useState("");
-  const [authMethod, setAuthMethod] = useState("Gmail");
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [users, setUsers] = useState([]);
   const [isModalOpenpassword, setIsModalOpenpassword] =useState(false);
-  const navigate = useNavigate();
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setIsLoading(true); // Start loading
 
-    try {
-      const response = await axios.post(
-        `${apiConfig.baseURL}/api/auth/signup`,
-        {
-          email,
-          username,
-          password,
-          gender,
-          phone,
-          smtppassword,
-        }
-      );
-      toast.success(response.data.message || "Account created successfully!");
-      const userId = response.data.user.id; 
-      setTimeout(() => {
-        navigate(`/signup-option/${userId}`);
-      }, 3000);
-    } catch (error) {
-      if (error.response) {
-        const errorMessage = error.response.data.message || "Error signing up";
-        if (error.response.status === 400) {
-          if (errorMessage.includes("User already exists")) {
-            toast.warning(
-              "User already exists. Please use a different email or username."
-            );
-          } else {
-            toast.error(errorMessage);
-          }
-        } else {
-          toast.error(errorMessage);
-        }
-      } else {
-        toast.error("Network error. Please try again.");
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const fetchUsers = async () => {
+      try {
+        const response = await axios.get(`${apiConfig.baseURL}/api/admin/users`);
+       setUsers(response.data);
+      } catch (error) {
+        console.error("Error fetching users:", error);
       }
-    } finally {
-      setIsLoading(false);
-    }
-  };
+    };
+  
+    fetchUsers();
+  }, []);
+
+    const handleSubmit = async (e) => {
+      e.preventDefault();
+      setIsLoading(true); 
+       // Check for existing email or username
+       const existingUser = users.find(
+        (user) => user.email === email || user.username === username
+      );
+    
+      // If user exists and is active, show warning
+      if (existingUser && existingUser.isActive) {
+        toast.warning("User already exists and is active. Please use different credentials.");
+        setIsLoading(false);
+        return;
+      }
+      
+     toast.success("Your data saved successfully!")
+        // Navigate to SMTPPage with user data
+        setTimeout(() => {
+          navigate("/smtppage", {
+            state: {
+              email,
+              username,
+              password,
+              gender,
+              phone,
+            },
+          });
+        }, 3000);
+    
+    } 
  
   return (
     <div className="signup-page">
@@ -213,33 +214,7 @@ function Signup() {
                 placeholder="Enter the User password"
               />
             </div>
-            <div className="label">
-              <label>
-                {authMethod === "Gmail"
-                  ? "SMTP App Passcode"
-                  : "Hostinger Password"}
-              </label>
-              {authMethod === "Gmail" && (
-                <FaInfoCircle
-                  className="info-icon"
-                  onClick={() => {
-                    console.log("Info icon clicked!");
-                    setIsModalOpen(true);
-                  }}
-                  style={{ cursor: "pointer", marginLeft: "5px" }}
-                />
-              )}
-            </div>
-            <div className="input-container">
-              <input
-                type="text"
-                value={smtppassword}
-                onChange={(e) => setSmtppassword(e.target.value)}
-                required
-                className="signup-input"
-                placeholder = "Eg:deyq kjki kvii olua" 
-              />
-            </div>
+          
             <div className="sub-btn">
               <button
                 type="submit"
@@ -266,36 +241,7 @@ function Signup() {
         </div>
       </div>
 
-      {/* Modal */}
-      {isModalOpen && (
-        <div className="custom-modal-overlay">
-          <div className="custom-modal-container">
-            <h3>Steps to Get Gmail SMTP App Passcode</h3>
-            <ol>
-              <li>Go to your Google Account Security Settings.</li>
-              <li>Enable 2-Step Verification.</li>
-              <li> Use the top-left search box to find and Simply type “App Password” in the search input and press Enter to automatically scroll to that section.</li>
-              <li>
-                Generate a new app password for "Mail" and select your device.
-              </li>
-              <li>
-                Copy and use the generated passcode in the SMTP App Passcode
-                field.
-              </li>
-              <li>
-                Sample 16 digit App Passcode is{" "}
-                <strong>deyq kjki kvii olua.</strong>
-              </li>
-            </ol>
-            <button
-              onClick={() => setIsModalOpen(false)}
-              className="modal-close-button"
-            >
-              Close
-            </button>
-          </div>
-        </div>
-      )}
+   
 
       {isModalOpenpassword && (
         <div className="custom-modal-overlay">

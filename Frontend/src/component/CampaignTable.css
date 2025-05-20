@@ -4,6 +4,19 @@
 
 }
 
+.delete-all-btn {
+  background-color: #2b2d77;
+  color: white;
+  border: none;
+  width: 100px;
+  height: 40px;
+  font-size: 15px;
+  border-radius: 25px;
+  margin: 20px 0px 0px 15px ;
+  cursor: pointer; 
+}
+
+
 .admin-dashboard-header {
   padding-top: 10px;
   color: #2b2d77;

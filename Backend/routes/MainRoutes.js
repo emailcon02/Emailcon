@@ -15,6 +15,8 @@ import authMiddleware from "../config/authMiddleware.js";
 import mongoose from "mongoose";
 import BirthdayTemplate from "../models/BirthdayTemplates.js";
 import PaymentHistory from "../models/PaymentHistory.js";
+import Aliasname from "../models/Aliasname.js";
+import Replyto from "../models/Replyto.js";
 const router = express.Router();
 
 // Upload image to s3 bucket
@@ -114,6 +116,8 @@ router.post('/sendtestmail', async (req, res) => {
   try {
     const {
       emailData,
+      aliasName,
+      replyTo,
       attachments,
       previewContent,
       bgColor,
@@ -179,6 +183,25 @@ router.post('/sendtestmail', async (req, res) => {
         <img src="${item.src}" style="margin-top:10px;width:${item.style.width};pointer-events:none;height:${item.style.height};border-radius:${item.style.borderRadius};background-color:${item.style.backgroundColor}"/>
         </div>`;
       }
+      else if (item.type === 'break') {
+        return `<table role="presentation" align="center" width="100%" style="border-collapse: separate; border-spacing: 0; margin: 10px auto!important;">
+      <tr>
+        <td align="center"  style="padding: 0;">
+          <hr style="width:100%; background-color:#00000; margin:30px 0px;" />
+        </td>
+      </tr>
+    </table>`;
+      } else if (item.type === 'gap') {
+        return `
+    <table role="presentation" align="center" width="100%" style="border-collapse: separate; border-spacing: 0; margin: ${item.style.margin || '30px 0'};">
+      <tr>
+        <td align="center" width="100%" style="padding: 0;">
+          <div style="width:100%; height:50px; margin: 0 auto;"></div>
+        </td>
+      </tr>
+    </table>
+  `;}
+
       else if (item.type === 'cardimage') {
         return `
         <table role="presentation" align="center" width="${item.style.width}" style="border-collapse: separate; border-spacing: 0; margin: 10px auto!important;">
@@ -342,9 +365,10 @@ router.post('/sendtestmail', async (req, res) => {
     const trackingPixel = `<img src="${apiConfig.baseURL}/api/stud/track-email-open?emailId=${encodeURIComponent(emailData.recipient)}&userId=${userId}&campaignId=${campaignId}&t=${Date.now()}" width="1" height="1" style="display:none;" />`;
 
     const mailOptions = {
-      from: `"${emailData.aliasName}" <${email}>`,
+      from: `"${aliasName}" <${email}>`,
       to: emailData.recipient,
       subject: emailData.subject,
+      replyTo:replyTo,
       attachments: Attachments,
 
       html: `
@@ -447,7 +471,7 @@ router.post('/sendexcelEmail', async (req, res) => {
     subject,
     aliasName,
     body,
-    bgColor, attachments,
+    bgColor, attachments,replyTo,
     previewtext,
     userId,
     campaignId
@@ -577,6 +601,26 @@ router.post('/sendexcelEmail', async (req, res) => {
     </td>
 </tr>
 </table>`
+
+
+case 'break':
+    return `<table style="width:100%; border-collapse:collapse; margin:10px auto !important;">
+      <tr>
+        <td style="padding: 0;">
+          <hr style="width:100%;background-color:#000000;margin: 30px 0px;" />
+        </td>
+      </tr>
+    </table>`;
+
+    case 'gap':
+    return `<table style="width:100%; border-collapse:collapse; margin: ${item.style.margin || '30px 0'};">
+      <tr>
+        <td style="padding: 0;">
+          <div style="width: ${item.style.width || '100%'}; height: ${item.style.height || '40px'}; margin: 0 auto;"></div>
+        </td>
+      </tr>
+    </table>`;
+
 
         case 'textwithimage':
           return `<table class="image-text" style="width:100%;height:220px !important;border-collapse:seperate;border-radius:10px;margin:15px 0px !important;${styleString};">
@@ -712,6 +756,7 @@ router.post('/sendexcelEmail', async (req, res) => {
       from: `"${aliasName}" <${email}>`,
       to: recipientEmail,
       subject: subject,
+      replyTo:replyTo,
       attachments: Attachments,
 
       html: `
@@ -819,7 +864,7 @@ router.post('/sendbulkEmail', async (req, res) => {
   const {
     recipientEmail,
     subject,
-    aliasName,
+    aliasName,replyTo,
     body,
     bgColor, attachments,
     previewtext,
@@ -937,6 +982,24 @@ router.post('/sendbulkEmail', async (req, res) => {
       </tr>
   </table>`;
 
+  
+case 'break':
+  return `<table style="width:100%; border-collapse:collapse; margin:10px auto !important;">
+    <tr>
+      <td style="padding: 0;">
+        <hr style="width:100%;background-color:#000000;margin: 30px 0px;" />
+      </td>
+    </tr>
+  </table>`;
+
+  case 'gap':
+  return `<table style="width:100%; border-collapse:collapse; margin: ${item.style.margin || '30px 0'};">
+    <tr>
+      <td style="padding: 0;">
+        <div style="width: ${item.style.width || '100%'}; height: ${item.style.height || '40px'}; margin: 0 auto;"></div>
+      </td>
+    </tr>
+  </table>`;
 
         case 'cardimage':
           return `
@@ -1089,6 +1152,7 @@ router.post('/sendbulkEmail', async (req, res) => {
       from: `"${aliasName}" <${email}>`,
       to: recipientEmail,
       subject: subject,
+      replyTo:replyTo,
       attachments: Attachments,
       html: `
         <html>
@@ -1237,10 +1301,106 @@ router.post('/groups', async (req, res) => {
     });
   }
 });
+//create Replyto
+router.post('/replyTo', async (req, res) => {
+  const { replyTo,userId } = req.body;
 
+  if (!userId) {
+    return res.status(400).send({
+      message: "User ID is required"
+    });
+  }
+
+  try {
+    // Check if the replyto already exists for the user
+    const existingReply = await Replyto.findOne({
+      replyTo,
+      user: userId
+    });
+    if (existingReply) {
+      return res.status(400).send({
+        message: "Reply to Mail already exists for this user"
+      });
+    }
+    // Create a new reply to
+    const replytonew = new Replyto({
+      replyTo,
+      user: userId
+    }); 
+    await replytonew.save();
+    res.status(201).send(replytonew);
+  } catch (error) {
+    console.error(error);
+    res.status(500).send({
+      message: "Error creating reply to mail"
+    });
+  }
+});
+
+//getting all replyto
+router.get('/replyTo/:userId', async (req, res) => {
+  try {
+    const replyTo = await Replyto.find({
+      user: req.params.userId
+    });
+    res.json(replyTo);
+  } catch (error) {
+    res.status(500).json({
+      message: 'Error fetching replyto mail'
+    });
+  }
+});
+//create aliasname
+router.post('/aliasname', async (req, res) => {
+  const { aliasname,userId } = req.body;
+
+  if (!userId) {
+    return res.status(400).send({
+      message: "User ID is required"
+    });
+  }
+
+  try {
+    // Check if the alias name already exists for the user
+    const existingName = await Aliasname.findOne({
+      aliasname,
+      user: userId
+    });
+    if (existingName) {
+      return res.status(400).send({
+        message: "Alias name already exists for this user"
+      });
+    }
+    // Create a new aliasname
+    const aliasnamenew = new Aliasname({
+      aliasname,
+      user: userId
+    }); 
+    await aliasnamenew.save();
+    res.status(201).send(aliasnamenew);
+  } catch (error) {
+    console.error(error);
+    res.status(500).send({
+      message: "Error creating aliasname"
+    });
+  }
+});
+
+//getting all aliasname
+router.get('/aliasname/:userId', async (req, res) => {
+  try {
+    const aliasname = await Aliasname.find({
+      user: req.params.userId
+    });
+    res.json(aliasname);
+  } catch (error) {
+    res.status(500).json({
+      message: 'Error fetching aliasname'
+    });
+  }
+});
 
 //add student to selected group through excel
-
 router.post("/students/upload", async (req, res) => {
   try {
     // console.log("Received data:", req.body); // Debugging
@@ -1292,6 +1452,21 @@ router.get('/payment-history/:userId', async (req, res) => {
   }
 });
 
+//grt latest payment-history
+router.get('/payment-history-latest/:userId', async (req, res) => {
+  try {
+    const latestPayment = await PaymentHistory.findOne({ userId: req.params.userId })
+      .sort({ createdAt: -1 }); // Sort descending, latest first
+
+    if (!latestPayment) {
+      return res.status(404).json({ message: 'No payment history found' });
+    }
+
+    res.json(latestPayment); // Return only the latest one
+  } catch (error) {
+    res.status(500).json({ message: 'Error fetching latest payment' });
+  }
+});
 
 
 //getting user
@@ -1385,7 +1560,17 @@ router.post("/students/check-duplicate", async (req, res) => {
     res.status(500).json({ message: "Server error during duplicate check." });
   }
 });
-
+// 1. GET route to fetch all user payment history
+// 1. GET route to fetch all user payment history with user details
+router.get('/all-payment-history', async (req, res) => {
+  try {
+    const allPaymentHistory = await PaymentHistory.find().populate('userId', 'username email'); 
+    res.json(allPaymentHistory);
+  } catch (error) {
+    console.error("Error fetching all user history:", error);
+    res.status(500).json({ message: "Server error while fetching all user history." });
+  }
+});
 
 // 3. GET route to fetch all students, with optional filtering by group
 router.get('/students', async (req, res) => {
@@ -1670,7 +1855,7 @@ router.post("/camhistory", async (req, res) => {
       scheduledTime,
       attachments,
       status,
-      progress, aliasName,
+      progress, aliasName,replyTo,
       senddate,
       previewContent,
       exceldata,
@@ -1692,7 +1877,7 @@ router.post("/camhistory", async (req, res) => {
       sentEmails,
       attachments,
       failedEmails,
-      scheduledTime, aliasName,
+      scheduledTime, aliasName,replyTo,
       status,
       progress,
       senddate,

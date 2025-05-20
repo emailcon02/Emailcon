@@ -32,9 +32,15 @@ function AdminDashboard() {
     localStorage.removeItem("adminToken");
     navigate("/user-login");
   };
+  const handlecreateuser = () => {  
+    navigate("/admin-user-create");
+  };
 
   const handleenroll = () => {
     navigate("/user-enroll");
+  };
+  const handleallpayment = () => {  
+    navigate("/all-user-payment-history");
   };
 
   const handlepaymentview = (userId) => {
@@ -94,6 +100,12 @@ function AdminDashboard() {
           <h2 className="admin-dashboard-header">Emailcon Admin Dashboard</h2>
         </div>
         <div className="admin-nav-btn">
+        <button onClick={handlecreateuser} className="admin-nav-buttonnew">
+            <span className="nav-names">New employee</span>
+          </button>
+          <button onClick={handleallpayment} className="admin-nav-buttonnew">
+            <span className="nav-names">Payment History</span>
+          </button>
           <button onClick={handleenroll} className="admin-nav-buttonnew">
             <span className="nav-names">Demo Request</span>
           </button>
@@ -127,7 +139,7 @@ function AdminDashboard() {
               <tr key={user._id}>
                 <td>{user.email}</td>
                 <td>{user.username}</td>
-                <td>{user.password}</td>
+                <td>{user.password ? user.password.substring(0, 8) : ""}</td>
                 <td>{user.smtppassword ? user.smtppassword.substring(0, 8) : ""}</td>
                 <td>{user.isActive ? "Active" : "Inactive"}</td>
                 <td>
