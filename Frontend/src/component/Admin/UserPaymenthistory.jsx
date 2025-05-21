@@ -85,9 +85,10 @@ function UserPaymenthistory() {
       <table className="admin-dashboard-table">
       <thead>
     <tr>
+        <th>S.No</th>
       <th>Payment Date</th>
       <th>Amount</th>
-      <th>Duration (Days)</th>
+      <th>Plan Details(Days)</th>
       <th>Expiry Date</th>
       <th>Payment Status</th>
       <th>Payment Id</th>
@@ -97,6 +98,7 @@ function UserPaymenthistory() {
     {paymenthistory && paymenthistory.length > 0 ? (
       paymenthistory.map((payment) => (
         <tr key={payment._id}>
+          <td>{paymenthistory.indexOf(payment) + 1}</td>
           <td>{new Date(payment.createdAt).toLocaleDateString()}</td>
           <td>₹{payment.amount}</td>
           <td>{payment.duration}</td>

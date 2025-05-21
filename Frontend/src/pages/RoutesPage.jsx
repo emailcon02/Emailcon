@@ -31,6 +31,7 @@ import UserPaymenthistory from "../component/Admin/UserPaymenthistory";
 import Smtppage from "../component/Smtppage";
 import Createusers from "../component/Admin/Createusers";
 import AllUserPaymenthistory from "../component/Admin/AlluserPaymenthistory";
+import DashboardPage from "../component/Admin/DashboardPage";
 
 function RoutesPage() {
   const [isOnline, setIsOnline] = useState(navigator.onLine);
@@ -68,6 +69,7 @@ function RoutesPage() {
         <Route path="/register-form" element={<Form/>} />
         <Route path="/admin-login" element={<AdminLogin />} />
         <Route path="/admin-dashboard" element={<AdminDashboard />} />
+        <Route path="/super-admin-dashboard" element={<DashboardPage/>} />
         <Route path="/editor" element={<Mainpage />} />
         <Route path="/read-editor/:userId/:campaignId" element={<Readmainpage />} />
         <Route path="/click-editor/:userId/:campaignId" element={<Clickmainpage />} />

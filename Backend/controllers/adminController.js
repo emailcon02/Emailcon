@@ -7,7 +7,6 @@ import fs from "fs";
 import path from "path";
 import { uploadToS3 } from "../config/s3Uploder.js";
 import { decryptPassword } from "../config/encryption.js";
-import { Admin } from "mongodb";
 import Adminuser from "../models/Adminuser.js";
 export const getUsers = async (req, res) => {
   const users = await User.find({});

@@ -35,7 +35,7 @@ function AdminLogin() {
       if (response.data.success) {
         localStorage.setItem("adminToken", response.data.token);
         if (role === "super-admin") {
-          navigate("/admin-dashboard");
+          navigate("/super-admin-dashboard");
         } else if(role === "sub-admin") {
           navigate("/admin-user-create");
         }else if(role === "business-admin") {
@@ -127,11 +127,12 @@ function AdminLogin() {
                 required
               >
                 <option value="super-admin">Super-Admin</option>
-                {roles.map((r) => (
-    <option key={r} value={r}>
-      {r}
-    </option>
-  ))}
+                {[...new Set(roles)].map((r) => (
+  <option key={r} value={r}>
+    {r}
+  </option>
+))}
+
               </select>
             </div>
 

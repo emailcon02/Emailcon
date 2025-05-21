@@ -84,7 +84,10 @@ const Form = () => {
 
       if (response.status === 201) {
         toast.success("Details submitted successfully!");
+        setTimeout(() => {
         navigate("/");
+        }
+        , 3000);
 
         setFormData({
           name: "",

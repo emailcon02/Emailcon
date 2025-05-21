@@ -13,7 +13,7 @@
 .forms_content {
     display: flex;
     width: 100%;
-    height: 110vh;
+    /* height: 110vh; */
     margin-left: auto;
     margin-right: auto;
 }
@@ -46,14 +46,13 @@
 
 .img-form {
       flex: 2;
-    width: 50%;
+    width: 45%;
     background-color: #2f327d;
     padding: 50px 20px;
     display:flex;
     flex-direction: column;
-    /* justify-content: center; */
     gap:20px;
-    position: sticky;
+    position: fixed;
     right: 0;
     top: 0;
     height: 100vh;
