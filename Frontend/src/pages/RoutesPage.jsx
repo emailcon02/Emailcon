@@ -3,7 +3,6 @@ import { BrowserRouter as Router, Routes, Route} from "react-router-dom";
 import Signup from "../component/Signup";
 import Login from "../component/Login";
 import AdminLogin from "../component/Admin/AdminLogin";
-import AdminDashboard from "../component/Admin/AdminDashboard";
 import Mainpage from "./Mainpage";
 import Home from "../component/Home";
 import CampaignTable from "../component/CampaignTable";
@@ -32,6 +31,8 @@ import Smtppage from "../component/Smtppage";
 import Createusers from "../component/Admin/Createusers";
 import AllUserPaymenthistory from "../component/Admin/AlluserPaymenthistory";
 import DashboardPage from "../component/Admin/DashboardPage";
+import UserDetail from "../component/Admin/UserDetail";
+import ExpiredUser from "../component/Admin/ExpiredUser";
 
 function RoutesPage() {
   const [isOnline, setIsOnline] = useState(navigator.onLine);
@@ -68,7 +69,8 @@ function RoutesPage() {
         <Route path="/all-user-payment-history" element={<AllUserPaymenthistory/>} />
         <Route path="/register-form" element={<Form/>} />
         <Route path="/admin-login" element={<AdminLogin />} />
-        <Route path="/admin-dashboard" element={<AdminDashboard />} />
+        <Route path="/user-detail" element={<UserDetail />} />
+        <Route path="/expired-users" element={<ExpiredUser />} />
         <Route path="/super-admin-dashboard" element={<DashboardPage/>} />
         <Route path="/editor" element={<Mainpage />} />
         <Route path="/read-editor/:userId/:campaignId" element={<Readmainpage />} />

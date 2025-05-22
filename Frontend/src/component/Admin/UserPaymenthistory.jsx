@@ -1,17 +1,25 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import "./AdminDashboard.css";
-import { FaSignOutAlt } from "react-icons/fa";
+import { FaSearch } from "react-icons/fa";
 import { useNavigate, useParams } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import apiConfig from "../../apiconfig/apiConfig";
+import Header from "./Header";
+import AdminSidebar from "./AdminSidebar";
 
 function UserPaymenthistory() {
   const { userId} = useParams();    
   const [user, setUser] = useState([]);
   const [paymenthistory, setPaymenthistory] = useState([]);
-
+   const [filteredPayments, setFilteredPayments] = useState([]);
+    const [searchTerm, setSearchTerm] = useState("");
+    const [fromDate, setFromDate] = useState("");
+    const [toDate, setToDate] = useState("");
+    const [rowsPerPage, setRowsPerPage] = useState(20);
+    const [currentPage, setCurrentPage] = useState(1);
+  
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -56,6 +64,54 @@ function UserPaymenthistory() {
     fetchUser();
   }, [userId, navigate]); // Only run when user ID or navigate changes
 
+ useEffect(() => {
+    filterPayments();
+  }, [searchTerm, fromDate, toDate, paymenthistory]);
+
+  const filterPayments = () => {
+    let filtered = [...paymenthistory];
+
+    // Apply search
+    if (searchTerm) {
+      const term = searchTerm.toLowerCase();
+      filtered = filtered.filter((payment) => {
+        return (
+          payment.userId?.username?.toLowerCase().includes(term) ||
+          payment.paymentStatus?.toLowerCase().includes(term) ||
+          payment.duration?.toLowerCase().includes(term) ||
+          payment.razorpayPaymentId?.toLowerCase().includes(term)
+        );
+      });
+    }
+
+    // Apply date filter
+    if (fromDate || toDate) {
+      filtered = filtered.filter((payment) => {
+        const paymentDate = new Date(payment.createdAt);
+        const from = fromDate ? new Date(fromDate) : null;
+        const to = toDate ? new Date(toDate) : null;
+
+        const afterFrom = !from || paymentDate >= from;
+        const beforeTo = !to || paymentDate <= to;
+
+        return afterFrom && beforeTo;
+      });
+    }
+
+    setFilteredPayments(filtered);
+    setCurrentPage(1); // Reset to first page after filtering
+  };
+
+  const indexOfLast = currentPage * rowsPerPage;
+  const indexOfFirst = indexOfLast - rowsPerPage;
+  const currentUsers = filteredPayments.slice(indexOfFirst, indexOfLast);
+  const totalPages = Math.ceil(filteredPayments.length / rowsPerPage);
+
+  const resetFilter = () => {
+    setSearchTerm("");
+    setFromDate("");
+    setToDate("");
+  };
 
 
   const handleLogout = () => {
@@ -64,24 +120,65 @@ function UserPaymenthistory() {
 
 
   return (
-    <div className="admin-dashboard-page">
-      <div className="admin-navnew">
-        <div>
-          <h2 className="admin-dashboard-header">User Payment History</h2>
-        </div>
-        <div className="admin-nav-btn">
-          <button onClick={handleLogout} className="admin-nav-buttonnew">
-            <span className="admin-nav-icons">
-              <FaSignOutAlt />
-            </span>{" "}
-            <span className="nav-names">Back</span>
-          </button>
-        </div>
-      </div>
-
-      <h2 className="admin-dashboard-payment-heading">{user.username} Payment Details</h2>
-
-      <div className="cam-scroll" style={{ overflowX: "auto" }}>
+    <>
+    <Header />
+    <AdminSidebar />
+    <div className="admin-dashboard-page admin-main-content">
+          <div className="search-bar-search">
+                  <div className="search-container-table">
+                    <FaSearch className="search-icon" />
+                    <input
+                      type="text"
+                      placeholder="Search across all columns..."
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      className="search-input"
+                    />
+                  </div>
+                </div>
+        
+                <div className="admin-dashboard-table-header">
+                  <div className="rows-dropdown-left">
+                    <label htmlFor="rowsPerPage">Rows per page:</label>
+                    <select
+                      id="rowsPerPage"
+                      value={rowsPerPage}
+                      onChange={(e) => {
+                        const value =
+                          e.target.value === "all"
+                            ? filteredPayments.length
+                            : parseInt(e.target.value);
+                        setRowsPerPage(value);
+                        setCurrentPage(1);
+                      }}
+                    >
+                      <option value={30}>30</option>
+                      <option value={50}>50</option>
+                      <option value={100}>100</option>
+                      <option value="all">All</option>
+                    </select>
+                  </div>
+        
+                  <div className="date-filter">
+                    <label>From:</label>
+                    <input
+                      type="date"
+                      value={fromDate}
+                      onChange={(e) => setFromDate(e.target.value)}
+                    />
+        
+                    <label>To:</label>
+                    <input
+                      type="date"
+                      value={toDate}
+                      onChange={(e) => setToDate(e.target.value)}
+                    />
+        
+                    <button onClick={resetFilter}>Reset</button>
+                  </div>
+                </div>
+        
+           <div className="cam-scroll" style={{ overflowX: "auto" }}>
       <table className="admin-dashboard-table">
       <thead>
     <tr>
@@ -95,8 +192,8 @@ function UserPaymenthistory() {
     </tr>
   </thead>
   <tbody>
-    {paymenthistory && paymenthistory.length > 0 ? (
-      paymenthistory.map((payment) => (
+  {currentUsers && currentUsers.length > 0 ? (
+                currentUsers.map((payment) => (
         <tr key={payment._id}>
           <td>{paymenthistory.indexOf(payment) + 1}</td>
           <td>{new Date(payment.createdAt).toLocaleDateString()}</td>
@@ -117,6 +214,27 @@ function UserPaymenthistory() {
   </tbody>
 </table>
       </div>
+        {/* Pagination */}
+        <div className="pagination-container">
+          <div className="pagination-controls">
+            <button
+              disabled={currentPage === 1}
+              onClick={() => setCurrentPage((p) => p - 1)}
+            >
+              Prev
+            </button>
+            <span>
+              Page {currentPage} of {totalPages}
+            </span>
+            <button
+              disabled={currentPage === totalPages}
+              onClick={() => setCurrentPage((p) => p + 1)}
+            >
+              Next
+            </button>
+          </div>
+        </div>
+
 
       <ToastContainer
         className="custom-toast"
@@ -130,6 +248,7 @@ function UserPaymenthistory() {
         theme="light"
       />
     </div>
+    </>
   );
 }
 

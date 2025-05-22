@@ -9,7 +9,7 @@ import Header from "./Header";
 import AdminSidebar from "./AdminSidebar";
 import * as XLSX from "xlsx";
 import jsPDF from "jspdf";
-import autoTable from "jspdf-autotable"; // 👈 import the plugin
+import autoTable from "jspdf-autotable"; 
 
 function AllUserPaymenthistory() {
   const [paymenthistory, setPaymenthistory] = useState([]);

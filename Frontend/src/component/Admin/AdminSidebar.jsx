@@ -12,11 +12,11 @@ function AdminSidebar() {
 
   const items = [
     { icon: <i className="fas fa-tachometer-alt icon-hover"></i>, label: "Dashboard", path: "/super-admin-dashboard" },
-    { icon: <i className="fas fa-users icon-hover"></i>, label: "User Details", path: "/admin-dashboard" },
+    { icon: <i className="fas fa-users icon-hover"></i>, label: "User Details", path: "/user-detail" },
     { icon: <i className="fas fa-credit-card icon-hover"></i>, label: "Payment Details", path: "/all-user-payment-history" },
     { icon: <i className="fas fa-user-slash icon-hover"></i>, label: "Expired Users", path: "/expired-users" },
     { icon: <i className="fas fa-clipboard-list icon-hover"></i>, label: "Demo Request", path: "/user-enroll" },
-    { icon: <i className="fas fa-user-plus icon-hover"></i>, label: "Add Admin", path: "/admin-user-create" },
+    { icon: <i className="fas fa-user-plus icon-hover"></i>, label: "Add Employee", path: "/admin-user-create" },
     { icon: <i className="fas fa-sign-out-alt icon-hover"></i>, label: "Logout", path: "/admin-login", isLogout: true },
   ];
 

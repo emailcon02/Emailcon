@@ -36,7 +36,7 @@ function AdminLogin() {
         localStorage.setItem("adminToken", response.data.token);
         if (role === "super-admin") {
           navigate("/super-admin-dashboard");
-        } else if(role === "sub-admin") {
+        } else if(role === "admin") {
           navigate("/admin-user-create");
         }else if(role === "business-admin") {
           navigate("/admin-dashboard");
