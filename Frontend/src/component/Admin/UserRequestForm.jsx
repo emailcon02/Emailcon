@@ -7,7 +7,7 @@ import "react-toastify/dist/ReactToastify.css";
 import apiconfig from "../../apiconfig/apiConfig.js";
 import Header from "./Header.jsx";
 import Sidebar from "./AdminSidebar.jsx";
-function AdminUserform() {
+function UserRequestForm() {
   const [users, setUsers] = useState([]);
     const [filterRequest, setFilterRequest] = useState([]);
     const [searchTerm, setSearchTerm] = useState("");
@@ -15,6 +15,19 @@ function AdminUserform() {
     const [toDate, setToDate] = useState("");
     const [rowsPerPage, setRowsPerPage] = useState(20);
     const [currentPage, setCurrentPage] = useState(1);
+    const [sortOrder, setSortOrder] = useState("asc");
+const [isRemarkModalOpen, setIsRemarkModalOpen] = useState(false);
+const [selectedRemark, setSelectedRemark] = useState('');
+
+const openRemarkModal = (remark) => {
+  setSelectedRemark(remark);
+  setIsRemarkModalOpen(true);
+};
+
+const closeRemarkModal = () => {
+  setIsRemarkModalOpen(false);
+};
+
 
 
 useEffect(() => {
@@ -34,6 +47,18 @@ useEffect(() => {
   useEffect(() => {
     filteredRequest();
   }, [searchTerm, fromDate, toDate, users]);
+
+  const handleSortByDate = () => {
+    const sorted = [...filterRequest].sort((a, b) => {
+      const dateA = new Date(a.createdAt);
+      const dateB = new Date(b.createdAt);
+      return sortOrder === "desc" ? dateA - dateB : dateB - dateA;
+    });
+  
+    setFilterRequest(sorted);
+    setSortOrder(sortOrder === "asc" ? "desc" : "asc");
+  };
+  
 
   const filteredRequest = () => {
     let filtered = [...users];
@@ -57,19 +82,21 @@ useEffect(() => {
       });
     }
 
-    // Apply date filter
-    if (fromDate || toDate) {
-      filtered = filtered.filter((payment) => {
-        const paymentDate = new Date(payment.createdAt);
-        const from = fromDate ? new Date(fromDate) : null;
-        const to = toDate ? new Date(toDate) : null;
+ // Date filter
+  if (fromDate || toDate) {
+    filtered = filtered.filter((payment) => {
+      const paymentDate = new Date(payment.createdAt);
+      const start = fromDate ? new Date(fromDate) : null;
+      const end = toDate
+        ? new Date(new Date(toDate).setHours(23, 59, 59, 999))
+        : null;
 
-        const afterFrom = !from || paymentDate >= from;
-        const beforeTo = !to || paymentDate <= to;
+      const afterFrom = !start || paymentDate >= start;
+      const beforeTo = !end || paymentDate <= end;
 
-        return afterFrom && beforeTo;
-      });
-    }
+      return afterFrom && beforeTo;
+    });
+  }
 
     setFilterRequest(filtered);
     setCurrentPage(1); // Reset to first page after filtering
@@ -153,8 +180,10 @@ useEffect(() => {
           <thead>
             <tr>
               <th>S.No</th>
-              <th>Request Date</th>
-              <th>Name</th>
+ <th onClick={handleSortByDate} style={{ cursor: "pointer" }}>
+        Date {sortOrder === "asc" ? "▲" : "▼"}
+      </th>
+                    <th>Name</th>
               <th>Email</th>
               <th>Phone</th>
               <th>State</th>
@@ -180,8 +209,33 @@ useEffect(() => {
                 <td>{user.gender}</td>
                 <td>{user.type}</td>
                 <td>{user.profession}</td>
-                <td>{user.status}</td>
-                <td>{user.remarks}</td>             
+                <td>
+                    {user.status === "pending" ? (
+                      <span style={{ color: "orange" }}>Pending</span>
+                    ) : user.status === "purchased" ? (
+                      <span style={{ color: "green" }}>Purchased</span>
+                    ) : (
+                      <span style={{ color: "red" }}>Not Interested</span>
+                    )}
+                </td>
+<td
+  style={{
+    maxWidth: '150px',
+    cursor: 'pointer',
+    color: '#007bff',
+    textDecoration: 'underline'
+  }}
+  onClick={() => openRemarkModal(user.remarks)}
+>
+  {user.remarks
+    ? user.remarks.length > 20
+      ? `${user.remarks.slice(0, 20)}...`
+      : user.remarks
+    : <span style={{ fontSize: "12px", color: "#888" }}>N/A</span>
+  }
+</td>
+
+
               </tr>
             ))
             ) : (
@@ -216,6 +270,44 @@ useEffect(() => {
             </button>
           </div>
         </div>
+{isRemarkModalOpen && (
+  <div style={{
+    position: 'fixed',
+    top: 0, left: 0, right: 0, bottom: 0,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    zIndex: 1000
+  }}>
+    <div style={{
+      backgroundColor: '#fff',
+      padding: '20px',
+      borderRadius: '10px',
+      maxWidth: '400px',
+      width: '90%',
+      boxShadow: '0 5px 15px rgba(0,0,0,0.3)',
+      fontFamily: 'Arial, sans-serif'
+    }}>
+      <h4 style={{ marginTop: 0 }}>Full Remark</h4>
+      <p style={{ whiteSpace: 'pre-wrap', margin: '20px 0' }}>{selectedRemark || "N/A"}</p>
+      <button
+        onClick={closeRemarkModal}
+        style={{
+          padding: '8px 16px',
+          backgroundColor: '#f8c604',
+          color: '#fff',
+          border: 'none',
+          borderRadius: '5px',
+          cursor: 'pointer'
+        }}
+      >
+        Close
+      </button>
+    </div>
+  </div>
+)}
+
 
       <ToastContainer
         className="custom-toast"
@@ -233,4 +325,4 @@ useEffect(() => {
   );
 }
 
-export default AdminUserform;
+export default UserRequestForm;

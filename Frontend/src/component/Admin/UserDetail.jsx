@@ -19,6 +19,8 @@ function UserDetail() {
     const [toDate, setToDate] = useState("");
     const [rowsPerPage, setRowsPerPage] = useState(20);
     const [currentPage, setCurrentPage] = useState(1);
+    const [sortOrder, setSortOrder] = useState("asc");
+    
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -30,8 +32,10 @@ function UserDetail() {
         const response = await axios.get(
           `${apiconfig.baseURL}/api/admin/users`
         );
-        setUsers(response.data);
-      };
+    const sortedUsers = response.data.sort(
+      (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+    );
+    setUsers(sortedUsers);      };
       fetchUsers();
     }
   }, [navigate]);
@@ -41,7 +45,17 @@ function UserDetail() {
       filterUsers();
     }, [searchTerm, fromDate, toDate, users]);
   
+  const handleSortByDate = () => {
+    const sorted = [...filteredUsers].sort((a, b) => {
+      const dateA = new Date(a.createdAt);
+      const dateB = new Date(b.createdAt);
+      return sortOrder === "desc" ? dateA - dateB : dateB - dateA;
+    });
 
+    setFilteredUsers(sorted);
+    setSortOrder(sortOrder === "asc" ? "desc" : "asc");
+  };
+  
   const filterUsers = () => {
     let filtered = [...users];
 
@@ -60,19 +74,21 @@ function UserDetail() {
       });
     }
 
-    // Apply date filter
-    if (fromDate || toDate) {
-      filtered = filtered.filter((user) => {
-        const paymentDate = new Date(user.createdAt);
-        const from = fromDate ? new Date(fromDate) : null;
-        const to = toDate ? new Date(toDate) : null;
+        // Date filter
+  if (fromDate || toDate) {
+    filtered = filtered.filter((user) => {
+      const userDate = new Date(user.createdAt);
+      const start = fromDate ? new Date(fromDate) : null;
+      const end = toDate
+        ? new Date(new Date(toDate).setHours(23, 59, 59, 999))
+        : null;
 
-        const afterFrom = !from || paymentDate >= from;
-        const beforeTo = !to || paymentDate <= to;
+      const afterFrom = !start || userDate >= start;
+      const beforeTo = !end || userDate <= end;
 
-        return afterFrom && beforeTo;
-      });
-    }
+      return afterFrom && beforeTo;
+    });
+  }
 
     setFilteredUsers(filtered);
     setCurrentPage(1); 
@@ -165,7 +181,7 @@ function UserDetail() {
               onChange={(e) => {
                 const value =
                   e.target.value === "all"
-                    ? filteredPayments.length
+                    ? filteredUsers.length
                     : parseInt(e.target.value);
                 setRowsPerPage(value);
                 setCurrentPage(1);
@@ -206,7 +222,10 @@ function UserDetail() {
               <th>Email</th>
               <th>Password</th>
               <th>SMTP Passcode</th>
-              <th>Signup Date</th>
+                <th onClick={handleSortByDate} style={{ cursor: "pointer" }}>
+        Signup Date {sortOrder === "asc" ? "▲" : "▼"}
+      </th>  
+              <th>Contact No</th>
               <th>Account Status</th>
               <th>Action</th>
               <th>Send Login</th>
@@ -215,14 +234,15 @@ function UserDetail() {
           </thead>
           <tbody>
           {currentUsers && currentUsers.length > 0 ? (
-                currentUsers.map((user) => (
+                currentUsers.map((user, index) => (
               <tr key={user._id}>
-                <td>{users.indexOf(user) + 1}</td>
+                  <td>{indexOfFirst + index + 1}</td>
                 <td>{user.username}</td>
                 <td>{user.email}</td>
                 <td>{user.password ? user.password.substring(0, 8) : ""}</td>
                 <td>{user.smtppassword ? user.smtppassword.substring(0, 8) : ""}</td>
                 <td>{new Date(user.createdAt).toLocaleDateString()}</td>
+                <td>{user.phone || "N/A"}</td>
                 <td>{user.isActive ? "Active" : "Inactive"}</td>
                 <td>
                   {statusLoadingId === user._id ? (

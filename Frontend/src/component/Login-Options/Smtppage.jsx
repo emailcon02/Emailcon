@@ -1,10 +1,10 @@
 import React, { useState } from "react";
 import { FaInfoCircle } from "react-icons/fa";
 import "./SmtpPage.css"; // Link to external CSS
-import smtp from "../Images/smtp passwords.png"
-import smtpmodal from "../Images/bgsmtp.png"
+import smtp from "../../Images/smtp passwords.png"
+import smtpmodal from "../../Images/bgsmtp.png"
 import axios from "axios";
-import apiConfig from "../apiconfig/apiConfig";
+import apiConfig from "../../apiconfig/apiConfig";
 import { useLocation, useNavigate } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";

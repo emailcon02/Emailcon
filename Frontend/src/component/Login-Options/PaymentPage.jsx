@@ -4,8 +4,8 @@ import { useParams, useNavigate } from "react-router-dom";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import "./PaymentPage.css";
-import apiconfig from "../apiconfig/apiConfig";
-import payment from "../Images/Payment.svg";
+import apiconfig from "../../apiconfig/apiConfig";
+import payment from "../../Images/Payment.svg";
 
 
 const DURATION_OPTIONS = [

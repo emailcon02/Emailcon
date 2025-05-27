@@ -2,7 +2,7 @@ import React, { useState, useRef } from "react";
 import { FaSignOutAlt, FaEdit, FaEye, FaEyeSlash } from "react-icons/fa";
 import axios from "axios";
 import "./EditProfileModal.css";
-import apiConfig from "../apiconfig/apiConfig";
+import apiConfig from "../../apiconfig/apiConfig";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 

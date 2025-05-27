@@ -1,38 +1,39 @@
 import React, { useEffect, useState } from "react";
 import { BrowserRouter as Router, Routes, Route} from "react-router-dom";
-import Signup from "../component/Signup";
-import Login from "../component/Login";
-import AdminLogin from "../component/Admin/AdminLogin";
-import Mainpage from "./Mainpage";
-import Home from "../component/Home";
-import CampaignTable from "../component/CampaignTable";
-import ErrorPage from "../component/ErrorPage";
-import Campaign from "../component/Campaign";
-import ReadReport from "../component/ReadReport";
-import Readmainpage from "./Readmainpage";
-import Clickmainpage from "./Clickmainpage";
-import Clicksinglemainpage from "./Clicksinglemainpage";
-import TemMainpage from "./TemMainpage";
-import Birthdayeditor from "./Birthdayeditor";
-import Paymenteditor from "./Paymenteditor";
-import RemainderTable from "../component/RemainderTable";
-import Readreportremainder from "../component/Readreportremainder";
-import NoInternet from "../component/NoInternet"; // Import NoInternet
-import Forgetpassword from "../component/Forgetpassword";
-import Verifyotp from "../component/Verifyotp";
-import Resetpasswords from "../component/Resetpassword";
+import Login from "../../component/Login-Options/Login";
+import AdminLogin from "../../component/Admin/AdminLogin";
+import Mainpage from "../Mainpage";
+import Home from "../../component/Campaign-Creation/Home";
+import CampaignTable from "../../component/Campaign-Creation/CampaignTable";
+import ErrorPage from "../../component/Campaign-Creation/ErrorPage";
+import Campaign from "../../component/Campaign-Creation/Campaign";
+import ReadReport from "../../component/Campaign-Creation/ReadReport";
+import Readmainpage from "../Readmainpage";
+import Clickmainpage from "../Clickmainpage";
+import Clicksinglemainpage from "../Clicksinglemainpage";
+import TemMainpage from "../TemMainpage";
+import Birthdayeditor from "../Birthdayeditor";
+import Paymenteditor from "../Paymenteditor";
+import RemainderTable from "../../component/Campaign-Creation/RemainderTable";
+import Readreportremainder from "../../component/Campaign-Creation/Readreportremainder";
+import NoInternet from "../../component/Campaign-Creation/NoInternet"; // Import NoInternet
+import Forgetpassword from "../../component/Login-Options/Forgetpassword";
+import Verifyotp from "../../component/Login-Options/Verifyotp";
+import Resetpasswords from "../../component/Login-Options/Resetpassword";
 import Frontpageroute from "./Frontpageroute";
-import Form from "../component/Frontpage/Form";
-import AdminUserform from "../component/Admin/AdminUserform";
-import PaymentPage from "../component/PaymentPage";
-import SignupOption from "../component/SignupOption";
-import UserPaymenthistory from "../component/Admin/UserPaymenthistory";
-import Smtppage from "../component/Smtppage";
-import Createusers from "../component/Admin/Createusers";
-import AllUserPaymenthistory from "../component/Admin/AlluserPaymenthistory";
-import DashboardPage from "../component/Admin/DashboardPage";
-import UserDetail from "../component/Admin/UserDetail";
-import ExpiredUser from "../component/Admin/ExpiredUser";
+import Form from "../../component/Frontpage/Form";
+import PaymentPage from "../../component/Login-Options/PaymentPage";
+import SignupOption from "../../component/Login-Options/SignupOption";
+import UserPaymenthistory from "../../component/Admin/UserPaymenthistory";
+import Smtppage from "../../component/Login-Options/Smtppage";
+import Createusers from "../../component/Admin/Createusers";
+import AllUserPaymenthistory from "../../component/Admin/AlluserPaymenthistory";
+import DashboardPage from "../../component/Admin/DashboardPage";
+import UserDetail from "../../component/Admin/UserDetail";
+import ExpiredUser from "../../component/Admin/ExpiredUser";
+import UserRequestForm from "../../component/Admin/UserRequestForm";
+import Signup from "../../component/Login-Options/Signup";
+import UserDemoRequest from "../../component/Business-Admin/UserDemoRequest";
 
 function RoutesPage() {
   const [isOnline, setIsOnline] = useState(navigator.onLine);
@@ -60,9 +61,10 @@ function RoutesPage() {
         <Route path="/signup" element={<Signup />} />
         <Route path="/user-login" element={<Login />} />
         <Route path="/" element={<Frontpageroute />} />
-        <Route path="/user-enroll" element={<AdminUserform />} />
+        <Route path="/user-enroll" element={<UserRequestForm />} />
         <Route path="/signup-option/:userId" element={<SignupOption />} />
         <Route path="/admin-user-create" element={<Createusers />} />
+        <Route path="/business-admin-dashboard" element={<UserDemoRequest />} />
         <Route path="/smtppage" element={<Smtppage />} />   
         <Route path="/userpayment/:userId" element={<PaymentPage/>} />
         <Route path="/user-payment-history/:userId" element={<UserPaymenthistory/>} />

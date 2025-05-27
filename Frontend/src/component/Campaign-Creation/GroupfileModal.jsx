@@ -5,9 +5,9 @@ import "./GroupModal.css";
 import * as XLSX from "xlsx";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import sampleexcels from "../Images/excelsheet.png";
+import sampleexcels from "../../Images/excelsheet.png";
 import { FaInfoCircle } from "react-icons/fa";
-import apiConfig from "../apiconfig/apiConfig.js";
+import apiConfig from "../../apiconfig/apiConfig.js";
 
 const GroupfileModal = ({ onClose }) => {
   const [uploadedData, setUploadedData] = useState([]);

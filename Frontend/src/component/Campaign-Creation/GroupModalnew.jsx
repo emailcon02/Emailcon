@@ -6,8 +6,8 @@ import * as XLSX from "xlsx";
 import { ToastContainer, toast } from "react-toastify";
 import { FaInfoCircle } from "react-icons/fa";
 import "react-toastify/dist/ReactToastify.css";
-import sampleexcels from "../Images/excelsheet.png";
-import apiConfig from "../apiconfig/apiConfig.js";
+import sampleexcels from "../../Images/excelsheet.png";
+import apiConfig from "../../apiconfig/apiConfig.js";
 
 const GroupModalnew = ({ onClose }) => {
   const [groupName, setGroupName] = useState("");

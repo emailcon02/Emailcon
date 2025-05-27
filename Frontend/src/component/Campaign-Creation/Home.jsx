@@ -10,8 +10,7 @@ import {
 import "./Home.css";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import apiConfig from "../apiconfig/apiConfig.js";
-import { MdNotificationsActive } from "react-icons/md";
+import apiConfig from "../../apiconfig/apiConfig.js";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import SendbulkModal from "./SendbulkModal.jsx";
@@ -19,17 +18,14 @@ import GroupfileModal from "./GroupfileModal";
 import GroupModalnew from "./GroupModalnew.jsx";
 import ListPage from "./ListPage.jsx";
 import { FaRegClipboard, FaTimes } from "react-icons/fa";
-// import { FaSignOutAlt } from "react-icons/fa";
 import { FaAddressBook} from "react-icons/fa";
-
-// import { FaUserCircle } from "react-icons/fa";
 import { MdWavingHand } from "react-icons/md";
-import imghome from "../Images/home-sidebar.jpg";
-import welcomeimg from "../Images/welcome.png";
+import imghome from "../../Images/home-sidebar.jpg";
+import welcomeimg from "../../Images/welcome.png";
 import GroupfilesingleModal from "./GroupfilesingleModal.jsx";
 import * as XLSX from "xlsx";
 import { FaInfoCircle } from "react-icons/fa";
-import sampleexcel from "../Images/excelsheet.png";
+import sampleexcel from "../../Images/excelsheet.png";
 import CustomHourSelect from "./CustomHourSelect.jsx";
 import EditProfile from "./EditProfile.jsx";
 
@@ -1396,7 +1392,7 @@ const handlebirthDelete = async (templateId) => {
           : "Account expired"}
       </p>
       <button className="upgrade-btn-home" onClick={handlepayment}>
-        Upgrade
+        Renew
       </button>
     </div>
   )}
@@ -1643,7 +1639,6 @@ const handlebirthDelete = async (templateId) => {
                       value=""
                       disabled={step < 3}
                       className="select-variable"
-
                     >
                       <option value="" disabled className="template-title">
                         Add Variable
@@ -1657,7 +1652,6 @@ const handlebirthDelete = async (templateId) => {
                         </option>
                       ))}
                     </select>
-
                     {/* Show fields only for the selected heading */}
                     {selectedGroupsub && (
                       <div className="dropdown-container-sub">

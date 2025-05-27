@@ -8,10 +8,49 @@ import path from "path";
 import { uploadToS3 } from "../config/s3Uploder.js";
 import { decryptPassword } from "../config/encryption.js";
 import Adminuser from "../models/Adminuser.js";
+
 export const getUsers = async (req, res) => {
   const users = await User.find({});
   res.json(users);
 };
+export const editAdminUser = async (req, res) => {
+  const { id } = req.params;
+  const { email, username, password, role } = req.body;
+
+  try {
+    const user = await Adminuser.findById(id);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    user.email = email;
+    user.username = username;
+    user.password = password;
+    user.role = role;
+
+    await user.save();
+    res.status(200).json({ message: "User updated successfully" });
+  } catch (error) {
+    console.error("Error updating user:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+export const deleteAdminUser = async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const user = await Adminuser.findByIdAndDelete(id);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    res.status(200).json({ message: "User deleted successfully" });
+  } catch (error) {
+    console.error("Error deleting user:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+
 export const getUserform = async (req, res) => {
   const userform = await FormData.find({});
   res.json(userform);
@@ -518,7 +557,94 @@ export const sendCredentials = async (req, res) => {
 };
  
 
+//send admin credentials
+export const sendAdminCredentials = async (req, res) => {
+  const {
+    id
+  } = req.body; // Expecting the user ID from the request body
 
+  if (!id) {
+    return res.status(400).json({
+      message: "User ID is required",
+    });
+  }
+
+  try {
+    // Fetch the user details from the database
+    const user = await Adminuser.findById(id);
+
+    if (!user) {
+      return res.status(404).json({
+        message: "User not found",
+      });
+    }
+    // Define the email options
+    const mailOptions = {
+      from: `"Emailcon Support" <account-noreply@account.emailcon.in>`,
+      to: user.email,
+      subject: "Your Admin Login Credentials",
+      replyTo: "support@emailcon.in",
+      html: `
+       <body style="margin: 0; padding: 20px; font-family: Arial, sans-serif; background-color: #f7f7f7; color: #333;">
+  <table role="presentation" style="width: 100%; background-color: #fcfcfc; padding: 30px;" cellpadding="0" cellspacing="0">
+    <tr>
+      <td align="center">
+        <table role="presentation" style="max-width: 600px; width: 100%; background: #fff; border: 1px solid #e0e0e0; border-radius: 10px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);" cellpadding="0" cellspacing="0">
+          <tr>
+            <td align="center" style="background: #2f327d; color: white; padding: 20px; border-top-left-radius: 10px; border-top-right-radius: 10px;">
+              <div style="font-size: 50px; margin-bottom: 10px;">🔑</div>
+              <h1 style="margin: 0; font-size: 24px;">Email<span style="color: #f48c06;">con</span> Admin Login Credentials</h1>
+            </td>
+          </tr>
+          <tr>
+            <td align="center" style="padding: 20px;">
+              <p style="margin: 10px 0; font-size: 16px;">Hello <strong>${user.username}</strong>,</p>
+              <p style="margin: 10px 0; font-size: 16px;">Here are your login credentials:</p>
+              <p style="margin: 10px 0; font-size: 16px;"><strong>Email:</strong> ${user.email}</p>
+              <p style="margin: 10px 0; font-size: 16px;"><strong>Password:</strong> ${user.password}</p>
+              <p style="margin: 10px 0; font-size: 14px; text-align: center; font-weight: bold;">
+                &#8220;Please keep this info safe. For best security practices, it's recommended to change your password and avoid sharing it with anyone.&#8221;
+              </p>
+            </td>
+          </tr>
+          <tr>
+            <td align="center" style="padding: 20px; background: #f7f7f7; border-bottom-left-radius: 10px; border-bottom-right-radius: 10px;">
+              <p style="font-size: 12px; color: #666;">
+                If you have any questions, contact us at
+                <a href="mailto:support@emailcon.in" style="color: #1a5eb8; text-decoration: none;">
+                  support@emailcon.in
+                </a>.
+              </p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+`,
+    };
+
+    // Send the email
+    accounttransporter.sendMail(mailOptions, (error) => {
+      if (error) {
+        console.error("Error sending email:", error);
+        return res.status(500).json({
+          message: "Failed to send credentials",
+        });
+      }
+      res.status(200).json({
+        message: "Credentials sent successfully",
+      });
+    });
+  } catch (error) {
+    console.error("Error fetching user or sending email:", error);
+    res.status(500).json({
+      message: "An error occurred",
+    });
+  }
+};
+ 
 
 // Create admin user
 
@@ -535,6 +661,7 @@ export const createAdminUser = async (req, res) => {
       username,
       password,
       role,
+      isActive: false,
     });
     await newAdminUser.save();
     res.status(201).json({ message: "Admin user created successfully" });
@@ -544,6 +671,93 @@ export const createAdminUser = async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 }
+
+//Admin user activate
+export const updateAdminStatusmanually = async (req, res) => {
+  const { id, status } = req.body;
+
+  try {
+    const user = await Adminuser.findByIdAndUpdate(
+      id,
+      { isActive: status },
+      { new: true }
+    );
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Step 3: Compose Email Template
+    const htmlContent = `
+      <body style="margin: 0; padding: 20px; font-family: Arial, sans-serif; background-color: #f7f7f7; color: #333;">
+        <table role="presentation" style="width: 100%; background-color: #f9f9f9; padding: 30px;" cellpadding="0" cellspacing="0">
+          <tr>
+            <td align="center">
+              <table role="presentation" style="max-width: 600px; width: 100%; background: #fff; border: 1px solid #e0e0e0; border-radius: 10px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);" cellpadding="0" cellspacing="0">
+                <tr>
+                  <td align="center" style="background: #2f327d; color: white; padding: 20px; border-top-left-radius: 10px; border-top-right-radius: 10px;">
+                    <div style="font-size: 50px; margin-bottom: 10px;">✉️</div>
+                    <h1 style="margin: 0; font-size: 24px;">Email<span style="color: #f48c06;">con</span> Admin Account Notification</h1>
+                  </td>
+                </tr>
+                <tr>
+                  <td align="left" style="padding: 20px;">
+                    <p style="margin: 10px 0; font-size: 16px;">Hello <strong>${user.username}</strong>,</p>
+                    <h3 style="color: ${status ? '#28a745' : '#dc3545'};">
+                      Your account has been ${status ? 'activated' : 'deactivated'}.
+                    </h3>
+                    ${
+                      status
+                        ? `
+                      <p style="margin: 10px 0; font-size: 14px;">You can now access your account using the details below:</p>
+                      <div style="text-align: left; margin-top: 20px;">
+                        <p><strong>Login Credentials:</strong></p>
+                        <p>Email: <span style="color: #333;">${user.email}</span></p>
+                        <p>Password: <span style="color: #333;">${user.password || "N/A"}</span></p>
+                        <p style="margin: 10px 0; font-size: 14px; text-align: center; font-weight: bold;">
+                &#8220;Please keep this info safe. For best security practices, it's recommended to change your password and avoid sharing it with anyone.&#8221;
+              </p>
+                        </div>
+                    `
+                        : `<p style="margin: 10px 0; font-size: 14px;">Please contact admin for more details.</p>`
+                    }
+                  </td>
+                </tr>
+                <tr>
+                  <td align="center" style="padding: 20px; background: #f7f7f7; border-bottom-left-radius: 10px; border-bottom-right-radius: 10px;">
+                    <p style="font-size: 12px; color: #666;">
+                      If you have any questions, contact us at
+                      <a href="mailto:support@emailcon.in" style="color: #1a5eb8; text-decoration: none;">support@emailcon.in</a>.
+                    </p>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+        </table>
+      </body>
+    `;
+
+   await accounttransporter.sendMail({
+      from: `"Emailcon Support" <account-noreply@account.emailcon.in>`,
+      to: user.email,
+      subject: `Account ${status ? "Activated" : "Deactivated"}`,
+      replyTo: "support@emailcon.in",
+      html: htmlContent,
+    });
+
+    res.send(`Account ${status ? "activated" : "deactivated"} successfully.`);
+  } catch (err) {
+    console.error("Error updating account status or sending email:", err);
+    res.status(500).send("Failed to update status or send email.");
+  }
+};
+
+
+
+
+
+
 // Get all admin users
 export const getAdminUsers = async (req, res) => {
   try {
@@ -552,5 +766,20 @@ export const getAdminUsers = async (req, res) => {
   } catch (error) {
     console.error("Error fetching admin users:", error);
     res.status(500).json({ message: "Server error" });
+  }
+};
+
+
+export const updateFormData = async (req, res) => {
+  try {
+    const { status, remarks } = req.body;
+    const updated = await FormData.findByIdAndUpdate(
+      req.params.id,
+      { status, remarks },
+      { new: true }
+    );
+    res.json(updated);
+  } catch (error) {
+    res.status(500).json({ error: "Update failed" });
   }
 };

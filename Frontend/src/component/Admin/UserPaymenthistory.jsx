@@ -11,7 +11,7 @@ import AdminSidebar from "./AdminSidebar";
 
 function UserPaymenthistory() {
   const { userId} = useParams();    
-  const [user, setUser] = useState([]);
+  const [sortOrder, setSortOrder] = useState("asc");
   const [paymenthistory, setPaymenthistory] = useState([]);
    const [filteredPayments, setFilteredPayments] = useState([]);
     const [searchTerm, setSearchTerm] = useState("");
@@ -43,26 +43,17 @@ function UserPaymenthistory() {
     fetchPayments();
   }, [userId, navigate]); // Only run when user ID or navigate changes
 
-  useEffect(() => {
-    const fetchUser = async () => {
-      if (!userId) {
-        navigate("/admin-dashboard");
-        return;
-      }
-      try {
-        const response = await axios.get(`${apiConfig.baseURL}/api/stud/userdata/${userId}`);
-        setUser(response.data);
-      } catch (error) {
-        console.error("Error fetching User", {
-          message: error.message,
-          stack: error.stack,
-          response: error.response?.data,
-        });
-      }
-    };
-
-    fetchUser();
-  }, [userId, navigate]); // Only run when user ID or navigate changes
+  const handleSortByDate = () => {
+    const sorted = [...filteredPayments].sort((a, b) => {
+      const dateA = new Date(a.createdAt);
+      const dateB = new Date(b.createdAt);
+      return sortOrder === "desc" ? dateA - dateB : dateB - dateA;
+    });
+  
+    setFilteredPayments(sorted);
+    setSortOrder(sortOrder === "asc" ? "desc" : "asc");
+  };
+  
 
  useEffect(() => {
     filterPayments();
@@ -84,20 +75,21 @@ function UserPaymenthistory() {
       });
     }
 
-    // Apply date filter
-    if (fromDate || toDate) {
-      filtered = filtered.filter((payment) => {
-        const paymentDate = new Date(payment.createdAt);
-        const from = fromDate ? new Date(fromDate) : null;
-        const to = toDate ? new Date(toDate) : null;
+    // Date filter
+  if (fromDate || toDate) {
+    filtered = filtered.filter((payment) => {
+      const paymentDate = new Date(payment.createdAt);
+      const start = fromDate ? new Date(fromDate) : null;
+      const end = toDate
+        ? new Date(new Date(toDate).setHours(23, 59, 59, 999))
+        : null;
 
-        const afterFrom = !from || paymentDate >= from;
-        const beforeTo = !to || paymentDate <= to;
+      const afterFrom = !start || paymentDate >= start;
+      const beforeTo = !end || paymentDate <= end;
 
-        return afterFrom && beforeTo;
-      });
-    }
-
+      return afterFrom && beforeTo;
+    });
+  }
     setFilteredPayments(filtered);
     setCurrentPage(1); // Reset to first page after filtering
   };
@@ -114,9 +106,6 @@ function UserPaymenthistory() {
   };
 
 
-  const handleLogout = () => {
-    navigate("/admin-dashboard");
-  };
 
 
   return (
@@ -183,8 +172,11 @@ function UserPaymenthistory() {
       <thead>
     <tr>
         <th>S.No</th>
-      <th>Payment Date</th>
-      <th>Amount</th>
+                <th onClick={handleSortByDate} style={{ cursor: "pointer" }}>
+        Payment Date {sortOrder === "asc" ? "▲" : "▼"}
+      </th>  
+      <th>UserName</th>
+            <th>Amount</th>
       <th>Plan Details(Days)</th>
       <th>Expiry Date</th>
       <th>Payment Status</th>
@@ -197,6 +189,7 @@ function UserPaymenthistory() {
         <tr key={payment._id}>
           <td>{paymenthistory.indexOf(payment) + 1}</td>
           <td>{new Date(payment.createdAt).toLocaleDateString()}</td>
+          <td>{payment.userId?.username || "N/A"}</td>
           <td>₹{payment.amount}</td>
           <td>{payment.duration}</td>
           <td>{new Date(payment.expiryDate).toLocaleDateString()}</td>

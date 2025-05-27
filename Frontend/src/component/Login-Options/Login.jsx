@@ -4,8 +4,8 @@ import { useNavigate } from "react-router-dom";
 import "./Login.css";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import apiConfig from "../apiconfig/apiConfig.js";
-import logimg from "../Images/mail.png";
+import apiConfig from "../../apiconfig/apiConfig.js";
+import logimg from "../../Images/mail.png";
 import { FaEye, FaEyeSlash,FaArrowLeft } from "react-icons/fa";
 
 function Login() {

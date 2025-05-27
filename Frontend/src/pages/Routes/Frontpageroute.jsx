@@ -1,12 +1,12 @@
 import React from "react";
-import NavbarBanner from "../component/Frontpage/NavbarBanner";
-import FeaturedApps from "../component/Frontpage/FeatureApp";
-import Partner from "../component/Frontpage/Partner";
-import Future from "../component/Frontpage/Future";
-import Pricing from "../component/Frontpage/Pricing";
-import Footer from "../component/Frontpage/Footer";
-import FadeInSection from "../component/Frontpage/FadeInSection";
-import FeatureSection from "../component/Frontpage/FeatureSection";
+import FeaturedApps from "../../component/Frontpage/FeatureApp";
+import Partner from "../../component/Frontpage/Partner";
+import Future from "../../component/Frontpage/Future";
+import Pricing from "../../component/Frontpage/Pricing";
+import Footer from "../../component/Frontpage/Footer";
+import FadeInSection from "../../component/Frontpage/FadeInSection";
+import FeatureSection from "../../component/Frontpage/FeatureSection";
+import NavbarBanner from "../../component/Frontpage/NavbarBanner";
 
 function Frontpageroute() {
   return (

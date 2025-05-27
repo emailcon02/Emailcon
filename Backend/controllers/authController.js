@@ -1,7 +1,7 @@
 import jwt from "jsonwebtoken";
 import User from "../models/User.js";
 import PaymentHistory from "../models/PaymentHistory.js";
-import { encryptPassword } from "../config/encryption.js";
+import { decryptPassword, encryptPassword } from "../config/encryption.js";
 import nodemailer from "nodemailer";
 import apiConfig from "../api/apiconfigbackend.js";
 import otptransporter from "../config/otp-mailer.js";
@@ -86,11 +86,10 @@ export const login = async (req, res) => {
   try {
     const user = await User.findOne({ email });
     if (!user) return res.status(404).send("User not found.");
-
-    if (password !== user.password) {
+    const newEncryptedPassword = decryptPassword(user.password);
+    if (newEncryptedPassword !== password) {
       return res.status(401).send("Invalid credentials.");
     }
-
     const latestPayment = await PaymentHistory.findOne({ userId: user._id })
       .sort({ createdAt: -1 });
 
@@ -179,7 +178,11 @@ export const resetPassword = async (req, res) => {
   try {
     const user = await User.findOne({ email });
     if (!user) return res.status(404).send("User not found.");
-    user.password = password; 
+    const newPassword = encryptPassword(password);
+    if (newPassword === user.password) {
+      return res.status(400).send("New password cannot be the same as the old password.");
+    }
+    user.password = newPassword; 
     await user.save();
     const htmlContent = `
 <div style="max-width: 600px; margin: auto; background-color: #f4f6f8; border-radius: 10px; border: 1px solid #ddd; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05); overflow: hidden;">
@@ -250,25 +253,29 @@ export const adminLogin = async (req, res) => {
     // 2. NORMAL ADMIN OR USER FROM DB
     const user = await Adminuser.findOne({ email, role });
     if (!user) {
-      return res.status(404).json({ success: false, message: "User not found" });
+      return res.status(404).json({message: "User not found" });
     }
 
     // OPTIONAL: Use bcrypt if passwords are hashed
-    const isMatch = password === user.password; // use bcrypt.compare(password, user.password) if hashed
+    const isMatch = password === user.password; 
     if (!isMatch) {
-      return res.status(401).json({ success: false, message: "Invalid password" });
+      return res.status(401).json({message: "Invalid password" });
     }
 
-
+    if(user.isActive === false){
+      return res.status(403).json({ message: "Account not activated" });
+    }
+    
     res.json({
       success: true,
       role: user.role,
+      userId:user._id,
       token: "sub-admin-token", // send real JWT token
     });
 
   } catch (error) {
     console.error("Login error:", error);
-    res.status(500).json({ success: false, message: "Server error" });
+    res.status(500).json({message: "Server error" });
   }
 };
 
@@ -276,14 +283,20 @@ export const adminLogin = async (req, res) => {
 export const updateUserpassword = async (req, res) => {
   const { userId, newPassword } = req.body;
 
+  const user=await User.findById(userId);
+
   if (!userId || !newPassword) {
     return res.status(400).json({ message: "Missing fields" });
+  }
+  const newencrpytedPassword = encryptPassword(newPassword);
+  if (newencrpytedPassword === user.password) {
+    return res.status(400).json({ message: "New password cannot be the same as the old password." });
   }
 
   try {
     const updatedUser = await User.findByIdAndUpdate(
       userId,
-      { password: newPassword }, // Ensure this is hashed if needed
+      { password: newencrpytedPassword }, // Ensure this is hashed if needed
       { new: true }
     );
 
@@ -325,6 +338,65 @@ export const updateUserpassword = async (req, res) => {
     res.status(500).json({ message: "Error updating password or sending email", error: err });
   }
 };
+
+
+export const updateAdminUserpassword = async (req, res) => {
+  const { userId, newPassword } = req.body;
+  const user=await Adminuser.findById(userId);
+
+  if (!userId || !newPassword) {
+    return res.status(400).json({ message: "Missing fields" });
+  }
+  if (newPassword === user.password) {
+    return res.status(400).json({ message: "New password cannot be the same as the old password." });
+  }
+
+  try {
+    const updatedUser = await Adminuser.findByIdAndUpdate(
+      userId,
+      { password: newPassword }, 
+      { new: true }
+    );
+
+    if (!updatedUser) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Compose HTML email
+    const htmlContent = `
+     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 30px; background-color: #f4f6f8; border-radius: 10px; border: 1px solid #ddd; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);">
+        <div style="background-color: #2f327d;color:white;padding: 20px;text-align:center;">
+          <h1 style="font-size: 32px; color: #f48c06;">✉️</h1>
+          <h2>Email<span style="color: #f48c06;">con</span> Password Updated Successfully</h2>
+        </div>
+        <div style="text-align:center; margin:30px 0px;">
+        <p style="color: #333; font-size: 15px;">Hello <strong>${updatedUser.username || updatedUser.email}</strong>,<br>Your password has been changed. If you did not perform this action, please contact support immediately.</p>
+        </div>
+        <div style="text-align: center; margin-top: 30px;">
+          <a href="${apiConfig.baseURL}/admin-login" style="display: inline-block; background-color: #2f327d; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold;">Login Now</a>
+        </div>
+        <div style="margin-top: 40px; text-align: center; font-size: 13px; color: #aaa;">
+          <p>Thanks,<br>Team Emailcon</p>
+        </div>
+      </div>
+    `;
+
+    // Send mail
+      await resettransporter.sendMail({
+      from: `"Emailcon Support" <reset-noreply@account.emailcon.in>`,
+      to: updatedUser.email,
+      subject: "Your Password Has Been Updated",
+      replyTo: "support@emailcon.in",
+      html: htmlContent,
+    });
+
+    res.json({ message: "Password updated Successfully", updatedUser });
+  } catch (err) {
+    console.error("Error updating password or sending email:", err);
+    res.status(500).json({ message: "Error updating password or sending email", error: err });
+  }
+};
+
 
 export const updateUseravatar = async (req, res) => {
   const { userId,avatar,username,gender } = req.body;

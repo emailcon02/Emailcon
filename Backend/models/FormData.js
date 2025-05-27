@@ -9,7 +9,11 @@ const formDataSchema = new mongoose.Schema({
   gender: { type: String, enum: ["Male", "Female", "Other"], required: true },
   type: { type: String, enum: ["organization", "individual"], required: true },
   profession: { type: String, required: true },
-  createdAt: { type: Date, default: Date.now }
+  status: { type: String, enum: ["pending", "purchased", "not interested"], default: "pending" },
+  remarks: { type: String, default: "" },
+}
+, {
+  timestamps: true,
 });
 
 const FormData = mongoose.model("FormData", formDataSchema);

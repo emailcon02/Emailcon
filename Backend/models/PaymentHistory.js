@@ -17,8 +17,8 @@ const paymentHistorySchema = new mongoose.Schema({
     razorpayPaymentId: { type: String, default: null },
     razorpayOrderId: { type: String, default: null },
     razorpaySignature: { type: String, default: null },
-
-    createdAt: { type: Date, default: Date.now }
+}, {
+    timestamps: true
 });
 
 const PaymentHistory = mongoose.model("PaymentHistory", paymentHistorySchema);

@@ -3,7 +3,7 @@ import axios from "axios";
 import "./GroupModal.css";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import apiConfig from "../apiconfig/apiConfig.js";
+import apiConfig from "../../apiconfig/apiConfig.js";
 
 const GroupfilesingleModal = ({ onClose }) => {
   const [selectedGroupForUpload, setSelectedGroupForUpload] = useState(null);

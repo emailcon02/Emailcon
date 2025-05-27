@@ -17,6 +17,7 @@ import BirthdayTemplate from "../models/BirthdayTemplates.js";
 import PaymentHistory from "../models/PaymentHistory.js";
 import Aliasname from "../models/Aliasname.js";
 import Replyto from "../models/Replyto.js";
+import Adminuser from "../models/Adminuser.js";
 const router = express.Router();
 
 // Upload image to s3 bucket
@@ -1443,7 +1444,8 @@ router.get('/payment-history/:userId', async (req, res) => {
   try {
     const payments = await PaymentHistory.find({
       userId: req.params.userId
-    });
+    }).populate('userId', 'username'); // Populate only the username field
+
     res.json(payments);
   } catch (error) {
     res.status(500).json({
@@ -1451,6 +1453,7 @@ router.get('/payment-history/:userId', async (req, res) => {
     });
   }
 });
+
 
 //grt latest payment-history
 router.get('/payment-history-latest/:userId', async (req, res) => {
@@ -1468,20 +1471,33 @@ router.get('/payment-history-latest/:userId', async (req, res) => {
   }
 });
 
+//getting admin user
+router.get('/adminuserdata/:id', async (req, res) => {
+  const userId = req.params.id;
+
+  try {
+    const user = await Adminuser.findById(userId) 
+
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+    res.json(user);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
 
 //getting user
 router.get('/userdata/:id', async (req, res) => {
   const userId = req.params.id;
 
   try {
-    // Find the user by ID from the database
     const user = await User.findById(userId).select('-smtppassword'); // Exclude sensitive fields like password and smtppassword
 
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
-
-    // Send the user data as a response
     res.json(user);
   } catch (error) {
     console.error(error);

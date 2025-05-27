@@ -4,9 +4,9 @@ import "./Signup.css";
 import { ToastContainer, toast } from "react-toastify";
 import { FaInfoCircle } from "react-icons/fa";
 import "react-toastify/dist/ReactToastify.css";
-import sign from "../Images/ex1.png";
+import sign from "../../Images/ex1.png";
 import axios from "axios";
-import apiConfig from "../apiconfig/apiConfig";
+import apiConfig from "../../apiconfig/apiConfig";
 
 function Signup() {
   const [email, setEmail] = useState("");

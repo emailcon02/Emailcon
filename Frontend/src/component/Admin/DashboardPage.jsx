@@ -6,6 +6,7 @@ import Header from "./Header";
 import AdminSidebar from "./AdminSidebar";
 import axios from "axios";
 import apiconfig from "../../apiconfig/apiConfig.js";
+import UserChart from "./UserChart.jsx";
 
 function DashboardPage() {
   const [activePeriod, setActivePeriod] = useState("Monthly");
@@ -116,49 +117,61 @@ function DashboardPage() {
           </div>
 
           <div className="dashboard-grid">
-            <div className="quick-stats">
-              {[
-                {
-                  icon: "🧑",
-                  title: "Total Users",
-                  value: stats.totalUsers.toString(),
-                  badge: `+${stats.newUsers} New Users`,
-                  gradient: "blue-gradient",
-                  badgeClass: "badge-blue",
-                },
-                {
-                  icon: "✅",
-                  title: "Active Users",
-                  value: stats.activeUsers.toString(),
-                  badge: `${((stats.activeUsers/stats.totalUsers)*100).toFixed(0)}% of Total`,
-                  gradient: "purple-gradient",
-                  badgeClass: "badge-purple",
-                },
-                {
-                  icon: "⏸️",
-                  title: "Inactive Users",
-                  value: stats.inactiveUsers.toString(),
-                  badge: `${((stats.inactiveUsers/stats.totalUsers)*100).toFixed(0)}% of Total`,
-                  gradient: "green-gradient",
-                  badgeClass: "badge-green",
-                },
-                {
-                  icon: "🆕",
-                  title: "Trial Users",
-                  value: stats.trialRequests.toString(),
-                  badge: `+${stats.newTrialUsers} New Trials`,
-                  gradient: "orange-gradient",
-                  badgeClass: "badge-orange",
-                },
-              ].map(({ icon, title, value, badge, gradient, badgeClass }) => (
-                <div className="stat-card" key={title}>
-                  <div className={`stat-icon ${gradient}`}>{icon}</div>
+         
+
+ <div className="quick-stats">
+            {[
+              {
+                icon: <i className="fas fa-users"></i>, // Total users
+                title: "Total Users",
+                value: stats.totalUsers.toString(),
+                badge: `+${stats.newUsers} New Users`,
+                gradient: "blue-gradient",
+                badgeClass: "badge-blue",
+              },
+              {
+                icon: <i className="fas fa-user-check"></i>, // Active users
+                title: "Active Users",
+                value: stats.activeUsers.toString(),
+                badge: `${(
+                  (stats.activeUsers / stats.totalUsers) *
+                  100
+                ).toFixed(0)}% of Total`,
+                gradient: "purple-gradient",
+                badgeClass: "badge-purple",
+              },
+              {
+                icon: <i className="fas fa-user-clock"></i>, // Idle/inactive
+                title: "Inactive Users",
+                value: stats.inactiveUsers.toString(),
+                badge: `${(
+                  (stats.inactiveUsers / stats.totalUsers) *
+                  100
+                ).toFixed(0)}% of Total`,
+                gradient: "green-gradient",
+                badgeClass: "badge-green",
+              },
+              {
+                icon: <i className="fas fa-user-plus"></i>, // New trial users
+                title: "Trial Users",
+                value: stats.trialRequests.toString(),
+                badge: `+${stats.newTrialUsers} New Trials`,
+                gradient: "orange-gradient",
+                badgeClass: "badge-orange",
+              },
+            ].map(({ icon, title, value, badge, gradient, badgeClass }) => (
+              <div className={`stat-card ${gradient}`} key={title}>
+                <div className="stat-content">
                   <div className="stat-title">{title}</div>
                   <div className="stat-value">{value}</div>
                   <div className={`stat-badge ${badgeClass}`}>{badge}</div>
                 </div>
-              ))}
-            </div>
+                <div className="start-icon-container">
+                  <div className={`stat-icon ${gradient}`}>{icon}</div>
+                </div>
+              </div>
+            ))}
+          </div>
 
             <div className="revenue-chart-container">
               <div className="chart-header">
@@ -210,7 +223,10 @@ function DashboardPage() {
                   </div>
                 ))}
               </div>
+
             </div>
+            <UserChart/>
+
           </div>
         </div>
     </>

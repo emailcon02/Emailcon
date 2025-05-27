@@ -19,6 +19,7 @@ function AllUserPaymenthistory() {
   const [toDate, setToDate] = useState("");
   const [rowsPerPage, setRowsPerPage] = useState(20);
   const [currentPage, setCurrentPage] = useState(1);
+    const [sortOrder, setSortOrder] = useState("asc");
 
 
   useEffect(() => {
@@ -35,43 +36,56 @@ function AllUserPaymenthistory() {
     fetchPayments();
   }, []);
 
+  const handleSortByDate = () => {
+    const sorted = [...filteredPayments].sort((a, b) => {
+      const dateA = new Date(a.createdAt);
+      const dateB = new Date(b.createdAt);
+      return sortOrder === "desc" ? dateA - dateB : dateB - dateA;
+    });
+  
+    setFilteredPayments(sorted);
+    setSortOrder(sortOrder === "asc" ? "desc" : "asc");
+  };
+  
+  
+
   useEffect(() => {
     filterPayments();
   }, [searchTerm, fromDate, toDate, paymenthistory]);
 
-  const filterPayments = () => {
-    let filtered = [...paymenthistory];
+const filterPayments = () => {
+  let filtered = [...paymenthistory];
 
-    // Apply search
-    if (searchTerm) {
-      const term = searchTerm.toLowerCase();
-      filtered = filtered.filter((payment) => {
-        return (
-          payment.userId?.username?.toLowerCase().includes(term) ||
-          payment.paymentStatus?.toLowerCase().includes(term) ||
-          payment.duration?.toLowerCase().includes(term) ||
-          payment.razorpayPaymentId?.toLowerCase().includes(term)
-        );
-      });
-    }
+  // Search filter
+  if (searchTerm) {
+    const term = searchTerm.toLowerCase();
+    filtered = filtered.filter((payment) =>
+      payment.userId?.username?.toLowerCase().includes(term) ||
+      payment.paymentStatus?.toLowerCase().includes(term) ||
+      payment.duration?.toLowerCase().includes(term) ||
+      payment.razorpayPaymentId?.toLowerCase().includes(term)
+    );
+  }
 
-    // Apply date filter
-    if (fromDate || toDate) {
-      filtered = filtered.filter((payment) => {
-        const paymentDate = new Date(payment.createdAt);
-        const from = fromDate ? new Date(fromDate) : null;
-        const to = toDate ? new Date(toDate) : null;
+  // Date filter
+  if (fromDate || toDate) {
+    filtered = filtered.filter((payment) => {
+      const paymentDate = new Date(payment.createdAt);
+      const start = fromDate ? new Date(fromDate) : null;
+      const end = toDate
+        ? new Date(new Date(toDate).setHours(23, 59, 59, 999))
+        : null;
 
-        const afterFrom = !from || paymentDate >= from;
-        const beforeTo = !to || paymentDate <= to;
+      const afterFrom = !start || paymentDate >= start;
+      const beforeTo = !end || paymentDate <= end;
 
-        return afterFrom && beforeTo;
-      });
-    }
+      return afterFrom && beforeTo;
+    });
+  }
 
-    setFilteredPayments(filtered);
-    setCurrentPage(1); // Reset to first page after filtering
-  };
+  setFilteredPayments(filtered);
+  setCurrentPage(1);
+};
 
   const indexOfLast = currentPage * rowsPerPage;
   const indexOfFirst = indexOfLast - rowsPerPage;
@@ -113,11 +127,41 @@ function AllUserPaymenthistory() {
   
 // Then in the PDF export function:
 const handlePDFExport = () => {
-    const doc = new jsPDF();
-    autoTable(doc, { html: '#userTable' }); // 👈 call plugin directly
-    doc.save("payment_history.pdf");
-  };
-  
+  const doc = new jsPDF();
+
+  const tableColumn = [
+    "S.No",
+    "Payment Date",
+    "Username",
+    "Amount (Rs)",
+    "Plan Details (Days)",
+    "Expiry Date",
+    "Payment Status",
+    "Payment Id",
+  ];
+
+  const tableRows = filteredPayments.map((payment, index) => [
+    index + 1,
+    new Date(payment.createdAt).toLocaleDateString("en-IN"),
+    payment.userId?.username || "N/A",
+    payment.amount,
+    payment.duration,
+    new Date(payment.expiryDate).toLocaleDateString("en-IN"),
+    payment.paymentStatus,
+    payment.razorpayPaymentId || "N/A",
+  ]);
+
+  autoTable(doc, {
+    head: [tableColumn],
+    body: tableRows,
+    styles: {
+      font: "helvetica", // basic font
+    },
+  });
+
+  doc.save("payment_history.pdf");
+};
+
 
   return (
     <>
@@ -203,8 +247,10 @@ const handlePDFExport = () => {
             <thead>
               <tr>
                 <th>S.No</th>
-                <th>Payment Date</th>
-                <th>UserName</th>
+                <th onClick={handleSortByDate} style={{ cursor: "pointer" }}>
+        Payment Date {sortOrder === "asc" ? "▲" : "▼"}
+      </th>      
+      <th>UserName</th>
                 <th>Amount</th>
                 <th>Plan Details (Days)</th>
                 <th>Expiry Date</th>

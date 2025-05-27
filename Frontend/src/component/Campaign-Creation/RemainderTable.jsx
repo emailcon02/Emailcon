@@ -5,7 +5,7 @@ import { FaArrowLeft, FaSearch,FaEdit, FaTrash } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import apiConfig from "../apiconfig/apiConfig";
+import apiConfig from "../../apiconfig/apiConfig";
 
 function RemainderTable() {
   const [campaigns, setCampaigns] = useState([]);

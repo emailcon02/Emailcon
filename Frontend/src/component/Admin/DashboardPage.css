@@ -238,7 +238,6 @@
     grid-template-columns: repeat(12, 1fr);
     gap: 20px;
   }
-  
   /* Quick Stats */
   .quick-stats {
     grid-column: span 12;
@@ -248,103 +247,130 @@
     margin-bottom: 30px;
   }
   
-  .stat-card {
-    background-color: #ffffff;
-    border-radius: 16px;
-    padding: 25px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-    transition: all 0.3s;
-    position: relative;
-    overflow: hidden;
-  }
-  
-  .stat-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
-  }
-  
-  .stat-card::before {
-    content: "";
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 5px;
-    background: linear-gradient(90deg, #2f327d, #9370db);
-  }
-  
-  .stat-icon {
-    width: 50px;
-    height: 50px;
-    border-radius: 12px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 24px;
-    margin-bottom: 15px;
-  }
-  
-  .blue-gradient {
-    background: linear-gradient(135deg, #4169e1, #1e88e5);
-    color: white;
-  }
-  
-  .purple-gradient {
-    background: linear-gradient(135deg, #9370db, #7b1fa2);
-    color: white;
-  }
-  
-  .green-gradient {
-    background: linear-gradient(135deg, #43a047, #00796b);
-    color: white;
-  }
-  
-  .orange-gradient {
-    background: linear-gradient(135deg, #ff9800, #f57c00);
-    color: white;
-  }
-  
-  .stat-title {
-    font-size: 15px;
-    font-weight: 500;
-    color: #8a94a6;
-    margin-bottom: 10px;
-  }
-  
-  .stat-value {
-    font-size: 28px;
-    font-weight: 700;
-    margin-bottom: 20px;
-  }
-  
-  .stat-badge {
-    display: inline-flex;
-    align-items: center;
-    padding: 6px 12px;
-    border-radius: 20px;
-    font-size: 13px;
-    font-weight: 500;
-  }
-  
-  .badge-blue {
-    background-color: rgba(65, 105, 225, 0.1);
-    color: #2f327d;
-  }
-  
-  .badge-green {
-    background-color: rgba(67, 160, 71, 0.1);
-    color: #43a047;
-  }
-  
-  .badge-purple {
-    background-color: rgba(147, 112, 219, 0.1);
-    color: #9370db;
-  }
-  
-  .badge-orange {
-    background-color: rgba(255, 152, 0, 0.1);
-    color: #ff9800;
-  }
+ .quick-stats {
+   display: grid;
+   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+   gap: 20px;
+   padding: 20px;
+ }
+
+ .stat-card {
+   border-radius: 16px;
+   box-shadow: 0 8px 16px rgba(0, 0, 0, 0.05);
+   padding: 20px;
+   transition: transform 0.2s ease;
+   display: flex;
+   gap: 40px;
+ }
+
+ .stat-card:hover {
+   transform: translateY(-4px);
+ }
+
+ .stat-icon {
+   font-size: 1.8em;
+   /* Modern size */
+   background-color: rgba(255, 255, 255, 0.1);
+   /* Soft background */
+   padding: 15%;
+   border-radius: 50%;
+   display: flex;
+   align-items: center;
+   justify-content: center;
+   color: white;
+   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+   /* Soft shadow */
+   width: 50px;
+   height: 50px;
+   transition: transform 0.3s ease, background-color 0.3s ease;
+ }
+
+ .stat-icon:hover {
+   transform: scale(1.1);
+   background-color: rgba(255, 255, 255, 0.2);
+ }
+
+ .stat-card.blue-gradient .stat-icon {
+   background: linear-gradient(to right, #4facfe, #00f2fe);
+   margin-top: 20px;
+ }
+
+ .stat-card.purple-gradient .stat-icon {
+   background: linear-gradient(to right, #f7971e, #ffd200);
+   margin-top: 20px;
+ }
+
+ .stat-card.green-gradient .stat-icon {
+   background: linear-gradient(to right, #43e97b, #38f9d7);
+   margin-top: 20px;
+ }
+
+ .stat-card.orange-gradient .stat-icon {
+      background: linear-gradient(to right, #a18cd1, #fbc2eb);
+      margin-top: 20px;
+ }
+
+ .blue-gradient {
+   background-color: #90a5bd;
+ }
+
+ .purple-gradient {
+  background-color: #ebc07f;
+   
+ }
+
+ .green-gradient {
+   background-color: #9dc9b5;
+ }
+
+ .orange-gradient {
+   background-color: #b1a3d6;
+ }
+
+ .stat-title {
+   font-size: 16px;
+   font-weight: 600;
+   color: #ffffff;
+   margin-bottom: 6px;
+   text-align: center;
+ }
+
+ .stat-value {
+   font-size: 28px;
+   font-weight: 700;
+   color: #fbfcfd;
+   margin-bottom: 10px;
+   text-align: center;
+ }
+
+.stat-badge {
+  display: inline-block;
+  font-size: 12px;
+  font-weight: 500;
+  padding: 4px 10px;
+  border-radius: 12px;
+}
+
+.badge-blue {
+  background-color: #d1e3ff;
+  color: #1a57d1;
+}
+
+.badge-purple {
+  background-color: #ffe9c9;
+  color: #f6c23e;
+}
+
+.badge-green {
+  background-color: #d2f4ea;
+  color: #1cc88a;
+}
+
+.badge-orange {
+    background-color: #e3d4f7;
+    color: #7c3aed;
+}
+
   
   /* Charts Section */
   .revenue-chart-container {
@@ -458,63 +484,44 @@
     border-radius: 4px;
   }
   
-  /* Performance Section */
   .performance-container {
     grid-column: span 5;
     background-color: #ffffff;
     border-radius: 16px;
-    padding: 25px;
+    padding:10px 25px;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
     margin-bottom: 30px;
   }
   
-  .goal-progress {
+  .performance-title {
+    font-size: 18px;
+    font-weight: 600;
     margin-top: 20px;
-  }
-  
-  .goal-item {
-    margin-bottom: 20px;
-  }
-  
-  .goal-header {
-    display: flex;
-    justify-content: space-between;
+    text-align: center;
     margin-bottom: 10px;
   }
+  /* .chart-wrapper{
+    margin-top: 40px !important;
+  } */
   
-  .goal-title {
-    font-size: 15px;
-    font-weight: 500;
+  .year-select-chart {
+    padding: 8px 14px;
+    border: 1px solid #ece9e9;
+    border-radius: 8px;
+    font-size: 16px;
+    color: #333;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin: 10px 0px;
+    width:100px !important;
   }
   
-  .goal-value {
-    font-size: 15px;
-    font-weight: 600;
+ 
+  
+  .year-select:focus {
+    outline: none;
   }
   
-  .progress-bar {
-    height: 8px;
-    background-color: #f0f5ff;
-    border-radius: 4px;
-    overflow: hidden;
-  }
-  
-  .progress {
-    height: 100%;
-    border-radius: 4px;
-  }
-  
-  .progress-blue {
-    background: linear-gradient(90deg, #2f327d, #1e88e5);
-  }
-  
-  .progress-purple {
-    background: linear-gradient(90deg, #9370db, #7b1fa2);
-  }
-  
-  .progress-green {
-    background: linear-gradient(90deg, #43a047, #00796b);
-  }
 
   .date-picker-input {
     padding: 8px 12px;
@@ -556,7 +563,6 @@
   }
 
 
-  
   .pagination-container {
     margin: 15px 0;
     display: flex;

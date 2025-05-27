@@ -5,7 +5,7 @@ const adminuserSchema = new mongoose.Schema({
     username: String,
     password: String,
     role: String,
-    createdAt: { type: Date, default: Date.now }
+    isActive: { type: Boolean, default: false },
 }, {
     timestamps: true
 });

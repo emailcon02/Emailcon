@@ -1,12 +1,11 @@
 import React, { useState, useEffect } from "react";
 import "./Verifyotp.css";
-import pingenerate from "../Images/pingenerators.png";
+import pingenerate from "../../Images/pingenerators.png";
 import { useLocation, useNavigate } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import axios from "axios";
-import apiConfig from '../apiconfig/apiConfig.js';
-
+import apiConfig from '../../apiconfig/apiConfig.js';
 
 const Verifyotp = () => {
   const location = useLocation();

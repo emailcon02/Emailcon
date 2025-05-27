@@ -34,24 +34,43 @@ function AdminLogin() {
 
       if (response.data.success) {
         localStorage.setItem("adminToken", response.data.token);
+        localStorage.setItem("adminuserId", response.data.userId);
         if (role === "super-admin") {
+          setTimeout(() => {
           navigate("/super-admin-dashboard");
+          }, 3000);
         } else if(role === "admin") {
-          navigate("/admin-user-create");
+          setTimeout(() => {
+            navigate("/super-admin-dashboard");
+            }, 3000);
         }else if(role === "business-admin") {
-          navigate("/admin-dashboard");
+          setTimeout(() => {
+            navigate("/business-admin-dashboard");
+            }, 3000);
         }else {
           navigate("/user-dashboard");
         }
+        toast.success("Login successful!");
       } else {
         toast.error("Invalid admin credentials");
       }
     } catch (error) {
-      console.error(error);
-      toast.error(
-        error.response?.data?.message || "Something went wrong. Try again."
-      );
-    }
+      console.error("Login error:", error);
+    
+      if (error.response) {
+        const errorMessage = error.response.data.message || "Invalid credentials";
+    
+        if (error.response.status === 403 && errorMessage === "Account not activated") {
+          toast.error("Your account is not activated.");
+        } else {
+          toast.error(errorMessage);
+        }
+      } else if (error.request) {
+        toast.error("Network error. Please check your connection.");
+      } else {
+        toast.error("An error occurred. Please try again.");
+      }
+    }    
   };
 
   return (

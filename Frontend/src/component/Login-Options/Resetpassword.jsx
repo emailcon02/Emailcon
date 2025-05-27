@@ -2,12 +2,12 @@ import React,{useState} from 'react'
 import './Resetpassword.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEye, faEyeSlash } from '@fortawesome/free-solid-svg-icons';
-import imgs1 from '../Images/Resetpassword-pana.png'
+import imgs1 from '../../Images/Resetpassword-pana.png'
 import { useLocation } from 'react-router-dom';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import axios from 'axios';
-import apiConfig from '../apiconfig/apiConfig.js';
+import apiConfig from '../../apiconfig/apiConfig.js';
 import { useNavigate } from 'react-router-dom';
 
 function Resetpasswords() {

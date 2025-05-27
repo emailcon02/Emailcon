@@ -1,5 +1,5 @@
 import React from "react";
-import Lookingimg from "../Images/hand-drawn-step-illustration.png";
+import Lookingimg from "../../Images/hand-drawn-step-illustration.png";
 import { useNavigate } from "react-router-dom";
 import "./Campaign.css";
 

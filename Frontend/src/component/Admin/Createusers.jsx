@@ -12,11 +12,25 @@ import { FaEdit, FaTrash } from "react-icons/fa";
 const Createusers = () => {
   const [users, setUsers] = useState([]);
    const [filteredUsers, setFilteredUsers] = useState([]);
+  const [sortOrder, setSortOrder] = useState("asc");
       const [searchTerm, setSearchTerm] = useState("");
       const [fromDate, setFromDate] = useState("");
       const [toDate, setToDate] = useState("");
       const [rowsPerPage, setRowsPerPage] = useState(20);
       const [currentPage, setCurrentPage] = useState(1);
+      const [showDeleteModal, setShowDeleteModal] = useState(false);
+      const [deleteUserId, setDeleteUserId] = useState(null);
+        const [sendLoadingId, setSendLoadingId] = useState(null);
+          const [statusLoadingId, setStatusLoadingId] = useState(null);
+      const [editForm, setEditForm] = useState({
+        email: "",
+        username: "",
+        password: "",
+        role: "",
+      });
+      const [showEditModal, setShowEditModal] = useState(false);
+      const [editUserId, setEditUserId] = useState(null);
+
   const [form, setForm] = useState({
     email: "",
     username: "",
@@ -36,7 +50,16 @@ const Createusers = () => {
    useEffect(() => {
         filterUsers();
       }, [searchTerm, fromDate, toDate, users]);
-    
+    const handleSortByDate = () => {
+    const sorted = [...filteredUsers].sort((a, b) => {
+      const dateA = new Date(a.createdAt);
+      const dateB = new Date(b.createdAt);
+      return sortOrder === "desc" ? dateA - dateB : dateB - dateA;
+    });
+
+    setFilteredUsers(sorted);
+    setSortOrder(sortOrder === "asc" ? "desc" : "asc");
+  }; 
   
     const filterUsers = () => {
       let filtered = [...users];
@@ -56,19 +79,21 @@ const Createusers = () => {
         });
       }
   
-      // Apply date filter
-      if (fromDate || toDate) {
-        filtered = filtered.filter((user) => {
-          const paymentDate = new Date(user.createdAt);
-          const from = fromDate ? new Date(fromDate) : null;
-          const to = toDate ? new Date(toDate) : null;
-  
-          const afterFrom = !from || paymentDate >= from;
-          const beforeTo = !to || paymentDate <= to;
-  
-          return afterFrom && beforeTo;
-        });
-      }
+      // Date filter
+  if (fromDate || toDate) {
+    filtered = filtered.filter((user) => {
+      const userDate = new Date(user.createdAt);
+      const start = fromDate ? new Date(fromDate) : null;
+      const end = toDate
+        ? new Date(new Date(toDate).setHours(23, 59, 59, 999))
+        : null;
+
+      const afterFrom = !start || userDate >= start;
+      const beforeTo = !end || userDate <= end;
+
+      return afterFrom && beforeTo;
+    });
+  }
   
       setFilteredUsers(filtered);
       setCurrentPage(1); 
@@ -94,12 +119,103 @@ const Createusers = () => {
     fetchUsers();
   };
 
+  const handleEditClick = (user) => {
+    setEditForm({
+      email: user.email,
+      username: user.username,
+      password: user.password,
+      role: user.role,
+    });
+    setEditUserId(user._id);
+    setShowEditModal(true);
+  };
+
+  const handleEditSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      await axios.put(
+        apiconfig.baseURL + `/api/admin/edit-user/${editUserId}`,
+        editForm
+      );
+      setShowEditModal(false);
+      fetchUsers(); // Refresh the user list
+      toast.success("User updated successfully!");
+    } catch (error) {
+      console.error("Error updating user:", error);
+      toast.error("Failed to update user.");
+    }
+  };
+
+const handleDeleteClick = (id) => {
+  setDeleteUserId(id);
+  setShowDeleteModal(true);
+};
+
+const confirmDeleteUser = async () => {
+  try {
+    await axios.delete(
+      apiconfig.baseURL + `/api/admin/delete-user/${deleteUserId}`
+    );
+    setShowDeleteModal(false);
+    fetchUsers(); // Refresh the user list
+    toast.success("User deleted successfully!");
+  } catch (error) {
+    console.error("Error deleting user:", error);
+    toast.error("Failed to delete user.");
+  }
+};
+const handleSendCredentials = async (userId) => {
+    setSendLoadingId(userId);
+    try {
+      await axios.post(`${apiconfig.baseURL}/api/admin/admin-send-credentials`, {
+        id: userId,
+      });
+      toast.success(`Login credentials sent successfully!`, {
+        autoClose: 3000,
+      });
+    } catch (error) {
+      console.error("Email sending error:", error);
+      toast.error(`Failed to send login credentials`, {
+        autoClose: 3000,
+      });
+    } finally {
+      setSendLoadingId(null);
+    }
+  };
+
+   const handleStatusChange = async (id, status) => {
+      setStatusLoadingId(id);
+      try {
+        // Step 1: Update user status
+        await axios.post(`${apiconfig.baseURL}/api/admin/update-admin-status-manually`, {
+          id,
+          status
+        });
+    
+        // Step 2: Update frontend state
+        toast.success(`Account ${status ? "Activated" : "Deactivated"}`, {
+          autoClose: 3000,
+        });
+    
+        setUsers((prev) =>
+          prev.map((user) =>
+            user._id === id ? { ...user, isActive: status } : user
+          )
+        );
+      } catch (error) {
+        toast.error("Error updating status", { autoClose: 3000 });
+      } finally {
+        setStatusLoadingId(null);
+      }
+    };
+    
+
   return (
     <>
       <Header />
       <AdminSidebar />
       <div className="admin-dashboard-user-list admin-main-content">
- <div className="search-bar-search">
+        <div className="search-bar-search">
           <div className="search-container-table">
             <FaSearch className="search-icon" />
             <input
@@ -121,7 +237,7 @@ const Createusers = () => {
               onChange={(e) => {
                 const value =
                   e.target.value === "all"
-                    ? filteredPayments.length
+                    ? filteredUsers.length
                     : parseInt(e.target.value);
                 setRowsPerPage(value);
                 setCurrentPage(1);
@@ -152,7 +268,6 @@ const Createusers = () => {
             <button onClick={resetFilter}>Reset</button>
           </div>
         </div>
-
 
         <button
           onClick={() => setShowModal(true)}
@@ -190,7 +305,7 @@ const Createusers = () => {
                 <label>Password</label>
                 <input
                   placeholder="Password"
-                  type="password"
+                  type="text"
                   value={form.password}
                   onChange={(e) =>
                     setForm({ ...form, password: e.target.value })
@@ -206,7 +321,7 @@ const Createusers = () => {
                   className="admin-dashboard-select"
                 >
                   <option value="">-- Select Role --</option>
-                  <option value="sub-admin">admin</option>
+                  <option value="admin">admin</option>
                   <option value="business-admin">business-admin</option>
                   <option value="manager">Manager</option>
                 </select>
@@ -226,6 +341,100 @@ const Createusers = () => {
           </div>
         )}
 
+        {showEditModal && (
+          <div className="admin-dashboard-modal-overlay">
+            <div className="admin-dashboard-modal-box">
+              <h2 className="admin-dashboard-modal-title">
+                Edit <span style={{ color: "#f48c06" }}>Employee</span>
+              </h2>
+              <form onSubmit={handleEditSubmit}>
+                <label>Email</label>
+                <input
+                  placeholder="Email"
+                  type="email"
+                  value={editForm.email}
+                  onChange={(e) =>
+                    setEditForm({ ...editForm, email: e.target.value })
+                  }
+                  required
+                  className="admin-dashboard-input"
+                />
+                <label>Username</label>
+                <input
+                  placeholder="Username"
+                  value={editForm.username}
+                  onChange={(e) =>
+                    setEditForm({ ...editForm, username: e.target.value })
+                  }
+                  required
+                  className="admin-dashboard-input"
+                />
+                <label>Password</label>
+                <input
+                  placeholder="Password"
+                  type="text"
+                  value={editForm.password}
+                  onChange={(e) =>
+                    setEditForm({ ...editForm, password: e.target.value })
+                  }
+                  required
+                  className="admin-dashboard-input"
+                />
+                <label>Role</label>
+                <select
+                  value={editForm.role}
+                  onChange={(e) =>
+                    setEditForm({ ...editForm, role: e.target.value })
+                  }
+                  required
+                  className="admin-dashboard-select"
+                >
+                  <option value="">-- Select Role --</option>
+                  <option value="admin">admin</option>
+                  <option value="business-admin">business-admin</option>
+                  <option value="manager">Manager</option>
+                </select>
+
+                <button type="submit" className="admin-dashboard-submit-btn">
+                  Update
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setShowEditModal(false)}
+                  className="admin-dashboard-cancel-btn"
+                >
+                  Cancel
+                </button>
+              </form>
+            </div>
+          </div>
+        )}
+
+        {showDeleteModal && (
+          <div className="admin-dashboard-modal-overlay">
+            <div className="admin-dashboard-modal-box">
+              <h2 className="admin-dashboard-modal-title">
+                Confirm <span style={{ color: "#f48c06" }}>Delete</span>
+              </h2>
+              <p>Are you sure you want to delete this user?</p>
+              <div className="modal-buttons">
+                <button
+                  onClick={confirmDeleteUser}
+                  className="admin-dashboard-submit-btn"
+                >
+                  Yes, Delete
+                </button>
+                <button
+                  onClick={() => setShowDeleteModal(false)}
+                  className="admin-dashboard-cancel-btn"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+          <div className="cam-scroll" style={{ overflowX: "auto" }}>
         <table className="admin-dashboard-table">
           <thead>
             <tr>
@@ -233,68 +442,74 @@ const Createusers = () => {
               <th>Username</th>
               <th>Email</th>
               <th>Password</th>
-              <th>Created At</th>
-              <th>Role</th>
+                <th onClick={handleSortByDate} style={{ cursor: "pointer" }}>
+        Created At {sortOrder === "asc" ? "▲" : "▼"}
+      </th>             
+         <th>Role</th>
               <th>Send Login</th>
               <th>Account Status</th>
               <th>Action</th>
             </tr>
           </thead>
           <tbody>
-          {currentUsers && currentUsers.length > 0 ? (
-                currentUsers.map((user) => (
-              <tr key={user._id}>
-                <td>{users.indexOf(user) + 1}</td>
-                <td>{user.username}</td>
-                <td>{user.email}</td>
-                <td>{user.password}</td>
-                <td>{new Date(user.createdAt).toLocaleDateString("en-IN")}</td>
-                <td>{user.role}</td>
-                <td>
+            {currentUsers && currentUsers.length > 0 ? (
+              currentUsers.map((user) => (
+                <tr key={user._id}>
+                  <td>{users.indexOf(user) + 1}</td>
+                  <td>{user.username}</td>
+                  <td>{user.email}</td>
+                  <td>{user.password}</td>
+                  <td>
+                    {new Date(user.createdAt).toLocaleDateString("en-IN")}
+                  </td>
+                  <td>{user.role}</td>
+                  <td>
                   <button
                     className="send-btn"
-                    style={{ backgroundColor: "#f48c06", color: "white" }}
-                    onClick={() => {
-                      toast.success("Login details sent successfully!");
-                    }}
+                    style={{ backgroundColor: "#f48c06" }}
+                    onClick={() => handleSendCredentials(user._id)}
                   >
-                    Send
+                    {sendLoadingId === user._id ? (
+                      <span className="loader-create-remainder"></span>
+                    ) : (
+                      "Send"
+                    )}
                   </button>
                 </td>
                 <td>
-                  <label className="toggle-switch">
-                    <input
-                      type="checkbox"
-                      checked={user.isActive}
-                      onChange={() => {
-                        toast.success(
-                          user.isActive
-                            ? "Account Deactivated!"
-                            : "Account Activated!"
-                        );
-                      }}
-                    />
-                    <span className="slider"></span>
-                  </label>
+                  {statusLoadingId === user._id ? (
+                    <div className="loader"></div>
+                  ) : (
+                    <label className="toggle-switch">
+                      <input
+                        type="checkbox"
+                        checked={user.isActive}
+                        onChange={() =>
+                          handleStatusChange(user._id, !user.isActive)
+                        }
+                      />
+                      <span className="slider"></span>
+                    </label>
+                  )}
                 </td>
-                <td>
-                  <div className="action-button-admin">
-                    <button
-                      className="editadmin"
-                      //  onClick={() => handleEditStudent(student)}
-                    >
-                      <FaEdit size={18} color="#2f327d" />
-                    </button>
-                    <button
-                      className="deleteadmin"
-                      //  onClick={handleDeleteSelectedStudents}
-                    >
-                      <FaTrash size={18} color="#f48c06" />
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            ))
+                  <td>
+                    <div className="action-button-admin">
+                      <button
+                        className="editadmin"
+                        onClick={() => handleEditClick(user)}
+                      >
+                        <FaEdit size={18} color="#2f327d" />
+                      </button>
+                      <button
+                        className="deleteadmin"
+                        onClick={() => handleDeleteClick(user._id)}
+                      >
+                        <FaTrash size={18} color="#f48c06" />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))
             ) : (
               <tr>
                 <td colSpan="9" style={{ textAlign: "center" }}>
@@ -304,9 +519,10 @@ const Createusers = () => {
             )}
           </tbody>
         </table>
+        </div>
 
-             {/* Pagination */}
-             <div className="pagination-container">
+        {/* Pagination */}
+        <div className="pagination-container">
           <div className="pagination-controls">
             <button
               disabled={currentPage === 1}

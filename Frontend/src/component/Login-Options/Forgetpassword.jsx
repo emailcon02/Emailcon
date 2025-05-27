@@ -4,8 +4,8 @@ import axios from 'axios';
 import { ToastContainer, toast } from 'react-toastify';
 import { FaArrowLeft } from 'react-icons/fa';
 import 'react-toastify/dist/ReactToastify.css';
-import img1 from '../Images/forgetpassword.png';
-import apiConfig from '../apiconfig/apiConfig.js';
+import img1 from '../../Images/forgetpassword.png';
+import apiConfig from '../../apiconfig/apiConfig.js';
 import { useNavigate } from 'react-router-dom';
 function Forgetpassword() {
  

@@ -154,9 +154,7 @@ h2 {
   max-height: 400px;
   overflow: auto;
   margin: 0 auto;
-  /* Enable horizontal scrolling */
   white-space: nowrap;
-  /* Prevent table cells from wrapping */
 }
 
 .student-list table {
@@ -181,8 +179,8 @@ h2 {
 }
 
 /* Input Fields */
-input[type="text"],
-input[type="email"],
+.input-group input[type="text"],
+.input-group input[type="email"],
 select {
   width: 100%;
   padding: 8px;
@@ -246,9 +244,7 @@ select {
   width: 70%;
   max-width: 400px;
   height: 450px;
-  /* Fixed height */
   overflow-y: auto;
-  /* Enable vertical scroll */
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
 .edit-student-modal-contents {
@@ -257,7 +253,7 @@ select {
   border-radius: 8px;
   width: 70%;
   max-width: 400px;
-  height: 150px;
+  /* height: 150px; */
   /* Fixed height */
   overflow-y: auto;
   /* Enable vertical scroll */

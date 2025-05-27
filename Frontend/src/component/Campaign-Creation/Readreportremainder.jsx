@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import axios from "axios";
-import apiConfig from "../apiconfig/apiConfig";
-import { FaArrowLeft, FaSyncAlt } from "react-icons/fa";
+import apiConfig from "../../apiconfig/apiConfig";
+import { FaArrowLeft } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import "./ReadReport.css";
 import {
@@ -15,7 +15,7 @@ import {
   Legend,
 } from "recharts";
 
-const ReadReport = () => {
+const Readreportremainder = () => {
   const { userId, campaignId } = useParams();
   const [openCount, setOpenCount] = useState(0);
   const [campaigns, setCampaigns] = useState({});
@@ -60,11 +60,13 @@ const ReadReport = () => {
           setUrlCount(response.data.count);
           setClickedUrls(response.data.urls);
           setUrlEmails(response.data.emails);
+          // console.log("Click Data", response.data);
         })
         .catch((error) => console.error("Error fetching click data", error));
     };
 
     fetchClickData();
+
   }, [userId, campaignId]);
 
   // Handle View button click
@@ -141,21 +143,21 @@ const ReadReport = () => {
     setShowOverallClickModal(false); // Close Modal
   };
 
-  const handleEditor = (userId, campaignId) => {
-    navigate(`/read-editor/${userId}/${campaignId}`);
-  };
-  const handleoverallEditor = (userId, campaignId) => {
-    navigate(`/click-editor/${userId}/${campaignId}`);
-  };
+  // const handleEditor = (userId, campaignId) => {
+  //   navigate(`/read-editor/${userId}/${campaignId}`);
+  // };
+  // const handleoverallEditor = (userId, campaignId) => {
+  //   navigate(`/click-editor/${userId}/${campaignId}`);
+  // };
 
-  const handleoverallsingleEditor = (userId, campaignId, emails) => {
-    navigate(`/clicksingle-editor/${userId}/${campaignId}`, {
-      state: { emails },
-    });
-  };
+  // const handleoverallsingleEditor = (userId, campaignId, emails) => {
+  //   navigate(`/clicksingle-editor/${userId}/${campaignId}`, {
+  //     state: { emails },
+  //   });
+  // };
 
   const handleBackCampaign = () => {
-    navigate("/campaigntable");
+    navigate("/remaindertable");
   };
 
   const handleCloseModal = () => {
@@ -212,16 +214,7 @@ const ReadReport = () => {
       </nav>
       <div>
         <div className="Report-heading-2">
-          <div style={{ display: "flex", gap: "10px",marginBottom:"25px" }}>
-          <p className="Report-heading-head">Email Template</p>        
-          <button
-              onClick={() => window.location.reload()}
-              className="refresh-btn"
-              title="Refresh Page"
-            >
-              <FaSyncAlt />
-            </button>
-            </div>
+          <p style={{marginBottom:"20px"}} className="Report-heading-head">Email Template</p>
           <p>{campaigns.senddate}</p>
           <hr />
         </div>
@@ -257,7 +250,6 @@ const ReadReport = () => {
             onClick={(e) => e.stopPropagation()}
           >
             <h2 className="modal-heading-read">Delivered Rate</h2>
-            <div className="modal-content-read-table">
             <table className="email-table-read">
               <thead>
                 <tr>
@@ -278,7 +270,6 @@ const ReadReport = () => {
                 )}
               </tbody>
             </table>
-            </div>
             <button className="target-modal-read" onClick={handleClosedelModal}>
               Close
             </button>
@@ -296,7 +287,6 @@ const ReadReport = () => {
             onClick={(e) => e.stopPropagation()}
           >
             <h2 className="modal-heading-read">Clicked Rate</h2>
-            <div className="modal-content-read-table">
             <table className="email-table-read">
               <thead>
                 <tr>
@@ -326,7 +316,6 @@ const ReadReport = () => {
                 )}
               </tbody>
             </table>
-            </div>
             <div className="overall-btn">
               <button
                 className="overall-modal-read"
@@ -359,8 +348,6 @@ const ReadReport = () => {
             onClick={(e) => e.stopPropagation()}
           >
             <h2 className="modal-heading-read">Click Details</h2>
-            <div className="modal-content-read-table">
-
             <table className="email-table-read">
               <thead>
                 <tr>
@@ -385,8 +372,7 @@ const ReadReport = () => {
                 )}
               </tbody>
             </table>
-            </div>
-            <button
+            {/* <button
               className="target-modal-read"
               onClick={() =>
                 handleoverallsingleEditor(
@@ -397,7 +383,7 @@ const ReadReport = () => {
               }
             >
               Retarget
-            </button>
+            </button> */}
 
             <button
               className="close-modal-read"
@@ -417,7 +403,6 @@ const ReadReport = () => {
             onClick={(e) => e.stopPropagation()}
           >
             <h2 className="modal-heading-read">Failed Rate</h2>
-            <div className="modal-content-read-table">
             <table className="email-table-read">
               <thead>
                 <tr>
@@ -438,7 +423,6 @@ const ReadReport = () => {
                 )}
               </tbody>
             </table>
-            </div>
             <button
               className="target-modal-read"
               onClick={handleClosefailModal}
@@ -459,8 +443,6 @@ const ReadReport = () => {
             onClick={(e) => e.stopPropagation()}
           >
             <h2 className="modal-heading-read">Read Rate</h2>
-            <div className="modal-content-read-table">
-
             <table className="email-table-read">
               <thead>
                 <tr>
@@ -484,20 +466,19 @@ const ReadReport = () => {
                 )}
               </tbody>
             </table>
-            </div>
             <div className="overall-btn">
               <button
                 className="overall-modal-read"
                 onClick={() => setShowAnalysisModal(true)}
               >
-                Retarget Analysis
+                Analysis
               </button>
-              <button
+              {/* <button
                 className="overall-cancel"
                 onClick={() => handleEditor(userId, campaignId)}
               >
                 Retarget
-              </button>
+              </button> */}
             </div>
             <button className="close-modal-read" onClick={handleCloseModal}>
               x
@@ -516,7 +497,7 @@ const ReadReport = () => {
             className="modal-content-read-graph"
             onClick={(e) => e.stopPropagation()}
           >
-            <h2 className="modal-heading-read">Read Retarget Analysis</h2>
+            <h2 className="modal-heading-read">Read Email Analysis</h2>
             <ResponsiveContainer width="100%" height={400}>
               <BarChart data={processDataForGraph()}>
                 <XAxis dataKey="hour" />
@@ -544,8 +525,6 @@ const ReadReport = () => {
             onClick={(e) => e.stopPropagation()}
           >
             <h2 className="modal-heading-read">Overall Click Details</h2>
-            <div className="modal-content-read-table">
-
             <table className="email-table-read">
               <thead>
                 <tr>
@@ -567,13 +546,12 @@ const ReadReport = () => {
                 )}
               </tbody>
             </table>
-            </div>
-            <button
+            {/* <button
               className="target-modal-read"
               onClick={() => handleoverallEditor(userId, campaignId)}
             >
               Retarget
-            </button>
+            </button> */}
             <button
               className="close-modal-read"
               onClick={handleCloseoverallModal}
@@ -587,4 +565,4 @@ const ReadReport = () => {
   );
 };
 
-export default ReadReport;
+export default Readreportremainder;

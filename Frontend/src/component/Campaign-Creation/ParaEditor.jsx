@@ -1,12 +1,12 @@
 import React, { useState, useRef, useEffect } from "react";
 import axios from "axios";
-import apiConfig from "../apiconfig/apiConfig.js";
+import apiConfig from "../../apiconfig/apiConfig.js";
 import { motion } from "framer-motion";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { Editor } from "@tinymce/tinymce-react";
 import "./ParaEditor.css";
 import { Send, Loader2, Clipboard } from "lucide-react";
-import aiicon from "../Images/google-gemini-icon.png";
+import aiicon from "../../Images/google-gemini-icon.png";
 
 const ParaEditor = ({ isOpen, content, onSave, onClose }) => {
   const [editorContent, setEditorContent] = useState(content);

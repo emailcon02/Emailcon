@@ -12,7 +12,8 @@ const userSchema = new mongoose.Schema({
         type: String,
         default: "https://cdn-icons-png.flaticon.com/512/847/847969.png"
     },
-    createdAt: { type: Date, default: Date.now }
+}, {
+    timestamps: true
 });
 
 const User = mongoose.model("User", userSchema);

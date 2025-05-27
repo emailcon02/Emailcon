@@ -3,7 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import "./signupOption.css";
-import signupop from "../Images/Signupops.png"
+import signupop from "../../Images/Signupops.png"
 
 function SignupOption() {
   const { userId } = useParams();

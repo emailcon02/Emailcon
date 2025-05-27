@@ -4,7 +4,7 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import "./ListPage.css";
 import { FiEdit, FiTrash2,FiEye } from "react-icons/fi"; // Importing icons
-import apiConfig from "../apiconfig/apiConfig";
+import apiConfig from "../../apiconfig/apiConfig";
 
 const ConfirmationModal = ({ isOpen, onClose, onConfirm, message }) => {
   if (!isOpen) return null;
@@ -317,7 +317,7 @@ const ListPage = ({ onClose }) => {
 
             {editingGroup && (
               <div className="edit-student-modal-overlay">
-                <div className="edit-student-modal-contents">
+                <div className="edit-student-modal-contents input-group">
                   <h3>Edit Group</h3>
                   <input
                     type="text"
