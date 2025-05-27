@@ -29,6 +29,12 @@ import Smtppage from "../../component/Login-Options/Smtppage";
 import Createusers from "../../component/Admin/Createusers";
 import AllUserPaymenthistory from "../../component/Admin/AlluserPaymenthistory";
 import DashboardPage from "../../component/Admin/DashboardPage";
+import SubAdminDashboardPage from "../../component/Sub-Admin/DashboardPage";
+import SubAdminUserDetail from "../../component/Sub-Admin/UserDetail";
+import SubAdminExpiredUser from "../../component/Sub-Admin/ExpiredUser";
+import SubAdminUserPaymenthistory from "../../component/Sub-Admin/UserPaymenthistory";
+import SubAdminAllUserPaymenthistory from "../../component/Sub-Admin/AllUserPaymenthistory";
+import SubUserRequestForm from "../../component/Sub-Admin/UserRequestForm";
 import UserDetail from "../../component/Admin/UserDetail";
 import ExpiredUser from "../../component/Admin/ExpiredUser";
 import UserRequestForm from "../../component/Admin/UserRequestForm";
@@ -74,6 +80,12 @@ function RoutesPage() {
         <Route path="/user-detail" element={<UserDetail />} />
         <Route path="/expired-users" element={<ExpiredUser />} />
         <Route path="/super-admin-dashboard" element={<DashboardPage/>} />
+        <Route path="/sub-user-detail" element={<SubAdminUserDetail />} />
+        <Route path="/sub-expired-users" element={<SubAdminExpiredUser />} />
+        <Route path="/sub-user-payment-history/:userId" element={<SubAdminUserPaymenthistory />} />
+        <Route path="/sub-all-user-payment-history" element={<SubAdminAllUserPaymenthistory />} />
+        <Route path="/sub-admin-dashboard" element={<SubAdminDashboardPage/>} />
+        <Route path="/sub-user-enroll" element={<SubUserRequestForm />} />
         <Route path="/editor" element={<Mainpage />} />
         <Route path="/read-editor/:userId/:campaignId" element={<Readmainpage />} />
         <Route path="/click-editor/:userId/:campaignId" element={<Clickmainpage />} />
