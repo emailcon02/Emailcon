@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import "./DashboardPage.css";
+import "./SubDashboardPage.css";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import Header from "./Header";
@@ -100,7 +100,7 @@ function DashboardPage() {
               </p>
             </div>
 
-            <div style={{ display: "flex" }}>
+            <div className="date-filter-main">
               <div className="date-filter-dashboard">
                 <DatePicker
                   selected={selectedDate}

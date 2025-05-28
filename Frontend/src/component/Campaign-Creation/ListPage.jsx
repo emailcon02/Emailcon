@@ -429,13 +429,13 @@ const ListPage = ({ onClose }) => {
                               className="editstudent"
                               onClick={() => handleEditStudent(student)}
                             >
-                              <FiEdit size={18} color="green" />
+                              <FiEdit size={18} color="#2f327d" />
                             </button>
                             <button
                               className="editstudent"
                               onClick={handleDeleteSelectedStudents}
                             >
-                              <FiTrash2 size={18} color="red" />
+                              <FiTrash2 size={18} color="#f48c06" />
                             </button>
                           </td>
                         </tr>

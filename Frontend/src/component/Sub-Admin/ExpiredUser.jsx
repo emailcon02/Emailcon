@@ -104,7 +104,7 @@ function ExpiredUser() {
     setToDate("");
   };
   const handlepaymentview = (userId) => {
-    navigate(`/sub-user-payment-history/${userId}`);
+    navigate(`/user-payment-history/${userId}`);
   };
 
   return (

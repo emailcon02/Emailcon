@@ -33,7 +33,7 @@ import SubAdminDashboardPage from "../../component/Sub-Admin/DashboardPage";
 import SubAdminUserDetail from "../../component/Sub-Admin/UserDetail";
 import SubAdminExpiredUser from "../../component/Sub-Admin/ExpiredUser";
 import SubAdminUserPaymenthistory from "../../component/Sub-Admin/UserPaymenthistory";
-import SubAdminAllUserPaymenthistory from "../../component/Sub-Admin/AllUserPaymenthistory";
+import SubAdminAllUserPaymenthistory from "../../component/Sub-Admin/AlluserPaymenthistory";
 import SubUserRequestForm from "../../component/Sub-Admin/UserRequestForm";
 import UserDetail from "../../component/Admin/UserDetail";
 import ExpiredUser from "../../component/Admin/ExpiredUser";

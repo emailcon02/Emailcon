@@ -293,7 +293,7 @@ useEffect(() => {
   <>
     <style>
       {`
-        .modal-overlay {
+        .modal-overlay-bus {
           position: fixed;
           top: 0;
           left: 0;
@@ -306,7 +306,7 @@ useEffect(() => {
           z-index: 1000;
         }
 
-        .modal-content {
+        .modal-content-bus {
           background: rgba(255, 255, 255, 0.85);
           backdrop-filter: blur(10px);
           border-radius: 12px;
@@ -328,14 +328,14 @@ useEffect(() => {
           }
         }
 
-        .modal-content h3 {
+        .modal-content-bus h3 {
           margin-bottom: 20px;
           color: #2f327d;
           font-size: 22px;
           text-align: center;
         }
 
-        .modal-content label {
+        .modal-content-bus label {
           display: block;
           margin-top: 15px;
           margin-bottom: 6px;
@@ -343,8 +343,8 @@ useEffect(() => {
           color: #222;
         }
 
-        .modal-content select,
-        .modal-content textarea {
+        .modal-content-bus select,
+        .modal-content-bus textarea {
           width: 100%;
           padding: 10px;
           border-radius: 8px;
@@ -387,11 +387,19 @@ useEffect(() => {
         .modal-buttons button:last-child:hover {
           background:rgb(230, 185, 6);
         }
+          @media (max-width: 480px) {
+          .modal-content-bus{
+             padding:10px;
+          }
+             .modal-content-bus textarea{
+               width:93%;
+             }
+      }
       `}
     </style>
 
-    <div className="modal-overlay">
-      <div className="modal-content">
+    <div className="modal-overlay-bus">
+      <div className="modal-content-bus">
         <h3>Edit Status & Remarks</h3>
         <label>Status:</label>
         <select value={editStatus} onChange={(e) => setEditStatus(e.target.value)}>

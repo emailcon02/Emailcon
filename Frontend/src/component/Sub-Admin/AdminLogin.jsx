@@ -1,4 +1,4 @@
-import React, { useState,useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import "./AdminLogin.css";
 import { ToastContainer, toast } from "react-toastify";
@@ -7,21 +7,23 @@ import adminimg from "../../Images/signup-img.png";
 import axios from "axios";
 import apiConfig from "../../apiconfig/apiConfig.js";
 
+
 function AdminLogin() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [role, setRole] = useState("super-admin"); 
+  const [showPassword, setShowPassword] = useState(false);
+  const [role, setRole] = useState("super-admin");
   const [roles, setRoles] = useState([]);
-
   const navigate = useNavigate();
-   const fetchUsers = async () => {
-      const res = await axios.get(apiConfig.baseURL + '/api/admin/getadminuser');
-      setRoles(res.data.map(user => user.role));
-    };
-  
-    useEffect(() => {
-      fetchUsers();
-    }, []);
+
+  const fetchUsers = async () => {
+    const res = await axios.get(apiConfig.baseURL + "/api/admin/getadminuser");
+    setRoles(res.data.map((user) => user.role));
+  };
+
+  useEffect(() => {
+    fetchUsers();
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -29,7 +31,7 @@ function AdminLogin() {
       const response = await axios.post(`${apiConfig.baseURL}/api/auth/admin-login`, {
         email,
         password,
-        role, 
+        role,
       });
 
       if (response.data.success) {
@@ -37,18 +39,18 @@ function AdminLogin() {
         localStorage.setItem("adminuserId", response.data.userId);
         if (role === "super-admin") {
           setTimeout(() => {
-          navigate("/super-admin-dashboard");
-          }, 3000);
-        } else if(role === "admin") {
-          setTimeout(() => {
             navigate("/super-admin-dashboard");
-            }, 3000);
-        }else if(role === "business-admin") {
+          }, 3000);
+        } else if (role === "admin") {
+          setTimeout(() => {
+            navigate("/sub-admin-dashboard");
+          }, 3000);
+        } else if (role === "business-admin") {
           setTimeout(() => {
             navigate("/business-admin-dashboard");
-            }, 3000);
-        }else {
-          navigate("/user-dashboard");
+          }, 3000);
+        } else {
+          navigate("/sub-admin-dashboard");
         }
         toast.success("Login successful!");
       } else {
@@ -56,10 +58,8 @@ function AdminLogin() {
       }
     } catch (error) {
       console.error("Login error:", error);
-    
       if (error.response) {
         const errorMessage = error.response.data.message || "Invalid credentials";
-    
         if (error.response.status === 403 && errorMessage === "Account not activated") {
           toast.error("Your account is not activated.");
         } else {
@@ -70,18 +70,14 @@ function AdminLogin() {
       } else {
         toast.error("An error occurred. Please try again.");
       }
-    }    
+    }
   };
 
   return (
     <div className="admin-login-page">
       <div className="admin-cover">
         <div className="admin-aside">
-          <img
-            src={adminimg}
-            alt="Sample Excel Format"
-            className="signup-image"
-          />
+          <img src={adminimg} alt="Sample Excel Format" className="signup-image" />
           <h2 style={{ fontWeight: "550", color: "#2f327d" }}>
             Admin <span style={{ color: "#f48c06" }}> Access</span>
           </h2>
@@ -98,10 +94,7 @@ function AdminLogin() {
           </p>
         </div>
         <div className="admin-login-container">
-          <h2
-            className="admin-login-header"
-            style={{ fontWeight: "550", color: "#2f327d" }}
-          >
+          <h2 className="admin-login-header" style={{ fontWeight: "550", color: "#2f327d" }}>
             <span>
               Email<span style={{ color: "#f48c06" }}>con </span> Admin
               <span style={{ color: "#f48c06" }}> Login</span>
@@ -124,17 +117,22 @@ function AdminLogin() {
             <div className="lab">
               <label>Password</label>
             </div>
-            <div className="input-container">
+            <div className="input-container password-container">
               <input
-                type="password"
+                type={showPassword ? "text" : "password"}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
                 className="admin-login-input"
               />
+              <span
+                className="toggle-password"
+                onClick={() => setShowPassword(!showPassword)}
+              >
+                <i className={`fas ${showPassword ? "fa-eye-slash" : "fa-eye"}`}></i>
+              </span>
             </div>
 
-            {/* ✅ Role Select Dropdown */}
             <div className="lab">
               <label>Role</label>
             </div>
@@ -147,11 +145,10 @@ function AdminLogin() {
               >
                 <option value="super-admin">Super-Admin</option>
                 {[...new Set(roles)].map((r) => (
-  <option key={r} value={r}>
-    {r}
-  </option>
-))}
-
+                  <option key={r} value={r}>
+                    {r}
+                  </option>
+                ))}
               </select>
             </div>
 

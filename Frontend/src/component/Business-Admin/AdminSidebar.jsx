@@ -19,6 +19,7 @@ const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const adminuserId = localStorage.getItem("adminuserId");
   const [saveLoading, setSaveLoading] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
 
 
@@ -69,12 +70,18 @@ const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     toast.error(errorMsg);
   }
 };
-
+ const toggleSidebar = () => {
+    setIsSidebarOpen(!isSidebarOpen);
+  };
 
   return (
     <>
-      <div className="admin-sidebar">
-        <Link
+     <div className="mobile-toggle" onClick={toggleSidebar}>
+        <i className="fas fa-bars"></i>
+      </div>
+
+      <div className={`admin-sidebar ${isSidebarOpen ? 'open' : ''}`}>
+          <Link
           to="/business-admin-dashboard"
           className={`nav-item${location.pathname === "/business-admin-dashboard" ? " active" : ""}`}
         >

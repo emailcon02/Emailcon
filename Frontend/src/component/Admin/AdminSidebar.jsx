@@ -1,14 +1,20 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
+import './DashboardPage.css'; // Make sure to import styles
 
 function AdminSidebar() {
   const location = useLocation();
   const navigate = useNavigate();
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   const handleLogout = () => {
     localStorage.removeItem("adminToken");
     localStorage.removeItem("adminuserId");
     navigate("/admin-login");
+  };
+
+  const toggleSidebar = () => {
+    setIsSidebarOpen(!isSidebarOpen);
   };
 
   const items = [
@@ -22,30 +28,27 @@ function AdminSidebar() {
   ];
 
   return (
-    <div className="admin-sidebar">
-      {items.map(({ icon, label, path, isLogout }) => (
-        isLogout ? (
-          <div
-            key={label}
-            className="nav-item"
-            onClick={handleLogout}
-            style={{ cursor: "pointer" }}
-          >
-            <div className="nav-icon">{icon}</div>
-            <div className="nav-label">{label}</div>
-          </div>
-        ) : (
-          <Link
-            key={label}
-            to={path}
-            className={`nav-item${location.pathname === path ? " active" : ""}`}
-          >
-            <div className="nav-icon">{icon}</div>
-            <div className="nav-label">{label}</div>
-          </Link>
-        )
-      ))}
-    </div>
+    <>
+      <div className="mobile-toggle" onClick={toggleSidebar}>
+        <i className="fas fa-bars"></i>
+      </div>
+
+      <div className={`admin-sidebar ${isSidebarOpen ? 'open' : ''}`}>
+        {items.map(({ icon, label, path, isLogout }) =>
+          isLogout ? (
+            <div key={label} className="nav-item" onClick={handleLogout} style={{ cursor: "pointer" }}>
+              <div className="nav-icon">{icon}</div>
+              <div className="nav-label">{label}</div>
+            </div>
+          ) : (
+            <Link key={label} to={path} className={`nav-item${location.pathname === path ? " active" : ""}`}>
+              <div className="nav-icon">{icon}</div>
+              <div className="nav-label">{label}</div>
+            </Link>
+          )
+        )}
+      </div>
+    </>
   );
 }
 

@@ -20,7 +20,7 @@ function Header() {
             <input type="text" placeholder="Search..." />
           </div>
 
-          <div role="img" aria-label="notification">
+          <div className='dashboard-notify' role="img" aria-label="notification">
             🔔
           </div>
 

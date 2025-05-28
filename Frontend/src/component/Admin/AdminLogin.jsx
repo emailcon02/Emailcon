@@ -43,14 +43,14 @@ function AdminLogin() {
           }, 3000);
         } else if (role === "admin") {
           setTimeout(() => {
-            navigate("/super-admin-dashboard");
+            navigate("/sub-admin-dashboard");
           }, 3000);
         } else if (role === "business-admin") {
           setTimeout(() => {
             navigate("/business-admin-dashboard");
           }, 3000);
         } else {
-          navigate("/user-dashboard");
+          navigate("/sub-admin-dashboard");
         }
         toast.success("Login successful!");
       } else {

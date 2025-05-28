@@ -105,7 +105,7 @@ function UserDetail() {
     setToDate("");
   };
   const handlepaymentview = (userId) => {
-    navigate(`/sub-user-payment-history/${userId}`);
+    navigate(`/user-payment-history/${userId}`);
   };
 
   const handleSendCredentials = async (userId) => {
@@ -243,6 +243,8 @@ function UserDetail() {
                 <td>{new Date(user.createdAt).toLocaleDateString()}</td>
                 <td>{user.phone || "N/A"}</td>
                 <td>{user.isActive ? "Active" : "Inactive"}</td>
+                
+              
                 <td>
                   <button
                     className="send-btn"

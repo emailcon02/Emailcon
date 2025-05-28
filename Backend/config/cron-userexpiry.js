@@ -7,7 +7,7 @@ cron.schedule("*/10 * * * *", async () => {
   const now = new Date();
   const nowUTC = new Date(now.toISOString().slice(0, 19) + "Z");
 
-  console.log("🔍 Running payment reminder check at:", nowUTC.toISOString());
+  console.log("🔍 Running user payment reminder check at:", nowUTC.toISOString());
 
   try {
     const payments = await PaymentHistory.aggregate([
