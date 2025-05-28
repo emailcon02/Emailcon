@@ -794,4 +794,31 @@
     background: linear-gradient(135deg, #e39d53, #d3792f);
     color: white;
   }
+  .date-filter-main{
+    display: flex;
+  }
   
+@media (max-width: 480px) {
+  .search-bar-header{
+    display: none !important;
+  }
+  .header-bar{
+    padding: 0 10px !important;
+
+  }
+  .dashboard-header {
+    flex-direction: column !important;
+    align-items: center !important;
+  }
+  .date-filter-main{
+    flex-direction: column;
+    gap: 15px;
+    margin-top: 10px;
+  }
+  .date-filter-dashboard{
+    margin: 0 !important;
+    
+  }
+
+     
+}

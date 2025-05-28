@@ -100,7 +100,7 @@ function DashboardPage() {
               </p>
             </div>
 
-            <div style={{ display: "flex" }}>
+            <div className="date-filter-main">
               <div className="date-filter-dashboard">
                 <DatePicker
                   selected={selectedDate}
