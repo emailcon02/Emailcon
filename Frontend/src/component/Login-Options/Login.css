@@ -429,3 +429,20 @@
   border-radius: 5px;
   cursor: pointer;
 }
+.password-container {
+  position: relative;
+}
+
+.password-container .login-input {
+  width: 100%;
+  padding-right: 40px;
+}
+
+.toggle-password {
+  position: absolute;
+  top: 50%;
+  right: 10px;
+  transform: translateY(-50%);
+  cursor: pointer;
+  color: #2f327d;
+}

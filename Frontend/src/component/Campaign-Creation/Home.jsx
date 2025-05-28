@@ -68,6 +68,12 @@ const Home = () => {
   const [emailData, setEmailData] = useState({ attachments: [] }); // Email data object
   const [previewtext, setPreviewtext] = useState("");
   const [aliasName, setAliasName] = useState("");
+        const [replyTo,setReplyTo] = useState("");
+       const [isLoadingreply, setIsLoadingreply] = useState(false); // State for loader
+          const [aliasOptions, setAliasOptions] = useState([]);
+          const [showModal, setShowModal] = useState(false);
+          const [replyOptions, setReplyOptions] = useState([]);
+          const [showModalreply, setShowModalreply] = useState(false);
   const [selectedGroupsub, setSelectedGroupsub] = useState(false);
   const [fieldNames, setFieldNames] = useState({});
   const [students, setStudents] = useState([]); // Stores all students
@@ -175,6 +181,144 @@ const Home = () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
+
+    useEffect(() => {
+        const fetchaliasname = async () => {
+          if (!user?.id) {
+            navigate("/user-login"); // Redirect to login if user is not found
+            return;
+          }
+    
+          try {
+            const res = await axios.get(
+              `${apiConfig.baseURL}/api/stud/aliasname/${user.id}`
+            );
+            setAliasOptions(res.data);
+          } catch (err) {
+            console.error(err);
+            console.log("Failed to fetch aliasname");
+          }
+        };
+    
+        fetchaliasname();
+      }, [user?.id, navigate]); // Ensure useEffect is dependent on `user` and `navigate`
+    
+      const handleAddAlias = () => {
+        if (!user || !user.id) {
+          toast.error("Please ensure the user is valid");
+          return; // Stop further execution if user is invalid
+        }
+        if (!aliasName) {
+          toast.error("Aliasname cannot be empty");
+          return; // Stop further execution if aliasname is empty
+        }
+    
+        // Proceed with aliasname creation
+        setIsLoading(true); // Start loading
+        if (aliasName && user && user.id) {
+          axios
+            .post(`${apiConfig.baseURL}/api/stud/aliasname`, {
+              aliasname:aliasName,
+              userId: user.id,
+            })
+            .then((response) => {
+              setAliasOptions([...aliasOptions, response.data]);
+              toast.success("Aliasname created");
+              setShowModal(false);
+              setAliasName("");
+              setIsLoading(false);
+            })
+            .catch((error) => {
+              setIsLoading(false); // Stop loading
+              // Handle error response
+              console.error("Error:", error);
+              // Dismiss previous toasts before showing a new one
+              toast.dismiss();
+    
+              if (
+                error.response &&
+                error.response.data &&
+                error.response.data.message
+              ) {
+                toast.warning(error.response.data.message, { autoClose: 3000 });
+              } else {
+                toast.error("Failed to create aliasname", { autoClose: 3000 });
+              }
+            });
+        } else {
+          toast.error("Please ensure all fields are filled and user is valid");
+        }
+      };
+    
+    
+      useEffect(() => {
+        const fetchreplyto = async () => {
+          if (!user?.id) {
+            navigate("/user-login"); // Redirect to login if user is not found
+            return;
+          }
+    
+          try {
+            const res = await axios.get(
+              `${apiConfig.baseURL}/api/stud/replyTo/${user.id}`
+            );
+            setReplyOptions(res.data);
+          } catch (err) {
+            console.error(err);
+            console.log("Failed to fetch replyto mail");
+          }
+        };
+    
+        fetchreplyto();
+      }, [user?.id, navigate]); // Ensure useEffect is dependent on `user` and `navigate`
+    
+      const handleAddReply = () => {
+        if (!user || !user.id) {
+          toast.error("Please ensure the user is valid");
+          return; // Stop further execution if user is invalid
+        }
+        if (!replyTo) {
+          toast.error("Reply to mail cannot be empty");
+          return; // Stop further execution if replyto is empty
+        }
+    
+        // Proceed with replyto creation
+        setIsLoadingreply(true); // Start loading
+        if (replyTo && user && user.id) {
+          axios
+            .post(`${apiConfig.baseURL}/api/stud/replyTo`, {
+              replyTo,
+              userId: user.id,
+            })
+            .then((response) => {
+              setReplyOptions([...replyOptions, response.data]);
+              toast.success("Replyto mail created");
+              setShowModalreply(false);
+              setReplyTo("");
+              setIsLoadingreply(false);
+            })
+            .catch((error) => {
+              setIsLoadingreply(false); // Stop loading
+              // Handle error response
+              console.error("Error:", error);
+              // Dismiss previous toasts before showing a new one
+              toast.dismiss();
+    
+              if (
+                error.response &&
+                error.response.data &&
+                error.response.data.message
+              ) {
+                toast.warning(error.response.data.message, { autoClose: 3000 });
+              } else {
+                toast.error("Failed to create reply to mail", { autoClose: 3000 });
+              }
+            });
+        } else {
+          toast.error("Please ensure all fields are filled and user is valid");
+        }
+      };
+    
 
   const handleDelete = async (templateId) => {
     setIsDeleting(true);
@@ -759,6 +903,10 @@ const handlebirthDelete = async (templateId) => {
       toast.error("Please Enter Alias Name.");
       return;
     }
+    if (!replyTo) {
+      toast.error("Please Enter Reply to mail.");
+      return;
+    }
     if (!scheduledTime) {
       toast.error("Please Select Remainder time.");
       return;
@@ -825,6 +973,7 @@ const handlebirthDelete = async (templateId) => {
         sentEmails: 0,
         subject: message,
         aliasName,
+        replyTo,
         attachments,
         exceldata: [{}],
         previewtext,
@@ -970,6 +1119,7 @@ const handlebirthDelete = async (templateId) => {
                       </option>
                     ))}
                   </select>
+                  
                   <label htmlFor="subject-input">Alias Name:</label>
                   <input
                     type="text"
@@ -1613,15 +1763,115 @@ const handlebirthDelete = async (templateId) => {
                 {/* Step 3 */}
                 <div className={`box box3 ${step >= 3 ? "active" : ""}`}>
                 <label>Email Setup</label>
-                <label htmlFor="subject-input">Alias Name:</label>
-                  <input
-                    type="text"
-                    id="aliasName-input"
-                    value={aliasName}
-                    disabled={step < 3}
-                    onChange={(e) => setAliasName(e.target.value)}
-                    placeholder="Enter your alias name here"
-                  />
+                
+                   <div className="alias-container-wrapper">
+      <label htmlFor="aliasName-select" className="alias-container-label">Alias Name:</label>
+      <div className="alias-container-flex">
+        <select
+          style={{padding:"10px"}}
+          id="aliasName-select"
+          value={aliasName}
+          onChange={(e) => setAliasName(e.target.value)}
+          className="alias-container-select"
+          disabled={step < 3}    
+        >
+          <option value="">Select alias</option>
+          {aliasOptions.map((alias) => (
+    <option key={alias._id} value={alias.aliasName}>
+      {alias.aliasname}
+    </option>
+  ))}
+        </select>
+
+      </div>
+      <div className="alias-container-add-button">
+      <button type="button" onClick={() => setShowModal(true)} >
+          Add
+      </button>
+      </div>
+    
+
+      {showModal && (
+        <div className="alias-container-modal-overlay">
+          <div className="alias-container-modal-box">
+            <h3>Add Alias Name</h3>
+            <input
+              type="text"
+              value={aliasName}
+              onChange={(e) => setAliasName(e.target.value)}
+              placeholder="Enter alias name"
+              className="alias-container-input"
+            />
+            <div className="alias-container-modal-actions">
+              <button onClick={() => setShowModal(false)} className="alias-container-cancel-btn">Cancel</button>
+              <button onClick={handleAddAlias} className="alias-container-save-btn"
+               disabled={isLoading}
+               >
+                 {isLoading ? (
+                   <span className="loader-create"></span> // Spinner
+                 ) : (
+                   "Save"
+                 )}{" "}              
+             </button>           
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+
+    <div className="alias-container-wrapper">
+      <label htmlFor="aliasName-select" className="alias-container-label">Reply To:</label>
+      <div className="alias-container-flex">
+        <select
+          style={{padding:"10px"}}
+          id="replyTo-select"
+          value={replyTo}
+          disabled={step < 3}
+          onChange={(e) => setReplyTo(e.target.value)}
+          className="alias-container-select"
+        >
+          <option value="">Select ReplyTo</option>
+          {replyOptions.map((reply) => (
+    <option key={reply._id} value={reply.replyTo}>
+      {reply.replyTo}
+    </option>
+  ))}
+        </select>
+    
+      </div>
+      <div className="alias-container-add-button">
+      <button type="button" onClick={() => setShowModalreply(true)} disabled={step < 3}>
+         Add
+      </button>
+      </div>
+
+      {showModalreply && (
+        <div className="alias-container-modal-overlay">
+          <div className="alias-container-modal-box">
+            <h3>Add Reply To Mail</h3>
+            <input
+              type="text"
+              value={replyTo}
+              onChange={(e) => setReplyTo(e.target.value)}
+              placeholder="Enter reply to mail"
+              className="alias-container-input"
+            />
+            <div className="alias-container-modal-actions">
+              <button onClick={() => setShowModalreply(false)} className="alias-container-cancel-btn">Cancel</button>
+              <button onClick={handleAddReply} className="alias-container-save-btn"
+               disabled={isLoadingreply}
+               >
+                 {isLoadingreply ? (
+                   <span className="loader-create"></span> // Spinner
+                 ) : (
+                   "Save"
+                 )}{" "}              
+             </button>          
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
 
                   <label htmlFor="subject-input">Subject:</label>
                   <input

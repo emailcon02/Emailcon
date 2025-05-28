@@ -8,6 +8,7 @@ import apiConfig from "../../apiconfig/apiConfig.js";
 import logimg from "../../Images/mail.png";
 import { FaEye, FaEyeSlash,FaArrowLeft } from "react-icons/fa";
 
+
 function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -27,6 +28,7 @@ function Login() {
   const [expiryDate,setExpiryDate] = useState(null);
   const [userId,setUserId] = useState("");
   const [resendTimer, setResendTimer] = useState(0);
+  const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -171,16 +173,23 @@ function Login() {
             <div className="labels">
               <label>Password</label>
             </div>
-            <div className="input-container-login">
-              <input
-                type="password"
-                value={password}
-                placeholder="Enter Your User Password"
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                className="login-input"
-              />
-            </div>
+       <div className="input-container-login password-container">
+  <input
+    type={showPassword ? "text" : "password"}
+    value={password}
+    placeholder="Enter Your User Password"
+    onChange={(e) => setPassword(e.target.value)}
+    required
+    className="login-input"
+  />
+  <span
+    className="toggle-password"
+    onClick={() => setShowPassword(!showPassword)}
+  >
+    <i className={`fas ${showPassword ? "fa-eye-slash" : "fa-eye"}`}></i>
+  </span>
+</div>
+
 
             <div className="forgot-password-container">
               <button type="button" className="forgot-password-button" onClick={handleforgetPassword}>
@@ -199,12 +208,12 @@ function Login() {
                 Don't have an account? <span style={{ color: "#2f327d" }}>Signup</span>
               </button>
             </div>
-
+{/* 
             <div className="log-sign">
               <button onClick={() => navigate("/admin-login")} className="login-button login-submit">
                 Way to Admin Login
               </button>
-            </div>
+            </div> */}
           </form>
         </div>
       </div>

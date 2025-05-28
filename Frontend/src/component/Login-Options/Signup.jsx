@@ -13,6 +13,7 @@ function Signup() {
   const [isLoading, setIsLoading] = useState(false); // Loading state
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [phone, setPhone] = useState("");
   const [gender, setGender] = useState("");
   const [users, setUsers] = useState([]);
@@ -204,17 +205,24 @@ function Signup() {
               />
               </label>
             </div>
-            <div className="input-container-sign">
-              <input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                className="signup-input"
-                placeholder="Enter the User password"
-              />
-            </div>
-          
+    
+<div className="input-container-sign password-container">
+  <input
+    type={showPassword ? "text" : "password"}
+    value={password}
+    placeholder="Enter the user password"
+    onChange={(e) => setPassword(e.target.value)}
+    required
+    className="signup-input"
+  />
+  <span
+    className="toggle-password"
+    onClick={() => setShowPassword(!showPassword)}
+  >
+    <i className={`fas ${showPassword ? "fa-eye-slash" : "fa-eye"}`}></i>
+  </span>
+</div>
+        
             <div className="sub-btn">
               <button
                 type="submit"

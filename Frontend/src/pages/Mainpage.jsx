@@ -3,11 +3,10 @@ import axios from "axios";
 import "./Mainpage.css";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import {FaBars, FaTimes} from "react-icons/fa";
+import {FaBars, FaCheckCircle, FaTimes, FaTrash} from "react-icons/fa";
 import { FiEdit } from 'react-icons/fi'; // Importing icons
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
-
 import {
   FaParagraph,
   FaImage,
@@ -86,6 +85,112 @@ const Mainpage = () => {
     const [showModal, setShowModal] = useState(false);
     const [replyOptions, setReplyOptions] = useState([]);
     const [showModalreply, setShowModalreply] = useState(false);
+     const [activeTablayout, setActiveTablayout] = useState('components');
+     const [galleryImages, setGalleryImages] = useState([]);
+const [currentPage, setCurrentPage] = useState(1);
+const itemsPerPage = 6; 
+const totalPages = Math.ceil(galleryImages.length / itemsPerPage);
+const paginatedImages = galleryImages.slice(
+  (currentPage - 1) * itemsPerPage,
+  currentPage * itemsPerPage
+);
+const [selectedImageIndex, setSelectedImageIndex] = useState(null);
+const [selectedImageNumber, setSelectedImageNumber] = useState(null);
+
+
+  const handleTabClick = (tabName) => {
+    setActiveTablayout(tabName);
+  };
+
+  const fetchImages = async () => {
+  try {
+    const res = await axios.get(`${apiConfig.baseURL}/api/stud/images/${user.id}`);
+    setGalleryImages(res.data);
+  } catch (err) {
+    console.error("Error fetching images", err);
+  }
+};
+
+useEffect(() => {
+  fetchImages();
+}, []);
+
+  const uploadImagefile = async () => {
+  const input = document.createElement("input");
+  input.type = "file";
+  input.accept = "image/*";
+
+  input.onchange = async (e) => {
+    const file = e.target.files[0];
+    const formData = new FormData();
+    formData.append("image", file);
+
+    try {
+      // Upload image to S3 or server
+      const uploadRes = await axios.post(`${apiConfig.baseURL}/api/stud/upload`, formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+
+      const imageUrl = uploadRes.data.imageUrl;
+
+      // Save URL to DB
+      await axios.post(`${apiConfig.baseURL}/api/stud/save-image`, {
+        userId: user.id, // Ensure user ID is passed correctly
+        imageUrl,
+      });
+
+      toast.success("Image uploaded");
+      fetchImages(); // Refresh gallery
+    } catch (err) {
+      toast.error("Upload failed");
+      console.error(err);
+    }
+  };
+
+  input.click();
+};
+
+const deleteImage = async (id) => {
+  try {
+    // Find image in previewContent by id
+    const imageToDelete = galleryImages.find(img => img._id === id);
+    if (!imageToDelete || !imageToDelete.imageUrl) {
+      toast.error("Image not found");
+      return;
+    }
+
+    // Extract the S3 key from the URL
+    const s3Key = decodeURIComponent(imageToDelete.imageUrl.split(".amazonaws.com/")[1]);
+    if (!s3Key) {
+      toast.error("Invalid image URL");
+      return;
+    }
+
+    // Step 1: Delete file from S3 using backend API
+    const s3DeleteResponse = await fetch(
+      `${apiConfig.baseURL}/api/stud/file?key=${encodeURIComponent(s3Key)}`,
+      { method: "DELETE" }
+    );
+
+    if (!s3DeleteResponse.ok) {
+      const err = await s3DeleteResponse.json();
+      throw new Error(err?.error || "Error deleting file from S3");
+    }
+
+    // Step 2: Delete DB record by id
+    const dbDeleteResponse = await axios.delete(`${apiConfig.baseURL}/api/stud/images/${id}`);
+    if (dbDeleteResponse.status !== 200) {
+      throw new Error("Failed to delete image record from DB");
+    }
+
+    toast.success("Image deleted successfully");
+    fetchImages(); // Refresh gallery
+
+  } catch (err) {
+    toast.error("Delete failed");
+    console.error(err);
+  }
+};
 
   const VerticalSpacingIcon = () => (
     <div
@@ -420,8 +525,8 @@ const Mainpage = () => {
       },
     ]);
   };
+  
   const addMultipleImage = () => {
-    //  const isMobile = window.innerWidth <= 600; // Check if screen width is 600px or less
 
     setPreviewContent([
       ...previewContent,
@@ -512,30 +617,13 @@ const Mainpage = () => {
   };
 
   const addImage = () => {
-    const fileInput = document.createElement("input");
-    fileInput.type = "file";
-    fileInput.accept = "image/*";
-    fileInput.onchange = async (e) => {
-      const file = e.target.files[0];
-      const formData = new FormData();
-      formData.append("image", file);
-
-      // Upload image to Cloudinary or server
-      try {
-        const response = await axios.post(
-          `${apiConfig.baseURL}/api/stud/upload`,
-          formData,
-          {
-            headers: { "Content-Type": "multipart/form-data" },
-          }
-        );
-        const imageUrl1 = response.data.imageUrl;
+   
         setPreviewContent([
           ...previewContent,
           {
             type: "image",
-            url: imageUrl1,
-            src: imageUrl1,
+            src: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTjCoUtOal33JWLqals1Wq7p6GGCnr3o-lwpQ&s", // Default image source
+            url: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTjCoUtOal33JWLqals1Wq7p6GGCnr3o-lwpQ&s", // Default image source
             style: {
               width: "100%",
               height: "auto",
@@ -544,39 +632,16 @@ const Mainpage = () => {
               margin: "5px auto",
             },
           },
-        ]);
-      } catch (err) {
-        toast.error("Image upload failed");
-      }
-    };
-    fileInput.click();
+        ]);     
   };
 
   const addLogo = () => {
-    const fileInput = document.createElement("input");
-    fileInput.type = "file";
-    fileInput.accept = "image/*";
-    fileInput.onchange = async (e) => {
-      const file = e.target.files[0];
-      const formData = new FormData();
-      formData.append("image", file);
-
-      // Upload image to Cloudinary or server
-      try {
-        const response = await axios.post(
-          `${apiConfig.baseURL}/api/stud/upload`,
-          formData,
-          {
-            headers: { "Content-Type": "multipart/form-data" },
-          }
-        );
-        const imageUrl = response.data.imageUrl;
-        setPreviewContent([
+           setPreviewContent([
           ...previewContent,
           {
             type: "logo",
-            src: imageUrl,
-            url: imageUrl,
+           src: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTjCoUtOal33JWLqals1Wq7p6GGCnr3o-lwpQ&s", // Default image source
+            url: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTjCoUtOal33JWLqals1Wq7p6GGCnr3o-lwpQ&s", // Default image source  
             style: {
               width: "50%",
               height: "auto",
@@ -585,79 +650,46 @@ const Mainpage = () => {
               margin: "5px auto",
             },
           },
-        ]);
-      } catch (err) {
-        toast.error("Image upload failed");
-      }
-    };
-    fileInput.click();
+        ]);    
   };
 
-  const uploadImage = async (index, imageNumber) => {
-    const input = document.createElement("input");
-    input.type = "file";
-    input.accept = "image/*";
+const handleopenFiles = (index, imageNumber) => {
+  setSelectedImageIndex(index);
+  setSelectedImageNumber(imageNumber);
+  setActiveTablayout('files');
+};
 
-    input.onchange = async (e) => {
-      const file = e.target.files[0];
-      const formData = new FormData();
-      formData.append("image", file);
-
-      try {
-        const response = await axios.post(
-          `${apiConfig.baseURL}/api/stud/upload`,
-          formData,
-          { headers: { "Content-Type": "multipart/form-data" } }
-        );
-
-        const imageUrl3 = response.data.imageUrl;
-
-        // Update the correct image in the layout
+    const uploadImage = async (index, imageNumber, imageurl) => {
+      console.log("Uploading image for index:", index, "imageNumber:", imageNumber, "imageurl:", imageurl);
+    const imageUrl3 = imageurl || "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTjCoUtOal33JWLqals1Wq7p6GGCnr3o-lwpQ&s"; // Default image URL
+    try {
         setPreviewContent((prev) =>
           prev.map((item, i) =>
             i === index
               ? {
-                  ...item,
-                  url: imageUrl3,
-                  [imageNumber === 1 ? "src1" : "src2"]: imageUrl3,
-                }
+  ...item,
+  url: imageUrl3,
+  src: imageUrl3,
+  [imageNumber === 1 ? "src1" : "src2"]: imageUrl3
+}
               : item
           )
         );
+        setActiveTablayout('components'); // Switch back to components tab
       } catch (err) {
         toast.error("Image upload failed");
       }
-    };
 
-    input.click();
   };
 
   //add  clickable image
-  const addlinkImage = () => {
-    const fileInput = document.createElement("input");
-    fileInput.type = "file";
-    fileInput.accept = "image/*";
-    fileInput.onchange = async (e) => {
-      const file = e.target.files[0];
-      const formData = new FormData();
-      formData.append("image", file);
-
-      // Upload image to Cloudinary or server
-      try {
-        const response = await axios.post(
-          `${apiConfig.baseURL}/api/stud/upload`,
-          formData,
-          {
-            headers: { "Content-Type": "multipart/form-data" },
-          }
-        );
-        const imageUrl2 = response.data.imageUrl;
+  const addlinkImage = () => { 
         setPreviewContent([
           ...previewContent,
           {
             type: "link-image",
-            src: imageUrl2,
-            url: imageUrl2,
+           src: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTjCoUtOal33JWLqals1Wq7p6GGCnr3o-lwpQ&s", // Default image source
+            url: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTjCoUtOal33JWLqals1Wq7p6GGCnr3o-lwpQ&s", // Default image source
             style: {
               width: "100%",
               height: "auto",
@@ -668,11 +700,6 @@ const Mainpage = () => {
             link: "https://www.imageconindia.com/",
           },
         ]);
-      } catch (err) {
-        toast.error("Image upload failed");
-      }
-    };
-    fileInput.click();
   };
 
   const addImageText = () => {
@@ -773,7 +800,6 @@ const Mainpage = () => {
   //add multimage with button
   const addMultiImage = () => {
     const isMobile = window.innerWidth <= 600; // Check if screen width is 600px or less
-
     setPreviewContent([
       ...previewContent,
       {
@@ -855,56 +881,16 @@ const Mainpage = () => {
   };
 
   //delete
-  const deleteContent = async (index) => {
-    saveToUndoStack(); // Preserve the current state
-
-    const fileToDelete = previewContent[index];
-
-    // If no URL, it's local/default content — just delete from state
-    if (!fileToDelete?.url) {
-      const updated = previewContent.filter((_, i) => i !== index);
-      setPreviewContent(updated);
-      if (selectedIndex === index) {
-        setSelectedIndex(null);
-      } else if (selectedIndex > index) {
-        setSelectedIndex(selectedIndex - 1);
-      }
-      return;
-    }
-
-    // Extract the S3 key from the URL
-    const s3Key = decodeURIComponent(
-      fileToDelete.url.split(".amazonaws.com/")[1]
-    );
-    if (!s3Key) return;
-
-    try {
-      const res = await fetch(
-        `${apiConfig.baseURL}/api/stud/file?key=${encodeURIComponent(s3Key)}`,
-        {
-          method: "DELETE",
-        }
-      );
-
-      if (!res.ok) {
-        const err = await res.json();
-        throw new Error(err?.error || "Unknown error from server");
-      }
-
-      // Remove from state
-      const updated = previewContent.filter((_, i) => i !== index);
-      setPreviewContent(updated);
-
-      if (selectedIndex === index) {
-        setSelectedIndex(null);
-      } else if (selectedIndex > index) {
-        setSelectedIndex(selectedIndex - 1);
-      }
-    } catch (error) {
-      console.error("Error deleting file from S3:", error);
+ const deleteContent = (index) => {
+    saveToUndoStack(); // Save the current state before deleting
+    const updated = previewContent.filter((_, i) => i !== index);
+    setPreviewContent(updated);
+    if (selectedIndex === index) {
+      setSelectedIndex(null); // Reset selection if the deleted item was selected
+    } else if (selectedIndex > index) {
+      setSelectedIndex(selectedIndex - 1); // Adjust index
     }
   };
-
   const saveToUndoStack = () => {
     setUndoStack([...undoStack, [...previewContent]]);
     setRedoStack([]); // Clear redo stack whenever a new action is performed
@@ -1504,13 +1490,26 @@ const Mainpage = () => {
         <div className="app-container">
           {/* Left Editor */}
           <div className="editor item-2">
-            {/* Tabs */}
-            <div className="tabs">
-              <button className="tab">Components</button>
-            </div>
+           
+ <div className="tabs">
+        <button
+          className={`tab ${activeTablayout === 'components' ? 'active' : ''}`}
+          onClick={() => handleTabClick('components')}
+        >
+          Components
+        </button>
+        <button
+          className={`tab ${activeTablayout === 'files' ? 'active' : ''}`}
+          onClick={() => handleTabClick('files')}
+        >
+          Files
+        </button>
+      </div>
 
-            <div className="edit-btn">
-              {/* Tab Content */}
+      {/* Tab Content */}
+      <div className="edit-btn">
+        {activeTablayout === 'components' && (
+
               <div className="content-tab">
                 <button
                   onClick={addLogo}
@@ -1657,11 +1656,53 @@ const Mainpage = () => {
                   Template-Bg
                 </button>
               </div>
-            </div>
+        )}
 
-            {/* Styling Controls */}
+       {activeTablayout === 'files' && (
+  <div className="upload-default-file">
+    <button className="upload-button-file" onClick={uploadImagefile}>
+      + Upload
+    </button>
+
+    {/* Gallery */}
+ <div className="gallery-container">
+  {paginatedImages.length === 0 && (
+    <div className="no-images">No images found</div>
+  )}
+  {paginatedImages.map((item) => (
+    <div
+      key={item._id}
+      className="gallery-item"
+    >
+      <img src={item.imageUrl} alt="Uploaded" />
+      <div className="gallery-actions">
+      <button onClick={() => uploadImage(selectedImageIndex, selectedImageNumber, item.imageUrl)}>
+  <FaCheckCircle />
+</button>
+
+        <button onClick={() => deleteImage(item._id)}><FaTrash/></button>
+      </div>
+    </div>
+  ))}
+</div>
+
+<div className="pagination-controls-file">
+  <button onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))} disabled={currentPage === 1}>
+    Prev
+  </button>
+  <span>{currentPage} / {totalPages}</span>
+  <button onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))} disabled={currentPage === totalPages}>
+    Next
+  </button>
+</div>
+
+  </div>
+)}
+</div>
+            
+      {/* Styling Controls */}
             <>
-              {selectedIndex !== null && previewContent[selectedIndex] && (
+              {selectedIndex !== null && previewContent[selectedIndex] && activeTablayout === 'components' && (
                 <>
                   {isMobilestyle ? (
                     <>
@@ -3835,7 +3876,7 @@ const Mainpage = () => {
                               className="multiple-img"
                               title="Upload Image"
                               style={item.style}
-                              onClick={() => uploadImage(index, 1)}
+                              onClick={() => handleopenFiles(index, 1)} 
                             />
                           </div>
 
@@ -3848,7 +3889,8 @@ const Mainpage = () => {
                               className="multiple-img"
                               title="Upload Image"
                               style={item.style}
-                              onClick={() => uploadImage(index, 2)}
+                              onClick={() => handleopenFiles(index, 2)
+                              } 
                             />
                           </div>
                         </div>
@@ -3865,7 +3907,7 @@ const Mainpage = () => {
                               className="multiimg"
                               title="Upload Image"
                               style={item.style}
-                              onClick={() => uploadImage(index, 1)}
+                              onClick={() => handleopenFiles(index, 1)}
                             />
                             <a
                               href={item.link1}
@@ -3887,7 +3929,7 @@ const Mainpage = () => {
                               className="multiimg"
                               title="Upload Image"
                               style={item.style}
-                              onClick={() => uploadImage(index, 2)}
+                              onClick={() => handleopenFiles(index, 2)}
                             />
                             <a
                               href={item.link2}
@@ -3910,7 +3952,7 @@ const Mainpage = () => {
                             className="videoimg"
                             title="Upload Thumbnail Image"
                             style={item.style}
-                            onClick={() => uploadImage(index, 1)}
+                            onClick={() => handleopenFiles(index, 1)}
                           />
                           <a
                             href={item.link}
@@ -3937,7 +3979,7 @@ const Mainpage = () => {
                             alt="Editable"
                             className="card-image"
                             title="Upload Image"
-                            onClick={() => uploadImage(index, 1)}
+                            onClick={() => handleopenFiles(index, 1)}
                           />
                           <p
                             className="card-text"
@@ -4049,6 +4091,8 @@ const Mainpage = () => {
                               alt="Editable"
                               className="img"
                               style={item.style}
+                              onClick={() => handleopenFiles(index, 1)} 
+                              title="Upload Image"
                             />
                           </a>
                         </div>
@@ -4060,6 +4104,8 @@ const Mainpage = () => {
                             alt="Editable"
                             className="img"
                             style={item.style}
+                            onClick={() => handleopenFiles(index, 1)} 
+                            title="Upload Image"
                           />
                         </div>
                       )}
@@ -4155,7 +4201,7 @@ const Mainpage = () => {
                               alt="Editable"
                               className="image-item"
                               title="Upload Image"
-                              onClick={() => uploadImage(index, 1)}
+                              onClick={() => handleopenFiles(index, 1)}
                             />
                             <p
                               className="text-item"
@@ -4205,7 +4251,7 @@ const Mainpage = () => {
                               alt="Editable"
                               className="image-item"
                               title="Upload Image"
-                              onClick={() => uploadImage(index, 2)}
+                              onClick={() => handleopenFiles(index, 2)}
                             />
                           </div>
                           {modalIndex === index && ( // Open only for the selected index
@@ -4229,6 +4275,8 @@ const Mainpage = () => {
                             alt="Editable"
                             className="logo"
                             style={item.style}
+                            onClick={() => handleopenFiles(index, 1)} 
+                            title="Upload Image"
                           />
                         </div>
                       )}
@@ -4289,7 +4337,6 @@ const Mainpage = () => {
                       {selectedTemplatepre.temname} Preview
                     </h3>
                   )}{" "}
-                  {/* Now it's used */}
                   <div
                     className={`template-preview ${
                       isMobileView ? "mobile-view" : ""
@@ -4324,7 +4371,7 @@ const Mainpage = () => {
                                   style={item.style}
                                   dangerouslySetInnerHTML={{
                                     __html: item.content,
-                                  }} // Render HTML content here
+                                  }} 
                                 />
                               </>
                             )}

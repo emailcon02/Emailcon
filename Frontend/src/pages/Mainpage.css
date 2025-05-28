@@ -256,9 +256,9 @@ button[data-tooltip]:hover::after {
 .navbar-button-excel:hover {
     background-color: #bec7d8;
 }
-
 .tabs {
-    text-align: center;
+    display: flex;
+    justify-content: space-between;
     margin-bottom: 15px;
     border-bottom: 1px solid rgb(192, 190, 190);
 }
@@ -266,14 +266,102 @@ button[data-tooltip]:hover::after {
 .tab {
     padding: 0px 12px;
     border: none;
+    cursor: pointer;
     font-weight: 550;
-    background-color: transparent !important;
-    /* background: #f0f0f0; */
-    /* border-radius: 4px; */
-    /* margin-right: 8px; */
-    font-size: 18px;
-    border-bottom: 3px solid #2f327D;
+    background-color: transparent !important;  
+    font-size: 16px;
     color: #2f327D;
+}
+.tab.active {
+  border-bottom: 3px solid #2f327D;
+}
+
+
+
+.upload-button-file {
+
+  background-color: #f48c06;
+  color: white;
+  border: none;
+  padding: 6px 10px;
+  border-radius: 5px;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.gallery-container {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr); /* 2 items per row */
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.gallery-item {
+  padding: 5px;
+  cursor: pointer;
+}
+
+.gallery-item:hover {
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transform: scale(1.05);
+  transition: transform 0.2s ease-in-out;
+}
+.gallery-item:hover .gallery-actions button {
+  display: inline-block; /* Show buttons on hover */
+
+}
+
+.gallery-item img {
+  width: 80%;
+  width: 100px;
+  height: 100px;
+  object-fit: cover;
+  border-radius: 8px;
+  position: relative;
+}
+
+.gallery-actions {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    display: flex;
+    gap: 5px;
+}
+
+.gallery-actions button {
+  font-size: 12px;
+  padding: 4px 8px;
+  background-color: #2f327D;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  display: none; /* Hide by default */
+}
+
+.gallery-actions button:hover {
+  background-color: #20225b;
+}
+
+.pagination-controls-file {
+  margin-top: 20px;
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+}
+
+.pagination-controls-file button {
+  padding: 6px 12px;
+  border: none;
+  background-color: #f48c06;
+  color: white;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.pagination-controls-file button:disabled {
+  background-color: #aaa ;
+  cursor: not-allowed;
 }
 
 .Nav-icons {
@@ -1279,6 +1367,9 @@ input:checked+.slider-send:before {
     overflow: auto;
     border-radius: 5px;
     z-index: 1000;
+  }
+  .border img{
+    cursor: pointer;
   }
   
   .dropdown-container h4 {

@@ -18,6 +18,7 @@ import PaymentHistory from "../models/PaymentHistory.js";
 import Aliasname from "../models/Aliasname.js";
 import Replyto from "../models/Replyto.js";
 import Adminuser from "../models/Adminuser.js";
+import ImageUrl from "../models/Imageurl.js";
 const router = express.Router();
 
 // Upload image to s3 bucket
@@ -2176,7 +2177,46 @@ router.get("/validate", authMiddleware, async (req, res) => {
   res.send({ user });
 });
 
+// Save image URL
+router.post("/save-image", async (req, res) => {
+  const { userId, imageUrl } = req.body;
 
+  if (!userId || !imageUrl) {
+    return res.status(400).json({ error: "Missing userId or imageUrl" });
+  }
+
+
+  try {
+    const saved = new ImageUrl({ user: userId, imageUrl });
+    await saved.save();
+    res.status(201).json({ message: "Image URL saved successfully", data: saved });
+  } catch (err) {
+    console.error("Error saving image URL:", err);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
+
+// Fetch all images for a user
+router.get("/images/:userId", async (req, res) => {
+  try {
+    const images = await ImageUrl.find({ user: req.params.userId });
+    res.status(200).json(images);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Failed to fetch images" });
+  }
+});
+
+// Delete image by ID
+router.delete("/images/:id", async (req, res) => {
+  try {
+    await ImageUrl.findByIdAndDelete(req.params.id);
+    res.status(200).json({ message: "Image deleted" });
+  } catch (err) {
+    res.status(500).json({ error: "Delete failed" });
+  }
+});
 
 
 export default router;
