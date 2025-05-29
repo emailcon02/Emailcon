@@ -214,10 +214,10 @@
 
 .modal-input,
 .modal-select {
-  width: 100%;
+  width: 100% !important;
   /* Set width to 100% for equal width */
   padding: 10px;
-  margin-bottom: 10px;
+  margin:10px 0px;
   border: 1px solid #ddd;
   border-radius: 4px;
   font-size: 1rem;

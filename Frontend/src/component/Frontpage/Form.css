@@ -187,6 +187,10 @@
     .form {
         padding: 10px 30px;
     }
+    .img-form{
+        position:static;
+        top:0px;
+    }
 
     .img-text h1 {
         font-size: 2rem;
