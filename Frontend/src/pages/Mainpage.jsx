@@ -86,21 +86,12 @@ const Mainpage = () => {
   const [showModal, setShowModal] = useState(false);
   const [replyOptions, setReplyOptions] = useState([]);
   const [showModalreply, setShowModalreply] = useState(false);
-  const [activeTablayout, setActiveTablayout] = useState("components");
+  const [activeTablayout, setActiveTablayout] = useState(false);
   const [galleryImages, setGalleryImages] = useState([]);
-  const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 6;
-  const totalPages = Math.ceil(galleryImages.length / itemsPerPage);
-  const paginatedImages = galleryImages.slice(
-    (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage
-  );
   const [selectedImageIndex, setSelectedImageIndex] = useState(null);
   const [selectedImageNumber, setSelectedImageNumber] = useState(null);
 
-  const handleTabClick = (tabName) => {
-    setActiveTablayout(tabName);
-  };
+
 
   const fetchImages = async () => {
     try {
@@ -732,18 +723,10 @@ const Mainpage = () => {
   const handleopenFiles = (index, imageNumber) => {
     setSelectedImageIndex(index);
     setSelectedImageNumber(imageNumber);
-    setActiveTablayout("files");
+    setActiveTablayout(true);
   };
 
   const uploadImage = async (index, imageNumber, imageurl) => {
-    console.log(
-      "Uploading image for index:",
-      index,
-      "imageNumber:",
-      imageNumber,
-      "imageurl:",
-      imageurl
-    );
     const imageUrl3 =
       imageurl ||
       "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTjCoUtOal33JWLqals1Wq7p6GGCnr3o-lwpQ&s"; // Default image URL
@@ -760,7 +743,7 @@ const Mainpage = () => {
             : item
         )
       );
-      setActiveTablayout("components"); // Switch back to components tab
+      setActiveTablayout(false); 
     } catch (err) {
       toast.error("Image upload failed");
     }
@@ -1580,25 +1563,13 @@ const Mainpage = () => {
           {/* Left Editor */}
           <div className="editor item-2">
             <div className="tabs">
-              <button
-                className={`tab ${
-                  activeTablayout === "components" ? "active" : ""
-                }`}
-                onClick={() => handleTabClick("components")}
-              >
+              <button className="tab">
                 Components
-              </button>
-              <button
-                className={`tab ${activeTablayout === "files" ? "active" : ""}`}
-                onClick={() => handleTabClick("files")}
-              >
-                Files
               </button>
             </div>
 
             {/* Tab Content */}
             <div className="edit-btn">
-              {activeTablayout === "components" && (
                 <div className="content-tab">
                   <button
                     onClick={addLogo}
@@ -1762,68 +1733,52 @@ const Mainpage = () => {
                     Template-Bg
                   </button>
                 </div>
-              )}
-
-              {activeTablayout === "files" && (
-                <div className="upload-default-file">
-                  <button
-                    className="upload-button-file"
-                    onClick={uploadImagefile}
-                  >
-                    + Upload
-                  </button>
-
-                  {/* Gallery */}
-                  <div className="gallery-container">
-                    {paginatedImages.length === 0 && (
-                      <div className="no-images">No images found</div>
-                    )}
-                    {paginatedImages.map((item) => (
-                      <div key={item._id} className="gallery-item">
-                        <img src={item.imageUrl} alt="Uploaded" />
-                        <div className="gallery-actions">
-                          <button
-                            onClick={() =>
-                              uploadImage(
-                                selectedImageIndex,
-                                selectedImageNumber,
-                                item.imageUrl
-                              )
-                            }
-                          >
-                            <FaCheckCircle />
-                          </button>
-
-                          <button onClick={() => deleteImage(item._id)}>
-                            <FaTrash />
-                          </button>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-
-                  <div className="pagination-controls-file">
-                    <button
-                      onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
-                      disabled={currentPage === 1}
-                    >
-                      Prev
-                    </button>
-                    <span>
-                      {currentPage} / {totalPages}
-                    </span>
-                    <button
-                      onClick={() =>
-                        setCurrentPage((p) => Math.min(p + 1, totalPages))
-                      }
-                      disabled={currentPage === totalPages}
-                    >
-                      Next
-                    </button>
-                  </div>
-                </div>
-              )}
             </div>
+
+            {/* file manager modal */}
+                {activeTablayout && (
+  <div className="modal-overlay-file-editor">
+    <div className="modal-content-file">
+      <div className="modal-header-file">
+        <h2>File Manager</h2>
+<button className="close-modal-file" onClick={() => setActiveTablayout(false)}>x</button>
+      </div>
+
+      <button className="upload-button-file" onClick={uploadImagefile}>
+        + Upload
+      </button>
+
+      {/* Scrollable Gallery */}
+      <div className="gallery-scroll-container">
+        {galleryImages.length === 0 && (
+          <div className="no-images">No images found</div>
+        )}
+        {galleryImages.map((item) => (
+          <div key={item._id} className="gallery-item">
+            <img src={item.imageUrl} alt="Uploaded" />
+            <div className="gallery-actions">
+              <button
+                onClick={() =>
+                  uploadImage(
+                    selectedImageIndex,
+                    selectedImageNumber,
+                    item.imageUrl
+                  )
+                }
+              >
+                <FaCheckCircle />
+              </button>
+
+              <button onClick={() => deleteImage(item._id)}>
+                <FaTrash />
+              </button>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  </div>
+)}
 
             {/* Styling Controls */}
             <>
