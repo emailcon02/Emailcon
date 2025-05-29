@@ -315,6 +315,47 @@ router.post('/sendtestmail', async (req, res) => {
     </table>`;
       }
 
+      else if (item.type ==='banner') {
+        return `<div>
+        <img src="${item.src}" style="margin-top:10px;width:${item.style.width};pointer-events:none;height:${item.style.height};border-radius:${item.style.borderRadius};background-color:${item.style.backgroundColor}"/>
+        </div>`;
+      }
+
+
+
+
+else if (item.type === 'multi-image-card') {
+        return `<table class="multi" style="width:100%; border-collapse:collapse;margin:10px auto !important;">
+    <tr>
+      <td style="width:50%;text-align:center;padding:8px; vertical-align:top;">
+        <img src="${item.src1}" style="border-radius:10px;object-fit:contain;height:230px !important;width:100%;pointer-events:none !important; object-fit:cover;" alt="image"/>
+        <h3 style="margin:10px 0;">${item.title1 || 'Name of the product'}</h3>
+        <p style="margin:5px 0;"><s>${item.originalPrice1 ? `$${item.originalPrice1}` : '$9000'}</s></p>
+        <p style="margin:5px 0;">${item.offerPrice1 ? `Off Price $${item.offerPrice1}` : 'Off Price $5999'}</p>
+        <a class="img-btn"
+          href="${generateTrackingLink(item.link1, userId, campaignId, emailData.recipient)}"
+          target="_blank"
+          style="display:inline-block;padding:12px 25px;margin-top:20px;font-weight:bold;font-size:${item.buttonStyle1.fontSize || '18px'};width:${item.buttonStyle1.width || 'auto'};color:${item.buttonStyle1.color || '#000'};text-decoration:none;background-color:${item.buttonStyle1.backgroundColor || '#f0f0f0'};text-align:${item.buttonStyle1.textAlign || 'left'};border-radius:${item.buttonStyle1.borderRadius || '5px'};">
+          ${item.content1}
+        </a>
+      </td>
+      <td style="width:50%;text-align:center;padding:8px; vertical-align:top;">
+        <img src="${item.src2}" style="border-radius:10px;object-fit:contain;height:230px !important;width:100%;pointer-events:none !important; object-fit:cover;" alt="image"/>
+        <h3 style="margin:10px 0;">${item.title2 || 'Name of the product'}</h3>
+        <p style="margin:5px 0;"><s>${item.originalPrice2 ? `$${item.originalPrice2}` : '$8000'}</s></p>
+        <p style="margin:5px 0;">${item.offerPrice2 ? `Off Price $${item.offerPrice2}` : 'Off Price $4999'}</p>
+        <a class="img-btn"
+          href="${generateTrackingLink(item.link2, userId, campaignId, emailData.recipient)}"
+          target="_blank"
+          style="display:inline-block;padding:12px 25px;font-weight:bold;font-size:${item.buttonStyle2.fontSize || '18px'};margin-top:20px;width:${item.buttonStyle2.width || 'auto'};color:${item.buttonStyle2.color || '#000'};text-decoration:none;background-color:${item.buttonStyle2.backgroundColor || '#f0f0f0'};text-align:${item.buttonStyle2.textAlign || 'left'};border-radius:${item.buttonStyle2.borderRadius || '5px'};">
+          ${item.content2}
+        </a>
+      </td>
+    </tr>
+  </table>`;
+      }
+
+
       else if (item.type === 'imagewithtext') {
         return `<table class="image-text" style="width:100%;height:220px !important;background-color:${item.style1.backgroundColor || '#f4f4f4'}; border-collapse:seperate;border-radius:${item.style1.borderRadius || '10px'};margin:20px 0px !important">
         <tr>
@@ -586,6 +627,40 @@ router.post('/sendexcelEmail', async (req, res) => {
               </div>
           </td>
       </tr>
+  </table>`;
+
+  case 'banner':
+    return `<div><img src="${item.src}" style="margintop:10px;width:${item.style.width};pointerevents:none;height:${item.style.height};border-radius:${item.style.borderRadius}; background-color:${item.style.backgroundColor}"/>
+ </div>`;
+
+  case 'multi-image-card':
+      return `<table class="multi" style="width:100%; border-collapse:collapse;margin:10px auto !important;">
+    <tr>
+      <td style="width:50%;text-align:center;padding:8px; vertical-align:top;">
+        <img src="${item.src1}" style="border-radius:10px;object-fit:contain;height:230px !important;width:100%;pointer-events:none !important; object-fit:cover;" alt="image"/>
+        <h3 style="margin:10px 0;">${item.title1 || 'Name of the product'}</h3>
+        <p style="margin:5px 0;"><s>${item.originalPrice1 ? `$${item.originalPrice1}` : '$9000'}</s></p>
+        <p style="margin:5px 0;">${item.offerPrice1 ? `Off Price $${item.offerPrice1}` : 'Off Price $5999'}</p>
+        <a class="img-btn"
+          href="${generateTrackingLink(item.link1, userId, campaignId, emailData.recipient)}"
+          target="_blank"
+          style="display:inline-block;padding:12px 25px;margin-top:20px;font-weight:bold;font-size:${item.buttonStyle1.fontSize || '18px'};width:${item.buttonStyle1.width || 'auto'};color:${item.buttonStyle1.color || '#000'};text-decoration:none;background-color:${item.buttonStyle1.backgroundColor || '#f0f0f0'};text-align:${item.buttonStyle1.textAlign || 'left'};border-radius:${item.buttonStyle1.borderRadius || '5px'};">
+          ${item.content1}
+        </a>
+      </td>
+      <td style="width:50%;text-align:center;padding:8px; vertical-align:top;">
+        <img src="${item.src2}" style="border-radius:10px;object-fit:contain;height:230px !important;width:100%;pointer-events:none !important; object-fit:cover;" alt="image"/>
+        <h3 style="margin:10px 0;">${item.title2 || 'Name of the product'}</h3>
+        <p style="margin:5px 0;"><s>${item.originalPrice2 ? `$${item.originalPrice2}` : '$8000'}</s></p>
+        <p style="margin:5px 0;">${item.offerPrice2 ? `Off Price $${item.offerPrice2}` : 'Off Price $4999'}</p>
+        <a class="img-btn"
+          href="${generateTrackingLink(item.link2, userId, campaignId, emailData.recipient)}"
+          target="_blank"
+          style="display:inline-block;padding:12px 25px;font-weight:bold;font-size:${item.buttonStyle2.fontSize || '18px'};margin-top:20px;width:${item.buttonStyle2.width || 'auto'};color:${item.buttonStyle2.color || '#000'};text-decoration:none;background-color:${item.buttonStyle2.backgroundColor || '#f0f0f0'};text-align:${item.buttonStyle2.textAlign || 'left'};border-radius:${item.buttonStyle2.borderRadius || '5px'};">
+          ${item.content2}
+        </a>
+      </td>
+    </tr>
   </table>`;
 
         case 'cardimage':
@@ -990,6 +1065,40 @@ case 'break':
     <tr>
       <td style="padding: 0;">
         <hr style="width:100%;background-color:#000000;margin: 30px 0px;" />
+      </td>
+    </tr>
+  </table>`;
+
+  case 'banner':
+    return `<div><img src="${item.src}" style="margintop:10px;width:${item.style.width};pointerevents:none;height:${item.style.height};border-radius:${item.style.borderRadius}; background-color:${item.style.backgroundColor}"/>
+ </div>`;
+
+  case 'multi-image-card':
+      return `<table class="multi" style="width:100%; border-collapse:collapse;margin:10px auto !important;">
+    <tr>
+      <td style="width:50%;text-align:center;padding:8px; vertical-align:top;">
+        <img src="${item.src1}" style="border-radius:10px;object-fit:contain;height:230px !important;width:100%;pointer-events:none !important; object-fit:cover;" alt="image"/>
+        <h3 style="margin:10px 0;">${item.title1 || 'Name of the product'}</h3>
+        <p style="margin:5px 0;"><s>${item.originalPrice1 ? `$${item.originalPrice1}` : '$9000'}</s></p>
+        <p style="margin:5px 0;">${item.offerPrice1 ? `Off Price $${item.offerPrice1}` : 'Off Price $5999'}</p>
+        <a class="img-btn"
+          href="${generateTrackingLink(item.link1, userId, campaignId, emailData.recipient)}"
+          target="_blank"
+          style="display:inline-block;padding:12px 25px;margin-top:20px;font-weight:bold;font-size:${item.buttonStyle1.fontSize || '18px'};width:${item.buttonStyle1.width || 'auto'};color:${item.buttonStyle1.color || '#000'};text-decoration:none;background-color:${item.buttonStyle1.backgroundColor || '#f0f0f0'};text-align:${item.buttonStyle1.textAlign || 'left'};border-radius:${item.buttonStyle1.borderRadius || '5px'};">
+          ${item.content1}
+        </a>
+      </td>
+      <td style="width:50%;text-align:center;padding:8px; vertical-align:top;">
+        <img src="${item.src2}" style="border-radius:10px;object-fit:contain;height:230px !important;width:100%;pointer-events:none !important; object-fit:cover;" alt="image"/>
+        <h3 style="margin:10px 0;">${item.title2 || 'Name of the product'}</h3>
+        <p style="margin:5px 0;"><s>${item.originalPrice2 ? `$${item.originalPrice2}` : '$8000'}</s></p>
+        <p style="margin:5px 0;">${item.offerPrice2 ? `Off Price $${item.offerPrice2}` : 'Off Price $4999'}</p>
+        <a class="img-btn"
+          href="${generateTrackingLink(item.link2, userId, campaignId, emailData.recipient)}"
+          target="_blank"
+          style="display:inline-block;padding:12px 25px;font-weight:bold;font-size:${item.buttonStyle2.fontSize || '18px'};margin-top:20px;width:${item.buttonStyle2.width || 'auto'};color:${item.buttonStyle2.color || '#000'};text-decoration:none;background-color:${item.buttonStyle2.backgroundColor || '#f0f0f0'};text-align:${item.buttonStyle2.textAlign || 'left'};border-radius:${item.buttonStyle2.borderRadius || '5px'};">
+          ${item.content2}
+        </a>
       </td>
     </tr>
   </table>`;

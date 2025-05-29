@@ -230,6 +230,9 @@ button[data-tooltip]:hover::after {
     background-color: #bec7d8;
     /* border: 2px solid #007c89; */
 }
+.Layout img{
+    cursor: pointer;
+}
 
 .navbar-button-excel:hover {
     background-color: #bec7d8;
@@ -1831,14 +1834,11 @@ input:checked+.slider-send:before {
     /* margin-bottom: 8px; */
 }
 
-.template-container {
+/* .template-container {
     max-height: 240px;
     overflow-y: auto;
 
-    /* Firefox */
-    /* scrollbar-width: thin;
-    scrollbar-color: #4a90e2 #f1f1f1; */
-}
+} */
 
 /* General scrollbar styles */
 /* ::-webkit-scrollbar {

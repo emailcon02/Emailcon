@@ -673,6 +673,9 @@ button[data-tooltip]:hover::after {
     padding: 5px;
     /* margin-top: 10px; */
 }
+.Layout img{
+    cursor: pointer;
+}
 
 .select-variable {
     padding: 5px;
@@ -1856,14 +1859,12 @@ input:checked+.slider-send:before {
     /* margin-bottom: 8px; */
 }
 
-.template-container {
+/* .template-container {
     max-height: 240px;
     overflow-y: auto;
 
-    /* Firefox */
-    /* scrollbar-width: thin;
-    scrollbar-color: #4a90e2 #f1f1f1; */
-}
+  
+} */
 
 /* General scrollbar styles */
 /* ::-webkit-scrollbar {
