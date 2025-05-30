@@ -3,7 +3,7 @@ import axios from "axios";
 import "./Readmainpage.css";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { FaBars, FaCheckCircle, FaTimes, FaTrash } from "react-icons/fa";
+import { FaBars, FaCheckCircle, FaFolderOpen, FaTimes, FaTrash } from "react-icons/fa";
 import { useParams } from "react-router-dom";
 import { FiEdit } from "react-icons/fi"; // Importing icons
 
@@ -84,28 +84,20 @@ const Clickmainpage = () => {
   const [selectedTemplate, setSelectedTemplate] = useState(null);
   const [selectedTemplatepre, setSelectedTemplatepre] = useState(null);
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
-  const [groups, setGroups] = useState([]); // Stores group names
-  const [students, setStudents] = useState([]); // Stores all students
+  const [groups, setGroups] = useState([]); 
+  const [students, setStudents] = useState([]); 
   const [selectedGroup, setSelectedGroup] = useState({});
   const [fieldNames, setFieldNames] = useState({});
   const templateRef = useRef(null);
   const [openedGroups, setOpenedGroups] = useState({});
   const dropdownRef = useRef(null);
-  const [activeTablayout, setActiveTablayout] = useState("components");
+  const [activeTablayout, setActiveTablayout] = useState(false);
   const [galleryImages, setGalleryImages] = useState([]);
-  const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 6;
-  const totalPages = Math.ceil(galleryImages.length / itemsPerPage);
-  const paginatedImages = galleryImages.slice(
-    (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage
-  );
+  
   const [selectedImageIndex, setSelectedImageIndex] = useState(null);
   const [selectedImageNumber, setSelectedImageNumber] = useState(null);
 
-  const handleTabClick = (tabName) => {
-    setActiveTablayout(tabName);
-  };
+ 
 
   const fetchImages = async () => {
     try {
@@ -776,7 +768,7 @@ const Clickmainpage = () => {
   const handleopenFiles = (index, imageNumber) => {
     setSelectedImageIndex(index);
     setSelectedImageNumber(imageNumber);
-    setActiveTablayout("files");
+    setActiveTablayout(true);
   };
 
   const uploadImage = async (index, imageNumber, imageurl) => {
@@ -804,7 +796,7 @@ const Clickmainpage = () => {
             : item
         )
       );
-      setActiveTablayout("components"); // Switch back to components tab
+      setActiveTablayout(true); // Switch back to components tab
     } catch (err) {
       toast.error("Image upload failed");
     }
@@ -1426,7 +1418,7 @@ const Clickmainpage = () => {
   return (
     <div>
       <div className="mobile-content">
-        <div className="desktop-nav">
+       <div className={`desktop-nav ${activeTablayout ? 'hide-nav' : ''}`}>
           <nav className="navbar-read">
             <div>
               <h5 className="company-name-read">
@@ -1676,257 +1668,234 @@ const Clickmainpage = () => {
         <div className="app-container">
           {/* Left Editor */}
           <div className="editor item-2">
-            <div className="tabs">
-              <button
-                className={`tab ${
-                  activeTablayout === "components" ? "active" : ""
-                }`}
-                onClick={() => handleTabClick("components")}
-              >
-                Components
-              </button>
-              <button
-                className={`tab ${activeTablayout === "files" ? "active" : ""}`}
-                onClick={() => handleTabClick("files")}
-              >
-                Files
-              </button>
-            </div>
-
-            {/* Tab Content */}
-            <div className="edit-btn">
-              {activeTablayout === "components" && (
-                <div className="content-tab">
-                  <button
-                    onClick={addLogo}
-                    className="editor-button"
-                    draggable
-                    onDragStart={(e) => handleDragStart("logo")}
-                  >
-                    <MdAddPhotoAlternate /> Logo
-                  </button>
-                  <button
-                    onClick={addBanner}
-                    className="editor-button"
-                    draggable
-                    onDragStart={(e) => handleDragStart("banner")}
-                  >
-                    <FaImage />
-                    Banner
-                  </button>
-                  <button
-                    onClick={addHeading}
-                    className="editor-button"
-                    draggable
-                    onDragStart={(e) => handleDragStart("head")}
-                  >
-                    <FaHeading /> Heading
-                  </button>
-                  <button
-                    onClick={addText}
-                    className="editor-button"
-                    draggable
-                    onDragStart={(e) => handleDragStart("para")}
-                  >
-                    <FaParagraph /> Paragraph
-                  </button>
-                  <button
-                    onClick={addImage}
-                    className="editor-button"
-                    draggable
-                    onDragStart={(e) => handleDragStart("image")}
-                  >
-                    <FaImage /> Image
-                  </button>
-                  <button
-                    onClick={addlinkImage}
-                    className="editor-button"
-                    draggable
-                    onDragStart={(e) => handleDragStart("link-image")}
-                  >
-                    <FaImage />
-                    Clickable Image
-                  </button>
-                  <button
-                    onClick={addMultiImage}
-                    className="editor-button"
-                    draggable
-                    onDragStart={(e) => handleDragStart("multi-image")}
-                  >
-                    <FaImage /> Multi-Image-Button
-                  </button>
-                  <button
-                    onClick={addMultiImagecard}
-                    className="editor-button"
-                    draggable
-                    onDragStart={(e) => handleDragStart("multi-image-card")}
-                  >
-                    <FaImage /> Multi-Image-card
-                  </button>
-                  <button
-                    onClick={addMultipleImage}
-                    className="editor-button"
-                    draggable
-                    onDragStart={(e) => handleDragStart("multipleimage")}
-                  >
-                    <FaImage /> Multi-Image
-                  </button>
-                  <button
-                    onClick={addCardImage}
-                    className="editor-button"
-                    draggable
-                    onDragStart={(e) => handleDragStart("cardimage")}
-                  >
-                    <FaIdCard /> Image-Card
-                  </button>
-
-                  <button
-                    onClick={addTextImage}
-                    className="editor-button"
-                    draggable
-                    onDragStart={(e) => handleDragStart("textwithimage")}
-                  >
-                    <FaFileImage /> Text-Image
-                  </button>
-                  <button
-                    onClick={addImageText}
-                    className="editor-button"
-                    draggable
-                    onDragStart={(e) => handleDragStart("imagewithtext")}
-                  >
-                    <FaFileImage /> Image-Text
-                  </button>
-
-                  <button
-                    onClick={addVideo}
-                    className="editor-button"
-                    draggable
-                    onDragStart={(e) => handleDragStart("video-icon")}
-                  >
-                    <FaVideo />
-                    Video
-                  </button>
-                  <button
-                    onClick={addSocialMedia}
-                    className="editor-button"
-                    draggable
-                    onDragStart={(e) => handleDragStart("icons")}
-                  >
-                    <FaGlobe />
-                    Social Icons
-                  </button>
-                  <button
-                    onClick={addBreak}
-                    className="editor-button"
-                    draggable
-                    onDragStart={(e) => handleDragStart("break")}
-                  >
-                    <svg
-                      className="horizontal-line-icon"
-                      width="24"
-                      height="2"
-                      viewBox="0 0 24 2"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <rect width="24" height="4" fill="#555" />
-                    </svg>
-                    Line Break
-                  </button>
-                  <button
-                    onClick={addGap}
-                    className="editor-button"
-                    draggable
-                    onDragStart={(e) => handleDragStart("gap")}
-                  >
-                    <VerticalSpacingIcon />
-                    Gap
-                  </button>
-                  <button
-                    onClick={addButton}
-                    className="editor-button"
-                    draggable
-                    onDragStart={(e) => handleDragStart("button")}
-                  >
-                    <FaPlusSquare /> Button
-                  </button>
-                  <button className="editor-button">
-                    <input
-                      type="color"
-                      value={bgColor}
-                      onChange={(e) => setBgColor(e.target.value)}
-                      className="bg-color-pic"
-                    />
-                    Template-Bg
-                  </button>
-                </div>
-              )}
-
-              {activeTablayout === "files" && (
-                <div className="upload-default-file">
-                  <button
-                    className="upload-button-file"
-                    onClick={uploadImagefile}
-                  >
-                    + Upload
-                  </button>
-
-                  {/* Gallery */}
-                  <div className="gallery-container">
-                    {paginatedImages.length === 0 && (
-                      <div className="no-images">No images found</div>
-                    )}
-                    {paginatedImages.map((item) => (
-                      <div key={item._id} className="gallery-item">
-                        <img src={item.imageUrl} alt="Uploaded" />
-                        <div className="gallery-actions">
-                          <button
-                            onClick={() =>
-                              uploadImage(
-                                selectedImageIndex,
-                                selectedImageNumber,
-                                item.imageUrl
-                              )
-                            }
-                          >
-                            <FaCheckCircle />
-                          </button>
-
-                          <button onClick={() => deleteImage(item._id)}>
-                            <FaTrash />
-                          </button>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-
-                  <div className="pagination-controls-file">
-                    <button
-                      onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
-                      disabled={currentPage === 1}
-                    >
-                      Prev
-                    </button>
-                    <span>
-                      {currentPage} / {totalPages}
-                    </span>
-                    <button
-                      onClick={() =>
-                        setCurrentPage((p) => Math.min(p + 1, totalPages))
-                      }
-                      disabled={currentPage === totalPages}
-                    >
-                      Next
-                    </button>
-                  </div>
-                </div>
-              )}
-            </div>
-
+             <div className="tabs">
+                         <button className="tab">
+                           Components
+                         </button>
+                       </div>
+           
+                       {/* Tab Content */}
+                       <div className="edit-btn">
+                           <div className="content-tab">
+                             <button
+                               onClick={addLogo}
+                               className="editor-button"
+                               draggable
+                               onDragStart={(e) => handleDragStart("logo")}
+                             >
+                               <MdAddPhotoAlternate /> Logo
+                             </button>
+                             <button
+                               onClick={addBanner}
+                               className="editor-button"
+                               draggable
+                               onDragStart={(e) => handleDragStart("banner")}
+                             >
+                               <FaImage />
+                               Banner
+                             </button>
+                             <button
+                               onClick={addHeading}
+                               className="editor-button"
+                               draggable
+                               onDragStart={(e) => handleDragStart("head")}
+                             >
+                               <FaHeading /> Heading
+                             </button>
+                             <button
+                               onClick={addText}
+                               className="editor-button"
+                               draggable
+                               onDragStart={(e) => handleDragStart("para")}
+                             >
+                               <FaParagraph /> Paragraph
+                             </button>
+                             <button
+                               onClick={addImage}
+                               className="editor-button"
+                               draggable
+                               onDragStart={(e) => handleDragStart("image")}
+                             >
+                               <FaImage /> Image
+                             </button>
+                             <button
+                               onClick={addlinkImage}
+                               className="editor-button"
+                               draggable
+                               onDragStart={(e) => handleDragStart("link-image")}
+                             >
+                               <FaImage />
+                               Clickable Image
+                             </button>
+                             <button
+                               onClick={addMultiImage}
+                               className="editor-button"
+                               draggable
+                               onDragStart={(e) => handleDragStart("multi-image")}
+                             >
+                               <FaImage /> Multi-Image-Button
+                             </button>
+                             <button
+                               onClick={addMultiImagecard}
+                               className="editor-button"
+                               draggable
+                               onDragStart={(e) => handleDragStart("multi-image-card")}
+                             >
+                               <FaImage /> Multi-Image-card
+                             </button>
+                             <button
+                               onClick={addMultipleImage}
+                               className="editor-button"
+                               draggable
+                               onDragStart={(e) => handleDragStart("multipleimage")}
+                             >
+                               <FaImage /> Multi-Image
+                             </button>
+                             <button
+                               onClick={addCardImage}
+                               className="editor-button"
+                               draggable
+                               onDragStart={(e) => handleDragStart("cardimage")}
+                             >
+                               <FaIdCard /> Image-Card
+                             </button>
+           
+                             <button
+                               onClick={addTextImage}
+                               className="editor-button"
+                               draggable
+                               onDragStart={(e) => handleDragStart("textwithimage")}
+                             >
+                               <FaFileImage /> Text-Image
+                             </button>
+                             <button
+                               onClick={addImageText}
+                               className="editor-button"
+                               draggable
+                               onDragStart={(e) => handleDragStart("imagewithtext")}
+                             >
+                               <FaFileImage /> Image-Text
+                             </button>
+           
+                             <button
+                               onClick={addVideo}
+                               className="editor-button"
+                               draggable
+                               onDragStart={(e) => handleDragStart("video-icon")}
+                             >
+                               <FaVideo />
+                               Video
+                             </button>
+                             <button
+                               onClick={addSocialMedia}
+                               className="editor-button"
+                               draggable
+                               onDragStart={(e) => handleDragStart("icons")}
+                             >
+                               <FaGlobe />
+                               Social Icons
+                             </button>
+                             <button
+                               onClick={addBreak}
+                               className="editor-button"
+                               draggable
+                               onDragStart={(e) => handleDragStart("break")}
+                             >
+                               <svg
+                                 className="horizontal-line-icon"
+                                 width="24"
+                                 height="2"
+                                 viewBox="0 0 24 2"
+                                 xmlns="http://www.w3.org/2000/svg"
+                               >
+                                 <rect width="24" height="4" fill="#555" />
+                               </svg>
+                               Line Break
+                             </button>
+                             <button
+                               onClick={addGap}
+                               className="editor-button"
+                               draggable
+                               onDragStart={(e) => handleDragStart("gap")}
+                             >
+                               <VerticalSpacingIcon />
+                               Gap
+                             </button>
+                             <button
+                               onClick={addButton}
+                               className="editor-button"
+                               draggable
+                               onDragStart={(e) => handleDragStart("button")}
+                             >
+                               <FaPlusSquare /> Button
+                             </button>
+                             <button className="editor-button">
+                               <input
+                                 type="color"
+                                 value={bgColor}
+                                 onChange={(e) => setBgColor(e.target.value)}
+                                 className="bg-color-pic"
+                               />
+                               Template-Bg
+                             </button>
+                           </div>
+                       </div>
+                       <button
+                                           onClick={()=>setActiveTablayout(true)}
+                                           className="file-manager-btn"
+                                         >
+                                           <FaFolderOpen /> File Manager
+                                         </button>
+           
+                       {/* file manager modal */}
+                           {activeTablayout && (
+             <div className="modal-overlay-file-editor">
+               <div className="modal-content-file">
+                 <div className="modal-header-file">
+                   <h2>File Manager</h2>
+           <button className="close-modal-file" onClick={() => setActiveTablayout(false)}>x</button>
+                 </div>
+           
+                 <button className="upload-button-file" onClick={uploadImagefile}>
+                   + Upload
+                 </button>
+           
+                 {/* Scrollable Gallery */}
+                 <div className="gallery-scroll-container">
+                   {galleryImages.length === 0 && (
+                     <div className="no-images">No images found</div>
+                   )}
+                   {galleryImages.map((item) => (
+                     <div key={item._id} className="gallery-item">
+                       <img src={item.imageUrl} alt="Uploaded" />
+                       <div className="gallery-actions">
+                         <button
+                           onClick={() =>
+                             uploadImage(
+                               selectedImageIndex,
+                               selectedImageNumber,
+                               item.imageUrl
+                             )
+                           }
+                         >
+                           <FaCheckCircle />
+                         </button>
+           
+                         <button onClick={() => deleteImage(item._id)}>
+                           <FaTrash />
+                         </button>
+                       </div>
+                     </div>
+                   ))}
+                 </div>
+               </div>
+             </div>
+           )}
+           
             {/* Styling Controls */}
             <>
               {selectedIndex !== null &&
-                previewContent[selectedIndex] &&
-                activeTablayout === "components" && (
+                previewContent[selectedIndex] &&(
                   <>
                     {isMobilestyle ? (
                       <>

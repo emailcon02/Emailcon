@@ -3,7 +3,7 @@ import axios from "axios";
 import "./Mainpage.css";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import {FaBars, FaCheckCircle, FaTimes, FaTrash} from "react-icons/fa";
+import {FaBars, FaCheckCircle, FaFolderOpen, FaTimes, FaTrash} from "react-icons/fa";
 
 import { FiEdit } from 'react-icons/fi'; // Importing icons
 import DatePicker from "react-datepicker";
@@ -1336,7 +1336,7 @@ const Mainpage = () => {
   return (
     <div>
       <div className="mobile-content">
-        <div className="desktop-nav">
+       <div className={`desktop-nav ${activeTablayout ? 'hide-nav' : ''}`}>
           <nav className="navbar">
             <div>
               <h3 className="company-name">
@@ -1733,7 +1733,14 @@ const Mainpage = () => {
                     Template-Bg
                   </button>
                 </div>
+                 
             </div>
+                 <button
+                    onClick={()=>setActiveTablayout(true)}
+                    className="file-manager-btn"
+                  >
+                    <FaFolderOpen /> File Manager
+                  </button>
 
             {/* file manager modal */}
                 {activeTablayout && (
@@ -1784,7 +1791,7 @@ const Mainpage = () => {
             <>
               {selectedIndex !== null &&
                 previewContent[selectedIndex] &&
-                activeTablayout === "components" && (
+         (
                   <>
                     {isMobilestyle ? (
                       <>
