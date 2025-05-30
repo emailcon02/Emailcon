@@ -829,23 +829,19 @@ const Mainpage = () => {
       ...previewContent,
       {
         type: "icons",
-        iconsrc1:
-          "https://media-hosting.imagekit.io//67bd5de7d7284435/facebook.png?Expires=1834659823&Key-Pair-Id=K2ZIVPTIP2VGHC&Signature=Q3MgNGs1Jso~sjt298M6H-vs8QWdp~OxEKGNi1BF1Wq3uJwZqz2NeeW1BSNFKjYNxGR4otU8ssEUvdJ9TJMsbGUs6S1dxJiJ6ln3gxasE5ir4yXdWf1~fm-yQdE9F7Bssys1mf1aDBJjDG0ro7pHSILRd1v7eN~KS6VItz1k7kNejlwi84h0X6pjeIy5Lh7Zhilmc2ON5XD2Zio9oQa1OUJhj2D9ZXxR84ubLtUY4dmiESDaLtsUX0Gjvm6R0nXMkRL0oIxuIsgxi3JnmjesQgldTr4s9AIsgDmYy24DGbuaLji3epak-9fG0lyxZyyLQYfYmt8Wq-0PN0QDs2yQkQ__",
+        iconsrc1:"https://res.cloudinary.com/diytyjnla/image/upload/v1748582430/facebook_crpxwo.png",
         style1: { width: "30px", height: "30px" },
         links1: "https://www.facebook.com",
 
-        iconsrc2:
-          "https://media-hosting.imagekit.io//29eaf64e0e144a39/twitter.png?Expires=1834659855&Key-Pair-Id=K2ZIVPTIP2VGHC&Signature=tMMasC4XY4z4xl3DzTIcSSXTBBH-eMULL3w0WH5nHGsu0zVlz8~HLSw5nfiw2iBgB~J4QPle2LM4ow1aPq0x2cCUvAHLQ8IG9P5-KSV0Em2C1eZuXFaScWasYxeX9OAV1uIRBBvQxvId20IbNK7c9eBBUy12Htg2rjE2p8zCtqhwy5Ef6AqOogF3G7FcKpY8-DMNLKVrsagHuhP2R7m9gndSODhxsfSp17lW4R0wgo73IZicToB~U1mdlNOe2I7WKXGV3znS3u0P9NYdU4KR7DLmGX7NhEQaSQ1rF7yN6lL8tZHfPNoBCh50CbkuM16wf6qCcrHlcta1sPjlgfhTdg__",
-        style2: { width: "55px", height: "55px" },
+        iconsrc2:"https://res.cloudinary.com/diytyjnla/image/upload/v1748582461/twitter_g6czs3.png",
+        style2: { width: "30px", height: "30px" },
         links2: "https://www.twitter.com",
 
-        iconsrc3:
-          "https://media-hosting.imagekit.io//cfa67b595a694323/instagram.png?Expires=1834659862&Key-Pair-Id=K2ZIVPTIP2VGHC&Signature=F~x667oLkHSCCRT94amSjjg-7YvZGcUgYUBAOS8PyHS6fKhyxIg1BNFqgBrI-Wfibxvg9Ju~S4TxBkdF~PAhJqW4skqoNoWnadypcOGEWQnsK4Vt34cegUPk1WkeIWFz2twm1ase7PsFMgZFHQPYmH5iZsMlCSvkwyAnIhLOJHcKuUz6YeI8wAhCAvI7mZp4oLbICW08nHqJIhfrP5h4tYZ74PHgw5Z6NGeRrXMHph~itymPichKycdyv92m~3EozEAo~qrXeuF0hbU1H2hEeTqbiQU1dnDJXlA~Nq6r1QtFhJXMoSYv7Tw~qoQqyUZqwQw8cQ7XjSBrW0-fMXq6GA__",
+        iconsrc3:"https://res.cloudinary.com/diytyjnla/image/upload/v1748582448/Instagram_fj4sqm.png",
         style3: { width: "30px", height: "30px" },
         links3: "https://www.instagram.com",
 
-        iconsrc4:
-          "https://media-hosting.imagekit.io//24a0e8c0dfbd44da/youtube.png?Expires=1834659634&Key-Pair-Id=K2ZIVPTIP2VGHC&Signature=hKVEIuwIlua~7-1jjd~A0vSiyD9UYbdSHvQHs7nUNyetORS16hhvkxUSuQdkxNmmx~2h3JRNia3qZamzljVLCTlEiqF9OofWaXvenvzpF3tp3SkHei8WjQ5ZJdLT~YMgRgANJz7rYArnQugBukzmkHbg57GNJFTNrShLyFkSepwDlLG6nbo7qdPPmDNDyAbwhIlReMOgAnU7Mb1FsBd98TXbImb8hyiiUsM2zgTK0eEwGM1llYJlavFgrvwPbMenHEf37N~I56Z7H9ZUEPXmpZpJGIJONVVOkld~TuzfWLa52ogLEKb8ugc9gMrKJVdnL4fdrUoj7fyT~aWVxugQ0A__",
+        iconsrc4:"https://res.cloudinary.com/diytyjnla/image/upload/v1748582471/youtube_egb71v.png",
         style4: { width: "30px", height: "30px" },
         links4: "https://www.youtube.com",
 
@@ -1336,7 +1332,7 @@ const Mainpage = () => {
   return (
     <div>
       <div className="mobile-content">
-       <div className={`desktop-nav ${(activeTablayout || isModalOpen || isOpen)  ? 'hide-nav' : ''}`}>
+       <div className={`desktop-nav ${(activeTablayout || isModalOpen)  ? 'hide-nav' : ''}`}>
           <nav className="navbar">
             <div>
               <h3 className="company-name">
@@ -5196,14 +5192,17 @@ const Mainpage = () => {
                             className="card-text"
                             contentEditable
                             suppressContentEditableWarning
-                            onClick={() => setModalIndex(index)} // Open modal for this index
+                            onClick={() => {setModalIndex(index)
+                                 setIsModalOpen(true);} // Open the modal
+
+                            } // Open modal for this index
                             style={item.style}
                             dangerouslySetInnerHTML={{
                               __html: item.content1,
                             }}
                           />
 
-                          {modalIndex === index &&  ( // Open only for the selected index
+                          {isModalOpen && modalIndex === index &&  ( // Open only for the selected index
                             <ParaEditor
                               isOpen={true}
                               content={item.content1}
@@ -5418,14 +5417,17 @@ const Mainpage = () => {
                               className="text-item"
                               contentEditable
                               suppressContentEditableWarning
-                              onClick={() => setModalIndex(index)} // Open modal for this index
+                              onClick={() => {setModalIndex(index)
+                                  setIsModalOpen(true); // Open the modal
+                              }
+                              } // Open modal for this index
                               style={item.style}
                               dangerouslySetInnerHTML={{
                                 __html: item.content1,
                               }}
                             />
                           </div>
-                          {modalIndex === index && ( // Open only for the selected index
+                          {isModalOpen && modalIndex === index && ( // Open only for the selected index
                             <ParaEditor
                               isOpen={true}
                               content={item.content1}
@@ -5461,7 +5463,10 @@ const Mainpage = () => {
                               className="text-item"
                               contentEditable
                               suppressContentEditableWarning
-                              onClick={() => setModalIndex(index)} // Open modal for this index
+                              onClick={() => {setModalIndex(index)
+                                setIsModalOpen(true); // Open the modal
+                              }
+                              } // Open modal for this index
                               style={item.style}
                               dangerouslySetInnerHTML={{
                                 __html: item.content2,
@@ -5477,7 +5482,7 @@ const Mainpage = () => {
                               onClick={() => handleopenFiles(index, 2)}
                             />
                           </div>
-                          {modalIndex === index && ( // Open only for the selected index
+                          {isModalOpen && modalIndex === index && ( // Open only for the selected index
                             <ParaEditor
                               isOpen={true}
                               content={item.content2}
