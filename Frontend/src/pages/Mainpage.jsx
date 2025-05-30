@@ -1336,7 +1336,7 @@ const Mainpage = () => {
   return (
     <div>
       <div className="mobile-content">
-       <div className={`desktop-nav ${activeTablayout ? 'hide-nav' : ''}`}>
+       <div className={`desktop-nav ${(activeTablayout || isModalOpen || isOpen)  ? 'hide-nav' : ''}`}>
           <nav className="navbar">
             <div>
               <h3 className="company-name">
@@ -5203,7 +5203,7 @@ const Mainpage = () => {
                             }}
                           />
 
-                          {modalIndex === index && ( // Open only for the selected index
+                          {modalIndex === index &&  ( // Open only for the selected index
                             <ParaEditor
                               isOpen={true}
                               content={item.content1}
