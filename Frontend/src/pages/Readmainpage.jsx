@@ -97,20 +97,23 @@ const Readmainpage = () => {
   const [selectedImageIndex, setSelectedImageIndex] = useState(null);
   const [selectedImageNumber, setSelectedImageNumber] = useState(null);
 
-
-
   const fetchImages = async () => {
-    try {
-      const res = await axios.get(
-        `${apiConfig.baseURL}/api/stud/images/${user.id}`
-      );
-      setGalleryImages(res.data);
-    } catch (err) {
-      console.error("Error fetching images", err);
-    }
-  };
+  try {
+    const res = await axios.get(
+      `${apiConfig.baseURL}/api/stud/images/${user.id}`
+    );
 
-  useEffect(() => {
+    // Sort by createdAt in descending order (latest first)
+    const sortedImages = res.data.sort(
+      (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+    );
+
+    setGalleryImages(sortedImages);
+  } catch (err) {
+    console.error("Error fetching images", err);
+  }
+};
+ useEffect(() => {
     fetchImages();
   }, []);
 
