@@ -242,11 +242,19 @@
 .schedule-btn:hover {
     background-color:#fd7a22;
 }
+@media screen and (min-width: 760px) and (max-width: 1050px) {
+  .navbar-container {
+    gap: 20% !important;
+  }
+}
 
 /* Responsive Styles */
 @media (max-width: 768px) {
     .menu {
         display: none;
+    }
+    .navbarfront{
+        width: 80%;
     }
 
     .menu-toggle {

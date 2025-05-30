@@ -21,6 +21,10 @@ const camhistorySchema = new mongoose.Schema({
         type: String,
         required: true,
     },
+    replyTo: {
+        type: String,
+        required: true,
+    },
     sendcount: {
         type: String,
         required: true,

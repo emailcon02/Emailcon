@@ -1,5 +1,5 @@
 import React from 'react';
-import RoutesPage from './pages/RoutesPage.jsx';
+import RoutesPage from './pages/Routes/RoutesPage';
 import { ToastContainer } from "react-toastify";
 import './App.css';
 

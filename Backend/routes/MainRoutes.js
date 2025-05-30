@@ -11,8 +11,14 @@ import { decryptPassword } from "../config/encryption.js";
 import EmailOpen from "../models/EmailOpen.js";
 import ClickTracking from "../models/ClickTracking.js";
 import apiConfig from "../api/apiconfigbackend.js";
+import authMiddleware from "../config/authMiddleware.js";
 import mongoose from "mongoose";
 import BirthdayTemplate from "../models/BirthdayTemplates.js";
+import PaymentHistory from "../models/PaymentHistory.js";
+import Aliasname from "../models/Aliasname.js";
+import Replyto from "../models/Replyto.js";
+import Adminuser from "../models/Adminuser.js";
+import ImageUrl from "../models/Imageurl.js";
 const router = express.Router();
 
 // Upload image to s3 bucket
@@ -112,6 +118,8 @@ router.post('/sendtestmail', async (req, res) => {
   try {
     const {
       emailData,
+      aliasName,
+      replyTo,
       attachments,
       previewContent,
       bgColor,
@@ -177,6 +185,25 @@ router.post('/sendtestmail', async (req, res) => {
         <img src="${item.src}" style="margin-top:10px;width:${item.style.width};pointer-events:none;height:${item.style.height};border-radius:${item.style.borderRadius};background-color:${item.style.backgroundColor}"/>
         </div>`;
       }
+      else if (item.type === 'break') {
+        return `<table role="presentation" align="center" width="100%" style="border-collapse: separate; border-spacing: 0; margin: 10px auto!important;">
+      <tr>
+        <td align="center"  style="padding: 0;">
+          <hr style="width:100%; background-color:#00000; margin:30px 0px;" />
+        </td>
+      </tr>
+    </table>`;
+      } else if (item.type === 'gap') {
+        return `
+    <table role="presentation" align="center" width="100%" style="border-collapse: separate; border-spacing: 0; margin: ${item.style.margin || '30px 0'};">
+      <tr>
+        <td align="center" width="100%" style="padding: 0;">
+          <div style="width:100%; height:50px; margin: 0 auto;"></div>
+        </td>
+      </tr>
+    </table>
+  `;}
+
       else if (item.type === 'cardimage') {
         return `
         <table role="presentation" align="center" width="${item.style.width}" style="border-collapse: separate; border-spacing: 0; margin: 10px auto!important;">
@@ -288,6 +315,47 @@ router.post('/sendtestmail', async (req, res) => {
     </table>`;
       }
 
+      else if (item.type ==='banner') {
+        return `<div>
+        <img src="${item.src}" style="margin-top:10px;width:${item.style.width};pointer-events:none;height:${item.style.height};border-radius:${item.style.borderRadius};background-color:${item.style.backgroundColor}"/>
+        </div>`;
+      }
+
+
+
+
+else if (item.type === 'multi-image-card') {
+        return `<table class="multi" style="width:100%; border-collapse:collapse;margin:10px auto !important;">
+    <tr>
+      <td style="width:50%;text-align:center;padding:8px; vertical-align:top;">
+        <img src="${item.src1}" style="border-radius:10px;object-fit:contain;height:230px !important;width:100%;pointer-events:none !important; object-fit:cover;" alt="image"/>
+        <h3 style="margin:10px 0;">${item.title1 || 'Name of the product'}</h3>
+        <p style="margin:5px 0;"><s>${item.originalPrice1 ? `$${item.originalPrice1}` : '$9000'}</s></p>
+        <p style="margin:5px 0;">${item.offerPrice1 ? `Off Price $${item.offerPrice1}` : 'Off Price $5999'}</p>
+        <a class="img-btn"
+          href="${generateTrackingLink(item.link1, userId, campaignId, emailData.recipient)}"
+          target="_blank"
+          style="display:inline-block;padding:12px 25px;margin-top:20px;font-weight:bold;font-size:${item.buttonStyle1.fontSize || '18px'};width:${item.buttonStyle1.width || 'auto'};color:${item.buttonStyle1.color || '#000'};text-decoration:none;background-color:${item.buttonStyle1.backgroundColor || '#f0f0f0'};text-align:${item.buttonStyle1.textAlign || 'left'};border-radius:${item.buttonStyle1.borderRadius || '5px'};">
+          ${item.content1}
+        </a>
+      </td>
+      <td style="width:50%;text-align:center;padding:8px; vertical-align:top;">
+        <img src="${item.src2}" style="border-radius:10px;object-fit:contain;height:230px !important;width:100%;pointer-events:none !important; object-fit:cover;" alt="image"/>
+        <h3 style="margin:10px 0;">${item.title2 || 'Name of the product'}</h3>
+        <p style="margin:5px 0;"><s>${item.originalPrice2 ? `$${item.originalPrice2}` : '$8000'}</s></p>
+        <p style="margin:5px 0;">${item.offerPrice2 ? `Off Price $${item.offerPrice2}` : 'Off Price $4999'}</p>
+        <a class="img-btn"
+          href="${generateTrackingLink(item.link2, userId, campaignId, emailData.recipient)}"
+          target="_blank"
+          style="display:inline-block;padding:12px 25px;font-weight:bold;font-size:${item.buttonStyle2.fontSize || '18px'};margin-top:20px;width:${item.buttonStyle2.width || 'auto'};color:${item.buttonStyle2.color || '#000'};text-decoration:none;background-color:${item.buttonStyle2.backgroundColor || '#f0f0f0'};text-align:${item.buttonStyle2.textAlign || 'left'};border-radius:${item.buttonStyle2.borderRadius || '5px'};">
+          ${item.content2}
+        </a>
+      </td>
+    </tr>
+  </table>`;
+      }
+
+
       else if (item.type === 'imagewithtext') {
         return `<table class="image-text" style="width:100%;height:220px !important;background-color:${item.style1.backgroundColor || '#f4f4f4'}; border-collapse:seperate;border-radius:${item.style1.borderRadius || '10px'};margin:20px 0px !important">
         <tr>
@@ -340,9 +408,10 @@ router.post('/sendtestmail', async (req, res) => {
     const trackingPixel = `<img src="${apiConfig.baseURL}/api/stud/track-email-open?emailId=${encodeURIComponent(emailData.recipient)}&userId=${userId}&campaignId=${campaignId}&t=${Date.now()}" width="1" height="1" style="display:none;" />`;
 
     const mailOptions = {
-      from: `"${emailData.aliasName}" <${email}>`,
+      from: `"${aliasName}" <${email}>`,
       to: emailData.recipient,
       subject: emailData.subject,
+      replyTo:replyTo,
       attachments: Attachments,
 
       html: `
@@ -445,7 +514,7 @@ router.post('/sendexcelEmail', async (req, res) => {
     subject,
     aliasName,
     body,
-    bgColor, attachments,
+    bgColor, attachments,replyTo,
     previewtext,
     userId,
     campaignId
@@ -560,6 +629,40 @@ router.post('/sendexcelEmail', async (req, res) => {
       </tr>
   </table>`;
 
+  case 'banner':
+    return `<div><img src="${item.src}" style="margintop:10px;width:${item.style.width};pointerevents:none;height:${item.style.height};border-radius:${item.style.borderRadius}; background-color:${item.style.backgroundColor}"/>
+ </div>`;
+
+  case 'multi-image-card':
+      return `<table class="multi" style="width:100%; border-collapse:collapse;margin:10px auto !important;">
+    <tr>
+      <td style="width:50%;text-align:center;padding:8px; vertical-align:top;">
+        <img src="${item.src1}" style="border-radius:10px;object-fit:contain;height:230px !important;width:100%;pointer-events:none !important; object-fit:cover;" alt="image"/>
+        <h3 style="margin:10px 0;">${item.title1 || 'Name of the product'}</h3>
+        <p style="margin:5px 0;"><s>${item.originalPrice1 ? `$${item.originalPrice1}` : '$9000'}</s></p>
+        <p style="margin:5px 0;">${item.offerPrice1 ? `Off Price $${item.offerPrice1}` : 'Off Price $5999'}</p>
+        <a class="img-btn"
+          href="${generateTrackingLink(item.link1, userId, campaignId, emailData.recipient)}"
+          target="_blank"
+          style="display:inline-block;padding:12px 25px;margin-top:20px;font-weight:bold;font-size:${item.buttonStyle1.fontSize || '18px'};width:${item.buttonStyle1.width || 'auto'};color:${item.buttonStyle1.color || '#000'};text-decoration:none;background-color:${item.buttonStyle1.backgroundColor || '#f0f0f0'};text-align:${item.buttonStyle1.textAlign || 'left'};border-radius:${item.buttonStyle1.borderRadius || '5px'};">
+          ${item.content1}
+        </a>
+      </td>
+      <td style="width:50%;text-align:center;padding:8px; vertical-align:top;">
+        <img src="${item.src2}" style="border-radius:10px;object-fit:contain;height:230px !important;width:100%;pointer-events:none !important; object-fit:cover;" alt="image"/>
+        <h3 style="margin:10px 0;">${item.title2 || 'Name of the product'}</h3>
+        <p style="margin:5px 0;"><s>${item.originalPrice2 ? `$${item.originalPrice2}` : '$8000'}</s></p>
+        <p style="margin:5px 0;">${item.offerPrice2 ? `Off Price $${item.offerPrice2}` : 'Off Price $4999'}</p>
+        <a class="img-btn"
+          href="${generateTrackingLink(item.link2, userId, campaignId, emailData.recipient)}"
+          target="_blank"
+          style="display:inline-block;padding:12px 25px;font-weight:bold;font-size:${item.buttonStyle2.fontSize || '18px'};margin-top:20px;width:${item.buttonStyle2.width || 'auto'};color:${item.buttonStyle2.color || '#000'};text-decoration:none;background-color:${item.buttonStyle2.backgroundColor || '#f0f0f0'};text-align:${item.buttonStyle2.textAlign || 'left'};border-radius:${item.buttonStyle2.borderRadius || '5px'};">
+          ${item.content2}
+        </a>
+      </td>
+    </tr>
+  </table>`;
+
         case 'cardimage':
           return `
     <table role="presentation" align="center"  style="${styleString};border-collapse: separate; border-spacing: 0; margin: 10px auto!important;">
@@ -575,6 +678,26 @@ router.post('/sendexcelEmail', async (req, res) => {
     </td>
 </tr>
 </table>`
+
+
+case 'break':
+    return `<table style="width:100%; border-collapse:collapse; margin:10px auto !important;">
+      <tr>
+        <td style="padding: 0;">
+          <hr style="width:100%;background-color:#000000;margin: 30px 0px;" />
+        </td>
+      </tr>
+    </table>`;
+
+    case 'gap':
+    return `<table style="width:100%; border-collapse:collapse; margin: ${item.style.margin || '30px 0'};">
+      <tr>
+        <td style="padding: 0;">
+          <div style="width: ${item.style.width || '100%'}; height: ${item.style.height || '40px'}; margin: 0 auto;"></div>
+        </td>
+      </tr>
+    </table>`;
+
 
         case 'textwithimage':
           return `<table class="image-text" style="width:100%;height:220px !important;border-collapse:seperate;border-radius:10px;margin:15px 0px !important;${styleString};">
@@ -710,6 +833,7 @@ router.post('/sendexcelEmail', async (req, res) => {
       from: `"${aliasName}" <${email}>`,
       to: recipientEmail,
       subject: subject,
+      replyTo:replyTo,
       attachments: Attachments,
 
       html: `
@@ -817,7 +941,7 @@ router.post('/sendbulkEmail', async (req, res) => {
   const {
     recipientEmail,
     subject,
-    aliasName,
+    aliasName,replyTo,
     body,
     bgColor, attachments,
     previewtext,
@@ -935,6 +1059,58 @@ router.post('/sendbulkEmail', async (req, res) => {
       </tr>
   </table>`;
 
+  
+case 'break':
+  return `<table style="width:100%; border-collapse:collapse; margin:10px auto !important;">
+    <tr>
+      <td style="padding: 0;">
+        <hr style="width:100%;background-color:#000000;margin: 30px 0px;" />
+      </td>
+    </tr>
+  </table>`;
+
+  case 'banner':
+    return `<div><img src="${item.src}" style="margintop:10px;width:${item.style.width};pointerevents:none;height:${item.style.height};border-radius:${item.style.borderRadius}; background-color:${item.style.backgroundColor}"/>
+ </div>`;
+
+  case 'multi-image-card':
+      return `<table class="multi" style="width:100%; border-collapse:collapse;margin:10px auto !important;">
+    <tr>
+      <td style="width:50%;text-align:center;padding:8px; vertical-align:top;">
+        <img src="${item.src1}" style="border-radius:10px;object-fit:contain;height:230px !important;width:100%;pointer-events:none !important; object-fit:cover;" alt="image"/>
+        <h3 style="margin:10px 0;">${item.title1 || 'Name of the product'}</h3>
+        <p style="margin:5px 0;"><s>${item.originalPrice1 ? `$${item.originalPrice1}` : '$9000'}</s></p>
+        <p style="margin:5px 0;">${item.offerPrice1 ? `Off Price $${item.offerPrice1}` : 'Off Price $5999'}</p>
+        <a class="img-btn"
+          href="${generateTrackingLink(item.link1, userId, campaignId, emailData.recipient)}"
+          target="_blank"
+          style="display:inline-block;padding:12px 25px;margin-top:20px;font-weight:bold;font-size:${item.buttonStyle1.fontSize || '18px'};width:${item.buttonStyle1.width || 'auto'};color:${item.buttonStyle1.color || '#000'};text-decoration:none;background-color:${item.buttonStyle1.backgroundColor || '#f0f0f0'};text-align:${item.buttonStyle1.textAlign || 'left'};border-radius:${item.buttonStyle1.borderRadius || '5px'};">
+          ${item.content1}
+        </a>
+      </td>
+      <td style="width:50%;text-align:center;padding:8px; vertical-align:top;">
+        <img src="${item.src2}" style="border-radius:10px;object-fit:contain;height:230px !important;width:100%;pointer-events:none !important; object-fit:cover;" alt="image"/>
+        <h3 style="margin:10px 0;">${item.title2 || 'Name of the product'}</h3>
+        <p style="margin:5px 0;"><s>${item.originalPrice2 ? `$${item.originalPrice2}` : '$8000'}</s></p>
+        <p style="margin:5px 0;">${item.offerPrice2 ? `Off Price $${item.offerPrice2}` : 'Off Price $4999'}</p>
+        <a class="img-btn"
+          href="${generateTrackingLink(item.link2, userId, campaignId, emailData.recipient)}"
+          target="_blank"
+          style="display:inline-block;padding:12px 25px;font-weight:bold;font-size:${item.buttonStyle2.fontSize || '18px'};margin-top:20px;width:${item.buttonStyle2.width || 'auto'};color:${item.buttonStyle2.color || '#000'};text-decoration:none;background-color:${item.buttonStyle2.backgroundColor || '#f0f0f0'};text-align:${item.buttonStyle2.textAlign || 'left'};border-radius:${item.buttonStyle2.borderRadius || '5px'};">
+          ${item.content2}
+        </a>
+      </td>
+    </tr>
+  </table>`;
+
+  case 'gap':
+  return `<table style="width:100%; border-collapse:collapse; margin: ${item.style.margin || '30px 0'};">
+    <tr>
+      <td style="padding: 0;">
+        <div style="width: ${item.style.width || '100%'}; height: ${item.style.height || '40px'}; margin: 0 auto;"></div>
+      </td>
+    </tr>
+  </table>`;
 
         case 'cardimage':
           return `
@@ -1087,6 +1263,7 @@ router.post('/sendbulkEmail', async (req, res) => {
       from: `"${aliasName}" <${email}>`,
       to: recipientEmail,
       subject: subject,
+      replyTo:replyTo,
       attachments: Attachments,
       html: `
         <html>
@@ -1235,10 +1412,106 @@ router.post('/groups', async (req, res) => {
     });
   }
 });
+//create Replyto
+router.post('/replyTo', async (req, res) => {
+  const { replyTo,userId } = req.body;
 
+  if (!userId) {
+    return res.status(400).send({
+      message: "User ID is required"
+    });
+  }
+
+  try {
+    // Check if the replyto already exists for the user
+    const existingReply = await Replyto.findOne({
+      replyTo,
+      user: userId
+    });
+    if (existingReply) {
+      return res.status(400).send({
+        message: "Reply to Mail already exists for this user"
+      });
+    }
+    // Create a new reply to
+    const replytonew = new Replyto({
+      replyTo,
+      user: userId
+    }); 
+    await replytonew.save();
+    res.status(201).send(replytonew);
+  } catch (error) {
+    console.error(error);
+    res.status(500).send({
+      message: "Error creating reply to mail"
+    });
+  }
+});
+
+//getting all replyto
+router.get('/replyTo/:userId', async (req, res) => {
+  try {
+    const replyTo = await Replyto.find({
+      user: req.params.userId
+    });
+    res.json(replyTo);
+  } catch (error) {
+    res.status(500).json({
+      message: 'Error fetching replyto mail'
+    });
+  }
+});
+//create aliasname
+router.post('/aliasname', async (req, res) => {
+  const { aliasname,userId } = req.body;
+
+  if (!userId) {
+    return res.status(400).send({
+      message: "User ID is required"
+    });
+  }
+
+  try {
+    // Check if the alias name already exists for the user
+    const existingName = await Aliasname.findOne({
+      aliasname,
+      user: userId
+    });
+    if (existingName) {
+      return res.status(400).send({
+        message: "Alias name already exists for this user"
+      });
+    }
+    // Create a new aliasname
+    const aliasnamenew = new Aliasname({
+      aliasname,
+      user: userId
+    }); 
+    await aliasnamenew.save();
+    res.status(201).send(aliasnamenew);
+  } catch (error) {
+    console.error(error);
+    res.status(500).send({
+      message: "Error creating aliasname"
+    });
+  }
+});
+
+//getting all aliasname
+router.get('/aliasname/:userId', async (req, res) => {
+  try {
+    const aliasname = await Aliasname.find({
+      user: req.params.userId
+    });
+    res.json(aliasname);
+  } catch (error) {
+    res.status(500).json({
+      message: 'Error fetching aliasname'
+    });
+  }
+});
 
 //add student to selected group through excel
-
 router.post("/students/upload", async (req, res) => {
   try {
     // console.log("Received data:", req.body); // Debugging
@@ -1276,19 +1549,65 @@ router.get('/groups/:userId', async (req, res) => {
     });
   }
 });
+//getting user payment-history
+router.get('/payment-history/:userId', async (req, res) => {
+  try {
+    const payments = await PaymentHistory.find({
+      userId: req.params.userId
+    }).populate('userId', 'username'); // Populate only the username field
+
+    res.json(payments);
+  } catch (error) {
+    res.status(500).json({
+      message: 'Error fetching payments'
+    });
+  }
+});
+
+
+//grt latest payment-history
+router.get('/payment-history-latest/:userId', async (req, res) => {
+  try {
+    const latestPayment = await PaymentHistory.findOne({ userId: req.params.userId })
+      .sort({ createdAt: -1 }); // Sort descending, latest first
+
+    if (!latestPayment) {
+      return res.status(404).json({ message: 'No payment history found' });
+    }
+
+    res.json(latestPayment); // Return only the latest one
+  } catch (error) {
+    res.status(500).json({ message: 'Error fetching latest payment' });
+  }
+});
+
+//getting admin user
+router.get('/adminuserdata/:id', async (req, res) => {
+  const userId = req.params.id;
+
+  try {
+    const user = await Adminuser.findById(userId) 
+
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+    res.json(user);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
 //getting user
 router.get('/userdata/:id', async (req, res) => {
   const userId = req.params.id;
 
   try {
-    // Find the user by ID from the database
     const user = await User.findById(userId).select('-smtppassword'); // Exclude sensitive fields like password and smtppassword
 
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
-
-    // Send the user data as a response
     res.json(user);
   } catch (error) {
     console.error(error);
@@ -1367,7 +1686,17 @@ router.post("/students/check-duplicate", async (req, res) => {
     res.status(500).json({ message: "Server error during duplicate check." });
   }
 });
-
+// 1. GET route to fetch all user payment history
+// 1. GET route to fetch all user payment history with user details
+router.get('/all-payment-history', async (req, res) => {
+  try {
+    const allPaymentHistory = await PaymentHistory.find().populate('userId', 'username email'); 
+    res.json(allPaymentHistory);
+  } catch (error) {
+    console.error("Error fetching all user history:", error);
+    res.status(500).json({ message: "Server error while fetching all user history." });
+  }
+});
 
 // 3. GET route to fetch all students, with optional filtering by group
 router.get('/students', async (req, res) => {
@@ -1652,7 +1981,7 @@ router.post("/camhistory", async (req, res) => {
       scheduledTime,
       attachments,
       status,
-      progress, aliasName,
+      progress, aliasName,replyTo,
       senddate,
       previewContent,
       exceldata,
@@ -1674,7 +2003,7 @@ router.post("/camhistory", async (req, res) => {
       sentEmails,
       attachments,
       failedEmails,
-      scheduledTime, aliasName,
+      scheduledTime, aliasName,replyTo,
       status,
       progress,
       senddate,
@@ -1924,5 +2253,79 @@ router.put("/updateStudent/:id", async (req, res) => {
     res.status(500).json({ message: "Error updating student", error: err });
   }
 });
+
+router.delete('/camhistory/:id', async (req, res) => {
+  const campaignId = req.params.id;
+  console.log('Deleting campaign history:', campaignId);
+
+  try {
+    // Use the Camhistory model to delete the campaign history
+    const deletedCampaign = await Camhistory.findByIdAndDelete(campaignId);
+    if (!deletedCampaign) {
+      return res.status(404).json({
+        message: 'Campaign history not found'
+      });
+    }
+    res.status(200).json({
+      message: 'Campaign history deleted successfully'
+    });
+  } catch (error) {
+    console.error('Error deleting campaign history:', error);
+    res.status(500).json({
+      message: 'Server error while deleting campaign history'
+    });
+  }
+});
+
+// user-expiry-check
+
+router.get("/validate", authMiddleware, async (req, res) => {
+  const user = await User.findById(req.user._id); // or req.user.id if `req.user` is just the payload
+  if (!user) return res.status(404).send("User not found");
+
+  res.send({ user });
+});
+
+// Save image URL
+router.post("/save-image", async (req, res) => {
+  const { userId, imageUrl } = req.body;
+
+  if (!userId || !imageUrl) {
+    return res.status(400).json({ error: "Missing userId or imageUrl" });
+  }
+
+
+  try {
+    const saved = new ImageUrl({ user: userId, imageUrl });
+    await saved.save();
+    res.status(201).json({ message: "Image URL saved successfully", data: saved });
+  } catch (err) {
+    console.error("Error saving image URL:", err);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
+
+// Fetch all images for a user
+router.get("/images/:userId", async (req, res) => {
+  try {
+    const images = await ImageUrl.find({ user: req.params.userId });
+    res.status(200).json(images);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Failed to fetch images" });
+  }
+});
+
+// Delete image by ID
+router.delete("/images/:id", async (req, res) => {
+  try {
+    await ImageUrl.findByIdAndDelete(req.params.id);
+    res.status(200).json({ message: "Image deleted" });
+  } catch (err) {
+    res.status(500).json({ error: "Delete failed" });
+  }
+});
+
 
 export default router;

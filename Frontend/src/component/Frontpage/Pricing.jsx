@@ -6,7 +6,7 @@ import { useNavigate } from "react-router-dom";
 const Pricing= () => {
   const navigate = useNavigate();
   const handlenavigate = () => {
-    navigate("/register-form");
+    navigate("/user-login");
   }
  
   return (

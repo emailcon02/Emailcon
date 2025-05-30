@@ -1,0 +1,209 @@
+.ep-avatar-grid {
+    display: flex;
+    gap: 25px;
+    justify-content: center;
+    margin-bottom: 20px;
+  }
+  
+  .ep-avatar-option {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: 0.3s ease;
+  }
+  
+  .ep-avatar-option:hover {
+    /* transform: scale(1.01); */
+    border: 2px solid #f48c06;
+  }
+  
+
+.ep-modal,
+.ep-edit-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgb(0 0 0 / 87%);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+}
+
+.ep-modal-content,
+.ep-edit-modal-content {
+  background: white;
+  padding: 20px 30px;
+  border-radius: 10px;
+  width: 400px;
+  max-width: 90%;
+  max-height: 500px;
+  overflow-y: auto;
+  position: relative;
+
+  scrollbar-width: thin;                        /* Firefox */
+  scrollbar-color: lightgrey transparent;       /* Firefox thumb and track */
+}
+
+/* WebKit browsers (Chrome, Safari, Edge) */
+.ep-modal-content::-webkit-scrollbar,
+.ep-edit-modal-content::-webkit-scrollbar {
+  width: 6px;
+}
+
+.ep-modal-content::-webkit-scrollbar-track,
+.ep-edit-modal-content::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.ep-modal-content::-webkit-scrollbar-thumb,
+.ep-edit-modal-content::-webkit-scrollbar-thumb {
+  background-color: lightgrey;
+  border-radius: 10px;
+}
+
+.ep-modal-content::-webkit-scrollbar-button,
+.ep-edit-modal-content::-webkit-scrollbar-button {
+  display: none;
+  height: 0;
+  width: 0;
+}
+
+.ep-edit-modal-content h3{
+    color:#2f327d;
+}
+.ep-close-icon {
+  position: absolute;
+  top: 12px;
+  right: 16px;
+  font-size: 24px;
+  font-weight: bold;
+  cursor: pointer;
+  color: #888;
+}
+.ep-close-icon:hover {
+  color: #000;
+}
+
+.ep-field {
+  margin-bottom: 15px;
+}
+.ep-label {
+  display: block;
+  font-weight: bold;
+  margin-bottom: 5px;
+}
+.ep-input {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+.ep-edit-container {
+  display: flex;
+  align-items: center;
+}
+.ep-edit-icon {
+  margin-left: 10px;
+  cursor: pointer;
+  color: #f48c06;
+}
+
+.ep-buttons {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 20px;
+}
+.ep-save {
+  background:  #f48c06;
+  color: white;
+  padding: 8px 16px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+.ep-logout {
+    background:#2f327d;
+    color: white;
+    display: flex;
+    align-items: center; /* Vertical alignment */
+    justify-content: center; /* Optional: center within the button */
+    gap: 5px; /* Use gap instead of margin-left for better spacing */
+    padding: 8px 12px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  .ep-eye-icon {
+    margin-left: 8px;
+    cursor: pointer;
+    font-size: 1rem;
+    color: #555;
+  }
+  
+
+.ep-logout:hover .icon-log {
+    animation: moveIcon 0.5s ease-in-out infinite alternate;
+  }
+  
+  @keyframes moveIcon {
+    0% {
+      transform: translateX(0);
+    }
+  
+    100% {
+      transform: translateX(5px);
+      /* Move icon slightly to the right */
+    }
+  }
+
+.ep-avatar-preview {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #ddd;
+  cursor: pointer;
+  transition: 0.3s;
+}
+.ep-avatar-preview:hover {
+  border-color: #f48c06;
+  box-shadow: 0 0 8px  #ce7502;
+}
+.ep-avatar-upload {
+    position: relative;
+    margin-bottom: 20px;
+    display: flex;
+    justify-content: center;
+  }
+  
+  .ep-avatar-label {
+    cursor: pointer;
+    display: inline-block;
+    position: relative;
+  }
+  
+  .ep-avatar-preview {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #ccc;
+    transition: 0.3s ease;
+  }
+  
+  .ep-avatar-edit-icon {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    background: #f48c06;
+    color: white;
+    padding: 4px;
+    border-radius: 50%;
+    font-size: 14px;
+    pointer-events: none;
+  }
+  
