@@ -843,21 +843,22 @@ const TemMainpage = () => {
       ...previewContent,
       {
        type: "icons",
-        iconsrc1:"https://ik.imagekit.io/w1dqqzgef/facebook.png?updatedAt=1748431529535",
+        iconsrc1:"https://res.cloudinary.com/diytyjnla/image/upload/v1748582430/facebook_crpxwo.png",
         style1: { width: "30px", height: "30px" },
         links1: "https://www.facebook.com",
 
-        iconsrc2:"https://ik.imagekit.io/w1dqqzgef/twitter.png?updatedAt=1748432069016",
+        iconsrc2:"https://res.cloudinary.com/diytyjnla/image/upload/v1748582461/twitter_g6czs3.png",
         style2: { width: "30px", height: "30px" },
         links2: "https://www.twitter.com",
 
-        iconsrc3:"https://ik.imagekit.io/w1dqqzgef/Instagram.png?updatedAt=1748432042135",
+        iconsrc3:"https://res.cloudinary.com/diytyjnla/image/upload/v1748582448/Instagram_fj4sqm.png",
         style3: { width: "30px", height: "30px" },
         links3: "https://www.instagram.com",
 
-        iconsrc4:"https://ik.imagekit.io/w1dqqzgef/youtube.png?updatedAt=1748432094671",
+        iconsrc4:"https://res.cloudinary.com/diytyjnla/image/upload/v1748582471/youtube_egb71v.png",
         style4: { width: "30px", height: "30px" },
         links4: "https://www.youtube.com",
+
         ContentStyle: {
           width: "100%",
           backgroundColor: "white",
@@ -4687,14 +4688,17 @@ const TemMainpage = () => {
                                                  className="card-text"
                                                  contentEditable
                                                  suppressContentEditableWarning
-                                                 onClick={() => setModalIndex(index)} // Open modal for this index
+                                                 onClick={() => {setModalIndex(index)
+                                                      setIsModalOpen(true);} // Open the modal
+                     
+                                                 } // Open modal for this index
                                                  style={item.style}
                                                  dangerouslySetInnerHTML={{
                                                    __html: item.content1,
                                                  }}
                                                />
                      
-                                               {modalIndex === index && ( // Open only for the selected index
+                                               {isModalOpen && modalIndex === index &&  ( // Open only for the selected index
                                                  <ParaEditor
                                                    isOpen={true}
                                                    content={item.content1}
@@ -4909,14 +4913,17 @@ const TemMainpage = () => {
                                                    className="text-item"
                                                    contentEditable
                                                    suppressContentEditableWarning
-                                                   onClick={() => setModalIndex(index)} // Open modal for this index
+                                                   onClick={() => {setModalIndex(index)
+                                                       setIsModalOpen(true); // Open the modal
+                                                   }
+                                                   } // Open modal for this index
                                                    style={item.style}
                                                    dangerouslySetInnerHTML={{
                                                      __html: item.content1,
                                                    }}
                                                  />
                                                </div>
-                                               {modalIndex === index && ( // Open only for the selected index
+                                               {isModalOpen && modalIndex === index && ( // Open only for the selected index
                                                  <ParaEditor
                                                    isOpen={true}
                                                    content={item.content1}
@@ -4952,7 +4959,10 @@ const TemMainpage = () => {
                                                    className="text-item"
                                                    contentEditable
                                                    suppressContentEditableWarning
-                                                   onClick={() => setModalIndex(index)} // Open modal for this index
+                                                   onClick={() => {setModalIndex(index)
+                                                     setIsModalOpen(true); // Open the modal
+                                                   }
+                                                   } // Open modal for this index
                                                    style={item.style}
                                                    dangerouslySetInnerHTML={{
                                                      __html: item.content2,
@@ -4968,7 +4978,7 @@ const TemMainpage = () => {
                                                    onClick={() => handleopenFiles(index, 2)}
                                                  />
                                                </div>
-                                               {modalIndex === index && ( // Open only for the selected index
+                                               {isModalOpen && modalIndex === index && ( // Open only for the selected index
                                                  <ParaEditor
                                                    isOpen={true}
                                                    content={item.content2}
@@ -5018,7 +5028,6 @@ const TemMainpage = () => {
                                                </a>
                                              </div>
                                            )}
-
                       <div className="del-edit-btn">
                         <button
                           className="delete-btn"
