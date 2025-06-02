@@ -94,8 +94,26 @@ const [showFolderModal, setShowFolderModal] = useState(false);
 const [newFolderName, setNewFolderName] = useState("");
 const [folderList, setFolderList] = useState([]);
 const [currentFolder, setCurrentFolder] = useState(null);
+  const [hoveredId, setHoveredId] = useState(null);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [folderToDelete, setFolderToDelete] = useState(null);
 
-
+  const handleDelete = async () => {
+    try {
+      const response = await axios.delete(`${apiConfig.baseURL}/api/stud/folder/${folderToDelete.name}`);
+      if (response.data.success) {
+        setFolderList(prev => prev.filter(f => f.name !== folderToDelete.name));
+        setModalVisible(false);
+        setFolderToDelete(null);
+        toast.success("Deleted Successfully");
+      } else {
+        toast.error("Failed to delete folder.");
+      }
+    } catch (err) {
+      console.error("Error deleting folder:", err);
+      toast.error("Error deleting folder.");
+    }
+  };
 
  const fetchFolders = async () => {
   try {
@@ -994,6 +1012,9 @@ useEffect(() => {
   const handleItemClick = (index) => {
     setSelectedIndex(index); // Set the selected index when an item is clicked
   };
+   const handleItemClickdesktop = (index) => {
+    setSelectedIndex(index); // Set the selected index when an item is clicked
+  };
 
   //delete
   const deleteContent = (index) => {
@@ -1384,7 +1405,7 @@ useEffect(() => {
   return (
     <div>
       <div className="mobile-content">
-       <div className={`desktop-nav ${(activeTablayout || isModalOpen)  ? 'hide-nav' : ''}`}>
+       <div className={`desktop-nav ${(activeTablayout)  ? 'hide-nav' : ''}`}>
           <nav className="navbar">
             <div>
               <h3 className="company-name">
@@ -1807,30 +1828,102 @@ useEffect(() => {
         <button onClick={() => setShowFolderModal(true)} style={{ padding: "8px 16px", background: "#28a745", color: "#fff", border: "none", borderRadius: "4px", cursor: "pointer" }}>+ Folder</button>
         {currentFolder && <button onClick={() => setCurrentFolder(null)} style={{ padding: "8px 16px", background: "#ffc107", color: "#000", border: "none", borderRadius: "4px", cursor: "pointer" }}>← Back</button>}
       </div>
-{/* Folders only visible at root level */}
-{!currentFolder && (
-  <div style={{ display: "flex", flexWrap: "wrap", gap: "12px", marginBottom: "15px" }}>
-    {folderList.map(folder => (
-      <div
-        key={folder._id}
-        style={{
-          cursor: "pointer",
-          color: "#007bff",
-          background: "#f1f1f1",
-          padding: "8px 12px",
-          borderRadius: "6px",
-          display: "flex",
-          alignItems: "center",
-          whiteSpace: "nowrap"
-        }}
-        onClick={() => setCurrentFolder(folder.name)}
-      >
-        📁 {folder.name}
-      </div>
-    ))}
-  </div>
-)}
+ {/* Folder display (only at root level) */}
+      {!currentFolder && (
+        <div style={{ display: "flex", flexWrap: "wrap", gap: "12px", marginBottom: "15px" }}>
+          {folderList.map(folder => (
+            <div
+              key={folder._id}
+              style={{
+                position: "relative",
+                cursor: "pointer",
+                color: "#007bff",
+                background: "#f1f1f1",
+                padding: "8px 12px",
+                borderRadius: "6px",
+                display: "flex",
+                alignItems: "center",
+                whiteSpace: "nowrap"
+              }}
+              onMouseEnter={() => setHoveredId(folder._id)}
+              onMouseLeave={() => setHoveredId(null)}
+            >
+              <span onClick={() => setCurrentFolder(folder.name)}>📁 {folder.name}</span>
 
+              {/* Delete icon on hover */}
+              {hoveredId === folder._id && (
+                 <span style={{color:'#f48c06',marginLeft:"5px",fontSize:"12px"}}
+                   onClick={(e) => {
+                    e.stopPropagation();
+                    setFolderToDelete(folder);
+                    setModalVisible(true);
+                  }}
+                 ><FaTrash/></span>  
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Confirmation Modal */}
+      {modalVisible && (
+        <div
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            width: "100%",
+            height: "100%",
+            background: "rgba(0,0,0,0.5)",
+            display: "flex",
+            alignItems: "center",
+            zIndex:"99999",
+            justifyContent: "center"
+          }}
+        >
+          <div
+            style={{
+              background: "#fff",
+              padding: "20px",
+              borderRadius: "10px",
+              width: "300px",
+              textAlign: "center"
+            }}
+          >
+            <p>
+              Are you sure you want to delete folder <strong>{folderToDelete?.name}</strong>?
+            </p>
+            <div style={{ marginTop: "15px" }}>
+              <button
+                style={{
+                  marginRight: "10px",
+                  padding: "6px 12px",
+                  backgroundColor: "#ccc",
+                  border: "none",
+                  borderRadius: "4px",
+                  cursor: "pointer"
+                }}
+                onClick={() => setModalVisible(false)}
+              >
+                Cancel
+              </button>
+              <button
+                style={{
+                  padding: "6px 12px",
+                  backgroundColor: "red",
+                  color: "white",
+                  border: "none",
+                  borderRadius: "4px",
+                  cursor: "pointer"
+                }}
+                onClick={handleDelete}
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
 {/* Folder title */}
 {currentFolder && (
@@ -1864,8 +1957,8 @@ useEffect(() => {
         <div style={{ background: "#fff", padding: "20px", borderRadius: "8px", width: "300px" }}>
           <h3>Create Folder</h3>
           <input type="text" value={newFolderName} onChange={e => setNewFolderName(e.target.value)} placeholder="Folder Name" style={{ width: "95%", padding: "8px", marginBottom: "10px" }} />
-          <button onClick={createFolder} style={{ padding: "8px 12px", background: "#28a745", color: "#fff", border: "none", borderRadius: "4px" }}>Save</button>
-          <button onClick={() => setShowFolderModal(false)} style={{ marginLeft: "10px", padding: "8px 12px", background: "#dc3545", color: "#fff", border: "none", borderRadius: "4px" }}>Cancel</button>
+          <button onClick={createFolder} style={{ padding: "8px 12px", background: "#2f327D", color: "#fff", border: "none", borderRadius: "4px" }}>Save</button>
+          <button onClick={() => setShowFolderModal(false)} style={{ marginLeft: "10px", padding: "8px 12px", background: "#f48c06", color: "#fff", border: "none", borderRadius: "4px" }}>Cancel</button>
         </div>
       </div>
     )}
@@ -4994,7 +5087,7 @@ useEffect(() => {
               >
                 {previewContent.map((item, index) => {
                   if (!item || !item.type) {
-                    return null; // Skip rendering undefined or malformed items
+                    return null; 
                   }
                   return (
                     <div
@@ -5015,8 +5108,8 @@ useEffect(() => {
                             suppressContentEditableWarning
                             onClick={() => {
                               setSelectedIndex(index);
-                              setSelectedContent(item.content); // Store the correct content
-                              setIsModalOpen(true); // Open the modal
+                              setSelectedContent(item.content); 
+                              setIsModalOpen(true); 
                             }}
                             style={item.style}
                             dangerouslySetInnerHTML={{ __html: item.content }}
@@ -5233,7 +5326,8 @@ useEffect(() => {
                             className="card-text"
                             contentEditable
                             suppressContentEditableWarning
-                            onClick={() => {setModalIndex(index)
+                            onClick={() => {
+                                 setModalIndex(index)
                                  setIsModalOpen(true);} // Open the modal
 
                             } // Open modal for this index
@@ -5243,7 +5337,7 @@ useEffect(() => {
                             }}
                           />
 
-                          {isModalOpen && modalIndex === index &&  ( // Open only for the selected index
+                          {isModalOpen && modalIndex === index &&  ( 
                             <ParaEditor
                               isOpen={true}
                               content={item.content1}
@@ -5579,7 +5673,13 @@ useEffect(() => {
                           className="delete-btn"
                           onClick={() => deleteContent(index)}
                         >
-                          <FiTrash2 />
+                          <FiTrash2/>
+                        </button>
+                         <button
+                          className="edit-desktop-btn"
+                          onClick={() => handleItemClickdesktop(index)}
+                        >
+                          <FiEdit/>
                         </button>
                         <button
                           className="edit-con-btn"
@@ -5597,7 +5697,6 @@ useEffect(() => {
 
           {/* Modal for preview Content */}
           {/* Right Preview */}
-
           {isPreviewOpen && (
             <div className="preview-modal-overlay-tem">
               <div className="preview-modal-content">

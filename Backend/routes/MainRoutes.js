@@ -2367,5 +2367,31 @@ router.delete("/images/:id", async (req, res) => {
   }
 });
 
+// DELETE /api/folder/:folderName
+router.delete('/folder/:folderName', async (req, res) => {
+  try {
+    const { folderName } = req.params;
+
+    // Delete all images with that folder name
+    const imageResult = await ImageUrl.deleteMany({ folderName });
+
+    // Delete the folder entry
+    const folderResult = await Folder.deleteOne({ name: folderName });
+
+    res.status(200).json({
+      success: true,
+      message: `Folder '${folderName}' and all its images were deleted.`,
+      deletedImages: imageResult.deletedCount,
+      deletedFolder: folderResult.deletedCount,
+    });
+  } catch (err) {
+    res.status(500).json({
+      success: false,
+      message: 'Server error',
+      error: err.message,
+    });
+  }
+});
+
 
 export default router;
