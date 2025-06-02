@@ -32,6 +32,7 @@ import apiConfig from "../apiconfig/apiConfig.js";
 import ColorPicker from "./ColorPicker.jsx";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
+import FileManagerModal from "./FilemanagerModal.jsx";
 
 const Readmainpage = () => {
   const [activeTab, setActiveTab] = useState("button1");
@@ -1914,8 +1915,9 @@ const [showFolderModal, setShowFolderModal] = useState(false);
                              </button>
                      
                                    {/* file manager modal */}
+  <FileManagerModal activeTablayout={activeTablayout}>
                      {activeTablayout && (
-  <div className="modal-overlay-file-editor" >
+         <div className="modal-overlay-file-editor" >
                          <div className="modal-content-file" style={{ width: "90%", maxWidth: "700px", background: "#fff", padding: "20px", borderRadius: "10px", position: "relative", maxHeight: "90vh", overflowY: "auto" }}>
                            <div className="modal-header-file" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "10px" }}>
                              <h2>File Manager</h2>
@@ -2066,7 +2068,7 @@ const [showFolderModal, setShowFolderModal] = useState(false);
                          )}
                        </div>
                      )}
-           
+           </FileManagerModal>
 
             {/* Styling Controls */}
             <>

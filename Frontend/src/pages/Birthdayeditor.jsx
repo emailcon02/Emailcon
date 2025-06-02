@@ -35,6 +35,7 @@ import { useNavigate } from "react-router-dom";
 import apiConfig from "../apiconfig/apiConfig.js";
 import ColorPicker from "./ColorPicker.jsx";
 import DatePicker from "react-datepicker";
+import FileManagerModal from "./FilemanagerModal.jsx";
 
 const Birthdayeditor = () => {
   const [activeTab, setActiveTab] = useState("button1");
@@ -1809,6 +1810,7 @@ const Birthdayeditor = () => {
             
                     
                                   {/* file manager modal */}
+                                    <FileManagerModal activeTablayout={activeTablayout}>                                 
                     {activeTablayout && (
   <div className="modal-overlay-file-editor" >
                         <div className="modal-content-file" style={{ width: "90%", maxWidth: "700px", background: "#fff", padding: "20px", borderRadius: "10px", position: "relative", maxHeight: "90vh", overflowY: "auto" }}>
@@ -1961,7 +1963,7 @@ const Birthdayeditor = () => {
                         )}
                       </div>
                     )}
-            
+        </FileManagerModal>    
 
             {/* Styling Controls */}
             <>
