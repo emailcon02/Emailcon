@@ -1915,7 +1915,7 @@ const [showFolderModal, setShowFolderModal] = useState(false);
                      
                                    {/* file manager modal */}
                      {activeTablayout && (
-                       <div className="modal-overlay-file-editor" style={{ position: "fixed", top: 0, left: 0, width: "100%", height: "100%", backgroundColor: "rgba(0,0,0,0.6)", display: "flex", justifyContent: "center", alignItems: "center", zIndex: 1000 }}>
+  <div className="modal-overlay-file-editor" >
                          <div className="modal-content-file" style={{ width: "90%", maxWidth: "700px", background: "#fff", padding: "20px", borderRadius: "10px", position: "relative", maxHeight: "90vh", overflowY: "auto" }}>
                            <div className="modal-header-file" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "10px" }}>
                              <h2>File Manager</h2>
