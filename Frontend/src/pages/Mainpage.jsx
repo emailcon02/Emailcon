@@ -90,16 +90,96 @@ const Mainpage = () => {
   const [galleryImages, setGalleryImages] = useState([]);
   const [selectedImageIndex, setSelectedImageIndex] = useState(null);
   const [selectedImageNumber, setSelectedImageNumber] = useState(null);
+const [showFolderModal, setShowFolderModal] = useState(false);
+const [newFolderName, setNewFolderName] = useState("");
+const [folderList, setFolderList] = useState([]);
+const [currentFolder, setCurrentFolder] = useState(null);
 
 
 
-  const fetchImages = async () => {
+ const fetchFolders = async () => {
   try {
     const res = await axios.get(
-      `${apiConfig.baseURL}/api/stud/images/${user.id}`
+      `${apiConfig.baseURL}/api/stud/folders/${user.id}`
     );
 
     // Sort by createdAt in descending order (latest first)
+    const sortedFolders = res.data.sort(
+      (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+    );
+
+  setFolderList(sortedFolders);
+  } catch (err) {
+    console.error("Error fetching folders", err);
+  }
+};
+
+const createFolder = async () => {
+  if (!newFolderName.trim()) return;
+  try {
+    const res = await axios.post(`${apiConfig.baseURL}/api/stud/create-folder`, {
+      userId: user.id,
+      folderName: newFolderName,
+    });
+
+    toast.success("Folder Created");
+    setNewFolderName("");
+    setShowFolderModal(false);
+
+    // Add newly created folder to the list without refetching
+    setFolderList(prev => [...prev, res.data.folder]);
+
+    // Optionally still call fetchFolders() to sync with DB
+setTimeout(() => {
+  fetchFolders();
+}, 100); // slight delay to ensure re-render
+  } catch (err) {
+    toast.error("Failed to create folder");
+  }
+};
+
+
+const uploadImagefile = async () => {
+  const input = document.createElement("input");
+  input.type = "file";
+  input.accept = "image/*";
+
+  input.onchange = async (e) => {
+    const file = e.target.files[0];
+    const formData = new FormData();
+    formData.append("image", file);
+
+    try {
+      const uploadRes = await axios.post(
+        `${apiConfig.baseURL}/api/stud/upload`,
+        formData,
+        { headers: { "Content-Type": "multipart/form-data" } }
+      );
+
+      const imageUrl = uploadRes.data.imageUrl;
+
+      await axios.post(`${apiConfig.baseURL}/api/stud/save-image`, {
+        userId: user.id,
+        imageUrl,
+        folderName: currentFolder // NULL for root
+      });
+
+      toast.success("Image uploaded");
+      fetchImages();
+    } catch (err) {
+      toast.error("Upload failed");
+    }
+  };
+  input.click();
+};
+
+const fetchImages = async () => {
+  try {
+    const res = await axios.get(
+      `${apiConfig.baseURL}/api/stud/images/${user.id}`,
+      { params: { folderName: currentFolder || '' } }
+    );
+
     const sortedImages = res.data.sort(
       (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
     );
@@ -109,48 +189,7 @@ const Mainpage = () => {
     console.error("Error fetching images", err);
   }
 };
- useEffect(() => {
-    fetchImages();
-  }, []);
 
-  const uploadImagefile = async () => {
-    const input = document.createElement("input");
-    input.type = "file";
-    input.accept = "image/*";
-
-    input.onchange = async (e) => {
-      const file = e.target.files[0];
-      const formData = new FormData();
-      formData.append("image", file);
-
-      try {
-        // Upload image to S3 or server
-        const uploadRes = await axios.post(
-          `${apiConfig.baseURL}/api/stud/upload`,
-          formData,
-          {
-            headers: { "Content-Type": "multipart/form-data" },
-          }
-        );
-
-        const imageUrl = uploadRes.data.imageUrl;
-
-        // Save URL to DB
-        await axios.post(`${apiConfig.baseURL}/api/stud/save-image`, {
-          userId: user.id, // Ensure user ID is passed correctly
-          imageUrl,
-        });
-
-        toast.success("Image uploaded");
-        fetchImages(); // Refresh gallery
-      } catch (err) {
-        toast.error("Upload failed");
-        console.error(err);
-      }
-    };
-
-    input.click();
-  };
 
   const deleteImage = async (id) => {
     try {
@@ -196,6 +235,14 @@ const Mainpage = () => {
       console.error(err);
     }
   };
+useEffect(() => {
+  fetchFolders();
+}, []); // Only once on mount
+
+useEffect(() => {
+  fetchImages();
+}, [currentFolder]); // Only images need folderName
+
 
   const VerticalSpacingIcon = () => (
     <div
@@ -1743,48 +1790,85 @@ const Mainpage = () => {
                     <FaFolderOpen /> File Manager
                   </button>
 
-            {/* file manager modal */}
-                {activeTablayout && (
-  <div className="modal-overlay-file-editor">
-    <div className="modal-content-file">
-      <div className="modal-header-file">
+              {/* file manager modal */}
+{activeTablayout && (
+  <div className="modal-overlay-file-editor" style={{ position: "fixed", top: 0, left: 0, width: "100%", height: "100%", backgroundColor: "rgba(0,0,0,0.6)", display: "flex", justifyContent: "center", alignItems: "center", zIndex: 1000 }}>
+    <div className="modal-content-file" style={{ width: "90%", maxWidth: "700px", background: "#fff", padding: "20px", borderRadius: "10px", position: "relative", maxHeight: "90vh", overflowY: "auto" }}>
+      <div className="modal-header-file" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "10px" }}>
         <h2>File Manager</h2>
-<button className="close-modal-file" onClick={() => setActiveTablayout(false)}>x</button>
+        <button onClick={() => {
+          setCurrentFolder(null);
+          setActiveTablayout(false);
+        }} style={{ background: "transparent", border: "none", fontSize: "20px", cursor: "pointer" }}>x</button>
       </div>
 
-      <button className="upload-button-file" onClick={uploadImagefile}>
-        + Upload
-      </button>
+      <div style={{ display: "flex", gap: "10px", marginBottom: "15px" }}>
+        <button onClick={uploadImagefile} style={{ padding: "8px 16px", background: "#007bff", color: "#fff", border: "none", borderRadius: "4px", cursor: "pointer" }}>+ Upload</button>
+        <button onClick={() => setShowFolderModal(true)} style={{ padding: "8px 16px", background: "#28a745", color: "#fff", border: "none", borderRadius: "4px", cursor: "pointer" }}>+ Folder</button>
+        {currentFolder && <button onClick={() => setCurrentFolder(null)} style={{ padding: "8px 16px", background: "#ffc107", color: "#000", border: "none", borderRadius: "4px", cursor: "pointer" }}>← Back</button>}
+      </div>
+{/* Folders only visible at root level */}
+{!currentFolder && (
+  <div style={{ display: "flex", flexWrap: "wrap", gap: "12px", marginBottom: "15px" }}>
+    {folderList.map(folder => (
+      <div
+        key={folder._id}
+        style={{
+          cursor: "pointer",
+          color: "#007bff",
+          background: "#f1f1f1",
+          padding: "8px 12px",
+          borderRadius: "6px",
+          display: "flex",
+          alignItems: "center",
+          whiteSpace: "nowrap"
+        }}
+        onClick={() => setCurrentFolder(folder.name)}
+      >
+        📁 {folder.name}
+      </div>
+    ))}
+  </div>
+)}
 
-      {/* Scrollable Gallery */}
-      <div className="gallery-scroll-container">
-        {galleryImages.length === 0 && (
-          <div className="no-images">No images found</div>
-        )}
-        {galleryImages.map((item) => (
-          <div key={item._id} className="gallery-item">
-            <img src={item.imageUrl} alt="Uploaded" />
-            <div className="gallery-actions">
-              <button
-                onClick={() =>
-                  uploadImage(
-                    selectedImageIndex,
-                    selectedImageNumber,
-                    item.imageUrl
-                  )
-                }
-              >
-                <FaCheckCircle />
-              </button>
 
-              <button onClick={() => deleteImage(item._id)}>
-                <FaTrash />
-              </button>
-            </div>
-          </div>
-        ))}
+{/* Folder title */}
+{currentFolder && (
+  <div style={{ marginBottom: "10px", fontWeight: "bold" }}>
+    Showing images in folder: {currentFolder}
+  </div>
+)}
+
+{/* Images */}
+<div className="gallery-scroll-container">
+  {galleryImages.length === 0 && (
+    <div className="no-images">No images found</div>
+  )}
+
+  {galleryImages.map(item => (
+    <div key={item._id} className="gallery-item">
+      <img src={item.imageUrl} alt="Uploaded" />
+      <div className="gallery-actions">
+        <button onClick={() => uploadImage(selectedImageIndex, selectedImageNumber, item.imageUrl)}><FaCheckCircle /></button>
+        <button onClick={() => deleteImage(item._id)}><FaTrash /></button>
       </div>
     </div>
+  ))}
+</div>
+
+    </div>
+
+    {/* Folder creation modal */}
+    {showFolderModal && (
+      <div style={{ position: "fixed", background: "rgba(0,0,0,0.7)", top: 0,zIndex:99999, left: 0, width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center" }}>
+        <div style={{ background: "#fff", padding: "20px", borderRadius: "8px", width: "300px" }}>
+          <h3>Create Folder</h3>
+          <input type="text" value={newFolderName} onChange={e => setNewFolderName(e.target.value)} placeholder="Folder Name" style={{ width: "95%", padding: "8px", marginBottom: "10px" }} />
+          <button onClick={createFolder} style={{ padding: "8px 12px", background: "#28a745", color: "#fff", border: "none", borderRadius: "4px" }}>Save</button>
+          <button onClick={() => setShowFolderModal(false)} style={{ marginLeft: "10px", padding: "8px 12px", background: "#dc3545", color: "#fff", border: "none", borderRadius: "4px" }}>Cancel</button>
+        </div>
+      </div>
+    )}
   </div>
 )}
 
@@ -1884,7 +1968,7 @@ const Mainpage = () => {
                                 Product-1
                                 </h4>
                                 {/* Title 1 */}
-                                <label>Product Title:</label>
+                                <label>Product Title :</label>
                                 <input
                                   type="text"
                                   placeholder="Enter product title"

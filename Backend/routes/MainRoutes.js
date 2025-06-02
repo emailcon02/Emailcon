@@ -19,6 +19,7 @@ import Aliasname from "../models/Aliasname.js";
 import Replyto from "../models/Replyto.js";
 import Adminuser from "../models/Adminuser.js";
 import ImageUrl from "../models/Imageurl.js";
+import Folder from "../models/Folder.js";
 const router = express.Router();
 
 // Upload image to s3 bucket
@@ -330,8 +331,8 @@ else if (item.type === 'multi-image-card') {
       <td style="width:50%;text-align:center;padding:8px; vertical-align:top;">
         <img src="${item.src1}" style="border-radius:10px;object-fit:contain;height:230px !important;width:100%;pointer-events:none !important; object-fit:cover;" alt="image"/>
         <h3 style="margin:10px 0;">${item.title1 || 'Name of the product'}</h3>
-        <p style="margin:5px 0;"><s>${item.originalPrice1 ? `$${item.originalPrice1}` : '$9000'}</s></p>
-        <p style="margin:5px 0;">${item.offerPrice1 ? `Off Price $${item.offerPrice1}` : 'Off Price $5999'}</p>
+        <p style="margin:5px 0;"><s>${item.originalPrice1 ? `₹${item.originalPrice1}` : '₹9000'}</s></p>
+        <p style="margin:5px 0;">${item.offerPrice1 ? `Off Price ₹${item.offerPrice1}` : 'Off Price ₹5999'}</p>
         <a class="img-btn"
           href="${generateTrackingLink(item.link1, userId, campaignId, emailData.recipient)}"
           target="_blank"
@@ -342,8 +343,8 @@ else if (item.type === 'multi-image-card') {
       <td style="width:50%;text-align:center;padding:8px; vertical-align:top;">
         <img src="${item.src2}" style="border-radius:10px;object-fit:contain;height:230px !important;width:100%;pointer-events:none !important; object-fit:cover;" alt="image"/>
         <h3 style="margin:10px 0;">${item.title2 || 'Name of the product'}</h3>
-        <p style="margin:5px 0;"><s>${item.originalPrice2 ? `$${item.originalPrice2}` : '$8000'}</s></p>
-        <p style="margin:5px 0;">${item.offerPrice2 ? `Off Price $${item.offerPrice2}` : 'Off Price $4999'}</p>
+        <p style="margin:5px 0;"><s>${item.originalPrice2 ? `₹${item.originalPrice2}` : '₹8000'}</s></p>
+        <p style="margin:5px 0;">${item.offerPrice2 ? `Off Price ₹${item.offerPrice2}` : 'Off Price ₹4999'}</p>
         <a class="img-btn"
           href="${generateTrackingLink(item.link2, userId, campaignId, emailData.recipient)}"
           target="_blank"
@@ -639,8 +640,8 @@ router.post('/sendexcelEmail', async (req, res) => {
       <td style="width:50%;text-align:center;padding:8px; vertical-align:top;">
         <img src="${item.src1}" style="border-radius:10px;object-fit:contain;height:230px !important;width:100%;pointer-events:none !important; object-fit:cover;" alt="image"/>
         <h3 style="margin:10px 0;">${item.title1 || 'Name of the product'}</h3>
-        <p style="margin:5px 0;"><s>${item.originalPrice1 ? `$${item.originalPrice1}` : '$9000'}</s></p>
-        <p style="margin:5px 0;">${item.offerPrice1 ? `Off Price $${item.offerPrice1}` : 'Off Price $5999'}</p>
+        <p style="margin:5px 0;"><s>${item.originalPrice1 ? `₹${item.originalPrice1}` : '₹9000'}</s></p>
+        <p style="margin:5px 0;">${item.offerPrice1 ? `Off Price ₹${item.offerPrice1}` : 'Off Price ₹5999'}</p>
         <a class="img-btn"
           href="${generateTrackingLink(item.link1, userId, campaignId, emailData.recipient)}"
           target="_blank"
@@ -651,8 +652,8 @@ router.post('/sendexcelEmail', async (req, res) => {
       <td style="width:50%;text-align:center;padding:8px; vertical-align:top;">
         <img src="${item.src2}" style="border-radius:10px;object-fit:contain;height:230px !important;width:100%;pointer-events:none !important; object-fit:cover;" alt="image"/>
         <h3 style="margin:10px 0;">${item.title2 || 'Name of the product'}</h3>
-        <p style="margin:5px 0;"><s>${item.originalPrice2 ? `$${item.originalPrice2}` : '$8000'}</s></p>
-        <p style="margin:5px 0;">${item.offerPrice2 ? `Off Price $${item.offerPrice2}` : 'Off Price $4999'}</p>
+        <p style="margin:5px 0;"><s>${item.originalPrice2 ? `₹${item.originalPrice2}` : '₹8000'}</s></p>
+        <p style="margin:5px 0;">${item.offerPrice2 ? `Off Price ₹${item.offerPrice2}` : 'Off Price ₹4999'}</p>
         <a class="img-btn"
           href="${generateTrackingLink(item.link2, userId, campaignId, emailData.recipient)}"
           target="_blank"
@@ -1079,8 +1080,8 @@ case 'break':
       <td style="width:50%;text-align:center;padding:8px; vertical-align:top;">
         <img src="${item.src1}" style="border-radius:10px;object-fit:contain;height:230px !important;width:100%;pointer-events:none !important; object-fit:cover;" alt="image"/>
         <h3 style="margin:10px 0;">${item.title1 || 'Name of the product'}</h3>
-        <p style="margin:5px 0;"><s>${item.originalPrice1 ? `$${item.originalPrice1}` : '$9000'}</s></p>
-        <p style="margin:5px 0;">${item.offerPrice1 ? `Off Price $${item.offerPrice1}` : 'Off Price $5999'}</p>
+        <p style="margin:5px 0;"><s>${item.originalPrice1 ? `₹${item.originalPrice1}` : '₹9000'}</s></p>
+        <p style="margin:5px 0;">${item.offerPrice1 ? `Off Price ₹${item.offerPrice1}` : 'Off Price ₹5999'}</p>
         <a class="img-btn"
           href="${generateTrackingLink(item.link1, userId, campaignId, emailData.recipient)}"
           target="_blank"
@@ -2286,34 +2287,73 @@ router.get("/validate", authMiddleware, async (req, res) => {
   res.send({ user });
 });
 
-// Save image URL
-router.post("/save-image", async (req, res) => {
-  const { userId, imageUrl } = req.body;
-
-  if (!userId || !imageUrl) {
-    return res.status(400).json({ error: "Missing userId or imageUrl" });
+// POST /api/stud/create-folder
+router.post('/create-folder', async (req, res) => {
+  const { userId, folderName } = req.body;
+  if (!userId || !folderName) {
+    return res.status(400).json({ error: 'Missing userId or folderName' });
   }
 
+  try {
+    const existingFolder = await Folder.findOne({ userId, name: folderName });
+    if (existingFolder) {
+      return res.status(400).json({ error: 'Folder already exists' });
+    }
+
+    const folder = new Folder({ user:userId, name: folderName });
+    await folder.save();
+    res.status(201).json({ message: 'Folder created', folder });
+  } catch (err) {
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// GET all folder based on user
+router.get("/folders/:userId", async (req, res) => {
+  try {
+    const folders = await Folder.find({ user: req.params.userId });
+    res.status(200).json(folders);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Failed to fetch folders" });
+  }
+});
+
+// POST /api/stud/save-image
+router.post('/save-image', async (req, res) => {
+  const { userId, imageUrl, folderName } = req.body;
+  if (!userId || !imageUrl) {
+    return res.status(400).json({ error: 'Missing userId or imageUrl' });
+  }
 
   try {
-    const saved = new ImageUrl({ user: userId, imageUrl });
-    await saved.save();
-    res.status(201).json({ message: "Image URL saved successfully", data: saved });
+    const image = new ImageUrl({user:userId, imageUrl, folderName });
+    await image.save();
+    res.status(201).json({ message: 'Image saved', image });
   } catch (err) {
-    console.error("Error saving image URL:", err);
-    res.status(500).json({ error: "Server error" });
+    res.status(500).json({ error: 'Server error' });
   }
 });
 
 
-// Fetch all images for a user
-router.get("/images/:userId", async (req, res) => {
+
+// GET /api/stud/images/:userId
+router.get('/images/:userId', async (req, res) => {
+  const { userId } = req.params;
+  const { folderName } = req.query;
+
   try {
-    const images = await ImageUrl.find({ user: req.params.userId });
+    const query = { user: userId }; // ✅ correct field is "user"
+
+    if (folderName) {
+      query.folderName = folderName; // ✅ filter by folder if provided
+    }
+
+    const images = await ImageUrl.find(query).sort({ createdAt: -1 });
     res.status(200).json(images);
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "Failed to fetch images" });
+    console.error("Error fetching images:", err);
+    res.status(500).json({ error: 'Server error' });
   }
 });
 
