@@ -4,7 +4,13 @@ import "./Mainpage.css";
 import { useLocation } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { FaBars, FaCheckCircle, FaFolderOpen, FaTimes, FaTrash } from "react-icons/fa";
+import {
+  FaBars,
+  FaCheckCircle,
+  FaFolderOpen,
+  FaTimes,
+  FaTrash,
+} from "react-icons/fa";
 import { FiEdit } from "react-icons/fi"; // Importing icons
 
 import {
@@ -99,177 +105,182 @@ const TemMainpage = () => {
   const [selectedImageIndex, setSelectedImageIndex] = useState(null);
   const [selectedImageNumber, setSelectedImageNumber] = useState(null);
 
- const [showFolderModal, setShowFolderModal] = useState(false);
-   const [newFolderName, setNewFolderName] = useState("");
-   const [folderList, setFolderList] = useState([]);
-   const [currentFolder, setCurrentFolder] = useState(null);
-     const [hoveredId, setHoveredId] = useState(null);
-     const [modalVisible, setModalVisible] = useState(false);
-     const [folderToDelete, setFolderToDelete] = useState(null);
-   
-     const handleDelete = async () => {
-       try {
-         const response = await axios.delete(`${apiConfig.baseURL}/api/stud/folder/${folderToDelete.name}`);
-         if (response.data.success) {
-           setFolderList(prev => prev.filter(f => f.name !== folderToDelete.name));
-           setModalVisible(false);
-           setFolderToDelete(null);
-           toast.success("Deleted Successfully");
-         } else {
-           toast.error("Failed to delete folder.");
-         }
-       } catch (err) {
-         console.error("Error deleting folder:", err);
-         toast.error("Error deleting folder.");
-       }
-     };
-   
-    const fetchFolders = async () => {
-     try {
-       const res = await axios.get(
-         `${apiConfig.baseURL}/api/stud/folders/${user.id}`
-       );
-   
-       // Sort by createdAt in descending order (latest first)
-       const sortedFolders = res.data.sort(
-         (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
-       );
-   
-     setFolderList(sortedFolders);
-     } catch (err) {
-       console.error("Error fetching folders", err);
-     }
-   };
-   
-   const createFolder = async () => {
-     if (!newFolderName.trim()) return;
-     try {
-       const res = await axios.post(`${apiConfig.baseURL}/api/stud/create-folder`, {
-         userId: user.id,
-         folderName: newFolderName,
-       });
-   
-       toast.success("Folder Created");
-       setNewFolderName("");
-       setShowFolderModal(false);
-   
-       // Add newly created folder to the list without refetching
-       setFolderList(prev => [...prev, res.data.folder]);
-   
-       // Optionally still call fetchFolders() to sync with DB
-   setTimeout(() => {
-     fetchFolders();
-   }, 100); // slight delay to ensure re-render
-     } catch (err) {
-       toast.error("Failed to create folder");
-     }
-   };
-   
-   
-   const uploadImagefile = async () => {
-     const input = document.createElement("input");
-     input.type = "file";
-     input.accept = "image/*";
-   
-     input.onchange = async (e) => {
-       const file = e.target.files[0];
-       const formData = new FormData();
-       formData.append("image", file);
-   
-       try {
-         const uploadRes = await axios.post(
-           `${apiConfig.baseURL}/api/stud/upload`,
-           formData,
-           { headers: { "Content-Type": "multipart/form-data" } }
-         );
-   
-         const imageUrl = uploadRes.data.imageUrl;
-   
-         await axios.post(`${apiConfig.baseURL}/api/stud/save-image`, {
-           userId: user.id,
-           imageUrl,
-           folderName: currentFolder // NULL for root
-         });
-   
-         toast.success("Image uploaded");
-         fetchImages();
-       } catch (err) {
-         toast.error("Upload failed");
-       }
-     };
-     input.click();
-   };
-   
-   const fetchImages = async () => {
-     try {
-       const res = await axios.get(
-         `${apiConfig.baseURL}/api/stud/images/${user.id}`,
-         { params: { folderName: currentFolder || '' } }
-       );
-   
-       const sortedImages = res.data.sort(
-         (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
-       );
-   
-       setGalleryImages(sortedImages);
-     } catch (err) {
-       console.error("Error fetching images", err);
-     }
-   };
-   
-   
-     const deleteImage = async (id) => {
-       try {
-         // Find image in previewContent by id
-         const imageToDelete = galleryImages.find((img) => img._id === id);
-         if (!imageToDelete || !imageToDelete.imageUrl) {
-           toast.error("Image not found");
-           return;
-         }
-   
-         // Extract the S3 key from the URL
-         const s3Key = decodeURIComponent(
-           imageToDelete.imageUrl.split(".amazonaws.com/")[1]
-         );
-         if (!s3Key) {
-           toast.error("Invalid image URL");
-           return;
-         }
-   
-         // Step 1: Delete file from S3 using backend API
-         const s3DeleteResponse = await fetch(
-           `${apiConfig.baseURL}/api/stud/file?key=${encodeURIComponent(s3Key)}`,
-           { method: "DELETE" }
-         );
-   
-         if (!s3DeleteResponse.ok) {
-           const err = await s3DeleteResponse.json();
-           throw new Error(err?.error || "Error deleting file from S3");
-         }
-   
-         // Step 2: Delete DB record by id
-         const dbDeleteResponse = await axios.delete(
-           `${apiConfig.baseURL}/api/stud/images/${id}`
-         );
-         if (dbDeleteResponse.status !== 200) {
-           throw new Error("Failed to delete image record from DB");
-         }
-   
-         toast.success("Image deleted successfully");
-         fetchImages(); // Refresh gallery
-       } catch (err) {
-         toast.error("Delete failed");
-         console.error(err);
-       }
-     };
-   useEffect(() => {
-     fetchFolders();
-   }, []); 
-   
-   useEffect(() => {
-     fetchImages();
-   }, [currentFolder]); 
-   
+  const [showFolderModal, setShowFolderModal] = useState(false);
+  const [newFolderName, setNewFolderName] = useState("");
+  const [folderList, setFolderList] = useState([]);
+  const [currentFolder, setCurrentFolder] = useState(null);
+  const [hoveredId, setHoveredId] = useState(null);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [folderToDelete, setFolderToDelete] = useState(null);
+
+  const handleDelete = async () => {
+    try {
+      const response = await axios.delete(
+        `${apiConfig.baseURL}/api/stud/folder/${folderToDelete.name}`
+      );
+      if (response.data.success) {
+        setFolderList((prev) =>
+          prev.filter((f) => f.name !== folderToDelete.name)
+        );
+        setModalVisible(false);
+        setFolderToDelete(null);
+        toast.success("Deleted Successfully");
+      } else {
+        toast.error("Failed to delete folder.");
+      }
+    } catch (err) {
+      console.error("Error deleting folder:", err);
+      toast.error("Error deleting folder.");
+    }
+  };
+
+  const fetchFolders = async () => {
+    try {
+      const res = await axios.get(
+        `${apiConfig.baseURL}/api/stud/folders/${user.id}`
+      );
+
+      // Sort by createdAt in descending order (latest first)
+      const sortedFolders = res.data.sort(
+        (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+      );
+
+      setFolderList(sortedFolders);
+    } catch (err) {
+      console.error("Error fetching folders", err);
+    }
+  };
+
+  const createFolder = async () => {
+    if (!newFolderName.trim()) return;
+    try {
+      const res = await axios.post(
+        `${apiConfig.baseURL}/api/stud/create-folder`,
+        {
+          userId: user.id,
+          folderName: newFolderName,
+        }
+      );
+
+      toast.success("Folder Created");
+      setNewFolderName("");
+      setShowFolderModal(false);
+
+      // Add newly created folder to the list without refetching
+      setFolderList((prev) => [...prev, res.data.folder]);
+
+      // Optionally still call fetchFolders() to sync with DB
+      setTimeout(() => {
+        fetchFolders();
+      }, 100); // slight delay to ensure re-render
+    } catch (err) {
+      toast.error("Failed to create folder");
+    }
+  };
+
+  const uploadImagefile = async () => {
+    const input = document.createElement("input");
+    input.type = "file";
+    input.accept = "image/*";
+
+    input.onchange = async (e) => {
+      const file = e.target.files[0];
+      const formData = new FormData();
+      formData.append("image", file);
+
+      try {
+        const uploadRes = await axios.post(
+          `${apiConfig.baseURL}/api/stud/upload`,
+          formData,
+          { headers: { "Content-Type": "multipart/form-data" } }
+        );
+
+        const imageUrl = uploadRes.data.imageUrl;
+
+        await axios.post(`${apiConfig.baseURL}/api/stud/save-image`, {
+          userId: user.id,
+          imageUrl,
+          folderName: currentFolder, // NULL for root
+        });
+
+        toast.success("Image uploaded");
+        fetchImages();
+      } catch (err) {
+        toast.error("Upload failed");
+      }
+    };
+    input.click();
+  };
+
+  const fetchImages = async () => {
+    try {
+      const res = await axios.get(
+        `${apiConfig.baseURL}/api/stud/images/${user.id}`,
+        { params: { folderName: currentFolder || "" } }
+      );
+
+      const sortedImages = res.data.sort(
+        (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+      );
+
+      setGalleryImages(sortedImages);
+    } catch (err) {
+      console.error("Error fetching images", err);
+    }
+  };
+
+  const deleteImage = async (id) => {
+    try {
+      // Find image in previewContent by id
+      const imageToDelete = galleryImages.find((img) => img._id === id);
+      if (!imageToDelete || !imageToDelete.imageUrl) {
+        toast.error("Image not found");
+        return;
+      }
+
+      // Extract the S3 key from the URL
+      const s3Key = decodeURIComponent(
+        imageToDelete.imageUrl.split(".amazonaws.com/")[1]
+      );
+      if (!s3Key) {
+        toast.error("Invalid image URL");
+        return;
+      }
+
+      // Step 1: Delete file from S3 using backend API
+      const s3DeleteResponse = await fetch(
+        `${apiConfig.baseURL}/api/stud/file?key=${encodeURIComponent(s3Key)}`,
+        { method: "DELETE" }
+      );
+
+      if (!s3DeleteResponse.ok) {
+        const err = await s3DeleteResponse.json();
+        throw new Error(err?.error || "Error deleting file from S3");
+      }
+
+      // Step 2: Delete DB record by id
+      const dbDeleteResponse = await axios.delete(
+        `${apiConfig.baseURL}/api/stud/images/${id}`
+      );
+      if (dbDeleteResponse.status !== 200) {
+        throw new Error("Failed to delete image record from DB");
+      }
+
+      toast.success("Image deleted successfully");
+      fetchImages(); // Refresh gallery
+    } catch (err) {
+      toast.error("Delete failed");
+      console.error(err);
+    }
+  };
+  useEffect(() => {
+    fetchFolders();
+  }, []);
+
+  useEffect(() => {
+    fetchImages();
+  }, [currentFolder]);
+
   const VerticalSpacingIcon = () => (
     <div
       style={{
@@ -675,9 +686,9 @@ const TemMainpage = () => {
       ...previewContent,
       {
         type: "banner",
-          src:"https://reviverestore.org/wp-content/uploads/2017/05/placeholder-image-cropped-768x432.jpg",
-          url:"https://reviverestore.org/wp-content/uploads/2017/05/placeholder-image-cropped-768x432.jpg",
-          style: {
+        src: "https://reviverestore.org/wp-content/uploads/2017/05/placeholder-image-cropped-768x432.jpg",
+        url: "https://reviverestore.org/wp-content/uploads/2017/05/placeholder-image-cropped-768x432.jpg",
+        style: {
           width: "100%",
           height: "auto",
           borderRadius: "10px",
@@ -828,7 +839,7 @@ const TemMainpage = () => {
             : item
         )
       );
-      setActiveTablayout(false); 
+      setActiveTablayout(false);
     } catch (err) {
       toast.error("Image upload failed");
     }
@@ -913,20 +924,24 @@ const TemMainpage = () => {
     setPreviewContent([
       ...previewContent,
       {
-       type: "icons",
-        iconsrc1:"https://res.cloudinary.com/diytyjnla/image/upload/v1748582430/facebook_crpxwo.png",
+        type: "icons",
+        iconsrc1:
+          "https://res.cloudinary.com/diytyjnla/image/upload/v1748582430/facebook_crpxwo.png",
         style1: { width: "30px", height: "30px" },
         links1: "https://www.facebook.com",
 
-        iconsrc2:"https://res.cloudinary.com/diytyjnla/image/upload/v1748582461/twitter_g6czs3.png",
+        iconsrc2:
+          "https://res.cloudinary.com/diytyjnla/image/upload/v1748582461/twitter_g6czs3.png",
         style2: { width: "30px", height: "30px" },
         links2: "https://www.twitter.com",
 
-        iconsrc3:"https://res.cloudinary.com/diytyjnla/image/upload/v1748582448/Instagram_fj4sqm.png",
+        iconsrc3:
+          "https://res.cloudinary.com/diytyjnla/image/upload/v1748582448/Instagram_fj4sqm.png",
         style3: { width: "30px", height: "30px" },
         links3: "https://www.instagram.com",
 
-        iconsrc4:"https://res.cloudinary.com/diytyjnla/image/upload/v1748582471/youtube_egb71v.png",
+        iconsrc4:
+          "https://res.cloudinary.com/diytyjnla/image/upload/v1748582471/youtube_egb71v.png",
         style4: { width: "30px", height: "30px" },
         links4: "https://www.youtube.com",
 
@@ -1406,7 +1421,7 @@ const TemMainpage = () => {
   return (
     <div>
       <div className="mobile-content">
-       <div className={`desktop-nav ${activeTablayout ? 'hide-nav' : ''}`}>
+        <div className={`desktop-nav ${activeTablayout ? "hide-nav" : ""}`}>
           <nav className="navbar">
             <div>
               <h3 className="company-name">
@@ -1632,378 +1647,1356 @@ const TemMainpage = () => {
         <div className="app-container">
           {/* Left Editor */}
           <div className="editor item-2">
-             <div className="tabs">
-                         <button className="tab">
-                           Components
-                         </button>
-                       </div>
-           
-                       {/* Tab Content */}
-                       <div className="edit-btn">
-                           <div className="content-tab">
-                             <button
-                               onClick={addLogo}
-                               className="editor-button"
-                               draggable
-                               onDragStart={(e) => handleDragStart("logo")}
-                             >
-                               <MdAddPhotoAlternate /> Logo
-                             </button>
-                             <button
-                               onClick={addBanner}
-                               className="editor-button"
-                               draggable
-                               onDragStart={(e) => handleDragStart("banner")}
-                             >
-                               <FaImage />
-                               Banner
-                             </button>
-                             <button
-                               onClick={addHeading}
-                               className="editor-button"
-                               draggable
-                               onDragStart={(e) => handleDragStart("head")}
-                             >
-                               <FaHeading /> Heading
-                             </button>
-                             <button
-                               onClick={addText}
-                               className="editor-button"
-                               draggable
-                               onDragStart={(e) => handleDragStart("para")}
-                             >
-                               <FaParagraph /> Paragraph
-                             </button>
-                             <button
-                               onClick={addImage}
-                               className="editor-button"
-                               draggable
-                               onDragStart={(e) => handleDragStart("image")}
-                             >
-                               <FaImage /> Image
-                             </button>
-                             <button
-                               onClick={addlinkImage}
-                               className="editor-button"
-                               draggable
-                               onDragStart={(e) => handleDragStart("link-image")}
-                             >
-                               <FaImage />
-                               Clickable Image
-                             </button>
-                             <button
-                               onClick={addMultiImage}
-                               className="editor-button"
-                               draggable
-                               onDragStart={(e) => handleDragStart("multi-image")}
-                             >
-                               <FaImage /> Multi-Image-Button
-                             </button>
-                             <button
-                               onClick={addMultiImagecard}
-                               className="editor-button"
-                               draggable
-                               onDragStart={(e) => handleDragStart("multi-image-card")}
-                             >
-                               <FaImage /> Multi-Image-card
-                             </button>
-                             <button
-                               onClick={addMultipleImage}
-                               className="editor-button"
-                               draggable
-                               onDragStart={(e) => handleDragStart("multipleimage")}
-                             >
-                               <FaImage /> Multi-Image
-                             </button>
-                             <button
-                               onClick={addCardImage}
-                               className="editor-button"
-                               draggable
-                               onDragStart={(e) => handleDragStart("cardimage")}
-                             >
-                               <FaIdCard /> Image-Card
-                             </button>
-           
-                             <button
-                               onClick={addTextImage}
-                               className="editor-button"
-                               draggable
-                               onDragStart={(e) => handleDragStart("textwithimage")}
-                             >
-                               <FaFileImage /> Text-Image
-                             </button>
-                             <button
-                               onClick={addImageText}
-                               className="editor-button"
-                               draggable
-                               onDragStart={(e) => handleDragStart("imagewithtext")}
-                             >
-                               <FaFileImage /> Image-Text
-                             </button>
-           
-                             <button
-                               onClick={addVideo}
-                               className="editor-button"
-                               draggable
-                               onDragStart={(e) => handleDragStart("video-icon")}
-                             >
-                               <FaVideo />
-                               Video
-                             </button>
-                             <button
-                               onClick={addSocialMedia}
-                               className="editor-button"
-                               draggable
-                               onDragStart={(e) => handleDragStart("icons")}
-                             >
-                               <FaGlobe />
-                               Social Icons
-                             </button>
-                             <button
-                               onClick={addBreak}
-                               className="editor-button"
-                               draggable
-                               onDragStart={(e) => handleDragStart("break")}
-                             >
-                               <svg
-                                 className="horizontal-line-icon"
-                                 width="24"
-                                 height="2"
-                                 viewBox="0 0 24 2"
-                                 xmlns="http://www.w3.org/2000/svg"
-                               >
-                                 <rect width="24" height="4" fill="#555" />
-                               </svg>
-                               Line Break
-                             </button>
-                             <button
-                               onClick={addGap}
-                               className="editor-button"
-                               draggable
-                               onDragStart={(e) => handleDragStart("gap")}
-                             >
-                               <VerticalSpacingIcon />
-                               Gap
-                             </button>
-                             <button
-                               onClick={addButton}
-                               className="editor-button"
-                               draggable
-                               onDragStart={(e) => handleDragStart("button")}
-                             >
-                               <FaPlusSquare /> Button
-                             </button>
-                             <button className="editor-button">
-                               <input
-                                 type="color"
-                                 value={bgColor}
-                                 onChange={(e) => setBgColor(e.target.value)}
-                                 className="bg-color-pic"
-                               />
-                               Template-Bg
-                             </button>
-                           </div>
-                       </div>
-                       <button
-                                           onClick={()=>setActiveTablayout(true)}
-                                           className="file-manager-btn"
-                                         >
-                                           <FaFolderOpen /> File Manager
-                          </button>
-           
-                     
-                                   {/* file manager modal */}
-                            <FileManagerModal activeTablayout={activeTablayout}>                                  
-                     {activeTablayout && (
-  <div className="modal-overlay-file-editor" >
-                         <div className="modal-content-file" style={{ width: "90%", maxWidth: "700px", background: "#fff", padding: "20px", borderRadius: "10px", position: "relative", maxHeight: "90vh", overflowY: "auto" }}>
-                           <div className="modal-header-file" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "10px" }}>
-                             <h2>File Manager</h2>
-                             <button onClick={() => {
-                               setCurrentFolder(null);
-                               setActiveTablayout(false);
-                             }} style={{ background: "transparent", border: "none", fontSize: "20px", cursor: "pointer" }}>x</button>
-                           </div>
-                     
-                           <div style={{ display: "flex", gap: "10px", marginBottom: "15px" }}>
-                             <button onClick={uploadImagefile} style={{ padding: "8px 16px", background: "#007bff", color: "#fff", border: "none", borderRadius: "4px", cursor: "pointer" }}>+ Upload</button>
-                             <button onClick={() => setShowFolderModal(true)} style={{ padding: "8px 16px", background: "#28a745", color: "#fff", border: "none", borderRadius: "4px", cursor: "pointer" }}>+ Folder</button>
-                             {currentFolder && <button onClick={() => setCurrentFolder(null)} style={{ padding: "8px 16px", background: "#ffc107", color: "#000", border: "none", borderRadius: "4px", cursor: "pointer" }}>← Back</button>}
-                           </div>
-                      {/* Folder display (only at root level) */}
-                           {!currentFolder && (
-                             <div style={{ display: "flex", flexWrap: "wrap", gap: "12px", marginBottom: "15px" }}>
-                               {folderList.map(folder => (
-                                 <div
-                                   key={folder._id}
-                                   style={{
-                                     position: "relative",
-                                     cursor: "pointer",
-                                     color: "#007bff",
-                                     background: "#f1f1f1",
-                                     padding: "8px 12px",
-                                     borderRadius: "6px",
-                                     display: "flex",
-                                     alignItems: "center",
-                                     whiteSpace: "nowrap"
-                                   }}
-                                   onMouseEnter={() => setHoveredId(folder._id)}
-                                   onMouseLeave={() => setHoveredId(null)}
-                                 >
-                                   <span onClick={() => setCurrentFolder(folder.name)}>📁 {folder.name}</span>
-                     
-                                   {/* Delete icon on hover */}
-                                   {hoveredId === folder._id && (
-                                      <span style={{color:'#f48c06',marginLeft:"5px",fontSize:"12px"}}
-                                        onClick={(e) => {
-                                         e.stopPropagation();
-                                         setFolderToDelete(folder);
-                                         setModalVisible(true);
-                                       }}
-                                      ><FaTrash/></span>  
-                                   )}
-                                 </div>
-                               ))}
-                             </div>
-                           )}
-                     
-                           {/* Confirmation Modal */}
-                           {modalVisible && (
-                             <div
-                               style={{
-                                 position: "fixed",
-                                 top: 0,
-                                 left: 0,
-                                 width: "100%",
-                                 height: "100%",
-                                 background: "rgba(0,0,0,0.5)",
-                                 display: "flex",
-                                 alignItems: "center",
-                                 zIndex:"99999",
-                                 justifyContent: "center"
-                               }}
-                             >
-                               <div
-                                 style={{
-                                   background: "#fff",
-                                   padding: "20px",
-                                   borderRadius: "10px",
-                                   width: "300px",
-                                   textAlign: "center"
-                                 }}
-                               >
-                                 <p>
-                                   Are you sure you want to delete folder <strong>{folderToDelete?.name}</strong>?
-                                 </p>
-                                 <div style={{ marginTop: "15px" }}>
-                                   <button
-                                     style={{
-                                       marginRight: "10px",
-                                       padding: "6px 12px",
-                                       backgroundColor: "#ccc",
-                                       border: "none",
-                                       borderRadius: "4px",
-                                       cursor: "pointer"
-                                     }}
-                                     onClick={() => setModalVisible(false)}
-                                   >
-                                     Cancel
-                                   </button>
-                                   <button
-                                     style={{
-                                       padding: "6px 12px",
-                                       backgroundColor: "red",
-                                       color: "white",
-                                       border: "none",
-                                       borderRadius: "4px",
-                                       cursor: "pointer"
-                                     }}
-                                     onClick={handleDelete}
-                                   >
-                                     Delete
-                                   </button>
-                                 </div>
-                               </div>
-                             </div>
-                           )}
-                     
-                     {/* Folder title */}
-                     {currentFolder && (
-                       <div style={{ marginBottom: "10px", fontWeight: "bold" }}>
-                         Showing images in folder: {currentFolder}
-                       </div>
-                     )}
-                     
-                     {/* Images */}
-                     <div className="gallery-scroll-container">
-                       {galleryImages.length === 0 && (
-                         <div className="no-images">No images found</div>
-                       )}
-                     
-                       {galleryImages.map(item => (
-                         <div key={item._id} className="gallery-item">
-                           <img src={item.imageUrl} alt="Uploaded" />
-                           <div className="gallery-actions">
-                             <button onClick={() => uploadImage(selectedImageIndex, selectedImageNumber, item.imageUrl)}><FaCheckCircle /></button>
-                             <button onClick={() => deleteImage(item._id)}><FaTrash /></button>
-                           </div>
-                         </div>
-                       ))}
-                     </div>
-                     
-                         </div>
-                     
-                         {/* Folder creation modal */}
-                         {showFolderModal && (
-                           <div style={{ position: "fixed", background: "rgba(0,0,0,0.7)", top: 0,zIndex:99999, left: 0, width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                             <div style={{ background: "#fff", padding: "20px", borderRadius: "8px", width: "300px" }}>
-                               <h3>Create Folder</h3>
-                               <input type="text" value={newFolderName} onChange={e => setNewFolderName(e.target.value)} placeholder="Folder Name" style={{ width: "95%", padding: "8px", marginBottom: "10px" }} />
-                               <button onClick={createFolder} style={{ padding: "8px 12px", background: "#2f327D", color: "#fff", border: "none", borderRadius: "4px" }}>Save</button>
-                               <button onClick={() => setShowFolderModal(false)} style={{ marginLeft: "10px", padding: "8px 12px", background: "#f48c06", color: "#fff", border: "none", borderRadius: "4px" }}>Cancel</button>
-                             </div>
-                           </div>
-                         )}
-                       </div>
-                     )}
-              </FileManagerModal>
-           
+            <div className="tabs">
+              <button className="tab">Components</button>
+            </div>
+
+            {/* Tab Content */}
+            <div className="edit-btn">
+              <div className="content-tab">
+                <button
+                  onClick={addLogo}
+                  className="editor-button"
+                  draggable
+                  onDragStart={(e) => handleDragStart("logo")}
+                >
+                  <MdAddPhotoAlternate /> Logo
+                </button>
+                <button
+                  onClick={addBanner}
+                  className="editor-button"
+                  draggable
+                  onDragStart={(e) => handleDragStart("banner")}
+                >
+                  <FaImage />
+                  Banner
+                </button>
+                <button
+                  onClick={addHeading}
+                  className="editor-button"
+                  draggable
+                  onDragStart={(e) => handleDragStart("head")}
+                >
+                  <FaHeading /> Heading
+                </button>
+                <button
+                  onClick={addText}
+                  className="editor-button"
+                  draggable
+                  onDragStart={(e) => handleDragStart("para")}
+                >
+                  <FaParagraph /> Paragraph
+                </button>
+                <button
+                  onClick={addImage}
+                  className="editor-button"
+                  draggable
+                  onDragStart={(e) => handleDragStart("image")}
+                >
+                  <FaImage /> Image
+                </button>
+                <button
+                  onClick={addlinkImage}
+                  className="editor-button"
+                  draggable
+                  onDragStart={(e) => handleDragStart("link-image")}
+                >
+                  <FaImage />
+                  Clickable Image
+                </button>
+                <button
+                  onClick={addMultiImage}
+                  className="editor-button"
+                  draggable
+                  onDragStart={(e) => handleDragStart("multi-image")}
+                >
+                  <FaImage /> Multi-Image-Button
+                </button>
+                <button
+                  onClick={addMultiImagecard}
+                  className="editor-button"
+                  draggable
+                  onDragStart={(e) => handleDragStart("multi-image-card")}
+                >
+                  <FaImage /> Multi-Image-card
+                </button>
+                <button
+                  onClick={addMultipleImage}
+                  className="editor-button"
+                  draggable
+                  onDragStart={(e) => handleDragStart("multipleimage")}
+                >
+                  <FaImage /> Multi-Image
+                </button>
+                <button
+                  onClick={addCardImage}
+                  className="editor-button"
+                  draggable
+                  onDragStart={(e) => handleDragStart("cardimage")}
+                >
+                  <FaIdCard /> Image-Card
+                </button>
+
+                <button
+                  onClick={addTextImage}
+                  className="editor-button"
+                  draggable
+                  onDragStart={(e) => handleDragStart("textwithimage")}
+                >
+                  <FaFileImage /> Text-Image
+                </button>
+                <button
+                  onClick={addImageText}
+                  className="editor-button"
+                  draggable
+                  onDragStart={(e) => handleDragStart("imagewithtext")}
+                >
+                  <FaFileImage /> Image-Text
+                </button>
+
+                <button
+                  onClick={addVideo}
+                  className="editor-button"
+                  draggable
+                  onDragStart={(e) => handleDragStart("video-icon")}
+                >
+                  <FaVideo />
+                  Video
+                </button>
+                <button
+                  onClick={addSocialMedia}
+                  className="editor-button"
+                  draggable
+                  onDragStart={(e) => handleDragStart("icons")}
+                >
+                  <FaGlobe />
+                  Social Icons
+                </button>
+                <button
+                  onClick={addBreak}
+                  className="editor-button"
+                  draggable
+                  onDragStart={(e) => handleDragStart("break")}
+                >
+                  <svg
+                    className="horizontal-line-icon"
+                    width="24"
+                    height="2"
+                    viewBox="0 0 24 2"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <rect width="24" height="4" fill="#555" />
+                  </svg>
+                  Line Break
+                </button>
+                <button
+                  onClick={addGap}
+                  className="editor-button"
+                  draggable
+                  onDragStart={(e) => handleDragStart("gap")}
+                >
+                  <VerticalSpacingIcon />
+                  Gap
+                </button>
+                <button
+                  onClick={addButton}
+                  className="editor-button"
+                  draggable
+                  onDragStart={(e) => handleDragStart("button")}
+                >
+                  <FaPlusSquare /> Button
+                </button>
+                <button className="editor-button">
+                  <input
+                    type="color"
+                    value={bgColor}
+                    onChange={(e) => setBgColor(e.target.value)}
+                    className="bg-color-pic"
+                  />
+                  Template-Bg
+                </button>
+              </div>
+            </div>
+            <button
+              onClick={() => setActiveTablayout(true)}
+              className="file-manager-btn"
+            >
+              <FaFolderOpen /> File Manager
+            </button>
+
+            {/* file manager modal */}
+            <FileManagerModal activeTablayout={activeTablayout}>
+              {activeTablayout && (
+                <div className="modal-overlay-file-editor">
+                  <div
+                    className="modal-content-file"
+                    style={{
+                      width: "90%",
+                      maxWidth: "700px",
+                      background: "#fff",
+                      padding: "20px",
+                      borderRadius: "10px",
+                      position: "relative",
+                      maxHeight: "90vh",
+                      overflowY: "auto",
+                    }}
+                  >
+                    <div
+                      className="modal-header-file"
+                      style={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                        marginBottom: "10px",
+                      }}
+                    >
+                      <h2>File Manager</h2>
+                      <button
+                        onClick={() => {
+                          setCurrentFolder(null);
+                          setActiveTablayout(false);
+                        }}
+                        style={{
+                          background: "transparent",
+                          border: "none",
+                          fontSize: "20px",
+                          cursor: "pointer",
+                        }}
+                      >
+                        x
+                      </button>
+                    </div>
+
+                    <div
+                      style={{
+                        display: "flex",
+                        gap: "10px",
+                        marginBottom: "15px",
+                      }}
+                    >
+                      <button
+                        onClick={uploadImagefile}
+                        style={{
+                          padding: "8px 16px",
+                          background: "#007bff",
+                          color: "#fff",
+                          border: "none",
+                          borderRadius: "4px",
+                          cursor: "pointer",
+                        }}
+                      >
+                        + Upload
+                      </button>
+                      <button
+                        onClick={() => setShowFolderModal(true)}
+                        style={{
+                          padding: "8px 16px",
+                          background: "#28a745",
+                          color: "#fff",
+                          border: "none",
+                          borderRadius: "4px",
+                          cursor: "pointer",
+                        }}
+                      >
+                        + Folder
+                      </button>
+                      {currentFolder && (
+                        <button
+                          onClick={() => setCurrentFolder(null)}
+                          style={{
+                            padding: "8px 16px",
+                            background: "#ffc107",
+                            color: "#000",
+                            border: "none",
+                            borderRadius: "4px",
+                            cursor: "pointer",
+                          }}
+                        >
+                          ← Back
+                        </button>
+                      )}
+                    </div>
+                    {/* Folder display (only at root level) */}
+                    {!currentFolder && (
+                      <div
+                        style={{
+                          display: "flex",
+                          flexWrap: "wrap",
+                          gap: "12px",
+                          marginBottom: "15px",
+                        }}
+                      >
+                        {folderList.map((folder) => (
+                          <div
+                            key={folder._id}
+                            style={{
+                              position: "relative",
+                              cursor: "pointer",
+                              color: "#007bff",
+                              background: "#f1f1f1",
+                              padding: "8px 12px",
+                              borderRadius: "6px",
+                              display: "flex",
+                              alignItems: "center",
+                              whiteSpace: "nowrap",
+                            }}
+                            onMouseEnter={() => setHoveredId(folder._id)}
+                            onMouseLeave={() => setHoveredId(null)}
+                          >
+                            <span onClick={() => setCurrentFolder(folder.name)}>
+                              📁 {folder.name}
+                            </span>
+
+                            {/* Delete icon on hover */}
+                            {hoveredId === folder._id && (
+                              <span
+                                style={{
+                                  color: "#f48c06",
+                                  marginLeft: "5px",
+                                  fontSize: "12px",
+                                }}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setFolderToDelete(folder);
+                                  setModalVisible(true);
+                                }}
+                              >
+                                <FaTrash />
+                              </span>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
+                    {/* Confirmation Modal */}
+                    {modalVisible && (
+                      <div
+                        style={{
+                          position: "fixed",
+                          top: 0,
+                          left: 0,
+                          width: "100%",
+                          height: "100%",
+                          background: "rgba(0,0,0,0.5)",
+                          display: "flex",
+                          alignItems: "center",
+                          zIndex: "99999",
+                          justifyContent: "center",
+                        }}
+                      >
+                        <div
+                          style={{
+                            background: "#fff",
+                            padding: "20px",
+                            borderRadius: "10px",
+                            width: "300px",
+                            textAlign: "center",
+                          }}
+                        >
+                          <p>
+                            Are you sure you want to delete folder{" "}
+                            <strong>{folderToDelete?.name}</strong>?
+                          </p>
+                          <div style={{ marginTop: "15px" }}>
+                            <button
+                              style={{
+                                marginRight: "10px",
+                                padding: "6px 12px",
+                                backgroundColor: "#ccc",
+                                border: "none",
+                                borderRadius: "4px",
+                                cursor: "pointer",
+                              }}
+                              onClick={() => setModalVisible(false)}
+                            >
+                              Cancel
+                            </button>
+                            <button
+                              style={{
+                                padding: "6px 12px",
+                                backgroundColor: "red",
+                                color: "white",
+                                border: "none",
+                                borderRadius: "4px",
+                                cursor: "pointer",
+                              }}
+                              onClick={handleDelete}
+                            >
+                              Delete
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Folder title */}
+                    {currentFolder && (
+                      <div style={{ marginBottom: "10px", fontWeight: "bold" }}>
+                        Showing images in folder: {currentFolder}
+                      </div>
+                    )}
+
+                    {/* Images */}
+                    <div className="gallery-scroll-container">
+                      {galleryImages.length === 0 && (
+                        <div className="no-images">No images found</div>
+                      )}
+
+                      {galleryImages.map((item) => (
+                        <div key={item._id} className="gallery-item">
+                          <img src={item.imageUrl} alt="Uploaded" />
+                          <div className="gallery-actions">
+                            <button
+                              onClick={() =>
+                                uploadImage(
+                                  selectedImageIndex,
+                                  selectedImageNumber,
+                                  item.imageUrl
+                                )
+                              }
+                            >
+                              <FaCheckCircle />
+                            </button>
+                            <button onClick={() => deleteImage(item._id)}>
+                              <FaTrash />
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Folder creation modal */}
+                  {showFolderModal && (
+                    <div
+                      style={{
+                        position: "fixed",
+                        background: "rgba(0,0,0,0.7)",
+                        top: 0,
+                        zIndex: 99999,
+                        left: 0,
+                        width: "100%",
+                        height: "100%",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                      }}
+                    >
+                      <div
+                        style={{
+                          background: "#fff",
+                          padding: "20px",
+                          borderRadius: "8px",
+                          width: "300px",
+                        }}
+                      >
+                        <h3>Create Folder</h3>
+                        <input
+                          type="text"
+                          value={newFolderName}
+                          onChange={(e) => setNewFolderName(e.target.value)}
+                          placeholder="Folder Name"
+                          style={{
+                            width: "95%",
+                            padding: "8px",
+                            marginBottom: "10px",
+                          }}
+                        />
+                        <button
+                          onClick={createFolder}
+                          style={{
+                            padding: "8px 12px",
+                            background: "#2f327D",
+                            color: "#fff",
+                            border: "none",
+                            borderRadius: "4px",
+                          }}
+                        >
+                          Save
+                        </button>
+                        <button
+                          onClick={() => setShowFolderModal(false)}
+                          style={{
+                            marginLeft: "10px",
+                            padding: "8px 12px",
+                            background: "#f48c06",
+                            color: "#fff",
+                            border: "none",
+                            borderRadius: "4px",
+                          }}
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+            </FileManagerModal>
+
             {/* Styling Controls */}
             <>
-              {selectedIndex !== null &&
-                previewContent[selectedIndex] &&
-                (
-                  <>
-                    {isMobilestyle ? (
-                      <>
-                        {isModalOpenstyle && (
-                          <div className="modal-overlay-send">
-                            <div className="modal-content-style">
-                              <button
-                                className="close-btn-style"
-                                onClick={() => setIsModalOpenstyle(false)}
-                              >
-                                X
-                              </button>
-                              <h3>Style Controls</h3>
-                              <div className="style-item">
-                                {previewContent[selectedIndex].type ===
-                                  "para" && (
-                                  <>
+              {selectedIndex !== null && previewContent[selectedIndex] && (
+                <>
+                  {isMobilestyle ? (
+                    <>
+                      {isModalOpenstyle && (
+                        <div className="modal-overlay-send">
+                          <div className="modal-content-style">
+                            <button
+                              className="close-btn-style"
+                              onClick={() => setIsModalOpenstyle(false)}
+                            >
+                              X
+                            </button>
+                            <h3>Style Controls</h3>
+                            <div className="style-item">
+                              {previewContent[selectedIndex].type ===
+                                "para" && (
+                                <>
+                                  <ColorPicker
+                                    label="Text Color"
+                                    objectKey="style.color"
+                                    previewContent={previewContent}
+                                    selectedIndex={selectedIndex}
+                                    updateContent={updateContent}
+                                  />
+                                  <ColorPicker
+                                    label="Text Background"
+                                    objectKey="style.backgroundColor"
+                                    previewContent={previewContent}
+                                    selectedIndex={selectedIndex}
+                                    updateContent={updateContent}
+                                  />
+                                  <label>Border Radius:</label>
+                                  <input
+                                    type="range"
+                                    min="0"
+                                    max="50"
+                                    value={parseInt(
+                                      previewContent[
+                                        selectedIndex
+                                      ].style.borderRadius.replace("px", "")
+                                    )}
+                                    onChange={(e) =>
+                                      updateContent(selectedIndex, {
+                                        style: {
+                                          ...previewContent[selectedIndex]
+                                            .style,
+                                          borderRadius: `${e.target.value}px`,
+                                        },
+                                      })
+                                    }
+                                  />
+                                </>
+                              )}
+                              {previewContent[selectedIndex].type ===
+                                "multipleimage" && (
+                                <>
+                                  <div style={{ textAlign: "center" }}>
+                                    No style control for this type
+                                  </div>
+                                </>
+                              )}
+                              {previewContent[selectedIndex].type ===
+                                "multi-image-card" && (
+                                <div>
+                                  <div className="tab-container-style">
+                                    <button
+                                      className={`tab-style ${
+                                        activeTab === "button1" ? "active" : ""
+                                      }`}
+                                      onClick={() => setActiveTab("button1")}
+                                    >
+                                      Card Style-1
+                                    </button>
+                                    <button
+                                      className={`tab-style ${
+                                        activeTab === "button2" ? "active" : ""
+                                      }`}
+                                      onClick={() => setActiveTab("button2")}
+                                    >
+                                      Card Style-2
+                                    </button>
+                                  </div>
+
+                                  {activeTab === "button1" && (
+                                    <div className="style-editor">
+                                      <h4 className="preview-title-card">
+                                        Product-1
+                                      </h4>
+                                      {/* Title 1 */}
+                                      <label>Product Title:</label>
+                                      <input
+                                        type="text"
+                                        placeholder="Enter product title"
+                                        value={
+                                          previewContent[selectedIndex]
+                                            .title1 || ""
+                                        }
+                                        onChange={(e) =>
+                                          updateContent(selectedIndex, {
+                                            title1: e.target.value,
+                                          })
+                                        }
+                                      />
+
+                                      {/* Original Price 1 */}
+                                      <label>Original Price:</label>
+                                      <input
+                                        type="number"
+                                        placeholder="Enter original price"
+                                        value={
+                                          previewContent[selectedIndex]
+                                            .originalPrice1 || ""
+                                        }
+                                        onChange={(e) =>
+                                          updateContent(selectedIndex, {
+                                            originalPrice1: e.target.value,
+                                          })
+                                        }
+                                      />
+
+                                      {/* Offer Price 1 */}
+                                      <label>Offer Price:</label>
+                                      <input
+                                        type="number"
+                                        placeholder="Enter offer price"
+                                        value={
+                                          previewContent[selectedIndex]
+                                            .offerPrice1 || ""
+                                        }
+                                        onChange={(e) =>
+                                          updateContent(selectedIndex, {
+                                            offerPrice1: e.target.value,
+                                          })
+                                        }
+                                      />
+
+                                      <h4 className="preview-title-card">
+                                        Button-1
+                                      </h4>
+
+                                      <label>Button Name:</label>
+                                      <input
+                                        type="text"
+                                        placeholder="Enter button name"
+                                        value={
+                                          previewContent[selectedIndex]
+                                            .content1 || ""
+                                        }
+                                        onChange={(e) =>
+                                          updateContent(selectedIndex, {
+                                            content1: e.target.value,
+                                          })
+                                        }
+                                      />
+                                      <label>Button Link:</label>
+                                      <input
+                                        type="text"
+                                        value={
+                                          previewContent[selectedIndex].link1
+                                        }
+                                        onChange={(e) =>
+                                          updateContent(selectedIndex, {
+                                            link1: e.target.value,
+                                          })
+                                        }
+                                      />
+                                      <div className="editor-bg">
+                                        Button Text Color:
+                                        <input
+                                          type="color"
+                                          value={
+                                            previewContent[selectedIndex]
+                                              .buttonStyle1.color
+                                          }
+                                          onChange={(e) =>
+                                            updateContent(selectedIndex, {
+                                              buttonStyle1: {
+                                                ...previewContent[selectedIndex]
+                                                  .buttonStyle1,
+                                                color: e.target.value,
+                                              },
+                                            })
+                                          }
+                                        />
+                                      </div>
+                                      <div className="editor-bg">
+                                        Button Background Color:
+                                        <input
+                                          type="color"
+                                          value={
+                                            previewContent[selectedIndex]
+                                              .buttonStyle1.backgroundColor
+                                          }
+                                          onChange={(e) =>
+                                            updateContent(selectedIndex, {
+                                              buttonStyle1: {
+                                                ...previewContent[selectedIndex]
+                                                  .buttonStyle1,
+                                                backgroundColor: e.target.value,
+                                              },
+                                            })
+                                          }
+                                        />
+                                      </div>
+
+                                      <label>Text Alignment:</label>
+                                      <select
+                                        value={
+                                          previewContent[selectedIndex]
+                                            ?.buttonStyle1?.textAlign || ""
+                                        }
+                                        onChange={(e) =>
+                                          updateContent(selectedIndex, {
+                                            buttonStyle1: {
+                                              ...previewContent[selectedIndex]
+                                                .buttonStyle1,
+                                              textAlign: e.target.value,
+                                            },
+                                          })
+                                        }
+                                      >
+                                        <option value="left">Left</option>
+                                        <option value="center">Center</option>
+                                        <option value="right">Right</option>
+                                      </select>
+                                      <label>Button Size:</label>
+                                      <div>
+                                        <button
+                                          className="modal-btn-size"
+                                          onClick={() =>
+                                            updateContent(selectedIndex, {
+                                              buttonStyle1: {
+                                                ...previewContent[selectedIndex]
+                                                  .buttonStyle1,
+                                                width: "auto",
+                                              },
+                                            })
+                                          }
+                                        >
+                                          Small
+                                        </button>
+                                        <button
+                                          className="modal-btn-size"
+                                          onClick={() =>
+                                            updateContent(selectedIndex, {
+                                              buttonStyle1: {
+                                                ...previewContent[selectedIndex]
+                                                  .buttonStyle1,
+                                                width: "50%",
+                                              },
+                                            })
+                                          }
+                                        >
+                                          Medium
+                                        </button>
+                                        <button
+                                          className="modal-btn-size"
+                                          onClick={() =>
+                                            updateContent(selectedIndex, {
+                                              buttonStyle1: {
+                                                ...previewContent[selectedIndex]
+                                                  .buttonStyle1,
+                                                width: "80%",
+                                              },
+                                            })
+                                          }
+                                        >
+                                          Large
+                                        </button>
+                                      </div>
+                                      <label>Border Radius:</label>
+                                      <input
+                                        type="range"
+                                        min="0"
+                                        max="50"
+                                        value={parseInt(
+                                          previewContent[
+                                            selectedIndex
+                                          ].buttonStyle1.borderRadius.replace(
+                                            "px",
+                                            ""
+                                          )
+                                        )}
+                                        onChange={(e) =>
+                                          updateContent(selectedIndex, {
+                                            buttonStyle1: {
+                                              ...previewContent[selectedIndex]
+                                                .buttonStyle1,
+                                              borderRadius: `${e.target.value}px`,
+                                            },
+                                          })
+                                        }
+                                      />
+                                    </div>
+                                  )}
+
+                                  {activeTab === "button2" && (
+                                    <div className="style-editor">
+                                      {/* Title 2 */}
+                                      <h4 className="preview-title-card">
+                                        Product-2
+                                      </h4>
+                                      <label>Product Title:</label>
+                                      <input
+                                        type="text"
+                                        placeholder="Enter product title"
+                                        value={
+                                          previewContent[selectedIndex]
+                                            .title2 || ""
+                                        }
+                                        onChange={(e) =>
+                                          updateContent(selectedIndex, {
+                                            title2: e.target.value,
+                                          })
+                                        }
+                                      />
+
+                                      {/* Original Price 2 */}
+                                      <label>Original Price:</label>
+                                      <input
+                                        type="number"
+                                        placeholder="Enter original price"
+                                        value={
+                                          previewContent[selectedIndex]
+                                            .originalPrice2 || ""
+                                        }
+                                        onChange={(e) =>
+                                          updateContent(selectedIndex, {
+                                            originalPrice2: e.target.value,
+                                          })
+                                        }
+                                      />
+
+                                      {/* Offer Price 2 */}
+                                      <label>Offer Price:</label>
+                                      <input
+                                        type="number"
+                                        placeholder="Enter offer price"
+                                        value={
+                                          previewContent[selectedIndex]
+                                            .offerPrice2 || ""
+                                        }
+                                        onChange={(e) =>
+                                          updateContent(selectedIndex, {
+                                            offerPrice2: e.target.value,
+                                          })
+                                        }
+                                      />
+
+                                      <h4 className="preview-title-card">
+                                        Button-2
+                                      </h4>
+                                      <label>Button Name:</label>
+                                      <input
+                                        type="text"
+                                        placeholder="Enter button name"
+                                        value={
+                                          previewContent[selectedIndex]
+                                            .content2 || ""
+                                        }
+                                        onChange={(e) =>
+                                          updateContent(selectedIndex, {
+                                            content2: e.target.value,
+                                          })
+                                        }
+                                      />
+                                      <label>Button Link:</label>
+                                      <input
+                                        type="text"
+                                        value={
+                                          previewContent[selectedIndex].link2
+                                        }
+                                        onChange={(e) =>
+                                          updateContent(selectedIndex, {
+                                            link2: e.target.value,
+                                          })
+                                        }
+                                      />
+                                      <div className="editor-bg">
+                                        Button Text Color:
+                                        <input
+                                          type="color"
+                                          value={
+                                            previewContent[selectedIndex]
+                                              .buttonStyle2.color
+                                          }
+                                          onChange={(e) =>
+                                            updateContent(selectedIndex, {
+                                              buttonStyle2: {
+                                                ...previewContent[selectedIndex]
+                                                  .buttonStyle2,
+                                                color: e.target.value,
+                                              },
+                                            })
+                                          }
+                                        />
+                                      </div>
+
+                                      <div className="editor-bg">
+                                        Button Background Color:
+                                        <input
+                                          type="color"
+                                          value={
+                                            previewContent[selectedIndex]
+                                              .buttonStyle2.backgroundColor
+                                          }
+                                          onChange={(e) =>
+                                            updateContent(selectedIndex, {
+                                              buttonStyle2: {
+                                                ...previewContent[selectedIndex]
+                                                  .buttonStyle2,
+                                                backgroundColor: e.target.value,
+                                              },
+                                            })
+                                          }
+                                        />
+                                      </div>
+
+                                      <label>Text Alignment:</label>
+                                      <select
+                                        value={
+                                          previewContent[selectedIndex]
+                                            ?.buttonStyle2?.textAlign || ""
+                                        }
+                                        onChange={(e) =>
+                                          updateContent(selectedIndex, {
+                                            buttonStyle2: {
+                                              ...previewContent[selectedIndex]
+                                                .buttonStyle2,
+                                              textAlign: e.target.value,
+                                            },
+                                          })
+                                        }
+                                      >
+                                        <option value="left">Left</option>
+                                        <option value="center">Center</option>
+                                        <option value="right">Right</option>
+                                      </select>
+
+                                      <label>Button Size:</label>
+                                      <div>
+                                        <button
+                                          className="modal-btn-size"
+                                          onClick={() =>
+                                            updateContent(selectedIndex, {
+                                              buttonStyle2: {
+                                                ...previewContent[selectedIndex]
+                                                  .buttonStyle2,
+                                                width: "auto",
+                                              },
+                                            })
+                                          }
+                                        >
+                                          Small
+                                        </button>
+                                        <button
+                                          className="modal-btn-size"
+                                          onClick={() =>
+                                            updateContent(selectedIndex, {
+                                              buttonStyle2: {
+                                                ...previewContent[selectedIndex]
+                                                  .buttonStyle2,
+                                                width: "50%",
+                                              },
+                                            })
+                                          }
+                                        >
+                                          Medium
+                                        </button>
+                                        <button
+                                          className="modal-btn-size"
+                                          onClick={() =>
+                                            updateContent(selectedIndex, {
+                                              buttonStyle2: {
+                                                ...previewContent[selectedIndex]
+                                                  .buttonStyle2,
+                                                width: "80%",
+                                              },
+                                            })
+                                          }
+                                        >
+                                          Large
+                                        </button>
+                                      </div>
+
+                                      <label>Border Radius:</label>
+                                      <input
+                                        type="range"
+                                        min="0"
+                                        max="50"
+                                        value={parseInt(
+                                          previewContent[
+                                            selectedIndex
+                                          ].buttonStyle2.borderRadius.replace(
+                                            "px",
+                                            ""
+                                          )
+                                        )}
+                                        onChange={(e) =>
+                                          updateContent(selectedIndex, {
+                                            buttonStyle2: {
+                                              ...previewContent[selectedIndex]
+                                                .buttonStyle2,
+                                              borderRadius: `${e.target.value}px`,
+                                            },
+                                          })
+                                        }
+                                      />
+                                    </div>
+                                  )}
+                                </div>
+                              )}
+
+                              {previewContent[selectedIndex].type ===
+                                "cardimage" && (
+                                <>
+                                  <ColorPicker
+                                    label="Text Color"
+                                    objectKey="style1.color"
+                                    previewContent={previewContent}
+                                    selectedIndex={selectedIndex}
+                                    updateContent={updateContent}
+                                  />
+                                  <ColorPicker
+                                    label="Text Background"
+                                    objectKey="style1.backgroundColor"
+                                    previewContent={previewContent}
+                                    selectedIndex={selectedIndex}
+                                    updateContent={updateContent}
+                                  />
+                                </>
+                              )}
+
+                              {previewContent[selectedIndex].type ===
+                                "head" && (
+                                <>
+                                  <label>Font Size:</label>
+                                  <input
+                                    type="number"
+                                    value={parseInt(
+                                      previewContent[
+                                        selectedIndex
+                                      ].style.fontSize.replace("px", "")
+                                    )}
+                                    onChange={(e) =>
+                                      updateContent(selectedIndex, {
+                                        style: {
+                                          ...previewContent[selectedIndex]
+                                            .style,
+                                          fontSize: `${e.target.value}px`,
+                                        },
+                                      })
+                                    }
+                                  />
+                                  <ColorPicker
+                                    label="Text Color"
+                                    objectKey="style.color"
+                                    previewContent={previewContent}
+                                    selectedIndex={selectedIndex}
+                                    updateContent={updateContent}
+                                  />
+                                  <ColorPicker
+                                    label="Text Background"
+                                    objectKey="style.backgroundColor"
+                                    previewContent={previewContent}
+                                    selectedIndex={selectedIndex}
+                                    updateContent={updateContent}
+                                  />
+                                  <label>Text Alignment:</label>
+                                  <select
+                                    value={
+                                      previewContent[selectedIndex].style
+                                        .textAlign
+                                    }
+                                    onChange={(e) =>
+                                      updateContent(selectedIndex, {
+                                        style: {
+                                          ...previewContent[selectedIndex]
+                                            .style,
+                                          textAlign: e.target.value,
+                                        },
+                                      })
+                                    }
+                                  >
+                                    <option value="left">Left</option>
+                                    <option value="center">Center</option>
+                                    <option value="right">Right</option>
+                                  </select>
+                                </>
+                              )}
+                              {previewContent[selectedIndex].type ===
+                                "button" && (
+                                <>
+                                  <label>Button name:</label>
+                                  <input
+                                    type="text"
+                                    placeholder="Enter button name"
+                                    value={
+                                      previewContent[selectedIndex].content ||
+                                      ""
+                                    }
+                                    onChange={(e) =>
+                                      updateContent(selectedIndex, {
+                                        content: e.target.value,
+                                      })
+                                    }
+                                  />
+                                  <ColorPicker
+                                    label="Text Color"
+                                    objectKey="style.color"
+                                    previewContent={previewContent}
+                                    selectedIndex={selectedIndex}
+                                    updateContent={updateContent}
+                                  />
+                                  <ColorPicker
+                                    label="Text Background"
+                                    objectKey="style.backgroundColor"
+                                    previewContent={previewContent}
+                                    selectedIndex={selectedIndex}
+                                    updateContent={updateContent}
+                                  />
+                                  <label>Text Alignment:</label>
+                                  <select
+                                    value={
+                                      previewContent[selectedIndex]?.style
+                                        ?.textAlign || ""
+                                    }
+                                    onChange={(e) =>
+                                      updateContent(selectedIndex, {
+                                        style: {
+                                          ...previewContent[selectedIndex]
+                                            .style,
+                                          textAlign: e.target.value,
+                                        },
+                                      })
+                                    }
+                                  >
+                                    <option value="left">Left</option>
+                                    <option value="center">Center</option>
+                                    <option value="right">Right</option>
+                                  </select>
+                                  <label>Button Size:</label>
+                                  <div>
+                                    <button
+                                      className="modal-btn-size"
+                                      onClick={() =>
+                                        updateContent(selectedIndex, {
+                                          style: {
+                                            ...previewContent[selectedIndex]
+                                              .style,
+                                            width: "50%",
+                                            margin: "0 auto", // Centering the button
+                                          },
+                                        })
+                                      }
+                                    >
+                                      Small
+                                    </button>
+                                    <button
+                                      className="modal-btn-size"
+                                      onClick={() =>
+                                        updateContent(selectedIndex, {
+                                          style: {
+                                            ...previewContent[selectedIndex]
+                                              .style,
+                                            width: "70%",
+                                            margin: "0 auto",
+                                          },
+                                        })
+                                      }
+                                    >
+                                      Medium
+                                    </button>
+                                    <button
+                                      className="modal-btn-size"
+                                      onClick={() =>
+                                        updateContent(selectedIndex, {
+                                          style: {
+                                            ...previewContent[selectedIndex]
+                                              .style,
+                                            width: "90%",
+                                            margin: "0 auto",
+                                          },
+                                        })
+                                      }
+                                    >
+                                      Large
+                                    </button>
+                                  </div>
+
+                                  <label>Border Radius:</label>
+                                  <input
+                                    type="range"
+                                    min="0"
+                                    max="50"
+                                    value={parseInt(
+                                      previewContent[
+                                        selectedIndex
+                                      ].style.borderRadius.replace("px", "")
+                                    )}
+                                    onChange={(e) =>
+                                      updateContent(selectedIndex, {
+                                        style: {
+                                          ...previewContent[selectedIndex]
+                                            .style,
+                                          borderRadius: `${e.target.value}px`,
+                                        },
+                                      })
+                                    }
+                                  />
+                                  <label>Button Text Size:</label>
+                                  <input
+                                    type="range"
+                                    min="10"
+                                    max="30"
+                                    value={parseInt(
+                                      (
+                                        previewContent[selectedIndex]?.style
+                                          ?.fontSize || "15px"
+                                      ).replace("px", "")
+                                    )}
+                                    onChange={(e) =>
+                                      updateContent(selectedIndex, {
+                                        style: {
+                                          ...previewContent[selectedIndex]
+                                            .style,
+                                          fontSize: `${e.target.value}px`,
+                                        },
+                                      })
+                                    }
+                                  />
+
+                                  <label>Link:</label>
+                                  <input
+                                    type="text"
+                                    placeholder="Enter URL"
+                                    value={
+                                      previewContent[selectedIndex].link || ""
+                                    }
+                                    onChange={(e) =>
+                                      updateContent(selectedIndex, {
+                                        link: e.target.value,
+                                      })
+                                    }
+                                  />
+                                </>
+                              )}
+
+                              {/* New Editor for Multi-Image Links and Button Styling */}
+                              {previewContent[selectedIndex].type ===
+                                "multi-image" && (
+                                <>
+                                  <h4>Button-1 Styles</h4>
+                                  <div>
+                                    <label>Button Name:</label>
+                                    <input
+                                      type="text"
+                                      placeholder="Enter button name"
+                                      value={
+                                        previewContent[selectedIndex]
+                                          .content1 || ""
+                                      }
+                                      onChange={(e) =>
+                                        updateContent(selectedIndex, {
+                                          content1: e.target.value,
+                                        })
+                                      }
+                                    />
+                                    <label>Button Link:</label>
+                                    <input
+                                      type="text"
+                                      value={
+                                        previewContent[selectedIndex].link1
+                                      }
+                                      onChange={(e) =>
+                                        updateContent(selectedIndex, {
+                                          link1: e.target.value,
+                                        })
+                                      }
+                                    />
                                     <ColorPicker
-                                      label="Text Color"
-                                      objectKey="style.color"
+                                      label="Button Text Color"
+                                      objectKey="buttonStyle1.color"
                                       previewContent={previewContent}
                                       selectedIndex={selectedIndex}
                                       updateContent={updateContent}
                                     />
                                     <ColorPicker
-                                      label="Text Background"
-                                      objectKey="style.backgroundColor"
+                                      label="Button Text Background"
+                                      objectKey="buttonStyle1.backgroundColor"
                                       previewContent={previewContent}
                                       selectedIndex={selectedIndex}
                                       updateContent={updateContent}
                                     />
+                                    <label>Text Alignment:</label>
+                                    <select
+                                      value={
+                                        previewContent[selectedIndex]
+                                          ?.buttonStyle1?.textAlign || ""
+                                      }
+                                      onChange={(e) =>
+                                        updateContent(selectedIndex, {
+                                          buttonStyle1: {
+                                            ...previewContent[selectedIndex]
+                                              .buttonStyle1,
+                                            textAlign: e.target.value,
+                                          },
+                                        })
+                                      }
+                                    >
+                                      <option value="left">Left</option>
+                                      <option value="center">Center</option>
+                                      <option value="right">Right</option>
+                                    </select>
+                                    <label>Button Size:</label>
+                                    <div>
+                                      <button
+                                        className="modal-btn-size"
+                                        onClick={() =>
+                                          updateContent(selectedIndex, {
+                                            buttonStyle1: {
+                                              ...previewContent[selectedIndex]
+                                                .buttonStyle1,
+                                              width: "auto",
+                                            },
+                                          })
+                                        }
+                                      >
+                                        Small
+                                      </button>
+                                      <button
+                                        className="modal-btn-size"
+                                        onClick={() =>
+                                          updateContent(selectedIndex, {
+                                            buttonStyle1: {
+                                              ...previewContent[selectedIndex]
+                                                .buttonStyle1,
+                                              width: "50%",
+                                            },
+                                          })
+                                        }
+                                      >
+                                        Medium
+                                      </button>
+                                      <button
+                                        className="modal-btn-size"
+                                        onClick={() =>
+                                          updateContent(selectedIndex, {
+                                            buttonStyle1: {
+                                              ...previewContent[selectedIndex]
+                                                .buttonStyle1,
+                                              width: "80%",
+                                            },
+                                          })
+                                        }
+                                      >
+                                        Large
+                                      </button>
+                                    </div>
                                     <label>Border Radius:</label>
                                     <input
                                       type="range"
@@ -2012,30 +3005,1349 @@ const TemMainpage = () => {
                                       value={parseInt(
                                         previewContent[
                                           selectedIndex
-                                        ].style.borderRadius.replace("px", "")
+                                        ].buttonStyle1.borderRadius.replace(
+                                          "px",
+                                          ""
+                                        )
                                       )}
                                       onChange={(e) =>
                                         updateContent(selectedIndex, {
-                                          style: {
+                                          buttonStyle1: {
                                             ...previewContent[selectedIndex]
-                                              .style,
+                                              .buttonStyle1,
                                             borderRadius: `${e.target.value}px`,
                                           },
                                         })
                                       }
                                     />
-                                  </>
-                                )}
-                                {previewContent[selectedIndex].type ===
-                                  "multipleimage" && (
-                                  <>
-                                    <div style={{ textAlign: "center" }}>
-                                      No style control for this type
+                                  </div>
+                                  <h4>Button-2 Style</h4>
+                                  <div>
+                                    <label>Button Name:</label>
+                                    <input
+                                      type="text"
+                                      placeholder="Enter button name"
+                                      value={
+                                        previewContent[selectedIndex]
+                                          .content2 || ""
+                                      }
+                                      onChange={(e) =>
+                                        updateContent(selectedIndex, {
+                                          content2: e.target.value,
+                                        })
+                                      }
+                                    />
+
+                                    <label>Button Link:</label>
+                                    <input
+                                      type="text"
+                                      value={
+                                        previewContent[selectedIndex].link2
+                                      }
+                                      onChange={(e) =>
+                                        updateContent(selectedIndex, {
+                                          link2: e.target.value,
+                                        })
+                                      }
+                                    />
+
+                                    <ColorPicker
+                                      label="Button Text Color"
+                                      objectKey="buttonStyle2.color"
+                                      previewContent={previewContent}
+                                      selectedIndex={selectedIndex}
+                                      updateContent={updateContent}
+                                    />
+                                    <ColorPicker
+                                      label="Button Text Background"
+                                      objectKey="buttonStyle2.backgroundColor"
+                                      previewContent={previewContent}
+                                      selectedIndex={selectedIndex}
+                                      updateContent={updateContent}
+                                    />
+
+                                    <label>Text Alignment:</label>
+                                    <select
+                                      value={
+                                        previewContent[selectedIndex]
+                                          ?.buttonStyle2?.textAlign || ""
+                                      }
+                                      onChange={(e) =>
+                                        updateContent(selectedIndex, {
+                                          buttonStyle2: {
+                                            ...previewContent[selectedIndex]
+                                              .buttonStyle2,
+                                            textAlign: e.target.value,
+                                          },
+                                        })
+                                      }
+                                    >
+                                      <option value="left">Left</option>
+                                      <option value="center">Center</option>
+                                      <option value="right">Right</option>
+                                    </select>
+
+                                    <label>Button Size:</label>
+                                    <div>
+                                      <button
+                                        className="modal-btn-size"
+                                        onClick={() =>
+                                          updateContent(selectedIndex, {
+                                            buttonStyle2: {
+                                              ...previewContent[selectedIndex]
+                                                .buttonStyle2,
+                                              width: "auto",
+                                            },
+                                          })
+                                        }
+                                      >
+                                        Small
+                                      </button>
+                                      <button
+                                        className="modal-btn-size"
+                                        onClick={() =>
+                                          updateContent(selectedIndex, {
+                                            buttonStyle2: {
+                                              ...previewContent[selectedIndex]
+                                                .buttonStyle2,
+                                              width: "50%",
+                                            },
+                                          })
+                                        }
+                                      >
+                                        Medium
+                                      </button>
+                                      <button
+                                        className="modal-btn-size"
+                                        onClick={() =>
+                                          updateContent(selectedIndex, {
+                                            buttonStyle2: {
+                                              ...previewContent[selectedIndex]
+                                                .buttonStyle2,
+                                              width: "80%",
+                                            },
+                                          })
+                                        }
+                                      >
+                                        Large
+                                      </button>
                                     </div>
-                                  </>
-                                )}
-  {previewContent[selectedIndex].type ===
-                          "multi-image-card" && (
+
+                                    <label>Border Radius:</label>
+                                    <input
+                                      type="range"
+                                      min="0"
+                                      max="50"
+                                      value={parseInt(
+                                        previewContent[
+                                          selectedIndex
+                                        ].buttonStyle2.borderRadius.replace(
+                                          "px",
+                                          ""
+                                        )
+                                      )}
+                                      onChange={(e) =>
+                                        updateContent(selectedIndex, {
+                                          buttonStyle2: {
+                                            ...previewContent[selectedIndex]
+                                              .buttonStyle2,
+                                            borderRadius: `${e.target.value}px`,
+                                          },
+                                        })
+                                      }
+                                    />
+                                  </div>
+                                </>
+                              )}
+
+                              {previewContent[selectedIndex]?.type ===
+                                "icons" && (
+                                <>
+                                  <ColorPicker
+                                    label="Background Color"
+                                    objectKey="ContentStyle.backgroundColor"
+                                    previewContent={previewContent}
+                                    selectedIndex={selectedIndex}
+                                    updateContent={updateContent}
+                                  />
+                                  <label>Link1:</label>
+                                  <input
+                                    type="text"
+                                    placeholder="Enter URL"
+                                    value={
+                                      previewContent[selectedIndex].links1 || ""
+                                    }
+                                    onChange={(e) =>
+                                      updateContent(selectedIndex, {
+                                        links1: e.target.value,
+                                      })
+                                    }
+                                  />
+
+                                  <label>Link2:</label>
+                                  <input
+                                    type="text"
+                                    placeholder="Enter URL"
+                                    value={
+                                      previewContent[selectedIndex].links2 || ""
+                                    }
+                                    onChange={(e) =>
+                                      updateContent(selectedIndex, {
+                                        links2: e.target.value,
+                                      })
+                                    }
+                                  />
+
+                                  <label>Link3:</label>
+                                  <input
+                                    type="text"
+                                    placeholder="Enter URL"
+                                    value={
+                                      previewContent[selectedIndex].links3 || ""
+                                    }
+                                    onChange={(e) =>
+                                      updateContent(selectedIndex, {
+                                        links3: e.target.value,
+                                      })
+                                    }
+                                  />
+
+                                  <label>Link4:</label>
+                                  <input
+                                    type="text"
+                                    placeholder="Enter URL"
+                                    value={
+                                      previewContent[selectedIndex].links4 || ""
+                                    }
+                                    onChange={(e) =>
+                                      updateContent(selectedIndex, {
+                                        links4: e.target.value,
+                                      })
+                                    }
+                                  />
+                                </>
+                              )}
+                              {/* btn card with muliple-image content  */}
+                              {/* New Editor for Multi-Image Links and Button Styling */}
+                              {previewContent[selectedIndex].type ===
+                                "multi-image-card" && (
+                                <div>
+                                  <div className="tab-container-style">
+                                    <button
+                                      className={`tab-style ${
+                                        activeTab === "button1" ? "active" : ""
+                                      }`}
+                                      onClick={() => setActiveTab("button1")}
+                                    >
+                                      Button-1
+                                    </button>
+                                    <button
+                                      className={`tab-style ${
+                                        activeTab === "button2" ? "active" : ""
+                                      }`}
+                                      onClick={() => setActiveTab("button2")}
+                                    >
+                                      Button-2
+                                    </button>
+                                  </div>
+
+                                  {activeTab === "button1" && (
+                                    <div className="style-editor">
+                                      <h4>Card Product 1</h4>
+                                      {/* Title 1 */}
+                                      <label>Product Title 1:</label>
+                                      <input
+                                        type="text"
+                                        placeholder="Enter product title"
+                                        value={
+                                          previewContent[selectedIndex]
+                                            .title1 || ""
+                                        }
+                                        onChange={(e) =>
+                                          updateContent(selectedIndex, {
+                                            title1: e.target.value,
+                                          })
+                                        }
+                                      />
+
+                                      {/* Original Price 1 */}
+                                      <label>Original Price 1:</label>
+                                      <input
+                                        type="number"
+                                        placeholder="Enter original price"
+                                        value={
+                                          previewContent[selectedIndex]
+                                            .originalPrice1 || ""
+                                        }
+                                        onChange={(e) =>
+                                          updateContent(selectedIndex, {
+                                            originalPrice1: e.target.value,
+                                          })
+                                        }
+                                      />
+
+                                      {/* Offer Price 1 */}
+                                      <label>Offer Price 1:</label>
+                                      <input
+                                        type="number"
+                                        placeholder="Enter offer price"
+                                        value={
+                                          previewContent[selectedIndex]
+                                            .offerPrice1 || ""
+                                        }
+                                        onChange={(e) =>
+                                          updateContent(selectedIndex, {
+                                            offerPrice1: e.target.value,
+                                          })
+                                        }
+                                      />
+
+                                      {/* Text Color */}
+                                      {/* <ColorPicker
+                                  label="Text Color"
+                                  objectKey="style.color"
+                                  previewContent={previewContent}
+                                  selectedIndex={selectedIndex}
+                                  updateContent={updateContent}
+                                /> */}
+
+                                      {/* Background Color */}
+                                      {/* <ColorPicker
+                                  label="Background Color"
+                                  objectKey="style.backgroundColor"
+                                  previewContent={previewContent}
+                                  selectedIndex={selectedIndex}
+                                  updateContent={updateContent}
+                                /> */}
+
+                                      <h4>Button-1 Styles</h4>
+
+                                      <label>Button Name:</label>
+                                      <input
+                                        type="text"
+                                        placeholder="Enter button name"
+                                        value={
+                                          previewContent[selectedIndex]
+                                            .content1 || ""
+                                        }
+                                        onChange={(e) =>
+                                          updateContent(selectedIndex, {
+                                            content1: e.target.value,
+                                          })
+                                        }
+                                      />
+                                      <label>Button Link:</label>
+                                      <input
+                                        type="text"
+                                        value={
+                                          previewContent[selectedIndex].link1
+                                        }
+                                        onChange={(e) =>
+                                          updateContent(selectedIndex, {
+                                            link1: e.target.value,
+                                          })
+                                        }
+                                      />
+                                      <div className="editor-bg">
+                                        Button Text Color:
+                                        <input
+                                          type="color"
+                                          value={
+                                            previewContent[selectedIndex]
+                                              .buttonStyle1.color
+                                          }
+                                          onChange={(e) =>
+                                            updateContent(selectedIndex, {
+                                              buttonStyle1: {
+                                                ...previewContent[selectedIndex]
+                                                  .buttonStyle1,
+                                                color: e.target.value,
+                                              },
+                                            })
+                                          }
+                                        />
+                                      </div>
+                                      <div className="editor-bg">
+                                        Button Background Color:
+                                        <input
+                                          type="color"
+                                          value={
+                                            previewContent[selectedIndex]
+                                              .buttonStyle1.backgroundColor
+                                          }
+                                          onChange={(e) =>
+                                            updateContent(selectedIndex, {
+                                              buttonStyle1: {
+                                                ...previewContent[selectedIndex]
+                                                  .buttonStyle1,
+                                                backgroundColor: e.target.value,
+                                              },
+                                            })
+                                          }
+                                        />
+                                      </div>
+
+                                      <label>Text Alignment:</label>
+                                      <select
+                                        value={
+                                          previewContent[selectedIndex]
+                                            ?.buttonStyle1?.textAlign || ""
+                                        }
+                                        onChange={(e) =>
+                                          updateContent(selectedIndex, {
+                                            buttonStyle1: {
+                                              ...previewContent[selectedIndex]
+                                                .buttonStyle1,
+                                              textAlign: e.target.value,
+                                            },
+                                          })
+                                        }
+                                      >
+                                        <option value="left">Left</option>
+                                        <option value="center">Center</option>
+                                        <option value="right">Right</option>
+                                      </select>
+                                      <label>Button Size:</label>
+                                      <div>
+                                        <button
+                                          className="modal-btn-size"
+                                          onClick={() =>
+                                            updateContent(selectedIndex, {
+                                              buttonStyle1: {
+                                                ...previewContent[selectedIndex]
+                                                  .buttonStyle1,
+                                                width: "auto",
+                                              },
+                                            })
+                                          }
+                                        >
+                                          Small
+                                        </button>
+                                        <button
+                                          className="modal-btn-size"
+                                          onClick={() =>
+                                            updateContent(selectedIndex, {
+                                              buttonStyle1: {
+                                                ...previewContent[selectedIndex]
+                                                  .buttonStyle1,
+                                                width: "50%",
+                                              },
+                                            })
+                                          }
+                                        >
+                                          Medium
+                                        </button>
+                                        <button
+                                          className="modal-btn-size"
+                                          onClick={() =>
+                                            updateContent(selectedIndex, {
+                                              buttonStyle1: {
+                                                ...previewContent[selectedIndex]
+                                                  .buttonStyle1,
+                                                width: "80%",
+                                              },
+                                            })
+                                          }
+                                        >
+                                          Large
+                                        </button>
+                                      </div>
+                                      <label>Border Radius:</label>
+                                      <input
+                                        type="range"
+                                        min="0"
+                                        max="50"
+                                        value={parseInt(
+                                          previewContent[
+                                            selectedIndex
+                                          ].buttonStyle1.borderRadius.replace(
+                                            "px",
+                                            ""
+                                          )
+                                        )}
+                                        onChange={(e) =>
+                                          updateContent(selectedIndex, {
+                                            buttonStyle1: {
+                                              ...previewContent[selectedIndex]
+                                                .buttonStyle1,
+                                              borderRadius: `${e.target.value}px`,
+                                            },
+                                          })
+                                        }
+                                      />
+                                    </div>
+                                  )}
+
+                                  {activeTab === "button2" && (
+                                    <div className="style-editor">
+                                      {/* Title 2 */}
+                                      <h4>Card Product 1</h4>
+                                      <label>Product Title 2:</label>
+                                      <input
+                                        type="text"
+                                        placeholder="Enter product title"
+                                        value={
+                                          previewContent[selectedIndex]
+                                            .title2 || ""
+                                        }
+                                        onChange={(e) =>
+                                          updateContent(selectedIndex, {
+                                            title2: e.target.value,
+                                          })
+                                        }
+                                      />
+
+                                      {/* Original Price 2 */}
+                                      <label>Original Price 2:</label>
+                                      <input
+                                        type="number"
+                                        placeholder="Enter original price"
+                                        value={
+                                          previewContent[selectedIndex]
+                                            .originalPrice2 || ""
+                                        }
+                                        onChange={(e) =>
+                                          updateContent(selectedIndex, {
+                                            originalPrice2: e.target.value,
+                                          })
+                                        }
+                                      />
+
+                                      {/* Offer Price 2 */}
+                                      <label>Offer Price 2:</label>
+                                      <input
+                                        type="number"
+                                        placeholder="Enter offer price"
+                                        value={
+                                          previewContent[selectedIndex]
+                                            .offerPrice2 || ""
+                                        }
+                                        onChange={(e) =>
+                                          updateContent(selectedIndex, {
+                                            offerPrice2: e.target.value,
+                                          })
+                                        }
+                                      />
+
+                                      <h4>Button-2 Styles</h4>
+                                      <label>Button Name:</label>
+                                      <input
+                                        type="text"
+                                        placeholder="Enter button name"
+                                        value={
+                                          previewContent[selectedIndex]
+                                            .content2 || ""
+                                        }
+                                        onChange={(e) =>
+                                          updateContent(selectedIndex, {
+                                            content2: e.target.value,
+                                          })
+                                        }
+                                      />
+                                      <label>Button Link:</label>
+                                      <input
+                                        type="text"
+                                        value={
+                                          previewContent[selectedIndex].link2
+                                        }
+                                        onChange={(e) =>
+                                          updateContent(selectedIndex, {
+                                            link2: e.target.value,
+                                          })
+                                        }
+                                      />
+                                      <div className="editor-bg">
+                                        Button Text Color:
+                                        <input
+                                          type="color"
+                                          value={
+                                            previewContent[selectedIndex]
+                                              .buttonStyle2.color
+                                          }
+                                          onChange={(e) =>
+                                            updateContent(selectedIndex, {
+                                              buttonStyle2: {
+                                                ...previewContent[selectedIndex]
+                                                  .buttonStyle2,
+                                                color: e.target.value,
+                                              },
+                                            })
+                                          }
+                                        />
+                                      </div>
+
+                                      <div className="editor-bg">
+                                        Button Background Color:
+                                        <input
+                                          type="color"
+                                          value={
+                                            previewContent[selectedIndex]
+                                              .buttonStyle2.backgroundColor
+                                          }
+                                          onChange={(e) =>
+                                            updateContent(selectedIndex, {
+                                              buttonStyle2: {
+                                                ...previewContent[selectedIndex]
+                                                  .buttonStyle2,
+                                                backgroundColor: e.target.value,
+                                              },
+                                            })
+                                          }
+                                        />
+                                      </div>
+
+                                      <label>Text Alignment:</label>
+                                      <select
+                                        value={
+                                          previewContent[selectedIndex]
+                                            ?.buttonStyle2?.textAlign || ""
+                                        }
+                                        onChange={(e) =>
+                                          updateContent(selectedIndex, {
+                                            buttonStyle2: {
+                                              ...previewContent[selectedIndex]
+                                                .buttonStyle2,
+                                              textAlign: e.target.value,
+                                            },
+                                          })
+                                        }
+                                      >
+                                        <option value="left">Left</option>
+                                        <option value="center">Center</option>
+                                        <option value="right">Right</option>
+                                      </select>
+
+                                      <label>Button Size:</label>
+                                      <div>
+                                        <button
+                                          className="modal-btn-size"
+                                          onClick={() =>
+                                            updateContent(selectedIndex, {
+                                              buttonStyle2: {
+                                                ...previewContent[selectedIndex]
+                                                  .buttonStyle2,
+                                                width: "auto",
+                                              },
+                                            })
+                                          }
+                                        >
+                                          Small
+                                        </button>
+                                        <button
+                                          className="modal-btn-size"
+                                          onClick={() =>
+                                            updateContent(selectedIndex, {
+                                              buttonStyle2: {
+                                                ...previewContent[selectedIndex]
+                                                  .buttonStyle2,
+                                                width: "50%",
+                                              },
+                                            })
+                                          }
+                                        >
+                                          Medium
+                                        </button>
+                                        <button
+                                          className="modal-btn-size"
+                                          onClick={() =>
+                                            updateContent(selectedIndex, {
+                                              buttonStyle2: {
+                                                ...previewContent[selectedIndex]
+                                                  .buttonStyle2,
+                                                width: "80%",
+                                              },
+                                            })
+                                          }
+                                        >
+                                          Large
+                                        </button>
+                                      </div>
+
+                                      <label>Border Radius:</label>
+                                      <input
+                                        type="range"
+                                        min="0"
+                                        max="50"
+                                        value={parseInt(
+                                          previewContent[
+                                            selectedIndex
+                                          ].buttonStyle2.borderRadius.replace(
+                                            "px",
+                                            ""
+                                          )
+                                        )}
+                                        onChange={(e) =>
+                                          updateContent(selectedIndex, {
+                                            buttonStyle2: {
+                                              ...previewContent[selectedIndex]
+                                                .buttonStyle2,
+                                              borderRadius: `${e.target.value}px`,
+                                            },
+                                          })
+                                        }
+                                      />
+                                    </div>
+                                  )}
+                                </div>
+                              )}
+
+                              {previewContent[selectedIndex].type ===
+                                "banner" && (
+                                <>
+                                  <label>Border Radius:</label>
+                                  <input
+                                    type="range"
+                                    min="0"
+                                    max="50"
+                                    value={parseInt(
+                                      previewContent[
+                                        selectedIndex
+                                      ].style.borderRadius.replace("px", "")
+                                    )}
+                                    onChange={(e) =>
+                                      updateContent(selectedIndex, {
+                                        style: {
+                                          ...previewContent[selectedIndex]
+                                            .style,
+                                          borderRadius: `${e.target.value}px`,
+                                        },
+                                      })
+                                    }
+                                  />
+
+                                  <div className="editor-bg">
+                                    Image Background
+                                    <input
+                                      type="color"
+                                      value={
+                                        previewContent[selectedIndex].style
+                                          .backgroundColor || "#ffffff"
+                                      }
+                                      onChange={(e) =>
+                                        updateContent(selectedIndex, {
+                                          style: {
+                                            ...previewContent[selectedIndex]
+                                              .style,
+                                            backgroundColor: e.target.value,
+                                          },
+                                        })
+                                      }
+                                    />
+                                  </div>
+                                </>
+                              )}
+
+                              {previewContent[selectedIndex].type ===
+                                "link-image" && (
+                                <>
+                                  <label>Size (%):</label>
+                                  <input
+                                    type="range"
+                                    min="10"
+                                    max="100"
+                                    value={parseInt(
+                                      previewContent[
+                                        selectedIndex
+                                      ].style.width.replace("%", "")
+                                    )}
+                                    onChange={(e) => {
+                                      const newSize = e.target.value;
+                                      updateContent(selectedIndex, {
+                                        style: {
+                                          ...previewContent[selectedIndex]
+                                            .style,
+                                          width: `${newSize}%`,
+                                          // height: `${newSize * 5}px`, // Adjusting height based on size percentage
+                                        },
+                                      });
+                                    }}
+                                  />
+                                  <span>
+                                    {parseInt(
+                                      previewContent[
+                                        selectedIndex
+                                      ].style.width.replace("%", "")
+                                    )}
+                                    %
+                                  </span>
+
+                                  <label>Border Radius:</label>
+                                  <input
+                                    type="range"
+                                    min="0"
+                                    max="50"
+                                    value={parseInt(
+                                      previewContent[
+                                        selectedIndex
+                                      ].style.borderRadius.replace("px", "")
+                                    )}
+                                    onChange={(e) =>
+                                      updateContent(selectedIndex, {
+                                        style: {
+                                          ...previewContent[selectedIndex]
+                                            .style,
+                                          borderRadius: `${e.target.value}px`,
+                                        },
+                                      })
+                                    }
+                                  />
+
+                                  <ColorPicker
+                                    label="Image Background"
+                                    objectKey="style.backgroundColor"
+                                    previewContent={previewContent}
+                                    selectedIndex={selectedIndex}
+                                    updateContent={updateContent}
+                                  />
+
+                                  <label>Link:</label>
+                                  <input
+                                    type="text"
+                                    placeholder="Enter URL"
+                                    value={
+                                      previewContent[selectedIndex].link || ""
+                                    }
+                                    onChange={(e) =>
+                                      updateContent(selectedIndex, {
+                                        link: e.target.value,
+                                      })
+                                    }
+                                  />
+                                </>
+                              )}
+
+                              {previewContent[selectedIndex].type ===
+                                "logo" && (
+                                <>
+                                  <label>Size (%):</label>
+                                  <input
+                                    type="range"
+                                    min="10"
+                                    max="100"
+                                    value={
+                                      parseInt(
+                                        previewContent[
+                                          selectedIndex
+                                        ].style.width.replace("%", "")
+                                      ) || 50
+                                    }
+                                    onChange={(e) => {
+                                      const newSize = e.target.value;
+                                      updateContent(selectedIndex, {
+                                        style: {
+                                          ...previewContent[selectedIndex]
+                                            .style,
+                                          width: `${newSize}%`,
+                                          // height: `${newSize * 5}px`, // Adjusting height based on size percentage
+                                        },
+                                      });
+                                    }}
+                                  />
+                                  <span>
+                                    {parseInt(
+                                      previewContent[
+                                        selectedIndex
+                                      ].style.width.replace("%", "")
+                                    ) || 50}
+                                    %
+                                  </span>
+
+                                  <label>Border Radius:</label>
+                                  <input
+                                    type="range"
+                                    min="0"
+                                    max="50"
+                                    value={parseInt(
+                                      previewContent[
+                                        selectedIndex
+                                      ].style.borderRadius.replace("px", "")
+                                    )}
+                                    onChange={(e) =>
+                                      updateContent(selectedIndex, {
+                                        style: {
+                                          ...previewContent[selectedIndex]
+                                            .style,
+                                          borderRadius: `${e.target.value}px`,
+                                        },
+                                      })
+                                    }
+                                  />
+                                  <ColorPicker
+                                    label="Image Background"
+                                    objectKey="style.backgroundColor"
+                                    previewContent={previewContent}
+                                    selectedIndex={selectedIndex}
+                                    updateContent={updateContent}
+                                  />
+                                </>
+                              )}
+
+                              {previewContent[selectedIndex].type ===
+                                "textwithimage" && (
+                                <>
+                                  <ColorPicker
+                                    label="Text Color"
+                                    objectKey="style.color"
+                                    previewContent={previewContent}
+                                    selectedIndex={selectedIndex}
+                                    updateContent={updateContent}
+                                  />
+                                  <ColorPicker
+                                    label="Text Background"
+                                    objectKey="style.backgroundColor"
+                                    previewContent={previewContent}
+                                    selectedIndex={selectedIndex}
+                                    updateContent={updateContent}
+                                  />
+                                </>
+                              )}
+
+                              {previewContent[selectedIndex].type ===
+                                "imagewithtext" && (
+                                <>
+                                  <ColorPicker
+                                    label="Text Color"
+                                    objectKey="style1.color"
+                                    previewContent={previewContent}
+                                    selectedIndex={selectedIndex}
+                                    updateContent={updateContent}
+                                  />
+                                  <ColorPicker
+                                    label="Text Background"
+                                    objectKey="style1.backgroundColor"
+                                    previewContent={previewContent}
+                                    selectedIndex={selectedIndex}
+                                    updateContent={updateContent}
+                                  />
+                                </>
+                              )}
+
+                              {previewContent[selectedIndex].type ===
+                                "video-icon" && (
+                                <>
+                                  <label>Size (%):</label>
+                                  <input
+                                    type="range"
+                                    min="50"
+                                    max="100"
+                                    value={parseInt(
+                                      previewContent[
+                                        selectedIndex
+                                      ].style.width.replace("%", "")
+                                    )}
+                                    onChange={(e) => {
+                                      const newSize = e.target.value;
+                                      updateContent(selectedIndex, {
+                                        style: {
+                                          ...previewContent[selectedIndex]
+                                            .style,
+                                          width: `${newSize}%`,
+                                        },
+                                      });
+                                    }}
+                                  />
+                                  <span>
+                                    {parseInt(
+                                      previewContent[
+                                        selectedIndex
+                                      ].style.width.replace("%", "")
+                                    )}
+                                    %
+                                  </span>
+
+                                  <label>Link:</label>
+                                  <input
+                                    type="text"
+                                    placeholder="Enter URL"
+                                    value={
+                                      previewContent[selectedIndex].link || ""
+                                    }
+                                    onChange={(e) =>
+                                      updateContent(selectedIndex, {
+                                        link: e.target.value,
+                                      })
+                                    }
+                                  />
+                                </>
+                              )}
+
+                              {previewContent[selectedIndex].type ===
+                                "image" && (
+                                <>
+                                  <label>Size (%):</label>
+                                  <input
+                                    type="range"
+                                    min="10"
+                                    max="100"
+                                    value={parseInt(
+                                      previewContent[
+                                        selectedIndex
+                                      ].style.width.replace("%", "")
+                                    )}
+                                    onChange={(e) => {
+                                      const newSize = e.target.value;
+                                      updateContent(selectedIndex, {
+                                        style: {
+                                          ...previewContent[selectedIndex]
+                                            .style,
+                                          width: `${newSize}%`,
+                                          // height: `${newSize * 5}px`, // Adjusting height based on size percentage
+                                        },
+                                      });
+                                    }}
+                                  />
+                                  <span>
+                                    {parseInt(
+                                      previewContent[
+                                        selectedIndex
+                                      ].style.width.replace("%", "")
+                                    )}
+                                    %
+                                  </span>
+                                  <label>Border Radius:</label>
+                                  <input
+                                    type="range"
+                                    min="0"
+                                    max="50"
+                                    value={parseInt(
+                                      previewContent[
+                                        selectedIndex
+                                      ].style.borderRadius.replace("px", "")
+                                    )}
+                                    onChange={(e) =>
+                                      updateContent(selectedIndex, {
+                                        style: {
+                                          ...previewContent[selectedIndex]
+                                            .style,
+                                          borderRadius: `${e.target.value}px`,
+                                        },
+                                      })
+                                    }
+                                  />
+
+                                  <ColorPicker
+                                    label="Image Background"
+                                    objectKey="style.backgroundColor"
+                                    previewContent={previewContent}
+                                    selectedIndex={selectedIndex}
+                                    updateContent={updateContent}
+                                  />
+                                </>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                    </>
+                  ) : (
+                    <div className="style-controls" ref={styleControlsRef}>
+                      <h3>Style Controls</h3>
+                      <div className="style-item">
+                        {previewContent[selectedIndex].type === "para" && (
+                          <>
+                            <div className="editor-bg">
+                              Text Color
+                              <input
+                                type="color"
+                                value={
+                                  previewContent[selectedIndex].style.color
+                                }
+                                onChange={(e) =>
+                                  updateContent(selectedIndex, {
+                                    style: {
+                                      ...previewContent[selectedIndex].style,
+                                      color: e.target.value,
+                                    },
+                                  })
+                                }
+                              />
+                            </div>
+                            <div className="editor-bg">
+                              Text Background
+                              <input
+                                type="color"
+                                value={
+                                  previewContent[selectedIndex].style
+                                    .backgroundColor || "#ffffff"
+                                }
+                                onChange={(e) =>
+                                  updateContent(selectedIndex, {
+                                    style: {
+                                      ...previewContent[selectedIndex].style,
+                                      backgroundColor: e.target.value,
+                                    },
+                                  })
+                                }
+                              />
+                            </div>
+                            <label>Border Radius:</label>
+                            <input
+                              type="range"
+                              min="0"
+                              max="50"
+                              value={parseInt(
+                                previewContent[
+                                  selectedIndex
+                                ].style.borderRadius.replace("px", "")
+                              )}
+                              onChange={(e) =>
+                                updateContent(selectedIndex, {
+                                  style: {
+                                    ...previewContent[selectedIndex].style,
+                                    borderRadius: `${e.target.value}px`,
+                                  },
+                                })
+                              }
+                            />
+                          </>
+                        )}
+
+                        {previewContent[selectedIndex].type === "head" && (
+                          <>
+                            <label>Font Size:</label>
+                            <input
+                              type="number"
+                              value={parseInt(
+                                previewContent[
+                                  selectedIndex
+                                ].style.fontSize.replace("px", "")
+                              )}
+                              onChange={(e) =>
+                                updateContent(selectedIndex, {
+                                  style: {
+                                    ...previewContent[selectedIndex].style,
+                                    fontSize: `${e.target.value}px`,
+                                  },
+                                })
+                              }
+                            />
+                            <div className="editor-bg">
+                              Text Color
+                              <input
+                                type="color"
+                                value={
+                                  previewContent[selectedIndex].style.color
+                                }
+                                onChange={(e) =>
+                                  updateContent(selectedIndex, {
+                                    style: {
+                                      ...previewContent[selectedIndex].style,
+                                      color: e.target.value,
+                                    },
+                                  })
+                                }
+                              />
+                            </div>
+                            <div className="editor-bg">
+                              Text Background
+                              <input
+                                type="color"
+                                value={
+                                  previewContent[selectedIndex].style
+                                    .backgroundColor || "#ffffff"
+                                }
+                                onChange={(e) =>
+                                  updateContent(selectedIndex, {
+                                    style: {
+                                      ...previewContent[selectedIndex].style,
+                                      backgroundColor: e.target.value,
+                                    },
+                                  })
+                                }
+                              />
+                            </div>
+                            <label>Text Alignment:</label>
+                            <select
+                              value={
+                                previewContent[selectedIndex].style.textAlign
+                              }
+                              onChange={(e) =>
+                                updateContent(selectedIndex, {
+                                  style: {
+                                    ...previewContent[selectedIndex].style,
+                                    textAlign: e.target.value,
+                                  },
+                                })
+                              }
+                            >
+                              <option value="left">Left</option>
+                              <option value="center">Center</option>
+                              <option value="right">Right</option>
+                            </select>
+                          </>
+                        )}
+                        {previewContent[selectedIndex].type === "button" && (
+                          <>
+                            <label>Button name:</label>
+                            <input
+                              type="text"
+                              placeholder="Enter button name"
+                              value={
+                                previewContent[selectedIndex].content || ""
+                              }
+                              onChange={(e) =>
+                                updateContent(selectedIndex, {
+                                  content: e.target.value,
+                                })
+                              }
+                            />
+                            <div className="editor-bg">
+                              Background Color
+                              <input
+                                type="color"
+                                value={
+                                  previewContent[selectedIndex].style
+                                    .backgroundColor
+                                }
+                                onChange={(e) =>
+                                  updateContent(selectedIndex, {
+                                    style: {
+                                      ...previewContent[selectedIndex].style,
+                                      backgroundColor: e.target.value,
+                                    },
+                                  })
+                                }
+                              />
+                            </div>
+                            <div className="editor-bg">
+                              Text Color
+                              <input
+                                type="color"
+                                value={
+                                  previewContent[selectedIndex].style.color
+                                }
+                                onChange={(e) =>
+                                  updateContent(selectedIndex, {
+                                    style: {
+                                      ...previewContent[selectedIndex].style,
+                                      color: e.target.value,
+                                    },
+                                  })
+                                }
+                              />
+                            </div>
+                            <label>Text Alignment:</label>
+                            <select
+                              value={
+                                previewContent[selectedIndex]?.style
+                                  ?.textAlign || ""
+                              }
+                              onChange={(e) =>
+                                updateContent(selectedIndex, {
+                                  style: {
+                                    ...previewContent[selectedIndex].style,
+                                    textAlign: e.target.value,
+                                  },
+                                })
+                              }
+                            >
+                              <option value="left">Left</option>
+                              <option value="center">Center</option>
+                              <option value="right">Right</option>
+                            </select>
+                            <label>Button Size:</label>
+                            <div>
+                              <button
+                                className="modal-btn-size"
+                                onClick={() =>
+                                  updateContent(selectedIndex, {
+                                    style: {
+                                      ...previewContent[selectedIndex].style,
+                                      width: "50%",
+                                      margin: "0 auto", // Centering the button
+                                    },
+                                  })
+                                }
+                              >
+                                Small
+                              </button>
+                              <button
+                                className="modal-btn-size"
+                                onClick={() =>
+                                  updateContent(selectedIndex, {
+                                    style: {
+                                      ...previewContent[selectedIndex].style,
+                                      width: "70%",
+                                      margin: "0 auto",
+                                    },
+                                  })
+                                }
+                              >
+                                Medium
+                              </button>
+                              <button
+                                className="modal-btn-size"
+                                onClick={() =>
+                                  updateContent(selectedIndex, {
+                                    style: {
+                                      ...previewContent[selectedIndex].style,
+                                      width: "90%",
+                                      margin: "0 auto",
+                                    },
+                                  })
+                                }
+                              >
+                                Large
+                              </button>
+                            </div>
+
+                            <label>Border Radius:</label>
+                            <input
+                              type="range"
+                              min="0"
+                              max="50"
+                              value={parseInt(
+                                previewContent[
+                                  selectedIndex
+                                ].style.borderRadius.replace("px", "")
+                              )}
+                              onChange={(e) =>
+                                updateContent(selectedIndex, {
+                                  style: {
+                                    ...previewContent[selectedIndex].style,
+                                    borderRadius: `${e.target.value}px`,
+                                  },
+                                })
+                              }
+                            />
+                            <label>Button Text Size:</label>
+                            <input
+                              type="range"
+                              min="10"
+                              max="30"
+                              value={parseInt(
+                                (
+                                  previewContent[selectedIndex]?.style
+                                    ?.fontSize || "15px"
+                                ).replace("px", "")
+                              )}
+                              onChange={(e) =>
+                                updateContent(selectedIndex, {
+                                  style: {
+                                    ...previewContent[selectedIndex].style,
+                                    fontSize: `${e.target.value}px`,
+                                  },
+                                })
+                              }
+                            />
+
+                            <label>Link:</label>
+                            <input
+                              type="text"
+                              placeholder="Enter URL"
+                              value={previewContent[selectedIndex].link || ""}
+                              onChange={(e) =>
+                                updateContent(selectedIndex, {
+                                  link: e.target.value,
+                                })
+                              }
+                            />
+                          </>
+                        )}
+
+                        {/* New Editor for Multi-Image Links and Button Styling */}
+                        {previewContent[selectedIndex].type ===
+                          "multi-image" && (
                           <div>
                             <div className="tab-container-style">
                               <button
@@ -2044,7 +4356,7 @@ const TemMainpage = () => {
                                 }`}
                                 onClick={() => setActiveTab("button1")}
                               >
-                                Card Style-1
+                                Button-1
                               </button>
                               <button
                                 className={`tab-style ${
@@ -2052,67 +4364,13 @@ const TemMainpage = () => {
                                 }`}
                                 onClick={() => setActiveTab("button2")}
                               >
-                                Card Style-2
+                                Button-2
                               </button>
                             </div>
 
                             {activeTab === "button1" && (
                               <div className="style-editor">
-                                <h4 className="preview-title-card">
-                                Product-1
-                                </h4>
-                                {/* Title 1 */}
-                                <label>Product Title:</label>
-                                <input
-                                  type="text"
-                                  placeholder="Enter product title"
-                                  value={
-                                    previewContent[selectedIndex].title1 || ""
-                                  }
-                                  onChange={(e) =>
-                                    updateContent(selectedIndex, {
-                                      title1: e.target.value,
-                                    })
-                                  }
-                                />
-
-                                {/* Original Price 1 */}
-                                <label>Original Price:</label>
-                                <input
-                                  type="number"
-                                  placeholder="Enter original price"
-                                  value={
-                                    previewContent[selectedIndex]
-                                      .originalPrice1 || ""
-                                  }
-                                  onChange={(e) =>
-                                    updateContent(selectedIndex, {
-                                      originalPrice1: e.target.value,
-                                    })
-                                  }
-                                />
-
-                                {/* Offer Price 1 */}
-                                <label>Offer Price:</label>
-                                <input
-                                  type="number"
-                                  placeholder="Enter offer price"
-                                  value={
-                                    previewContent[selectedIndex].offerPrice1 ||
-                                    ""
-                                  }
-                                  onChange={(e) =>
-                                    updateContent(selectedIndex, {
-                                      offerPrice1: e.target.value,
-                                    })
-                                  }
-                                />
-
-
-                                <h4 className="preview-title-card">
-                                  Button-1 
-                                </h4>
-
+                                <h4>Button-1 Styles</h4>
                                 <label>Button Name:</label>
                                 <input
                                   type="text"
@@ -2268,59 +4526,7 @@ const TemMainpage = () => {
 
                             {activeTab === "button2" && (
                               <div className="style-editor">
-                                {/* Title 2 */}
-                                <h4 className="preview-title-card">
-                                Product-2
-                                </h4>
-                                <label>Product Title:</label>
-                                <input
-                                  type="text"
-                                  placeholder="Enter product title"
-                                  value={
-                                    previewContent[selectedIndex].title2 || ""
-                                  }
-                                  onChange={(e) =>
-                                    updateContent(selectedIndex, {
-                                      title2: e.target.value,
-                                    })
-                                  }
-                                />
-
-                                {/* Original Price 2 */}
-                                <label>Original Price:</label>
-                                <input
-                                  type="number"
-                                  placeholder="Enter original price"
-                                  value={
-                                    previewContent[selectedIndex]
-                                      .originalPrice2 || ""
-                                  }
-                                  onChange={(e) =>
-                                    updateContent(selectedIndex, {
-                                      originalPrice2: e.target.value,
-                                    })
-                                  }
-                                />
-
-                                {/* Offer Price 2 */}
-                                <label>Offer Price:</label>
-                                <input
-                                  type="number"
-                                  placeholder="Enter offer price"
-                                  value={
-                                    previewContent[selectedIndex].offerPrice2 ||
-                                    ""
-                                  }
-                                  onChange={(e) =>
-                                    updateContent(selectedIndex, {
-                                      offerPrice2: e.target.value,
-                                    })
-                                  }
-                                />
-
-                                <h4 className="preview-title-card">
-                                  Button-2 
-                                </h4>
+                                <h4>Button-2 Styles</h4>
                                 <label>Button Name:</label>
                                 <input
                                   type="text"
@@ -2479,2581 +4685,516 @@ const TemMainpage = () => {
                           </div>
                         )}
 
-                                {previewContent[selectedIndex].type ===
-                                  "cardimage" && (
-                                  <>
-                                    <ColorPicker
-                                      label="Text Color"
-                                      objectKey="style1.color"
-                                      previewContent={previewContent}
-                                      selectedIndex={selectedIndex}
-                                      updateContent={updateContent}
-                                    />
-                                    <ColorPicker
-                                      label="Text Background"
-                                      objectKey="style1.backgroundColor"
-                                      previewContent={previewContent}
-                                      selectedIndex={selectedIndex}
-                                      updateContent={updateContent}
-                                    />
-                                  </>
-                                )}
-
-                                {previewContent[selectedIndex].type ===
-                                  "head" && (
-                                  <>
-                                    <label>Font Size:</label>
-                                    <input
-                                      type="number"
-                                      value={parseInt(
-                                        previewContent[
-                                          selectedIndex
-                                        ].style.fontSize.replace("px", "")
-                                      )}
-                                      onChange={(e) =>
-                                        updateContent(selectedIndex, {
-                                          style: {
-                                            ...previewContent[selectedIndex]
-                                              .style,
-                                            fontSize: `${e.target.value}px`,
-                                          },
-                                        })
-                                      }
-                                    />
-                                    <ColorPicker
-                                      label="Text Color"
-                                      objectKey="style.color"
-                                      previewContent={previewContent}
-                                      selectedIndex={selectedIndex}
-                                      updateContent={updateContent}
-                                    />
-                                    <ColorPicker
-                                      label="Text Background"
-                                      objectKey="style.backgroundColor"
-                                      previewContent={previewContent}
-                                      selectedIndex={selectedIndex}
-                                      updateContent={updateContent}
-                                    />
-                                    <label>Text Alignment:</label>
-                                    <select
-                                      value={
-                                        previewContent[selectedIndex].style
-                                          .textAlign
-                                      }
-                                      onChange={(e) =>
-                                        updateContent(selectedIndex, {
-                                          style: {
-                                            ...previewContent[selectedIndex]
-                                              .style,
-                                            textAlign: e.target.value,
-                                          },
-                                        })
-                                      }
-                                    >
-                                      <option value="left">Left</option>
-                                      <option value="center">Center</option>
-                                      <option value="right">Right</option>
-                                    </select>
-                                  </>
-                                )}
-                                {previewContent[selectedIndex].type ===
-                                  "button" && (
-                                  <>
-                                    <label>Button name:</label>
-                                    <input
-                                      type="text"
-                                      placeholder="Enter button name"
-                                      value={
-                                        previewContent[selectedIndex].content ||
-                                        ""
-                                      }
-                                      onChange={(e) =>
-                                        updateContent(selectedIndex, {
-                                          content: e.target.value,
-                                        })
-                                      }
-                                    />
-                                    <ColorPicker
-                                      label="Text Color"
-                                      objectKey="style.color"
-                                      previewContent={previewContent}
-                                      selectedIndex={selectedIndex}
-                                      updateContent={updateContent}
-                                    />
-                                    <ColorPicker
-                                      label="Text Background"
-                                      objectKey="style.backgroundColor"
-                                      previewContent={previewContent}
-                                      selectedIndex={selectedIndex}
-                                      updateContent={updateContent}
-                                    />
-                                    <label>Text Alignment:</label>
-                                    <select
-                                      value={
-                                        previewContent[selectedIndex]?.style
-                                          ?.textAlign || ""
-                                      }
-                                      onChange={(e) =>
-                                        updateContent(selectedIndex, {
-                                          style: {
-                                            ...previewContent[selectedIndex]
-                                              .style,
-                                            textAlign: e.target.value,
-                                          },
-                                        })
-                                      }
-                                    >
-                                      <option value="left">Left</option>
-                                      <option value="center">Center</option>
-                                      <option value="right">Right</option>
-                                    </select>
-                                    <label>Button Size:</label>
-                                    <div>
-                                      <button
-                                        className="modal-btn-size"
-                                        onClick={() =>
-                                          updateContent(selectedIndex, {
-                                            style: {
-                                              ...previewContent[selectedIndex]
-                                                .style,
-                                              width: "50%",
-                                              margin: "0 auto", // Centering the button
-                                            },
-                                          })
-                                        }
-                                      >
-                                        Small
-                                      </button>
-                                      <button
-                                        className="modal-btn-size"
-                                        onClick={() =>
-                                          updateContent(selectedIndex, {
-                                            style: {
-                                              ...previewContent[selectedIndex]
-                                                .style,
-                                              width: "70%",
-                                              margin: "0 auto",
-                                            },
-                                          })
-                                        }
-                                      >
-                                        Medium
-                                      </button>
-                                      <button
-                                        className="modal-btn-size"
-                                        onClick={() =>
-                                          updateContent(selectedIndex, {
-                                            style: {
-                                              ...previewContent[selectedIndex]
-                                                .style,
-                                              width: "90%",
-                                              margin: "0 auto",
-                                            },
-                                          })
-                                        }
-                                      >
-                                        Large
-                                      </button>
-                                    </div>
-
-                                    <label>Border Radius:</label>
-                                    <input
-                                      type="range"
-                                      min="0"
-                                      max="50"
-                                      value={parseInt(
-                                        previewContent[
-                                          selectedIndex
-                                        ].style.borderRadius.replace("px", "")
-                                      )}
-                                      onChange={(e) =>
-                                        updateContent(selectedIndex, {
-                                          style: {
-                                            ...previewContent[selectedIndex]
-                                              .style,
-                                            borderRadius: `${e.target.value}px`,
-                                          },
-                                        })
-                                      }
-                                    />
-                                    <label>Button Text Size:</label>
-                                    <input
-                                      type="range"
-                                      min="10"
-                                      max="30"
-                                      value={parseInt(
-                                        (
-                                          previewContent[selectedIndex]?.style
-                                            ?.fontSize || "15px"
-                                        ).replace("px", "")
-                                      )}
-                                      onChange={(e) =>
-                                        updateContent(selectedIndex, {
-                                          style: {
-                                            ...previewContent[selectedIndex]
-                                              .style,
-                                            fontSize: `${e.target.value}px`,
-                                          },
-                                        })
-                                      }
-                                    />
-
-                                    <label>Link:</label>
-                                    <input
-                                      type="text"
-                                      placeholder="Enter URL"
-                                      value={
-                                        previewContent[selectedIndex].link || ""
-                                      }
-                                      onChange={(e) =>
-                                        updateContent(selectedIndex, {
-                                          link: e.target.value,
-                                        })
-                                      }
-                                    />
-                                  </>
-                                )}
-
-                                {/* New Editor for Multi-Image Links and Button Styling */}
-                                {previewContent[selectedIndex].type ===
-                                  "multi-image" && (
-                                  <>
-                                    <h4>Button-1 Styles</h4>
-                                    <div>
-                                      <label>Button Name:</label>
-                                      <input
-                                        type="text"
-                                        placeholder="Enter button name"
-                                        value={
-                                          previewContent[selectedIndex]
-                                            .content1 || ""
-                                        }
-                                        onChange={(e) =>
-                                          updateContent(selectedIndex, {
-                                            content1: e.target.value,
-                                          })
-                                        }
-                                      />
-                                      <label>Button Link:</label>
-                                      <input
-                                        type="text"
-                                        value={
-                                          previewContent[selectedIndex].link1
-                                        }
-                                        onChange={(e) =>
-                                          updateContent(selectedIndex, {
-                                            link1: e.target.value,
-                                          })
-                                        }
-                                      />
-                                      <ColorPicker
-                                        label="Button Text Color"
-                                        objectKey="buttonStyle1.color"
-                                        previewContent={previewContent}
-                                        selectedIndex={selectedIndex}
-                                        updateContent={updateContent}
-                                      />
-                                      <ColorPicker
-                                        label="Button Text Background"
-                                        objectKey="buttonStyle1.backgroundColor"
-                                        previewContent={previewContent}
-                                        selectedIndex={selectedIndex}
-                                        updateContent={updateContent}
-                                      />
-                                      <label>Text Alignment:</label>
-                                      <select
-                                        value={
-                                          previewContent[selectedIndex]
-                                            ?.buttonStyle1?.textAlign || ""
-                                        }
-                                        onChange={(e) =>
-                                          updateContent(selectedIndex, {
-                                            buttonStyle1: {
-                                              ...previewContent[selectedIndex]
-                                                .buttonStyle1,
-                                              textAlign: e.target.value,
-                                            },
-                                          })
-                                        }
-                                      >
-                                        <option value="left">Left</option>
-                                        <option value="center">Center</option>
-                                        <option value="right">Right</option>
-                                      </select>
-                                      <label>Button Size:</label>
-                                      <div>
-                                        <button
-                                          className="modal-btn-size"
-                                          onClick={() =>
-                                            updateContent(selectedIndex, {
-                                              buttonStyle1: {
-                                                ...previewContent[selectedIndex]
-                                                  .buttonStyle1,
-                                                width: "auto",
-                                              },
-                                            })
-                                          }
-                                        >
-                                          Small
-                                        </button>
-                                        <button
-                                          className="modal-btn-size"
-                                          onClick={() =>
-                                            updateContent(selectedIndex, {
-                                              buttonStyle1: {
-                                                ...previewContent[selectedIndex]
-                                                  .buttonStyle1,
-                                                width: "50%",
-                                              },
-                                            })
-                                          }
-                                        >
-                                          Medium
-                                        </button>
-                                        <button
-                                          className="modal-btn-size"
-                                          onClick={() =>
-                                            updateContent(selectedIndex, {
-                                              buttonStyle1: {
-                                                ...previewContent[selectedIndex]
-                                                  .buttonStyle1,
-                                                width: "80%",
-                                              },
-                                            })
-                                          }
-                                        >
-                                          Large
-                                        </button>
-                                      </div>
-                                      <label>Border Radius:</label>
-                                      <input
-                                        type="range"
-                                        min="0"
-                                        max="50"
-                                        value={parseInt(
-                                          previewContent[
-                                            selectedIndex
-                                          ].buttonStyle1.borderRadius.replace(
-                                            "px",
-                                            ""
-                                          )
-                                        )}
-                                        onChange={(e) =>
-                                          updateContent(selectedIndex, {
-                                            buttonStyle1: {
-                                              ...previewContent[selectedIndex]
-                                                .buttonStyle1,
-                                              borderRadius: `${e.target.value}px`,
-                                            },
-                                          })
-                                        }
-                                      />
-                                    </div>
-                                    <h4>Button-2 Style</h4>
-                                    <div>
-                                      <label>Button Name:</label>
-                                      <input
-                                        type="text"
-                                        placeholder="Enter button name"
-                                        value={
-                                          previewContent[selectedIndex]
-                                            .content2 || ""
-                                        }
-                                        onChange={(e) =>
-                                          updateContent(selectedIndex, {
-                                            content2: e.target.value,
-                                          })
-                                        }
-                                      />
-
-                                      <label>Button Link:</label>
-                                      <input
-                                        type="text"
-                                        value={
-                                          previewContent[selectedIndex].link2
-                                        }
-                                        onChange={(e) =>
-                                          updateContent(selectedIndex, {
-                                            link2: e.target.value,
-                                          })
-                                        }
-                                      />
-
-                                      <ColorPicker
-                                        label="Button Text Color"
-                                        objectKey="buttonStyle2.color"
-                                        previewContent={previewContent}
-                                        selectedIndex={selectedIndex}
-                                        updateContent={updateContent}
-                                      />
-                                      <ColorPicker
-                                        label="Button Text Background"
-                                        objectKey="buttonStyle2.backgroundColor"
-                                        previewContent={previewContent}
-                                        selectedIndex={selectedIndex}
-                                        updateContent={updateContent}
-                                      />
-
-                                      <label>Text Alignment:</label>
-                                      <select
-                                        value={
-                                          previewContent[selectedIndex]
-                                            ?.buttonStyle2?.textAlign || ""
-                                        }
-                                        onChange={(e) =>
-                                          updateContent(selectedIndex, {
-                                            buttonStyle2: {
-                                              ...previewContent[selectedIndex]
-                                                .buttonStyle2,
-                                              textAlign: e.target.value,
-                                            },
-                                          })
-                                        }
-                                      >
-                                        <option value="left">Left</option>
-                                        <option value="center">Center</option>
-                                        <option value="right">Right</option>
-                                      </select>
-
-                                      <label>Button Size:</label>
-                                      <div>
-                                        <button
-                                          className="modal-btn-size"
-                                          onClick={() =>
-                                            updateContent(selectedIndex, {
-                                              buttonStyle2: {
-                                                ...previewContent[selectedIndex]
-                                                  .buttonStyle2,
-                                                width: "auto",
-                                              },
-                                            })
-                                          }
-                                        >
-                                          Small
-                                        </button>
-                                        <button
-                                          className="modal-btn-size"
-                                          onClick={() =>
-                                            updateContent(selectedIndex, {
-                                              buttonStyle2: {
-                                                ...previewContent[selectedIndex]
-                                                  .buttonStyle2,
-                                                width: "50%",
-                                              },
-                                            })
-                                          }
-                                        >
-                                          Medium
-                                        </button>
-                                        <button
-                                          className="modal-btn-size"
-                                          onClick={() =>
-                                            updateContent(selectedIndex, {
-                                              buttonStyle2: {
-                                                ...previewContent[selectedIndex]
-                                                  .buttonStyle2,
-                                                width: "80%",
-                                              },
-                                            })
-                                          }
-                                        >
-                                          Large
-                                        </button>
-                                      </div>
-
-                                      <label>Border Radius:</label>
-                                      <input
-                                        type="range"
-                                        min="0"
-                                        max="50"
-                                        value={parseInt(
-                                          previewContent[
-                                            selectedIndex
-                                          ].buttonStyle2.borderRadius.replace(
-                                            "px",
-                                            ""
-                                          )
-                                        )}
-                                        onChange={(e) =>
-                                          updateContent(selectedIndex, {
-                                            buttonStyle2: {
-                                              ...previewContent[selectedIndex]
-                                                .buttonStyle2,
-                                              borderRadius: `${e.target.value}px`,
-                                            },
-                                          })
-                                        }
-                                      />
-                                    </div>
-                                  </>
-                                )}
-
-                                {previewContent[selectedIndex]?.type ===
-                                  "icons" && (
-                                  <>
-                                    <ColorPicker
-                                      label="Background Color"
-                                      objectKey="ContentStyle.backgroundColor"
-                                      previewContent={previewContent}
-                                      selectedIndex={selectedIndex}
-                                      updateContent={updateContent}
-                                    />
-                                    <label>Link1:</label>
-                                    <input
-                                      type="text"
-                                      placeholder="Enter URL"
-                                      value={
-                                        previewContent[selectedIndex].links1 ||
-                                        ""
-                                      }
-                                      onChange={(e) =>
-                                        updateContent(selectedIndex, {
-                                          links1: e.target.value,
-                                        })
-                                      }
-                                    />
-
-                                    <label>Link2:</label>
-                                    <input
-                                      type="text"
-                                      placeholder="Enter URL"
-                                      value={
-                                        previewContent[selectedIndex].links2 ||
-                                        ""
-                                      }
-                                      onChange={(e) =>
-                                        updateContent(selectedIndex, {
-                                          links2: e.target.value,
-                                        })
-                                      }
-                                    />
-
-                                    <label>Link3:</label>
-                                    <input
-                                      type="text"
-                                      placeholder="Enter URL"
-                                      value={
-                                        previewContent[selectedIndex].links3 ||
-                                        ""
-                                      }
-                                      onChange={(e) =>
-                                        updateContent(selectedIndex, {
-                                          links3: e.target.value,
-                                        })
-                                      }
-                                    />
-
-                                    <label>Link4:</label>
-                                    <input
-                                      type="text"
-                                      placeholder="Enter URL"
-                                      value={
-                                        previewContent[selectedIndex].links4 ||
-                                        ""
-                                      }
-                                      onChange={(e) =>
-                                        updateContent(selectedIndex, {
-                                          links4: e.target.value,
-                                        })
-                                      }
-                                    />
-                                  </>
-                                )}
-                                {/* btn card with muliple-image content  */}
-                                {/* New Editor for Multi-Image Links and Button Styling */}
-                                {previewContent[selectedIndex].type ===
-                                  "multi-image-card" && (
-                                  <div>
-                                    <div className="tab-container-style">
-                                      <button
-                                        className={`tab-style ${
-                                          activeTab === "button1"
-                                            ? "active"
-                                            : ""
-                                        }`}
-                                        onClick={() => setActiveTab("button1")}
-                                      >
-                                        Button-1
-                                      </button>
-                                      <button
-                                        className={`tab-style ${
-                                          activeTab === "button2"
-                                            ? "active"
-                                            : ""
-                                        }`}
-                                        onClick={() => setActiveTab("button2")}
-                                      >
-                                        Button-2
-                                      </button>
-                                    </div>
-
-                                    {activeTab === "button1" && (
-                                      <div className="style-editor">
-                                        <h4>Card Product 1</h4>
-                                        {/* Title 1 */}
-                                        <label>Product Title 1:</label>
-                                        <input
-                                          type="text"
-                                          placeholder="Enter product title"
-                                          value={
-                                            previewContent[selectedIndex]
-                                              .title1 || ""
-                                          }
-                                          onChange={(e) =>
-                                            updateContent(selectedIndex, {
-                                              title1: e.target.value,
-                                            })
-                                          }
-                                        />
-
-                                        {/* Original Price 1 */}
-                                        <label>Original Price 1:</label>
-                                        <input
-                                          type="number"
-                                          placeholder="Enter original price"
-                                          value={
-                                            previewContent[selectedIndex]
-                                              .originalPrice1 || ""
-                                          }
-                                          onChange={(e) =>
-                                            updateContent(selectedIndex, {
-                                              originalPrice1: e.target.value,
-                                            })
-                                          }
-                                        />
-
-                                        {/* Offer Price 1 */}
-                                        <label>Offer Price 1:</label>
-                                        <input
-                                          type="number"
-                                          placeholder="Enter offer price"
-                                          value={
-                                            previewContent[selectedIndex]
-                                              .offerPrice1 || ""
-                                          }
-                                          onChange={(e) =>
-                                            updateContent(selectedIndex, {
-                                              offerPrice1: e.target.value,
-                                            })
-                                          }
-                                        />
-
-                                        {/* Text Color */}
-                                        {/* <ColorPicker
-                                  label="Text Color"
-                                  objectKey="style.color"
-                                  previewContent={previewContent}
-                                  selectedIndex={selectedIndex}
-                                  updateContent={updateContent}
-                                /> */}
-
-                                        {/* Background Color */}
-                                        {/* <ColorPicker
-                                  label="Background Color"
-                                  objectKey="style.backgroundColor"
-                                  previewContent={previewContent}
-                                  selectedIndex={selectedIndex}
-                                  updateContent={updateContent}
-                                /> */}
-
-                                        <h4>Button-1 Styles</h4>
-
-                                        <label>Button Name:</label>
-                                        <input
-                                          type="text"
-                                          placeholder="Enter button name"
-                                          value={
-                                            previewContent[selectedIndex]
-                                              .content1 || ""
-                                          }
-                                          onChange={(e) =>
-                                            updateContent(selectedIndex, {
-                                              content1: e.target.value,
-                                            })
-                                          }
-                                        />
-                                        <label>Button Link:</label>
-                                        <input
-                                          type="text"
-                                          value={
-                                            previewContent[selectedIndex].link1
-                                          }
-                                          onChange={(e) =>
-                                            updateContent(selectedIndex, {
-                                              link1: e.target.value,
-                                            })
-                                          }
-                                        />
-                                        <div className="editor-bg">
-                                          Button Text Color:
-                                          <input
-                                            type="color"
-                                            value={
-                                              previewContent[selectedIndex]
-                                                .buttonStyle1.color
-                                            }
-                                            onChange={(e) =>
-                                              updateContent(selectedIndex, {
-                                                buttonStyle1: {
-                                                  ...previewContent[
-                                                    selectedIndex
-                                                  ].buttonStyle1,
-                                                  color: e.target.value,
-                                                },
-                                              })
-                                            }
-                                          />
-                                        </div>
-                                        <div className="editor-bg">
-                                          Button Background Color:
-                                          <input
-                                            type="color"
-                                            value={
-                                              previewContent[selectedIndex]
-                                                .buttonStyle1.backgroundColor
-                                            }
-                                            onChange={(e) =>
-                                              updateContent(selectedIndex, {
-                                                buttonStyle1: {
-                                                  ...previewContent[
-                                                    selectedIndex
-                                                  ].buttonStyle1,
-                                                  backgroundColor:
-                                                    e.target.value,
-                                                },
-                                              })
-                                            }
-                                          />
-                                        </div>
-
-                                        <label>Text Alignment:</label>
-                                        <select
-                                          value={
-                                            previewContent[selectedIndex]
-                                              ?.buttonStyle1?.textAlign || ""
-                                          }
-                                          onChange={(e) =>
-                                            updateContent(selectedIndex, {
-                                              buttonStyle1: {
-                                                ...previewContent[selectedIndex]
-                                                  .buttonStyle1,
-                                                textAlign: e.target.value,
-                                              },
-                                            })
-                                          }
-                                        >
-                                          <option value="left">Left</option>
-                                          <option value="center">Center</option>
-                                          <option value="right">Right</option>
-                                        </select>
-                                        <label>Button Size:</label>
-                                        <div>
-                                          <button
-                                            className="modal-btn-size"
-                                            onClick={() =>
-                                              updateContent(selectedIndex, {
-                                                buttonStyle1: {
-                                                  ...previewContent[
-                                                    selectedIndex
-                                                  ].buttonStyle1,
-                                                  width: "auto",
-                                                },
-                                              })
-                                            }
-                                          >
-                                            Small
-                                          </button>
-                                          <button
-                                            className="modal-btn-size"
-                                            onClick={() =>
-                                              updateContent(selectedIndex, {
-                                                buttonStyle1: {
-                                                  ...previewContent[
-                                                    selectedIndex
-                                                  ].buttonStyle1,
-                                                  width: "50%",
-                                                },
-                                              })
-                                            }
-                                          >
-                                            Medium
-                                          </button>
-                                          <button
-                                            className="modal-btn-size"
-                                            onClick={() =>
-                                              updateContent(selectedIndex, {
-                                                buttonStyle1: {
-                                                  ...previewContent[
-                                                    selectedIndex
-                                                  ].buttonStyle1,
-                                                  width: "80%",
-                                                },
-                                              })
-                                            }
-                                          >
-                                            Large
-                                          </button>
-                                        </div>
-                                        <label>Border Radius:</label>
-                                        <input
-                                          type="range"
-                                          min="0"
-                                          max="50"
-                                          value={parseInt(
-                                            previewContent[
-                                              selectedIndex
-                                            ].buttonStyle1.borderRadius.replace(
-                                              "px",
-                                              ""
-                                            )
-                                          )}
-                                          onChange={(e) =>
-                                            updateContent(selectedIndex, {
-                                              buttonStyle1: {
-                                                ...previewContent[selectedIndex]
-                                                  .buttonStyle1,
-                                                borderRadius: `${e.target.value}px`,
-                                              },
-                                            })
-                                          }
-                                        />
-                                      </div>
-                                    )}
-
-                                    {activeTab === "button2" && (
-                                      <div className="style-editor">
-                                        {/* Title 2 */}
-                                        <h4>Card Product 1</h4>
-                                        <label>Product Title 2:</label>
-                                        <input
-                                          type="text"
-                                          placeholder="Enter product title"
-                                          value={
-                                            previewContent[selectedIndex]
-                                              .title2 || ""
-                                          }
-                                          onChange={(e) =>
-                                            updateContent(selectedIndex, {
-                                              title2: e.target.value,
-                                            })
-                                          }
-                                        />
-
-                                        {/* Original Price 2 */}
-                                        <label>Original Price 2:</label>
-                                        <input
-                                          type="number"
-                                          placeholder="Enter original price"
-                                          value={
-                                            previewContent[selectedIndex]
-                                              .originalPrice2 || ""
-                                          }
-                                          onChange={(e) =>
-                                            updateContent(selectedIndex, {
-                                              originalPrice2: e.target.value,
-                                            })
-                                          }
-                                        />
-
-                                        {/* Offer Price 2 */}
-                                        <label>Offer Price 2:</label>
-                                        <input
-                                          type="number"
-                                          placeholder="Enter offer price"
-                                          value={
-                                            previewContent[selectedIndex]
-                                              .offerPrice2 || ""
-                                          }
-                                          onChange={(e) =>
-                                            updateContent(selectedIndex, {
-                                              offerPrice2: e.target.value,
-                                            })
-                                          }
-                                        />
-
-                                        <h4>Button-2 Styles</h4>
-                                        <label>Button Name:</label>
-                                        <input
-                                          type="text"
-                                          placeholder="Enter button name"
-                                          value={
-                                            previewContent[selectedIndex]
-                                              .content2 || ""
-                                          }
-                                          onChange={(e) =>
-                                            updateContent(selectedIndex, {
-                                              content2: e.target.value,
-                                            })
-                                          }
-                                        />
-                                        <label>Button Link:</label>
-                                        <input
-                                          type="text"
-                                          value={
-                                            previewContent[selectedIndex].link2
-                                          }
-                                          onChange={(e) =>
-                                            updateContent(selectedIndex, {
-                                              link2: e.target.value,
-                                            })
-                                          }
-                                        />
-                                        <div className="editor-bg">
-                                          Button Text Color:
-                                          <input
-                                            type="color"
-                                            value={
-                                              previewContent[selectedIndex]
-                                                .buttonStyle2.color
-                                            }
-                                            onChange={(e) =>
-                                              updateContent(selectedIndex, {
-                                                buttonStyle2: {
-                                                  ...previewContent[
-                                                    selectedIndex
-                                                  ].buttonStyle2,
-                                                  color: e.target.value,
-                                                },
-                                              })
-                                            }
-                                          />
-                                        </div>
-
-                                        <div className="editor-bg">
-                                          Button Background Color:
-                                          <input
-                                            type="color"
-                                            value={
-                                              previewContent[selectedIndex]
-                                                .buttonStyle2.backgroundColor
-                                            }
-                                            onChange={(e) =>
-                                              updateContent(selectedIndex, {
-                                                buttonStyle2: {
-                                                  ...previewContent[
-                                                    selectedIndex
-                                                  ].buttonStyle2,
-                                                  backgroundColor:
-                                                    e.target.value,
-                                                },
-                                              })
-                                            }
-                                          />
-                                        </div>
-
-                                        <label>Text Alignment:</label>
-                                        <select
-                                          value={
-                                            previewContent[selectedIndex]
-                                              ?.buttonStyle2?.textAlign || ""
-                                          }
-                                          onChange={(e) =>
-                                            updateContent(selectedIndex, {
-                                              buttonStyle2: {
-                                                ...previewContent[selectedIndex]
-                                                  .buttonStyle2,
-                                                textAlign: e.target.value,
-                                              },
-                                            })
-                                          }
-                                        >
-                                          <option value="left">Left</option>
-                                          <option value="center">Center</option>
-                                          <option value="right">Right</option>
-                                        </select>
-
-                                        <label>Button Size:</label>
-                                        <div>
-                                          <button
-                                            className="modal-btn-size"
-                                            onClick={() =>
-                                              updateContent(selectedIndex, {
-                                                buttonStyle2: {
-                                                  ...previewContent[
-                                                    selectedIndex
-                                                  ].buttonStyle2,
-                                                  width: "auto",
-                                                },
-                                              })
-                                            }
-                                          >
-                                            Small
-                                          </button>
-                                          <button
-                                            className="modal-btn-size"
-                                            onClick={() =>
-                                              updateContent(selectedIndex, {
-                                                buttonStyle2: {
-                                                  ...previewContent[
-                                                    selectedIndex
-                                                  ].buttonStyle2,
-                                                  width: "50%",
-                                                },
-                                              })
-                                            }
-                                          >
-                                            Medium
-                                          </button>
-                                          <button
-                                            className="modal-btn-size"
-                                            onClick={() =>
-                                              updateContent(selectedIndex, {
-                                                buttonStyle2: {
-                                                  ...previewContent[
-                                                    selectedIndex
-                                                  ].buttonStyle2,
-                                                  width: "80%",
-                                                },
-                                              })
-                                            }
-                                          >
-                                            Large
-                                          </button>
-                                        </div>
-
-                                        <label>Border Radius:</label>
-                                        <input
-                                          type="range"
-                                          min="0"
-                                          max="50"
-                                          value={parseInt(
-                                            previewContent[
-                                              selectedIndex
-                                            ].buttonStyle2.borderRadius.replace(
-                                              "px",
-                                              ""
-                                            )
-                                          )}
-                                          onChange={(e) =>
-                                            updateContent(selectedIndex, {
-                                              buttonStyle2: {
-                                                ...previewContent[selectedIndex]
-                                                  .buttonStyle2,
-                                                borderRadius: `${e.target.value}px`,
-                                              },
-                                            })
-                                          }
-                                        />
-                                      </div>
-                                    )}
-                                  </div>
-                                )}
-
-                                {previewContent[selectedIndex].type ===
-                                  "banner" && (
-                                  <>
-                                    <label>Border Radius:</label>
-                                    <input
-                                      type="range"
-                                      min="0"
-                                      max="50"
-                                      value={parseInt(
-                                        previewContent[
-                                          selectedIndex
-                                        ].style.borderRadius.replace("px", "")
-                                      )}
-                                      onChange={(e) =>
-                                        updateContent(selectedIndex, {
-                                          style: {
-                                            ...previewContent[selectedIndex]
-                                              .style,
-                                            borderRadius: `${e.target.value}px`,
-                                          },
-                                        })
-                                      }
-                                    />
-
-                                    <div className="editor-bg">
-                                      Image Background
-                                      <input
-                                        type="color"
-                                        value={
-                                          previewContent[selectedIndex].style
-                                            .backgroundColor || "#ffffff"
-                                        }
-                                        onChange={(e) =>
-                                          updateContent(selectedIndex, {
-                                            style: {
-                                              ...previewContent[selectedIndex]
-                                                .style,
-                                              backgroundColor: e.target.value,
-                                            },
-                                          })
-                                        }
-                                      />
-                                    </div>
-                                  </>
-                                )}
-
-                                {previewContent[selectedIndex].type ===
-                                  "link-image" && (
-                                  <>
-                                    <label>Size (%):</label>
-                                    <input
-                                      type="range"
-                                      min="10"
-                                      max="100"
-                                      value={parseInt(
-                                        previewContent[
-                                          selectedIndex
-                                        ].style.width.replace("%", "")
-                                      )}
-                                      onChange={(e) => {
-                                        const newSize = e.target.value;
-                                        updateContent(selectedIndex, {
-                                          style: {
-                                            ...previewContent[selectedIndex]
-                                              .style,
-                                            width: `${newSize}%`,
-                                            // height: `${newSize * 5}px`, // Adjusting height based on size percentage
-                                          },
-                                        });
-                                      }}
-                                    />
-                                    <span>
-                                      {parseInt(
-                                        previewContent[
-                                          selectedIndex
-                                        ].style.width.replace("%", "")
-                                      )}
-                                      %
-                                    </span>
-
-                                    <label>Border Radius:</label>
-                                    <input
-                                      type="range"
-                                      min="0"
-                                      max="50"
-                                      value={parseInt(
-                                        previewContent[
-                                          selectedIndex
-                                        ].style.borderRadius.replace("px", "")
-                                      )}
-                                      onChange={(e) =>
-                                        updateContent(selectedIndex, {
-                                          style: {
-                                            ...previewContent[selectedIndex]
-                                              .style,
-                                            borderRadius: `${e.target.value}px`,
-                                          },
-                                        })
-                                      }
-                                    />
-
-                                    <ColorPicker
-                                      label="Image Background"
-                                      objectKey="style.backgroundColor"
-                                      previewContent={previewContent}
-                                      selectedIndex={selectedIndex}
-                                      updateContent={updateContent}
-                                    />
-
-                                    <label>Link:</label>
-                                    <input
-                                      type="text"
-                                      placeholder="Enter URL"
-                                      value={
-                                        previewContent[selectedIndex].link || ""
-                                      }
-                                      onChange={(e) =>
-                                        updateContent(selectedIndex, {
-                                          link: e.target.value,
-                                        })
-                                      }
-                                    />
-                                  </>
-                                )}
-
-                                {previewContent[selectedIndex].type ===
-                                  "logo" && (
-                                  <>
-                                    <label>Size (%):</label>
-                                    <input
-                                      type="range"
-                                      min="10"
-                                      max="100"
-                                      value={
-                                        parseInt(
-                                          previewContent[
-                                            selectedIndex
-                                          ].style.width.replace("%", "")
-                                        ) || 50
-                                      }
-                                      onChange={(e) => {
-                                        const newSize = e.target.value;
-                                        updateContent(selectedIndex, {
-                                          style: {
-                                            ...previewContent[selectedIndex]
-                                              .style,
-                                            width: `${newSize}%`,
-                                            // height: `${newSize * 5}px`, // Adjusting height based on size percentage
-                                          },
-                                        });
-                                      }}
-                                    />
-                                    <span>
-                                      {parseInt(
-                                        previewContent[
-                                          selectedIndex
-                                        ].style.width.replace("%", "")
-                                      ) || 50}
-                                      %
-                                    </span>
-
-                                    <label>Border Radius:</label>
-                                    <input
-                                      type="range"
-                                      min="0"
-                                      max="50"
-                                      value={parseInt(
-                                        previewContent[
-                                          selectedIndex
-                                        ].style.borderRadius.replace("px", "")
-                                      )}
-                                      onChange={(e) =>
-                                        updateContent(selectedIndex, {
-                                          style: {
-                                            ...previewContent[selectedIndex]
-                                              .style,
-                                            borderRadius: `${e.target.value}px`,
-                                          },
-                                        })
-                                      }
-                                    />
-                                    <ColorPicker
-                                      label="Image Background"
-                                      objectKey="style.backgroundColor"
-                                      previewContent={previewContent}
-                                      selectedIndex={selectedIndex}
-                                      updateContent={updateContent}
-                                    />
-                                  </>
-                                )}
-
-                                {previewContent[selectedIndex].type ===
-                                  "textwithimage" && (
-                                  <>
-                                    <ColorPicker
-                                      label="Text Color"
-                                      objectKey="style.color"
-                                      previewContent={previewContent}
-                                      selectedIndex={selectedIndex}
-                                      updateContent={updateContent}
-                                    />
-                                    <ColorPicker
-                                      label="Text Background"
-                                      objectKey="style.backgroundColor"
-                                      previewContent={previewContent}
-                                      selectedIndex={selectedIndex}
-                                      updateContent={updateContent}
-                                    />
-                                  </>
-                                )}
-
-                                {previewContent[selectedIndex].type ===
-                                  "imagewithtext" && (
-                                  <>
-                                    <ColorPicker
-                                      label="Text Color"
-                                      objectKey="style1.color"
-                                      previewContent={previewContent}
-                                      selectedIndex={selectedIndex}
-                                      updateContent={updateContent}
-                                    />
-                                    <ColorPicker
-                                      label="Text Background"
-                                      objectKey="style1.backgroundColor"
-                                      previewContent={previewContent}
-                                      selectedIndex={selectedIndex}
-                                      updateContent={updateContent}
-                                    />
-                                  </>
-                                )}
-
-                                {previewContent[selectedIndex].type ===
-                                  "video-icon" && (
-                                  <>
-                                    <label>Size (%):</label>
-                                    <input
-                                      type="range"
-                                      min="50"
-                                      max="100"
-                                      value={parseInt(
-                                        previewContent[
-                                          selectedIndex
-                                        ].style.width.replace("%", "")
-                                      )}
-                                      onChange={(e) => {
-                                        const newSize = e.target.value;
-                                        updateContent(selectedIndex, {
-                                          style: {
-                                            ...previewContent[selectedIndex]
-                                              .style,
-                                            width: `${newSize}%`,
-                                          },
-                                        });
-                                      }}
-                                    />
-                                    <span>
-                                      {parseInt(
-                                        previewContent[
-                                          selectedIndex
-                                        ].style.width.replace("%", "")
-                                      )}
-                                      %
-                                    </span>
-
-                                    <label>Link:</label>
-                                    <input
-                                      type="text"
-                                      placeholder="Enter URL"
-                                      value={
-                                        previewContent[selectedIndex].link || ""
-                                      }
-                                      onChange={(e) =>
-                                        updateContent(selectedIndex, {
-                                          link: e.target.value,
-                                        })
-                                      }
-                                    />
-                                  </>
-                                )}
-
-                                {previewContent[selectedIndex].type ===
-                                  "image" && (
-                                  <>
-                                    <label>Size (%):</label>
-                                    <input
-                                      type="range"
-                                      min="10"
-                                      max="100"
-                                      value={parseInt(
-                                        previewContent[
-                                          selectedIndex
-                                        ].style.width.replace("%", "")
-                                      )}
-                                      onChange={(e) => {
-                                        const newSize = e.target.value;
-                                        updateContent(selectedIndex, {
-                                          style: {
-                                            ...previewContent[selectedIndex]
-                                              .style,
-                                            width: `${newSize}%`,
-                                            // height: `${newSize * 5}px`, // Adjusting height based on size percentage
-                                          },
-                                        });
-                                      }}
-                                    />
-                                    <span>
-                                      {parseInt(
-                                        previewContent[
-                                          selectedIndex
-                                        ].style.width.replace("%", "")
-                                      )}
-                                      %
-                                    </span>
-                                    <label>Border Radius:</label>
-                                    <input
-                                      type="range"
-                                      min="0"
-                                      max="50"
-                                      value={parseInt(
-                                        previewContent[
-                                          selectedIndex
-                                        ].style.borderRadius.replace("px", "")
-                                      )}
-                                      onChange={(e) =>
-                                        updateContent(selectedIndex, {
-                                          style: {
-                                            ...previewContent[selectedIndex]
-                                              .style,
-                                            borderRadius: `${e.target.value}px`,
-                                          },
-                                        })
-                                      }
-                                    />
-
-                                    <ColorPicker
-                                      label="Image Background"
-                                      objectKey="style.backgroundColor"
-                                      previewContent={previewContent}
-                                      selectedIndex={selectedIndex}
-                                      updateContent={updateContent}
-                                    />
-                                  </>
-                                )}
-                              </div>
+                        {previewContent[selectedIndex]?.type === "icons" && (
+                          <>
+                            <div className="editor-bg">
+                              Background Color
+                              <input
+                                type="color"
+                                value={
+                                  previewContent[selectedIndex]?.ContentStyle
+                                    ?.backgroundColor || "#ffffff"
+                                }
+                                onChange={(e) =>
+                                  updateContent(selectedIndex, {
+                                    ContentStyle: {
+                                      ...previewContent[selectedIndex]
+                                        .ContentStyle,
+                                      backgroundColor: e.target.value,
+                                    },
+                                  })
+                                }
+                              />
                             </div>
-                          </div>
+                            <label>Link1:</label>
+                            <input
+                              type="text"
+                              placeholder="Enter URL"
+                              value={previewContent[selectedIndex].links1 || ""}
+                              onChange={(e) =>
+                                updateContent(selectedIndex, {
+                                  links1: e.target.value,
+                                })
+                              }
+                            />
+
+                            <label>Link2:</label>
+                            <input
+                              type="text"
+                              placeholder="Enter URL"
+                              value={previewContent[selectedIndex].links2 || ""}
+                              onChange={(e) =>
+                                updateContent(selectedIndex, {
+                                  links2: e.target.value,
+                                })
+                              }
+                            />
+
+                            <label>Link3:</label>
+                            <input
+                              type="text"
+                              placeholder="Enter URL"
+                              value={previewContent[selectedIndex].links3 || ""}
+                              onChange={(e) =>
+                                updateContent(selectedIndex, {
+                                  links3: e.target.value,
+                                })
+                              }
+                            />
+
+                            <label>Link4:</label>
+                            <input
+                              type="text"
+                              placeholder="Enter URL"
+                              value={previewContent[selectedIndex].links4 || ""}
+                              onChange={(e) =>
+                                updateContent(selectedIndex, {
+                                  links4: e.target.value,
+                                })
+                              }
+                            />
+                          </>
                         )}
-                      </>
-                    ) : (
-                      <div className="style-controls" ref={styleControlsRef}>
-                        <h3>Style Controls</h3>
-                        <div className="style-item">
-                          {previewContent[selectedIndex].type === "para" && (
-                            <>
-                              <div className="editor-bg">
-                                Text Color
-                                <input
-                                  type="color"
-                                  value={
-                                    previewContent[selectedIndex].style.color
-                                  }
-                                  onChange={(e) =>
-                                    updateContent(selectedIndex, {
-                                      style: {
-                                        ...previewContent[selectedIndex].style,
-                                        color: e.target.value,
-                                      },
-                                    })
-                                  }
-                                />
-                              </div>
-                              <div className="editor-bg">
-                                Text Background
-                                <input
-                                  type="color"
-                                  value={
-                                    previewContent[selectedIndex].style
-                                      .backgroundColor || "#ffffff"
-                                  }
-                                  onChange={(e) =>
-                                    updateContent(selectedIndex, {
-                                      style: {
-                                        ...previewContent[selectedIndex].style,
-                                        backgroundColor: e.target.value,
-                                      },
-                                    })
-                                  }
-                                />
-                              </div>
-                              <label>Border Radius:</label>
-                              <input
-                                type="range"
-                                min="0"
-                                max="50"
-                                value={parseInt(
-                                  previewContent[
-                                    selectedIndex
-                                  ].style.borderRadius.replace("px", "")
-                                )}
-                                onChange={(e) =>
-                                  updateContent(selectedIndex, {
-                                    style: {
-                                      ...previewContent[selectedIndex].style,
-                                      borderRadius: `${e.target.value}px`,
-                                    },
-                                  })
-                                }
-                              />
-                            </>
-                          )}
 
-                          {previewContent[selectedIndex].type === "head" && (
-                            <>
-                              <label>Font Size:</label>
-                              <input
-                                type="number"
-                                value={parseInt(
-                                  previewContent[
-                                    selectedIndex
-                                  ].style.fontSize.replace("px", "")
-                                )}
-                                onChange={(e) =>
-                                  updateContent(selectedIndex, {
-                                    style: {
-                                      ...previewContent[selectedIndex].style,
-                                      fontSize: `${e.target.value}px`,
-                                    },
-                                  })
-                                }
-                              />
-                              <div className="editor-bg">
-                                Text Color
-                                <input
-                                  type="color"
-                                  value={
-                                    previewContent[selectedIndex].style.color
-                                  }
-                                  onChange={(e) =>
-                                    updateContent(selectedIndex, {
-                                      style: {
-                                        ...previewContent[selectedIndex].style,
-                                        color: e.target.value,
-                                      },
-                                    })
-                                  }
-                                />
-                              </div>
-                              <div className="editor-bg">
-                                Text Background
-                                <input
-                                  type="color"
-                                  value={
-                                    previewContent[selectedIndex].style
-                                      .backgroundColor || "#ffffff"
-                                  }
-                                  onChange={(e) =>
-                                    updateContent(selectedIndex, {
-                                      style: {
-                                        ...previewContent[selectedIndex].style,
-                                        backgroundColor: e.target.value,
-                                      },
-                                    })
-                                  }
-                                />
-                              </div>
-                              <label>Text Alignment:</label>
-                              <select
-                                value={
-                                  previewContent[selectedIndex].style.textAlign
-                                }
-                                onChange={(e) =>
-                                  updateContent(selectedIndex, {
-                                    style: {
-                                      ...previewContent[selectedIndex].style,
-                                      textAlign: e.target.value,
-                                    },
-                                  })
-                                }
-                              >
-                                <option value="left">Left</option>
-                                <option value="center">Center</option>
-                                <option value="right">Right</option>
-                              </select>
-                            </>
-                          )}
-                          {previewContent[selectedIndex].type === "button" && (
-                            <>
-                              <label>Button name:</label>
-                              <input
-                                type="text"
-                                placeholder="Enter button name"
-                                value={
-                                  previewContent[selectedIndex].content || ""
-                                }
-                                onChange={(e) =>
-                                  updateContent(selectedIndex, {
-                                    content: e.target.value,
-                                  })
-                                }
-                              />
-                              <div className="editor-bg">
-                                Background Color
-                                <input
-                                  type="color"
-                                  value={
-                                    previewContent[selectedIndex].style
-                                      .backgroundColor
-                                  }
-                                  onChange={(e) =>
-                                    updateContent(selectedIndex, {
-                                      style: {
-                                        ...previewContent[selectedIndex].style,
-                                        backgroundColor: e.target.value,
-                                      },
-                                    })
-                                  }
-                                />
-                              </div>
-                              <div className="editor-bg">
-                                Text Color
-                                <input
-                                  type="color"
-                                  value={
-                                    previewContent[selectedIndex].style.color
-                                  }
-                                  onChange={(e) =>
-                                    updateContent(selectedIndex, {
-                                      style: {
-                                        ...previewContent[selectedIndex].style,
-                                        color: e.target.value,
-                                      },
-                                    })
-                                  }
-                                />
-                              </div>
-                              <label>Text Alignment:</label>
-                              <select
-                                value={
-                                  previewContent[selectedIndex]?.style
-                                    ?.textAlign || ""
-                                }
-                                onChange={(e) =>
-                                  updateContent(selectedIndex, {
-                                    style: {
-                                      ...previewContent[selectedIndex].style,
-                                      textAlign: e.target.value,
-                                    },
-                                  })
-                                }
-                              >
-                                <option value="left">Left</option>
-                                <option value="center">Center</option>
-                                <option value="right">Right</option>
-                              </select>
-                              <label>Button Size:</label>
-                              <div>
-                                <button
-                                  className="modal-btn-size"
-                                  onClick={() =>
-                                    updateContent(selectedIndex, {
-                                      style: {
-                                        ...previewContent[selectedIndex].style,
-                                        width: "50%",
-                                        margin: "0 auto", // Centering the button
-                                      },
-                                    })
-                                  }
-                                >
-                                  Small
-                                </button>
-                                <button
-                                  className="modal-btn-size"
-                                  onClick={() =>
-                                    updateContent(selectedIndex, {
-                                      style: {
-                                        ...previewContent[selectedIndex].style,
-                                        width: "70%",
-                                        margin: "0 auto",
-                                      },
-                                    })
-                                  }
-                                >
-                                  Medium
-                                </button>
-                                <button
-                                  className="modal-btn-size"
-                                  onClick={() =>
-                                    updateContent(selectedIndex, {
-                                      style: {
-                                        ...previewContent[selectedIndex].style,
-                                        width: "90%",
-                                        margin: "0 auto",
-                                      },
-                                    })
-                                  }
-                                >
-                                  Large
-                                </button>
-                              </div>
-
-                              <label>Border Radius:</label>
-                              <input
-                                type="range"
-                                min="0"
-                                max="50"
-                                value={parseInt(
-                                  previewContent[
-                                    selectedIndex
-                                  ].style.borderRadius.replace("px", "")
-                                )}
-                                onChange={(e) =>
-                                  updateContent(selectedIndex, {
-                                    style: {
-                                      ...previewContent[selectedIndex].style,
-                                      borderRadius: `${e.target.value}px`,
-                                    },
-                                  })
-                                }
-                              />
-                              <label>Button Text Size:</label>
-                              <input
-                                type="range"
-                                min="10"
-                                max="30"
-                                value={parseInt(
-                                  (
-                                    previewContent[selectedIndex]?.style
-                                      ?.fontSize || "15px"
-                                  ).replace("px", "")
-                                )}
-                                onChange={(e) =>
-                                  updateContent(selectedIndex, {
-                                    style: {
-                                      ...previewContent[selectedIndex].style,
-                                      fontSize: `${e.target.value}px`,
-                                    },
-                                  })
-                                }
-                              />
-
-                              <label>Link:</label>
-                              <input
-                                type="text"
-                                placeholder="Enter URL"
-                                value={previewContent[selectedIndex].link || ""}
-                                onChange={(e) =>
-                                  updateContent(selectedIndex, {
-                                    link: e.target.value,
-                                  })
-                                }
-                              />
-                            </>
-                          )}
-
-                          {/* New Editor for Multi-Image Links and Button Styling */}
-                          {previewContent[selectedIndex].type ===
-                            "multi-image" && (
-                            <div>
-                              <div className="tab-container-style">
-                                <button
-                                  className={`tab-style ${
-                                    activeTab === "button1" ? "active" : ""
-                                  }`}
-                                  onClick={() => setActiveTab("button1")}
-                                >
-                                  Button-1
-                                </button>
-                                <button
-                                  className={`tab-style ${
-                                    activeTab === "button2" ? "active" : ""
-                                  }`}
-                                  onClick={() => setActiveTab("button2")}
-                                >
-                                  Button-2
-                                </button>
-                              </div>
-
-                              {activeTab === "button1" && (
-                                <div className="style-editor">
-                                  <h4>Button-1 Styles</h4>
-                                  <label>Button Name:</label>
-                                  <input
-                                    type="text"
-                                    placeholder="Enter button name"
-                                    value={
-                                      previewContent[selectedIndex].content1 ||
-                                      ""
-                                    }
-                                    onChange={(e) =>
-                                      updateContent(selectedIndex, {
-                                        content1: e.target.value,
-                                      })
-                                    }
-                                  />
-                                  <label>Button Link:</label>
-                                  <input
-                                    type="text"
-                                    value={previewContent[selectedIndex].link1}
-                                    onChange={(e) =>
-                                      updateContent(selectedIndex, {
-                                        link1: e.target.value,
-                                      })
-                                    }
-                                  />
-                                  <div className="editor-bg">
-                                    Button Text Color:
-                                    <input
-                                      type="color"
-                                      value={
-                                        previewContent[selectedIndex]
-                                          .buttonStyle1.color
-                                      }
-                                      onChange={(e) =>
-                                        updateContent(selectedIndex, {
-                                          buttonStyle1: {
-                                            ...previewContent[selectedIndex]
-                                              .buttonStyle1,
-                                            color: e.target.value,
-                                          },
-                                        })
-                                      }
-                                    />
-                                  </div>
-                                  <div className="editor-bg">
-                                    Button Background Color:
-                                    <input
-                                      type="color"
-                                      value={
-                                        previewContent[selectedIndex]
-                                          .buttonStyle1.backgroundColor
-                                      }
-                                      onChange={(e) =>
-                                        updateContent(selectedIndex, {
-                                          buttonStyle1: {
-                                            ...previewContent[selectedIndex]
-                                              .buttonStyle1,
-                                            backgroundColor: e.target.value,
-                                          },
-                                        })
-                                      }
-                                    />
-                                  </div>
-
-                                  <label>Text Alignment:</label>
-                                  <select
-                                    value={
-                                      previewContent[selectedIndex]
-                                        ?.buttonStyle1?.textAlign || ""
-                                    }
-                                    onChange={(e) =>
-                                      updateContent(selectedIndex, {
-                                        buttonStyle1: {
-                                          ...previewContent[selectedIndex]
-                                            .buttonStyle1,
-                                          textAlign: e.target.value,
-                                        },
-                                      })
-                                    }
-                                  >
-                                    <option value="left">Left</option>
-                                    <option value="center">Center</option>
-                                    <option value="right">Right</option>
-                                  </select>
-                                  <label>Button Size:</label>
-                                  <div>
-                                    <button
-                                      className="modal-btn-size"
-                                      onClick={() =>
-                                        updateContent(selectedIndex, {
-                                          buttonStyle1: {
-                                            ...previewContent[selectedIndex]
-                                              .buttonStyle1,
-                                            width: "auto",
-                                          },
-                                        })
-                                      }
-                                    >
-                                      Small
-                                    </button>
-                                    <button
-                                      className="modal-btn-size"
-                                      onClick={() =>
-                                        updateContent(selectedIndex, {
-                                          buttonStyle1: {
-                                            ...previewContent[selectedIndex]
-                                              .buttonStyle1,
-                                            width: "50%",
-                                          },
-                                        })
-                                      }
-                                    >
-                                      Medium
-                                    </button>
-                                    <button
-                                      className="modal-btn-size"
-                                      onClick={() =>
-                                        updateContent(selectedIndex, {
-                                          buttonStyle1: {
-                                            ...previewContent[selectedIndex]
-                                              .buttonStyle1,
-                                            width: "80%",
-                                          },
-                                        })
-                                      }
-                                    >
-                                      Large
-                                    </button>
-                                  </div>
-                                  <label>Border Radius:</label>
-                                  <input
-                                    type="range"
-                                    min="0"
-                                    max="50"
-                                    value={parseInt(
-                                      previewContent[
-                                        selectedIndex
-                                      ].buttonStyle1.borderRadius.replace(
-                                        "px",
-                                        ""
-                                      )
-                                    )}
-                                    onChange={(e) =>
-                                      updateContent(selectedIndex, {
-                                        buttonStyle1: {
-                                          ...previewContent[selectedIndex]
-                                            .buttonStyle1,
-                                          borderRadius: `${e.target.value}px`,
-                                        },
-                                      })
-                                    }
-                                  />
-                                </div>
+                        {previewContent[selectedIndex].type ===
+                          "link-image" && (
+                          <>
+                            <label>Size (%):</label>
+                            <input
+                              type="range"
+                              min="10"
+                              max="100"
+                              value={parseInt(
+                                previewContent[
+                                  selectedIndex
+                                ].style.width.replace("%", "")
                               )}
-
-                              {activeTab === "button2" && (
-                                <div className="style-editor">
-                                  <h4>Button-2 Styles</h4>
-                                  <label>Button Name:</label>
-                                  <input
-                                    type="text"
-                                    placeholder="Enter button name"
-                                    value={
-                                      previewContent[selectedIndex].content2 ||
-                                      ""
-                                    }
-                                    onChange={(e) =>
-                                      updateContent(selectedIndex, {
-                                        content2: e.target.value,
-                                      })
-                                    }
-                                  />
-                                  <label>Button Link:</label>
-                                  <input
-                                    type="text"
-                                    value={previewContent[selectedIndex].link2}
-                                    onChange={(e) =>
-                                      updateContent(selectedIndex, {
-                                        link2: e.target.value,
-                                      })
-                                    }
-                                  />
-                                  <div className="editor-bg">
-                                    Button Text Color:
-                                    <input
-                                      type="color"
-                                      value={
-                                        previewContent[selectedIndex]
-                                          .buttonStyle2.color
-                                      }
-                                      onChange={(e) =>
-                                        updateContent(selectedIndex, {
-                                          buttonStyle2: {
-                                            ...previewContent[selectedIndex]
-                                              .buttonStyle2,
-                                            color: e.target.value,
-                                          },
-                                        })
-                                      }
-                                    />
-                                  </div>
-
-                                  <div className="editor-bg">
-                                    Button Background Color:
-                                    <input
-                                      type="color"
-                                      value={
-                                        previewContent[selectedIndex]
-                                          .buttonStyle2.backgroundColor
-                                      }
-                                      onChange={(e) =>
-                                        updateContent(selectedIndex, {
-                                          buttonStyle2: {
-                                            ...previewContent[selectedIndex]
-                                              .buttonStyle2,
-                                            backgroundColor: e.target.value,
-                                          },
-                                        })
-                                      }
-                                    />
-                                  </div>
-
-                                  <label>Text Alignment:</label>
-                                  <select
-                                    value={
-                                      previewContent[selectedIndex]
-                                        ?.buttonStyle2?.textAlign || ""
-                                    }
-                                    onChange={(e) =>
-                                      updateContent(selectedIndex, {
-                                        buttonStyle2: {
-                                          ...previewContent[selectedIndex]
-                                            .buttonStyle2,
-                                          textAlign: e.target.value,
-                                        },
-                                      })
-                                    }
-                                  >
-                                    <option value="left">Left</option>
-                                    <option value="center">Center</option>
-                                    <option value="right">Right</option>
-                                  </select>
-
-                                  <label>Button Size:</label>
-                                  <div>
-                                    <button
-                                      className="modal-btn-size"
-                                      onClick={() =>
-                                        updateContent(selectedIndex, {
-                                          buttonStyle2: {
-                                            ...previewContent[selectedIndex]
-                                              .buttonStyle2,
-                                            width: "auto",
-                                          },
-                                        })
-                                      }
-                                    >
-                                      Small
-                                    </button>
-                                    <button
-                                      className="modal-btn-size"
-                                      onClick={() =>
-                                        updateContent(selectedIndex, {
-                                          buttonStyle2: {
-                                            ...previewContent[selectedIndex]
-                                              .buttonStyle2,
-                                            width: "50%",
-                                          },
-                                        })
-                                      }
-                                    >
-                                      Medium
-                                    </button>
-                                    <button
-                                      className="modal-btn-size"
-                                      onClick={() =>
-                                        updateContent(selectedIndex, {
-                                          buttonStyle2: {
-                                            ...previewContent[selectedIndex]
-                                              .buttonStyle2,
-                                            width: "80%",
-                                          },
-                                        })
-                                      }
-                                    >
-                                      Large
-                                    </button>
-                                  </div>
-
-                                  <label>Border Radius:</label>
-                                  <input
-                                    type="range"
-                                    min="0"
-                                    max="50"
-                                    value={parseInt(
-                                      previewContent[
-                                        selectedIndex
-                                      ].buttonStyle2.borderRadius.replace(
-                                        "px",
-                                        ""
-                                      )
-                                    )}
-                                    onChange={(e) =>
-                                      updateContent(selectedIndex, {
-                                        buttonStyle2: {
-                                          ...previewContent[selectedIndex]
-                                            .buttonStyle2,
-                                          borderRadius: `${e.target.value}px`,
-                                        },
-                                      })
-                                    }
-                                  />
-                                </div>
+                              onChange={(e) => {
+                                const newSize = e.target.value;
+                                updateContent(selectedIndex, {
+                                  style: {
+                                    ...previewContent[selectedIndex].style,
+                                    width: `${newSize}%`,
+                                    // height: `${newSize * 5}px`, // Adjusting height based on size percentage
+                                  },
+                                });
+                              }}
+                            />
+                            <span>
+                              {parseInt(
+                                previewContent[
+                                  selectedIndex
+                                ].style.width.replace("%", "")
                               )}
+                              %
+                            </span>
+
+                            <label>Border Radius:</label>
+                            <input
+                              type="range"
+                              min="0"
+                              max="50"
+                              value={parseInt(
+                                previewContent[
+                                  selectedIndex
+                                ].style.borderRadius.replace("px", "")
+                              )}
+                              onChange={(e) =>
+                                updateContent(selectedIndex, {
+                                  style: {
+                                    ...previewContent[selectedIndex].style,
+                                    borderRadius: `${e.target.value}px`,
+                                  },
+                                })
+                              }
+                            />
+
+                            <div className="editor-bg">
+                              Image Background
+                              <input
+                                type="color"
+                                value={
+                                  previewContent[selectedIndex].style
+                                    .backgroundColor || "#ffffff"
+                                }
+                                onChange={(e) =>
+                                  updateContent(selectedIndex, {
+                                    style: {
+                                      ...previewContent[selectedIndex].style,
+                                      backgroundColor: e.target.value,
+                                    },
+                                  })
+                                }
+                              />
                             </div>
-                          )}
 
-                          {previewContent[selectedIndex]?.type === "icons" && (
-                            <>
-                              <div className="editor-bg">
-                                Background Color
-                                <input
-                                  type="color"
-                                  value={
-                                    previewContent[selectedIndex]?.ContentStyle
-                                      ?.backgroundColor || "#ffffff"
-                                  }
-                                  onChange={(e) =>
-                                    updateContent(selectedIndex, {
-                                      ContentStyle: {
-                                        ...previewContent[selectedIndex]
-                                          .ContentStyle,
-                                        backgroundColor: e.target.value,
-                                      },
-                                    })
-                                  }
-                                />
-                              </div>
-                              <label>Link1:</label>
+                            <label>Link:</label>
+                            <input
+                              type="text"
+                              placeholder="Enter URL"
+                              value={previewContent[selectedIndex].link || ""}
+                              onChange={(e) =>
+                                updateContent(selectedIndex, {
+                                  link: e.target.value,
+                                })
+                              }
+                            />
+                          </>
+                        )}
+
+                        {previewContent[selectedIndex].type === "logo" && (
+                          <>
+                            <label>Size (%):</label>
+                            <input
+                              type="range"
+                              min="10"
+                              max="100"
+                              value={
+                                parseInt(
+                                  previewContent[
+                                    selectedIndex
+                                  ].style.width.replace("%", "")
+                                ) || 50
+                              }
+                              onChange={(e) => {
+                                const newSize = e.target.value;
+                                updateContent(selectedIndex, {
+                                  style: {
+                                    ...previewContent[selectedIndex].style,
+                                    width: `${newSize}%`,
+                                    // height: `${newSize * 5}px`, // Adjusting height based on size percentage
+                                  },
+                                });
+                              }}
+                            />
+                            <span>
+                              {parseInt(
+                                previewContent[
+                                  selectedIndex
+                                ].style.width.replace("%", "")
+                              ) || 50}
+                              %
+                            </span>
+
+                            <label>Border Radius:</label>
+                            <input
+                              type="range"
+                              min="0"
+                              max="50"
+                              value={parseInt(
+                                previewContent[
+                                  selectedIndex
+                                ].style.borderRadius.replace("px", "")
+                              )}
+                              onChange={(e) =>
+                                updateContent(selectedIndex, {
+                                  style: {
+                                    ...previewContent[selectedIndex].style,
+                                    borderRadius: `${e.target.value}px`,
+                                  },
+                                })
+                              }
+                            />
+
+                            <div className="editor-bg">
+                              Image Background
                               <input
-                                type="text"
-                                placeholder="Enter URL"
+                                type="color"
                                 value={
-                                  previewContent[selectedIndex].links1 || ""
+                                  previewContent[selectedIndex].style
+                                    .backgroundColor || "#ffffff"
                                 }
                                 onChange={(e) =>
                                   updateContent(selectedIndex, {
-                                    links1: e.target.value,
+                                    style: {
+                                      ...previewContent[selectedIndex].style,
+                                      backgroundColor: e.target.value,
+                                    },
                                   })
                                 }
                               />
+                            </div>
+                          </>
+                        )}
 
-                              <label>Link2:</label>
+                        {previewContent[selectedIndex].type ===
+                          "textwithimage" && (
+                          <>
+                            <div className="editor-bg">
+                              Background Color
                               <input
-                                type="text"
-                                placeholder="Enter URL"
+                                type="color"
                                 value={
-                                  previewContent[selectedIndex].links2 || ""
+                                  previewContent[selectedIndex].style
+                                    .backgroundColor || "#ffffff"
                                 }
                                 onChange={(e) =>
                                   updateContent(selectedIndex, {
-                                    links2: e.target.value,
+                                    style: {
+                                      ...previewContent[selectedIndex].style,
+                                      backgroundColor: e.target.value,
+                                    },
                                   })
                                 }
                               />
-
-                              <label>Link3:</label>
+                            </div>
+                            <div className="editor-bg">
+                              Text Color
                               <input
-                                type="text"
-                                placeholder="Enter URL"
+                                type="color"
                                 value={
-                                  previewContent[selectedIndex].links3 || ""
+                                  previewContent[selectedIndex].style.color ||
+                                  "#ffffff"
                                 }
                                 onChange={(e) =>
                                   updateContent(selectedIndex, {
-                                    links3: e.target.value,
+                                    style: {
+                                      ...previewContent[selectedIndex].style,
+                                      color: e.target.value,
+                                    },
                                   })
                                 }
                               />
+                            </div>
+                          </>
+                        )}
 
-                              <label>Link4:</label>
+                        {previewContent[selectedIndex].type ===
+                          "imagewithtext" && (
+                          <>
+                            <div className="editor-bg">
+                              Background Color
                               <input
-                                type="text"
-                                placeholder="Enter URL"
+                                type="color"
                                 value={
-                                  previewContent[selectedIndex].links4 || ""
+                                  previewContent[selectedIndex].style1
+                                    .backgroundColor || "#ffffff"
                                 }
                                 onChange={(e) =>
                                   updateContent(selectedIndex, {
-                                    links4: e.target.value,
-                                  })
-                                }
-                              />
-                            </>
-                          )}
-
-                          {previewContent[selectedIndex].type ===
-                            "link-image" && (
-                            <>
-                              <label>Size (%):</label>
-                              <input
-                                type="range"
-                                min="10"
-                                max="100"
-                                value={parseInt(
-                                  previewContent[
-                                    selectedIndex
-                                  ].style.width.replace("%", "")
-                                )}
-                                onChange={(e) => {
-                                  const newSize = e.target.value;
-                                  updateContent(selectedIndex, {
-                                    style: {
-                                      ...previewContent[selectedIndex].style,
-                                      width: `${newSize}%`,
-                                      // height: `${newSize * 5}px`, // Adjusting height based on size percentage
-                                    },
-                                  });
-                                }}
-                              />
-                              <span>
-                                {parseInt(
-                                  previewContent[
-                                    selectedIndex
-                                  ].style.width.replace("%", "")
-                                )}
-                                %
-                              </span>
-
-                              <label>Border Radius:</label>
-                              <input
-                                type="range"
-                                min="0"
-                                max="50"
-                                value={parseInt(
-                                  previewContent[
-                                    selectedIndex
-                                  ].style.borderRadius.replace("px", "")
-                                )}
-                                onChange={(e) =>
-                                  updateContent(selectedIndex, {
-                                    style: {
-                                      ...previewContent[selectedIndex].style,
-                                      borderRadius: `${e.target.value}px`,
+                                    style1: {
+                                      ...previewContent[selectedIndex].style1,
+                                      backgroundColor: e.target.value,
                                     },
                                   })
                                 }
                               />
-
-                              <div className="editor-bg">
-                                Image Background
-                                <input
-                                  type="color"
-                                  value={
-                                    previewContent[selectedIndex].style
-                                      .backgroundColor || "#ffffff"
-                                  }
-                                  onChange={(e) =>
-                                    updateContent(selectedIndex, {
-                                      style: {
-                                        ...previewContent[selectedIndex].style,
-                                        backgroundColor: e.target.value,
-                                      },
-                                    })
-                                  }
-                                />
-                              </div>
-
-                              <label>Link:</label>
+                            </div>
+                            <div className="editor-bg">
+                              Text Color
                               <input
-                                type="text"
-                                placeholder="Enter URL"
-                                value={previewContent[selectedIndex].link || ""}
-                                onChange={(e) =>
-                                  updateContent(selectedIndex, {
-                                    link: e.target.value,
-                                  })
-                                }
-                              />
-                            </>
-                          )}
-
-                          {previewContent[selectedIndex].type === "logo" && (
-                            <>
-                              <label>Size (%):</label>
-                              <input
-                                type="range"
-                                min="10"
-                                max="100"
+                                type="color"
                                 value={
-                                  parseInt(
-                                    previewContent[
-                                      selectedIndex
-                                    ].style.width.replace("%", "")
-                                  ) || 50
+                                  previewContent[selectedIndex].style1.color ||
+                                  "#ffffff"
                                 }
-                                onChange={(e) => {
-                                  const newSize = e.target.value;
-                                  updateContent(selectedIndex, {
-                                    style: {
-                                      ...previewContent[selectedIndex].style,
-                                      width: `${newSize}%`,
-                                      // height: `${newSize * 5}px`, // Adjusting height based on size percentage
-                                    },
-                                  });
-                                }}
-                              />
-                              <span>
-                                {parseInt(
-                                  previewContent[
-                                    selectedIndex
-                                  ].style.width.replace("%", "")
-                                ) || 50}
-                                %
-                              </span>
-
-                              <label>Border Radius:</label>
-                              <input
-                                type="range"
-                                min="0"
-                                max="50"
-                                value={parseInt(
-                                  previewContent[
-                                    selectedIndex
-                                  ].style.borderRadius.replace("px", "")
-                                )}
                                 onChange={(e) =>
                                   updateContent(selectedIndex, {
-                                    style: {
-                                      ...previewContent[selectedIndex].style,
-                                      borderRadius: `${e.target.value}px`,
+                                    style1: {
+                                      ...previewContent[selectedIndex].style1,
+                                      color: e.target.value,
                                     },
                                   })
                                 }
                               />
+                            </div>
+                          </>
+                        )}
 
-                              <div className="editor-bg">
-                                Image Background
-                                <input
-                                  type="color"
-                                  value={
-                                    previewContent[selectedIndex].style
-                                      .backgroundColor || "#ffffff"
-                                  }
-                                  onChange={(e) =>
-                                    updateContent(selectedIndex, {
-                                      style: {
-                                        ...previewContent[selectedIndex].style,
-                                        backgroundColor: e.target.value,
-                                      },
-                                    })
-                                  }
-                                />
-                              </div>
-                            </>
-                          )}
+                        {previewContent[selectedIndex].type === "cardimage" && (
+                          <>
+                            <label>Size (%):</label>
+                            <input
+                              type="range"
+                              min="70"
+                              max="100"
+                              value={parseInt(
+                                previewContent[
+                                  selectedIndex
+                                ].style.width.replace("%", "")
+                              )}
+                              onChange={(e) => {
+                                const newSize = e.target.value;
+                                updateContent(selectedIndex, {
+                                  style: {
+                                    ...previewContent[selectedIndex].style,
+                                    width: `${newSize}%`,
+                                    // height: `${newSize * 5}px`, // Adjusting height based on size percentage
+                                  },
+                                });
+                              }}
+                            />
+                            <span>
+                              {parseInt(
+                                previewContent[
+                                  selectedIndex
+                                ].style.width.replace("%", "")
+                              )}
+                              %
+                            </span>
 
-                          {previewContent[selectedIndex].type ===
-                            "textwithimage" && (
-                            <>
-                              <div className="editor-bg">
-                                Background Color
-                                <input
-                                  type="color"
-                                  value={
-                                    previewContent[selectedIndex].style
-                                      .backgroundColor || "#ffffff"
-                                  }
-                                  onChange={(e) =>
-                                    updateContent(selectedIndex, {
-                                      style: {
-                                        ...previewContent[selectedIndex].style,
-                                        backgroundColor: e.target.value,
-                                      },
-                                    })
-                                  }
-                                />
-                              </div>
-                              <div className="editor-bg">
-                                Text Color
-                                <input
-                                  type="color"
-                                  value={
-                                    previewContent[selectedIndex].style.color ||
-                                    "#ffffff"
-                                  }
-                                  onChange={(e) =>
-                                    updateContent(selectedIndex, {
-                                      style: {
-                                        ...previewContent[selectedIndex].style,
-                                        color: e.target.value,
-                                      },
-                                    })
-                                  }
-                                />
-                              </div>
-                            </>
-                          )}
-
-                          {previewContent[selectedIndex].type ===
-                            "imagewithtext" && (
-                            <>
-                              <div className="editor-bg">
-                                Background Color
-                                <input
-                                  type="color"
-                                  value={
-                                    previewContent[selectedIndex].style1
-                                      .backgroundColor || "#ffffff"
-                                  }
-                                  onChange={(e) =>
-                                    updateContent(selectedIndex, {
-                                      style1: {
-                                        ...previewContent[selectedIndex].style1,
-                                        backgroundColor: e.target.value,
-                                      },
-                                    })
-                                  }
-                                />
-                              </div>
-                              <div className="editor-bg">
-                                Text Color
-                                <input
-                                  type="color"
-                                  value={
-                                    previewContent[selectedIndex].style1
-                                      .color || "#ffffff"
-                                  }
-                                  onChange={(e) =>
-                                    updateContent(selectedIndex, {
-                                      style1: {
-                                        ...previewContent[selectedIndex].style1,
-                                        color: e.target.value,
-                                      },
-                                    })
-                                  }
-                                />
-                              </div>
-                            </>
-                          )}
-
-                          {previewContent[selectedIndex].type ===
-                            "cardimage" && (
-                            <>
-                              <label>Size (%):</label>
+                            <div className="editor-bg">
+                              Background Color
                               <input
-                                type="range"
-                                min="70"
-                                max="100"
-                                value={parseInt(
-                                  previewContent[
-                                    selectedIndex
-                                  ].style.width.replace("%", "")
-                                )}
-                                onChange={(e) => {
-                                  const newSize = e.target.value;
-                                  updateContent(selectedIndex, {
-                                    style: {
-                                      ...previewContent[selectedIndex].style,
-                                      width: `${newSize}%`,
-                                      // height: `${newSize * 5}px`, // Adjusting height based on size percentage
-                                    },
-                                  });
-                                }}
-                              />
-                              <span>
-                                {parseInt(
-                                  previewContent[
-                                    selectedIndex
-                                  ].style.width.replace("%", "")
-                                )}
-                                %
-                              </span>
-
-                              <div className="editor-bg">
-                                Background Color
-                                <input
-                                  type="color"
-                                  value={
-                                    previewContent[selectedIndex].style1
-                                      .backgroundColor || "#ffffff"
-                                  }
-                                  onChange={(e) =>
-                                    updateContent(selectedIndex, {
-                                      style1: {
-                                        ...previewContent[selectedIndex].style1,
-                                        backgroundColor: e.target.value,
-                                      },
-                                    })
-                                  }
-                                />
-                              </div>
-                              <div className="editor-bg">
-                                Text Color
-                                <input
-                                  type="color"
-                                  value={
-                                    previewContent[selectedIndex].style1
-                                      .color || "#ffffff"
-                                  }
-                                  onChange={(e) =>
-                                    updateContent(selectedIndex, {
-                                      style1: {
-                                        ...previewContent[selectedIndex].style1,
-                                        color: e.target.value,
-                                      },
-                                    })
-                                  }
-                                />
-                              </div>
-                            </>
-                          )}
-
-                          {previewContent[selectedIndex].type ===
-                            "video-icon" && (
-                            <>
-                              <label>Size (%):</label>
-                              <input
-                                type="range"
-                                min="50"
-                                max="100"
-                                value={parseInt(
-                                  previewContent[
-                                    selectedIndex
-                                  ].style.width.replace("%", "")
-                                )}
-                                onChange={(e) => {
-                                  const newSize = e.target.value;
-                                  updateContent(selectedIndex, {
-                                    style: {
-                                      ...previewContent[selectedIndex].style,
-                                      width: `${newSize}%`,
-                                      // height: `${newSize}px`, // Adjusting height based on size percentage
-                                    },
-                                  });
-                                }}
-                              />
-                              <span>
-                                {parseInt(
-                                  previewContent[
-                                    selectedIndex
-                                  ].style.width.replace("%", "")
-                                )}
-                                %
-                              </span>
-
-                              <label>Link:</label>
-                              <input
-                                type="text"
-                                placeholder="Enter URL"
-                                value={previewContent[selectedIndex].link || ""}
-                                onChange={(e) =>
-                                  updateContent(selectedIndex, {
-                                    link: e.target.value,
-                                  })
+                                type="color"
+                                value={
+                                  previewContent[selectedIndex].style1
+                                    .backgroundColor || "#ffffff"
                                 }
-                              />
-                            </>
-                          )}
-
-                          {previewContent[selectedIndex].type === "image" && (
-                            <>
-                              <label>Size (%):</label>
-                              <input
-                                type="range"
-                                min="10"
-                                max="100"
-                                value={parseInt(
-                                  previewContent[
-                                    selectedIndex
-                                  ].style.width.replace("%", "")
-                                )}
-                                onChange={(e) => {
-                                  const newSize = e.target.value;
-                                  updateContent(selectedIndex, {
-                                    style: {
-                                      ...previewContent[selectedIndex].style,
-                                      width: `${newSize}%`,
-                                      // height: `${newSize * 5}px`, // Adjusting height based on size percentage
-                                    },
-                                  });
-                                }}
-                              />
-                              <span>
-                                {parseInt(
-                                  previewContent[
-                                    selectedIndex
-                                  ].style.width.replace("%", "")
-                                )}
-                                %
-                              </span>
-                              <label>Border Radius:</label>
-                              <input
-                                type="range"
-                                min="0"
-                                max="50"
-                                value={parseInt(
-                                  previewContent[
-                                    selectedIndex
-                                  ].style.borderRadius.replace("px", "")
-                                )}
                                 onChange={(e) =>
                                   updateContent(selectedIndex, {
-                                    style: {
-                                      ...previewContent[selectedIndex].style,
-                                      borderRadius: `${e.target.value}px`,
+                                    style1: {
+                                      ...previewContent[selectedIndex].style1,
+                                      backgroundColor: e.target.value,
                                     },
                                   })
                                 }
                               />
+                            </div>
+                            <div className="editor-bg">
+                              Text Color
+                              <input
+                                type="color"
+                                value={
+                                  previewContent[selectedIndex].style1.color ||
+                                  "#ffffff"
+                                }
+                                onChange={(e) =>
+                                  updateContent(selectedIndex, {
+                                    style1: {
+                                      ...previewContent[selectedIndex].style1,
+                                      color: e.target.value,
+                                    },
+                                  })
+                                }
+                              />
+                            </div>
+                          </>
+                        )}
 
-                              <div className="editor-bg">
-                                Image Background
-                                <input
-                                  type="color"
-                                  value={
-                                    previewContent[selectedIndex].style
-                                      .backgroundColor || "#ffffff"
-                                  }
-                                  onChange={(e) =>
-                                    updateContent(selectedIndex, {
-                                      style: {
-                                        ...previewContent[selectedIndex].style,
-                                        backgroundColor: e.target.value,
-                                      },
-                                    })
-                                  }
-                                />
-                              </div>
-                            </>
-                          )}
-                        </div>
+                        {previewContent[selectedIndex].type ===
+                          "video-icon" && (
+                          <>
+                            <label>Size (%):</label>
+                            <input
+                              type="range"
+                              min="50"
+                              max="100"
+                              value={parseInt(
+                                previewContent[
+                                  selectedIndex
+                                ].style.width.replace("%", "")
+                              )}
+                              onChange={(e) => {
+                                const newSize = e.target.value;
+                                updateContent(selectedIndex, {
+                                  style: {
+                                    ...previewContent[selectedIndex].style,
+                                    width: `${newSize}%`,
+                                    // height: `${newSize}px`, // Adjusting height based on size percentage
+                                  },
+                                });
+                              }}
+                            />
+                            <span>
+                              {parseInt(
+                                previewContent[
+                                  selectedIndex
+                                ].style.width.replace("%", "")
+                              )}
+                              %
+                            </span>
+
+                            <label>Link:</label>
+                            <input
+                              type="text"
+                              placeholder="Enter URL"
+                              value={previewContent[selectedIndex].link || ""}
+                              onChange={(e) =>
+                                updateContent(selectedIndex, {
+                                  link: e.target.value,
+                                })
+                              }
+                            />
+                          </>
+                        )}
+
+                        {previewContent[selectedIndex].type === "image" && (
+                          <>
+                            <label>Size (%):</label>
+                            <input
+                              type="range"
+                              min="10"
+                              max="100"
+                              value={parseInt(
+                                previewContent[
+                                  selectedIndex
+                                ].style.width.replace("%", "")
+                              )}
+                              onChange={(e) => {
+                                const newSize = e.target.value;
+                                updateContent(selectedIndex, {
+                                  style: {
+                                    ...previewContent[selectedIndex].style,
+                                    width: `${newSize}%`,
+                                    // height: `${newSize * 5}px`, // Adjusting height based on size percentage
+                                  },
+                                });
+                              }}
+                            />
+                            <span>
+                              {parseInt(
+                                previewContent[
+                                  selectedIndex
+                                ].style.width.replace("%", "")
+                              )}
+                              %
+                            </span>
+                            <label>Border Radius:</label>
+                            <input
+                              type="range"
+                              min="0"
+                              max="50"
+                              value={parseInt(
+                                previewContent[
+                                  selectedIndex
+                                ].style.borderRadius.replace("px", "")
+                              )}
+                              onChange={(e) =>
+                                updateContent(selectedIndex, {
+                                  style: {
+                                    ...previewContent[selectedIndex].style,
+                                    borderRadius: `${e.target.value}px`,
+                                  },
+                                })
+                              }
+                            />
+
+                            <div className="editor-bg">
+                              Image Background
+                              <input
+                                type="color"
+                                value={
+                                  previewContent[selectedIndex].style
+                                    .backgroundColor || "#ffffff"
+                                }
+                                onChange={(e) =>
+                                  updateContent(selectedIndex, {
+                                    style: {
+                                      ...previewContent[selectedIndex].style,
+                                      backgroundColor: e.target.value,
+                                    },
+                                  })
+                                }
+                              />
+                            </div>
+                          </>
+                        )}
                       </div>
-                    )}
-                  </>
-                )}
+                    </div>
+                  )}
+                </>
+              )}
             </>
           </div>
 
@@ -5091,572 +5232,583 @@ const TemMainpage = () => {
                       style={item.style}
                     >
                       {item.type === "para" && (
-                                             <>
-                                               <p
-                                                 className="border"
-                                                 contentEditable
-                                                 suppressContentEditableWarning
-                                                 onClick={() => {
-                                                   setSelectedIndex(index);
-                                                   setSelectedContent(item.content); // Store the correct content
-                                                   setIsModalOpen(true); // Open the modal
-                                                 }}
-                                                 style={item.style}
-                                                 dangerouslySetInnerHTML={{ __html: item.content }}
-                                               />
-                                               {isModalOpen && selectedIndex === index && (
-                                                 <ParaEditor
-                                                   isOpen={isModalOpen}
-                                                   content={selectedContent} // Pass the correct content
-                                                   style={item.style}
-                                                   onSave={(newContent) => {
-                                                     updateContent(index, { content: newContent }); // Save the new content
-                                                     setIsModalOpen(false);
-                                                   }}
-                                                   onClose={() => setIsModalOpen(false)}
-                                                 />
-                                               )}
-                                             </>
-                                           )}
-                     
-                                           {item.type === "multi-image-card" ? (
-                                             <div className="Layout-img">
-                                               <div className="Layout">
-                                                 <img
-                                                   src={
-                                                     item.src1 || "https://via.placeholder.com/200"
-                                                   }
-                                                   alt="Editable"
-                                                   className="multiimgcard"
-                                                   title="Upload Image"
-                                                   style={item.style}
-                                                   onClick={() => handleopenFiles(index, 1)}
-                                                 />
-                                                 <h3 className="card-text-image">
-                                                   {item.title1 || " "}
-                                                 </h3>
-                                                 <p>
-                                                   <s>
-                                                     {item.originalPrice1
-                                                       ? `$${item.originalPrice1}`
-                                                       : " "}
-                                                   </s>
-                                                 </p>
-                                                 <p>
-                                                   {item.offerPrice1
-                                                     ? `Off Price $${item.offerPrice1}`
-                                                     : " "}
-                                                 </p>
-                                                 <a
-                                                   href={item.link1}
-                                                   target="_blank"
-                                                   rel="noopener noreferrer"
-                                                   className="button-preview"
-                                                   style={item.buttonStyle1}
-                                                 >
-                                                   {item.content1}
-                                                 </a>
-                                               </div>
-                     
-                                               <div className="Layout">
-                                                 <img
-                                                   src={
-                                                     item.src2 || "https://via.placeholder.com/200"
-                                                   }
-                                                   alt="Editable"
-                                                   className="multiimgcard"
-                                                   title="Upload Image"
-                                                   style={item.style}
-                                                   onClick={() => handleopenFiles(index, 2)}
-                                                 />
-                                                 <h3 className="card-text-image">
-                                                   {item.title2 || " "}
-                                                 </h3>
-                                                 <p>
-                                                   <s>
-                                                     {item.originalPrice2
-                                                       ? `$${item.originalPrice2}`
-                                                       : " "}
-                                                   </s>
-                                                 </p>
-                                                 <p>
-                                                   {item.offerPrice2
-                                                     ? `Off Price $${item.offerPrice2}`
-                                                     : " "}
-                                                 </p>
-                                                 <a
-                                                   href={item.link2}
-                                                   target="_blank"
-                                                   rel="noopener noreferrer"
-                                                   className="button-preview"
-                                                   style={item.buttonStyle2}
-                                                 >
-                                                   {item.content2}
-                                                 </a>
-                                               </div>
-                                             </div>
-                                           ) : null}
-                     
-                                           {item.type === "multipleimage" ? (
-                                             <div className="Layout-img">
-                                               <div className="Layout">
-                                                 <img
-                                                   src={
-                                                     item.src1 || "https://via.placeholder.com/200"
-                                                   }
-                                                   alt="Editable"
-                                                   className="multiple-img"
-                                                   title="Upload Image"
-                                                   style={item.style}
-                                                   onClick={() => handleopenFiles(index, 1)}
-                                                 />
-                                               </div>
-                     
-                                               <div className="Layout">
-                                                 <img
-                                                   src={
-                                                     item.src2 || "https://via.placeholder.com/200"
-                                                   }
-                                                   alt="Editable"
-                                                   className="multiple-img"
-                                                   title="Upload Image"
-                                                   style={item.style}
-                                                   onClick={() => handleopenFiles(index, 2)}
-                                                 />
-                                               </div>
-                                             </div>
-                                           ) : null}
-                     
-                                           {item.type === "multi-image" ? (
-                                             <div className="Layout-img">
-                                               <div className="Layout">
-                                                 <img
-                                                   src={
-                                                     item.src1 || "https://via.placeholder.com/200"
-                                                   }
-                                                   alt="Editable"
-                                                   className="multiimg"
-                                                   title="Upload Image"
-                                                   style={item.style}
-                                                   onClick={() => handleopenFiles(index, 1)}
-                                                 />
-                                                 <a
-                                                   href={item.link1}
-                                                   target="_blank"
-                                                   className="button-preview"
-                                                   rel="noopener noreferrer"
-                                                   style={item.buttonStyle1}
-                                                 >
-                                                   {item.content1}
-                                                 </a>
-                                               </div>
-                     
-                                               <div className="Layout">
-                                                 <img
-                                                   src={
-                                                     item.src2 || "https://via.placeholder.com/200"
-                                                   }
-                                                   alt="Editable"
-                                                   className="multiimg"
-                                                   title="Upload Image"
-                                                   style={item.style}
-                                                   onClick={() => handleopenFiles(index, 2)}
-                                                 />
-                                                 <a
-                                                   href={item.link2}
-                                                   target="_blank"
-                                                   rel="noopener noreferrer"
-                                                   className="button-preview"
-                                                   style={item.buttonStyle2}
-                                                 >
-                                                   {item.content2}
-                                                 </a>
-                                               </div>
-                                             </div>
-                                           ) : null}
-                     
-                                           {item.type === "video-icon" ? (
-                                             <div className="video-icon">
-                                               <img
-                                                 src={item.src1 || "https://via.placeholder.com/200"}
-                                                 alt="Editable"
-                                                 className="videoimg"
-                                                 title="Upload Thumbnail Image"
-                                                 style={item.style}
-                                                 onClick={() => handleopenFiles(index, 1)}
-                                               />
-                                               <a
-                                                 href={item.link}
-                                                 target="_blank"
-                                                 rel="noopener noreferrer"
-                                               >
-                                                 <img
-                                                   src={item.src2}
-                                                   className="video-btn"
-                                                   alt="icon"
-                                                 />
-                                               </a>
-                                             </div>
-                                           ) : null}
-                     
-                                           {item.type === "cardimage" ? (
-                                             <div
-                                               className="card-image-container"
-                                               style={item.style1}
-                                             >
-                                               <img
-                                                 src={item.src1 || "https://via.placeholder.com/200"}
-                                                 style={item.style}
-                                                 alt="Editable"
-                                                 className="card-image"
-                                                 title="Upload Image"
-                                                 onClick={() => handleopenFiles(index, 1)}
-                                               />
-                                               <p
-                                                 className="card-text"
-                                                 contentEditable
-                                                 suppressContentEditableWarning
-                                                 onClick={() => {setModalIndex(index)
-                                                      setIsModalOpen(true);} // Open the modal
-                     
-                                                 } // Open modal for this index
-                                                 style={item.style}
-                                                 dangerouslySetInnerHTML={{
-                                                   __html: item.content1,
-                                                 }}
-                                               />
-                     
-                                               {isModalOpen && modalIndex === index &&  ( // Open only for the selected index
-                                                 <ParaEditor
-                                                   isOpen={true}
-                                                   content={item.content1}
-                                                   onSave={(newContent) => {
-                                                     updateContent(index, { content1: newContent });
-                                                     setModalIndex(null); // Close modal after save
-                                                   }}
-                                                   onClose={() => setModalIndex(null)}
-                                                 />
-                                               )}
-                                             </div>
-                                           ) : null}
-                     
-                                           {item.type === "head" && (
-                                             <div ref={dropdownRef}>
-                                               <p
-                                                 className="border"
-                                                 contentEditable
-                                                 suppressContentEditableWarning
-                                                 onBlur={(e) =>
-                                                   updateContent(index, {
-                                                     content: e.target.textContent,
-                                                   })
-                                                 }
-                                                 onMouseUp={(e) => handleCursorPosition(e, index)}
-                                                 onSelect={(e) => handleCursorPosition(e, index)}
-                                                 style={item.style}
-                                               >
-                                                 {item.content}
-                                               </p>
-                     
-                                               {/* Local state for each heading */}
-                                               <div className="select-group-container">
-                                                 {/* Select Group */}
-                                                 <select
-                                                   onChange={(e) => handleGroupChange(e, index)}
-                                                   value={selectedGroup[index] || ""}
-                                                   className="select-variable"
-                                                 >
-                                                   <option
-                                                     value=""
-                                                     disabled
-                                                     className="template-title"
-                                                   >
-                                                     Add Variable
-                                                   </option>
-                                                   <option value="" disabled>
-                                                     Select Group
-                                                   </option>
-                                                   {groups.map((group, idx) => (
-                                                     <option key={idx} value={group._id}>
-                                                       {group.name}
-                                                     </option>
-                                                   ))}
-                                                 </select>
-                     
-                                                 {/* Show fields only for the selected heading */}
-                                                 {selectedGroup[index] && openedGroups[index] && (
-                                                   <div className="dropdown-container">
-                                                     <p className="template-title">
-                                                       <span>Add</span> Variable
-                                                     </p>
-                                                     {fieldNames[index] &&
-                                                     fieldNames[index].length > 0 ? (
-                                                       <div>
-                                                         {fieldNames[index].map((field, idx) => (
-                                                           <div
-                                                             className="list-field"
-                                                             key={idx}
-                                                             onClick={() =>
-                                                               handleInsertName(index, `{${field}}`)
-                                                             }
-                                                           >
-                                                             {field}
-                                                           </div>
-                                                         ))}
-                                                       </div>
-                                                     ) : (
-                                                       <p className="no-variables">No Variables</p>
-                                                     )}
-                                                   </div>
-                                                 )}
-                                               </div>
-                                             </div>
-                                           )}
-                                           {item.type === "link-image" && (
-                                             <div className="border">
-                                               <a
-                                                 href={item.link || "#"}
-                                                 onClick={(e) => handleLinkClick(e, index)}
-                                               >
-                                                 <img
-                                                   src={
-                                                     item.src || "https://via.placeholder.com/200"
-                                                   }
-                                                   alt="Editable"
-                                                   className="img"
-                                                   style={item.style}
-                                                   onClick={() => handleopenFiles(index, 1)}
-                                                   title="Upload Image"
-                                                 />
-                                               </a>
-                                             </div>
-                                           )}
-                                           {item.type === "image" && (
-                                             <div className="border">
-                                               <img
-                                                 src={item.src || "https://via.placeholder.com/200"}
-                                                 alt="Editable"
-                                                 className="img"
-                                                 style={item.style}
-                                                 onClick={() => handleopenFiles(index, 1)}
-                                                 title="Upload Image"
-                                               />
-                                             </div>
-                                           )}
-                     
-                                           {item.type === "icons" && (
-                                             <div
-                                               className="border"
-                                               style={item.ContentStyle}
-                                               key={index}
-                                             >
-                                               <div className="icon-containers">
-                                                 <a
-                                                   href={item.links1 || "#"}
-                                                   target="_blank"
-                                                   rel="noopener noreferrer"
-                                                   onClick={(e) => handleLinksClick2(e, item.links1)}
-                                                 >
-                                                   <img
-                                                     src={item.iconsrc1}
-                                                     alt="Facebook"
-                                                     className="icon"
-                                                     style={item.style1}
-                                                   />
-                                                 </a>
-                     
-                                                 <a
-                                                   href={item.links2 || "#"}
-                                                   target="_blank"
-                                                   rel="noopener noreferrer"
-                                                   onClick={(e) => handleLinksClick2(e, item.links2)}
-                                                 >
-                                                   <img
-                                                     src={item.iconsrc2}
-                                                     alt="Twitter"
-                                                     className="icon"
-                                                     rel="noopener noreferrer"
-                                                     style={item.style2}
-                                                   />
-                                                 </a>
-                     
-                                                 <a
-                                                   href={item.links3 || "#"}
-                                                   target="_blank"
-                                                   rel="noopener noreferrer"
-                                                   onClick={(e) => handleLinksClick2(e, item.links3)}
-                                                 >
-                                                   <img
-                                                     src={item.iconsrc3}
-                                                     alt="Instagram"
-                                                     className="icon"
-                                                     style={item.style3}
-                                                   />
-                                                 </a>
-                     
-                                                 <a
-                                                   href={item.links4 || "#"}
-                                                   target="_blank"
-                                                   rel="noopener noreferrer"
-                                                   onClick={(e) => handleLinksClick2(e, item.links4)}
-                                                 >
-                                                   <img
-                                                     src={item.iconsrc4}
-                                                     alt="Youtube"
-                                                     className="icon"
-                                                     style={item.style4}
-                                                   />
-                                                 </a>
-                                               </div>
-                                             </div>
-                                           )}
-                                           {item.type === "break" && (
-                                             <div className="border-break">
-                                               <hr style={item.style} />
-                                             </div>
-                                           )}
-                     
-                                           {item.type === "gap" && (
-                                             <div className="border-break">
-                                               {<div style={item.styles}></div>}
-                                             </div>
-                                           )}
-                     
-                                           {item.type === "imagewithtext" ? (
-                                             <div className="image-text-container">
-                                               <div
-                                                 className="image-text-wrapper"
-                                                 style={item.style1}
-                                               >
-                                                 <img
-                                                   src={
-                                                     item.src1 || "https://via.placeholder.com/200"
-                                                   }
-                                                   alt="Editable"
-                                                   className="image-item"
-                                                   title="Upload Image"
-                                                   onClick={() => handleopenFiles(index, 1)}
-                                                 />
-                                                 <p
-                                                   className="text-item"
-                                                   contentEditable
-                                                   suppressContentEditableWarning
-                                                   onClick={() => {setModalIndex(index)
-                                                       setIsModalOpen(true); // Open the modal
-                                                   }
-                                                   } // Open modal for this index
-                                                   style={item.style}
-                                                   dangerouslySetInnerHTML={{
-                                                     __html: item.content1,
-                                                   }}
-                                                 />
-                                               </div>
-                                               {isModalOpen && modalIndex === index && ( // Open only for the selected index
-                                                 <ParaEditor
-                                                   isOpen={true}
-                                                   content={item.content1}
-                                                   onSave={(newContent) => {
-                                                     updateContent(index, { content1: newContent });
-                                                     setModalIndex(null); // Close modal after save
-                                                   }}
-                                                   onClose={() => setModalIndex(null)}
-                                                 />
-                                               )}
-                                             </div>
-                                           ) : null}
-                     
-                                           {item.type === "banner" && (
-                                             <div className="border">
-                                               <img
-                                                 src={item.src || "https://via.placeholder.com/200"}
-                                                 alt="Editable"
-                                                 className="img"
-                                                 style={item.style}
-                                                  title="Upload Image (1200 x 400)"
-                                                 onClick={() => handleopenFiles(index, 1)}
-                                               />
-                                             </div>
-                                           )}
-                     
-                                           {item.type === "textwithimage" ? (
-                                             <div className="image-text-container">
-                                               <div
-                                                 className="image-text-wrapper"
-                                                 style={item.style}
-                                               >
-                                                 <p
-                                                   className="text-item"
-                                                   contentEditable
-                                                   suppressContentEditableWarning
-                                                   onClick={() => {setModalIndex(index)
-                                                     setIsModalOpen(true); // Open the modal
-                                                   }
-                                                   } // Open modal for this index
-                                                   style={item.style}
-                                                   dangerouslySetInnerHTML={{
-                                                     __html: item.content2,
-                                                   }}
-                                                 />
-                                                 <img
-                                                   src={
-                                                     item.src2 || "https://via.placeholder.com/200"
-                                                   }
-                                                   alt="Editable"
-                                                   className="image-item"
-                                                   title="Upload Image"
-                                                   onClick={() => handleopenFiles(index, 2)}
-                                                 />
-                                               </div>
-                                               {isModalOpen && modalIndex === index && ( // Open only for the selected index
-                                                 <ParaEditor
-                                                   isOpen={true}
-                                                   content={item.content2}
-                                                   onSave={(newContent) => {
-                                                     updateContent(index, { content2: newContent });
-                                                     setModalIndex(null); // Close modal after save
-                                                   }}
-                                                   onClose={() => setModalIndex(null)}
-                                                 />
-                                               )}
-                                             </div>
-                                           ) : null}
-                     
-                                           {item.type === "logo" && (
-                                             <div className="border">
-                                               <img
-                                                 src={item.src || "https://via.placeholder.com/200"}
-                                                 alt="Editable"
-                                                 className="logo"
-                                                 style={item.style}
-                                                 onClick={() => handleopenFiles(index, 1)}
-                                                 title="Upload Image"
-                                               />
-                                             </div>
-                                           )}
-                                           {item.type === "button" && (
-                                             <div className="border-btn">
-                                               <a
-                                                 href={item.link || "#"}
-                                                 target="_blank"
-                                                 rel="noopener noreferrer"
-                                                 style={item.style}
-                                                 className="button-preview"
-                                               >
-                                                 {item.content}
-                                               </a>
-                                             </div>
-                                           )}
-                                           {item.type === "link" && (
-                                             <div className="border-btn">
-                                               <a
-                                                 href={item.href || "#"}
-                                                 onClick={(e) => handleLinkClick(e, index)}
-                                                 style={item.style}
-                                               >
-                                                 {item.content}
-                                               </a>
-                                             </div>
-                                           )}
+                        <>
+                          <p
+                            className="border"
+                            contentEditable
+                            suppressContentEditableWarning
+                            onClick={() => {
+                              setSelectedIndex(index);
+                              setSelectedContent(item.content); // Store the correct content
+                              setIsModalOpen(true); // Open the modal
+                            }}
+                            style={item.style}
+                            dangerouslySetInnerHTML={{ __html: item.content }}
+                          />
+                          {isModalOpen && selectedIndex === index && (
+                            <ParaEditor
+                              isOpen={isModalOpen}
+                              content={selectedContent} // Pass the correct content
+                              style={item.style}
+                              onSave={(newContent) => {
+                                updateContent(index, { content: newContent }); // Save the new content
+                                setIsModalOpen(false);
+                              }}
+                              onClose={() => setIsModalOpen(false)}
+                            />
+                          )}
+                        </>
+                      )}
+
+                      {item.type === "multi-image-card" ? (
+                        <div className="Layout-img">
+                          <div className="Layout">
+                            <img
+                              src={
+                                item.src1 || "https://via.placeholder.com/200"
+                              }
+                              alt="Editable"
+                              className="multiimgcard"
+                              title="Upload Image"
+                              style={item.style}
+                              onClick={() => handleopenFiles(index, 1)}
+                            />
+                            <h3 className="card-text-image">
+                              {item.title1 || " "}
+                            </h3>
+                            <p>
+                              <s>
+                                {item.originalPrice1
+                                  ? `$${item.originalPrice1}`
+                                  : " "}
+                              </s>
+                            </p>
+                            <p>
+                              {item.offerPrice1
+                                ? `Off Price $${item.offerPrice1}`
+                                : " "}
+                            </p>
+                            <a
+                              href={item.link1}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="button-preview"
+                              style={item.buttonStyle1}
+                            >
+                              {item.content1}
+                            </a>
+                          </div>
+
+                          <div className="Layout">
+                            <img
+                              src={
+                                item.src2 || "https://via.placeholder.com/200"
+                              }
+                              alt="Editable"
+                              className="multiimgcard"
+                              title="Upload Image"
+                              style={item.style}
+                              onClick={() => handleopenFiles(index, 2)}
+                            />
+                            <h3 className="card-text-image">
+                              {item.title2 || " "}
+                            </h3>
+                            <p>
+                              <s>
+                                {item.originalPrice2
+                                  ? `$${item.originalPrice2}`
+                                  : " "}
+                              </s>
+                            </p>
+                            <p>
+                              {item.offerPrice2
+                                ? `Off Price $${item.offerPrice2}`
+                                : " "}
+                            </p>
+                            <a
+                              href={item.link2}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="button-preview"
+                              style={item.buttonStyle2}
+                            >
+                              {item.content2}
+                            </a>
+                          </div>
+                        </div>
+                      ) : null}
+
+                      {item.type === "multipleimage" ? (
+                        <div className="Layout-img">
+                          <div className="Layout">
+                            <img
+                              src={
+                                item.src1 || "https://via.placeholder.com/200"
+                              }
+                              alt="Editable"
+                              className="multiple-img"
+                              title="Upload Image"
+                              style={item.style}
+                              onClick={() => handleopenFiles(index, 1)}
+                            />
+                          </div>
+
+                          <div className="Layout">
+                            <img
+                              src={
+                                item.src2 || "https://via.placeholder.com/200"
+                              }
+                              alt="Editable"
+                              className="multiple-img"
+                              title="Upload Image"
+                              style={item.style}
+                              onClick={() => handleopenFiles(index, 2)}
+                            />
+                          </div>
+                        </div>
+                      ) : null}
+
+                      {item.type === "multi-image" ? (
+                        <div className="Layout-img">
+                          <div className="Layout">
+                            <img
+                              src={
+                                item.src1 || "https://via.placeholder.com/200"
+                              }
+                              alt="Editable"
+                              className="multiimg"
+                              title="Upload Image"
+                              style={item.style}
+                              onClick={() => handleopenFiles(index, 1)}
+                            />
+                            <a
+                              href={item.link1}
+                              target="_blank"
+                              className="button-preview"
+                              rel="noopener noreferrer"
+                              style={item.buttonStyle1}
+                            >
+                              {item.content1}
+                            </a>
+                          </div>
+
+                          <div className="Layout">
+                            <img
+                              src={
+                                item.src2 || "https://via.placeholder.com/200"
+                              }
+                              alt="Editable"
+                              className="multiimg"
+                              title="Upload Image"
+                              style={item.style}
+                              onClick={() => handleopenFiles(index, 2)}
+                            />
+                            <a
+                              href={item.link2}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="button-preview"
+                              style={item.buttonStyle2}
+                            >
+                              {item.content2}
+                            </a>
+                          </div>
+                        </div>
+                      ) : null}
+
+                      {item.type === "video-icon" ? (
+                        <div className="video-icon">
+                          <img
+                            src={item.src1 || "https://via.placeholder.com/200"}
+                            alt="Editable"
+                            className="videoimg"
+                            title="Upload Thumbnail Image"
+                            style={item.style}
+                            onClick={() => handleopenFiles(index, 1)}
+                          />
+                          <a
+                            href={item.link}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                          >
+                            <img
+                              src={item.src2}
+                              className="video-btn"
+                              alt="icon"
+                            />
+                          </a>
+                        </div>
+                      ) : null}
+
+                      {item.type === "cardimage" ? (
+                        <div
+                          className="card-image-container"
+                          style={item.style1}
+                        >
+                          <img
+                            src={item.src1 || "https://via.placeholder.com/200"}
+                            style={item.style}
+                            alt="Editable"
+                            className="card-image"
+                            title="Upload Image"
+                            onClick={() => handleopenFiles(index, 1)}
+                          />
+                          <p
+                            className="card-text"
+                            contentEditable
+                            suppressContentEditableWarning
+                            onClick={
+                              () => {
+                                setModalIndex(index);
+                                setIsModalOpen(true);
+                              } // Open the modal
+                            } // Open modal for this index
+                            style={item.style}
+                            dangerouslySetInnerHTML={{
+                              __html: item.content1,
+                            }}
+                          />
+
+                          {isModalOpen &&
+                            modalIndex === index && ( // Open only for the selected index
+                              <ParaEditor
+                                isOpen={true}
+                                content={item.content1}
+                                onSave={(newContent) => {
+                                  updateContent(index, {
+                                    content1: newContent,
+                                  });
+                                  setModalIndex(null); // Close modal after save
+                                }}
+                                onClose={() => setModalIndex(null)}
+                              />
+                            )}
+                        </div>
+                      ) : null}
+
+                      {item.type === "head" && (
+                        <div ref={dropdownRef}>
+                          <p
+                            className="border"
+                            contentEditable
+                            suppressContentEditableWarning
+                            onBlur={(e) =>
+                              updateContent(index, {
+                                content: e.target.textContent,
+                              })
+                            }
+                            onMouseUp={(e) => handleCursorPosition(e, index)}
+                            onSelect={(e) => handleCursorPosition(e, index)}
+                            style={item.style}
+                          >
+                            {item.content}
+                          </p>
+
+                          {/* Local state for each heading */}
+                          <div className="select-group-container">
+                            {/* Select Group */}
+                            <select
+                              onChange={(e) => handleGroupChange(e, index)}
+                              value={selectedGroup[index] || ""}
+                              className="select-variable"
+                            >
+                              <option
+                                value=""
+                                disabled
+                                className="template-title"
+                              >
+                                Add Variable
+                              </option>
+                              <option value="" disabled>
+                                Select Group
+                              </option>
+                              {groups.map((group, idx) => (
+                                <option key={idx} value={group._id}>
+                                  {group.name}
+                                </option>
+                              ))}
+                            </select>
+
+                            {/* Show fields only for the selected heading */}
+                            {selectedGroup[index] && openedGroups[index] && (
+                              <div className="dropdown-container">
+                                <p className="template-title">
+                                  <span>Add</span> Variable
+                                </p>
+                                {fieldNames[index] &&
+                                fieldNames[index].length > 0 ? (
+                                  <div>
+                                    {fieldNames[index].map((field, idx) => (
+                                      <div
+                                        className="list-field"
+                                        key={idx}
+                                        onClick={() =>
+                                          handleInsertName(index, `{${field}}`)
+                                        }
+                                      >
+                                        {field}
+                                      </div>
+                                    ))}
+                                  </div>
+                                ) : (
+                                  <p className="no-variables">No Variables</p>
+                                )}
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      )}
+                      {item.type === "link-image" && (
+                        <div className="border">
+                          <a
+                            href={item.link || "#"}
+                            onClick={(e) => handleLinkClick(e, index)}
+                          >
+                            <img
+                              src={
+                                item.src || "https://via.placeholder.com/200"
+                              }
+                              alt="Editable"
+                              className="img"
+                              style={item.style}
+                              onClick={() => handleopenFiles(index, 1)}
+                              title="Upload Image"
+                            />
+                          </a>
+                        </div>
+                      )}
+                      {item.type === "image" && (
+                        <div className="border">
+                          <img
+                            src={item.src || "https://via.placeholder.com/200"}
+                            alt="Editable"
+                            className="img"
+                            style={item.style}
+                            onClick={() => handleopenFiles(index, 1)}
+                            title="Upload Image"
+                          />
+                        </div>
+                      )}
+
+                      {item.type === "icons" && (
+                        <div
+                          className="border"
+                          style={item.ContentStyle}
+                          key={index}
+                        >
+                          <div className="icon-containers">
+                            <a
+                              href={item.links1 || "#"}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              onClick={(e) => handleLinksClick2(e, item.links1)}
+                            >
+                              <img
+                                src={item.iconsrc1}
+                                alt="Facebook"
+                                className="icon"
+                                style={item.style1}
+                              />
+                            </a>
+
+                            <a
+                              href={item.links2 || "#"}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              onClick={(e) => handleLinksClick2(e, item.links2)}
+                            >
+                              <img
+                                src={item.iconsrc2}
+                                alt="Twitter"
+                                className="icon"
+                                rel="noopener noreferrer"
+                                style={item.style2}
+                              />
+                            </a>
+
+                            <a
+                              href={item.links3 || "#"}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              onClick={(e) => handleLinksClick2(e, item.links3)}
+                            >
+                              <img
+                                src={item.iconsrc3}
+                                alt="Instagram"
+                                className="icon"
+                                style={item.style3}
+                              />
+                            </a>
+
+                            <a
+                              href={item.links4 || "#"}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              onClick={(e) => handleLinksClick2(e, item.links4)}
+                            >
+                              <img
+                                src={item.iconsrc4}
+                                alt="Youtube"
+                                className="icon"
+                                style={item.style4}
+                              />
+                            </a>
+                          </div>
+                        </div>
+                      )}
+                      {item.type === "break" && (
+                        <div className="border-break">
+                          <hr style={item.style} />
+                        </div>
+                      )}
+
+                      {item.type === "gap" && (
+                        <div className="border-break">
+                          {<div style={item.styles}></div>}
+                        </div>
+                      )}
+
+                      {item.type === "imagewithtext" ? (
+                        <div className="image-text-container">
+                          <div
+                            className="image-text-wrapper"
+                            style={item.style1}
+                          >
+                            <img
+                              src={
+                                item.src1 || "https://via.placeholder.com/200"
+                              }
+                              alt="Editable"
+                              className="image-item"
+                              title="Upload Image"
+                              onClick={() => handleopenFiles(index, 1)}
+                            />
+                            <p
+                              className="text-item"
+                              contentEditable
+                              suppressContentEditableWarning
+                              onClick={() => {
+                                setModalIndex(index);
+                                setIsModalOpen(true); // Open the modal
+                              }} // Open modal for this index
+                              style={item.style}
+                              dangerouslySetInnerHTML={{
+                                __html: item.content1,
+                              }}
+                            />
+                          </div>
+                          {isModalOpen &&
+                            modalIndex === index && ( // Open only for the selected index
+                              <ParaEditor
+                                isOpen={true}
+                                content={item.content1}
+                                onSave={(newContent) => {
+                                  updateContent(index, {
+                                    content1: newContent,
+                                  });
+                                  setModalIndex(null); // Close modal after save
+                                }}
+                                onClose={() => setModalIndex(null)}
+                              />
+                            )}
+                        </div>
+                      ) : null}
+
+                      {item.type === "banner" && (
+                        <div className="border">
+                          <img
+                            src={item.src || "https://via.placeholder.com/200"}
+                            alt="Editable"
+                            className="img"
+                            style={item.style}
+                            title="Upload Image (1200 x 400)"
+                            onClick={() => handleopenFiles(index, 1)}
+                          />
+                        </div>
+                      )}
+
+                      {item.type === "textwithimage" ? (
+                        <div className="image-text-container">
+                          <div
+                            className="image-text-wrapper"
+                            style={item.style}
+                          >
+                            <p
+                              className="text-item"
+                              contentEditable
+                              suppressContentEditableWarning
+                              onClick={() => {
+                                setModalIndex(index);
+                                setIsModalOpen(true); // Open the modal
+                              }} // Open modal for this index
+                              style={item.style}
+                              dangerouslySetInnerHTML={{
+                                __html: item.content2,
+                              }}
+                            />
+                            <img
+                              src={
+                                item.src2 || "https://via.placeholder.com/200"
+                              }
+                              alt="Editable"
+                              className="image-item"
+                              title="Upload Image"
+                              onClick={() => handleopenFiles(index, 2)}
+                            />
+                          </div>
+                          {isModalOpen &&
+                            modalIndex === index && ( // Open only for the selected index
+                              <ParaEditor
+                                isOpen={true}
+                                content={item.content2}
+                                onSave={(newContent) => {
+                                  updateContent(index, {
+                                    content2: newContent,
+                                  });
+                                  setModalIndex(null); // Close modal after save
+                                }}
+                                onClose={() => setModalIndex(null)}
+                              />
+                            )}
+                        </div>
+                      ) : null}
+
+                      {item.type === "logo" && (
+                        <div className="border">
+                          <img
+                            src={item.src || "https://via.placeholder.com/200"}
+                            alt="Editable"
+                            className="logo"
+                            style={item.style}
+                            onClick={() => handleopenFiles(index, 1)}
+                            title="Upload Image"
+                          />
+                        </div>
+                      )}
+                      {item.type === "button" && (
+                        <div className="border-btn">
+                          <a
+                            href={item.link || "#"}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            style={item.style}
+                            className="button-preview"
+                          >
+                            {item.content}
+                          </a>
+                        </div>
+                      )}
+                      {item.type === "link" && (
+                        <div className="border-btn">
+                          <a
+                            href={item.href || "#"}
+                            onClick={(e) => handleLinkClick(e, index)}
+                            style={item.style}
+                          >
+                            {item.content}
+                          </a>
+                        </div>
+                      )}
                       <div className="del-edit-btn">
                         <button
                           className="delete-btn"
@@ -5711,563 +5863,619 @@ const TemMainpage = () => {
                             className="content-item-preview"
                             style={item.style}
                           >
-                          {item.type === "para" && (
-                                                 <>
-                                                   <p
-                                                     className="border"
-                                                     contentEditable
-                                                     suppressContentEditableWarning
-                                                     onClick={() => {
-                                                       setSelectedIndex(index);
-                                                       setSelectedContent(item.content); // Store the correct content
-                                                       setIsModalOpen(true); // Open the modal
-                                                     }}
-                                                     style={item.style}
-                                                     dangerouslySetInnerHTML={{ __html: item.content }}
-                                                   />
-                                                   {isModalOpen && selectedIndex === index && (
-                                                     <ParaEditor
-                                                       isOpen={isModalOpen}
-                                                       content={selectedContent} // Pass the correct content
-                                                       style={item.style}
-                                                       onSave={(newContent) => {
-                                                         updateContent(index, { content: newContent }); // Save the new content
-                                                         setIsModalOpen(false);
-                                                       }}
-                                                       onClose={() => setIsModalOpen(false)}
-                                                     />
-                                                   )}
-                                                 </>
-                                               )}
-                         
-                                               {item.type === "multi-image-card" ? (
-                                                 <div className="Layout-img">
-                                                   <div className="Layout">
-                                                     <img
-                                                       src={
-                                                         item.src1 || "https://via.placeholder.com/200"
-                                                       }
-                                                       alt="Editable"
-                                                       className="multiimgcard"
-                                                       title="Upload Image"
-                                                       style={item.style}
-                                                       onClick={() => handleopenFiles(index, 1)}
-                                                     />
-                                                     <h3 className="card-text-image">
-                                                       {item.title1 || " "}
-                                                     </h3>
-                                                     <p>
-                                                       <s>
-                                                         {item.originalPrice1
-                                                           ? `$${item.originalPrice1}`
-                                                           : " "}
-                                                       </s>
-                                                     </p>
-                                                     <p>
-                                                       {item.offerPrice1
-                                                         ? `Off Price $${item.offerPrice1}`
-                                                         : " "}
-                                                     </p>
-                                                     <a
-                                                       href={item.link1}
-                                                       target="_blank"
-                                                       rel="noopener noreferrer"
-                                                       className="button-preview"
-                                                       style={item.buttonStyle1}
-                                                     >
-                                                       {item.content1}
-                                                     </a>
-                                                   </div>
-                         
-                                                   <div className="Layout">
-                                                     <img
-                                                       src={
-                                                         item.src2 || "https://via.placeholder.com/200"
-                                                       }
-                                                       alt="Editable"
-                                                       className="multiimgcard"
-                                                       title="Upload Image"
-                                                       style={item.style}
-                                                       onClick={() => handleopenFiles(index, 2)}
-                                                     />
-                                                     <h3 className="card-text-image">
-                                                       {item.title2 || " "}
-                                                     </h3>
-                                                     <p>
-                                                       <s>
-                                                         {item.originalPrice2
-                                                           ? `$${item.originalPrice2}`
-                                                           : " "}
-                                                       </s>
-                                                     </p>
-                                                     <p>
-                                                       {item.offerPrice2
-                                                         ? `Off Price $${item.offerPrice2}`
-                                                         : " "}
-                                                     </p>
-                                                     <a
-                                                       href={item.link2}
-                                                       target="_blank"
-                                                       rel="noopener noreferrer"
-                                                       className="button-preview"
-                                                       style={item.buttonStyle2}
-                                                     >
-                                                       {item.content2}
-                                                     </a>
-                                                   </div>
-                                                 </div>
-                                               ) : null}
-                         
-                                               {item.type === "multipleimage" ? (
-                                                 <div className="Layout-img">
-                                                   <div className="Layout">
-                                                     <img
-                                                       src={
-                                                         item.src1 || "https://via.placeholder.com/200"
-                                                       }
-                                                       alt="Editable"
-                                                       className="multiple-img"
-                                                       title="Upload Image"
-                                                       style={item.style}
-                                                       onClick={() => handleopenFiles(index, 1)}
-                                                     />
-                                                   </div>
-                         
-                                                   <div className="Layout">
-                                                     <img
-                                                       src={
-                                                         item.src2 || "https://via.placeholder.com/200"
-                                                       }
-                                                       alt="Editable"
-                                                       className="multiple-img"
-                                                       title="Upload Image"
-                                                       style={item.style}
-                                                       onClick={() => handleopenFiles(index, 2)}
-                                                     />
-                                                   </div>
-                                                 </div>
-                                               ) : null}
-                         
-                                               {item.type === "multi-image" ? (
-                                                 <div className="Layout-img">
-                                                   <div className="Layout">
-                                                     <img
-                                                       src={
-                                                         item.src1 || "https://via.placeholder.com/200"
-                                                       }
-                                                       alt="Editable"
-                                                       className="multiimg"
-                                                       title="Upload Image"
-                                                       style={item.style}
-                                                       onClick={() => handleopenFiles(index, 1)}
-                                                     />
-                                                     <a
-                                                       href={item.link1}
-                                                       target="_blank"
-                                                       className="button-preview"
-                                                       rel="noopener noreferrer"
-                                                       style={item.buttonStyle1}
-                                                     >
-                                                       {item.content1}
-                                                     </a>
-                                                   </div>
-                         
-                                                   <div className="Layout">
-                                                     <img
-                                                       src={
-                                                         item.src2 || "https://via.placeholder.com/200"
-                                                       }
-                                                       alt="Editable"
-                                                       className="multiimg"
-                                                       title="Upload Image"
-                                                       style={item.style}
-                                                       onClick={() => handleopenFiles(index, 2)}
-                                                     />
-                                                     <a
-                                                       href={item.link2}
-                                                       target="_blank"
-                                                       rel="noopener noreferrer"
-                                                       className="button-preview"
-                                                       style={item.buttonStyle2}
-                                                     >
-                                                       {item.content2}
-                                                     </a>
-                                                   </div>
-                                                 </div>
-                                               ) : null}
-                         
-                                               {item.type === "video-icon" ? (
-                                                 <div className="video-icon">
-                                                   <img
-                                                     src={item.src1 || "https://via.placeholder.com/200"}
-                                                     alt="Editable"
-                                                     className="videoimg"
-                                                     title="Upload Thumbnail Image"
-                                                     style={item.style}
-                                                     onClick={() => handleopenFiles(index, 1)}
-                                                   />
-                                                   <a
-                                                     href={item.link}
-                                                     target="_blank"
-                                                     rel="noopener noreferrer"
-                                                   >
-                                                     <img
-                                                       src={item.src2}
-                                                       className="video-btn"
-                                                       alt="icon"
-                                                     />
-                                                   </a>
-                                                 </div>
-                                               ) : null}
-                         
-                                               {item.type === "cardimage" ? (
-                                                 <div
-                                                   className="card-image-container"
-                                                   style={item.style1}
-                                                 >
-                                                   <img
-                                                     src={item.src1 || "https://via.placeholder.com/200"}
-                                                     style={item.style}
-                                                     alt="Editable"
-                                                     className="card-image"
-                                                     title="Upload Image"
-                                                     onClick={() => handleopenFiles(index, 1)}
-                                                   />
-                                                   <p
-                                                     className="card-text"
-                                                     contentEditable
-                                                     suppressContentEditableWarning
-                                                     onClick={() => setModalIndex(index)} // Open modal for this index
-                                                     style={item.style}
-                                                     dangerouslySetInnerHTML={{
-                                                       __html: item.content1,
-                                                     }}
-                                                   />
-                         
-                                                   {modalIndex === index && ( // Open only for the selected index
-                                                     <ParaEditor
-                                                       isOpen={true}
-                                                       content={item.content1}
-                                                       onSave={(newContent) => {
-                                                         updateContent(index, { content1: newContent });
-                                                         setModalIndex(null); // Close modal after save
-                                                       }}
-                                                       onClose={() => setModalIndex(null)}
-                                                     />
-                                                   )}
-                                                 </div>
-                                               ) : null}
-                         
-                                               {item.type === "head" && (
-                                                 <div ref={dropdownRef}>
-                                                   <p
-                                                     className="border"
-                                                     contentEditable
-                                                     suppressContentEditableWarning
-                                                     onBlur={(e) =>
-                                                       updateContent(index, {
-                                                         content: e.target.textContent,
-                                                       })
-                                                     }
-                                                     onMouseUp={(e) => handleCursorPosition(e, index)}
-                                                     onSelect={(e) => handleCursorPosition(e, index)}
-                                                     style={item.style}
-                                                   >
-                                                     {item.content}
-                                                   </p>
-                         
-                                                   {/* Local state for each heading */}
-                                                   <div className="select-group-container">
-                                                     {/* Select Group */}
-                                                     <select
-                                                       onChange={(e) => handleGroupChange(e, index)}
-                                                       value={selectedGroup[index] || ""}
-                                                       className="select-variable"
-                                                     >
-                                                       <option
-                                                         value=""
-                                                         disabled
-                                                         className="template-title"
-                                                       >
-                                                         Add Variable
-                                                       </option>
-                                                       <option value="" disabled>
-                                                         Select Group
-                                                       </option>
-                                                       {groups.map((group, idx) => (
-                                                         <option key={idx} value={group._id}>
-                                                           {group.name}
-                                                         </option>
-                                                       ))}
-                                                     </select>
-                         
-                                                     {/* Show fields only for the selected heading */}
-                                                     {selectedGroup[index] && openedGroups[index] && (
-                                                       <div className="dropdown-container">
-                                                         <p className="template-title">
-                                                           <span>Add</span> Variable
-                                                         </p>
-                                                         {fieldNames[index] &&
-                                                         fieldNames[index].length > 0 ? (
-                                                           <div>
-                                                             {fieldNames[index].map((field, idx) => (
-                                                               <div
-                                                                 className="list-field"
-                                                                 key={idx}
-                                                                 onClick={() =>
-                                                                   handleInsertName(index, `{${field}}`)
-                                                                 }
-                                                               >
-                                                                 {field}
-                                                               </div>
-                                                             ))}
-                                                           </div>
-                                                         ) : (
-                                                           <p className="no-variables">No Variables</p>
-                                                         )}
-                                                       </div>
-                                                     )}
-                                                   </div>
-                                                 </div>
-                                               )}
-                                               {item.type === "link-image" && (
-                                                 <div className="border">
-                                                   <a
-                                                     href={item.link || "#"}
-                                                     onClick={(e) => handleLinkClick(e, index)}
-                                                   >
-                                                     <img
-                                                       src={
-                                                         item.src || "https://via.placeholder.com/200"
-                                                       }
-                                                       alt="Editable"
-                                                       className="img"
-                                                       style={item.style}
-                                                       onClick={() => handleopenFiles(index, 1)}
-                                                       title="Upload Image"
-                                                     />
-                                                   </a>
-                                                 </div>
-                                               )}
-                                               {item.type === "image" && (
-                                                 <div className="border">
-                                                   <img
-                                                     src={item.src || "https://via.placeholder.com/200"}
-                                                     alt="Editable"
-                                                     className="img"
-                                                     style={item.style}
-                                                     onClick={() => handleopenFiles(index, 1)}
-                                                     title="Upload Image"
-                                                   />
-                                                 </div>
-                                               )}
-                         
-                                               {item.type === "icons" && (
-                                                 <div
-                                                   className="border"
-                                                   style={item.ContentStyle}
-                                                   key={index}
-                                                 >
-                                                   <div className="icon-containers">
-                                                     <a
-                                                       href={item.links1 || "#"}
-                                                       target="_blank"
-                                                       rel="noopener noreferrer"
-                                                       onClick={(e) => handleLinksClick2(e, item.links1)}
-                                                     >
-                                                       <img
-                                                         src={item.iconsrc1}
-                                                         alt="Facebook"
-                                                         className="icon"
-                                                         style={item.style1}
-                                                       />
-                                                     </a>
-                         
-                                                     <a
-                                                       href={item.links2 || "#"}
-                                                       target="_blank"
-                                                       rel="noopener noreferrer"
-                                                       onClick={(e) => handleLinksClick2(e, item.links2)}
-                                                     >
-                                                       <img
-                                                         src={item.iconsrc2}
-                                                         alt="Twitter"
-                                                         className="icon"
-                                                         rel="noopener noreferrer"
-                                                         style={item.style2}
-                                                       />
-                                                     </a>
-                         
-                                                     <a
-                                                       href={item.links3 || "#"}
-                                                       target="_blank"
-                                                       rel="noopener noreferrer"
-                                                       onClick={(e) => handleLinksClick2(e, item.links3)}
-                                                     >
-                                                       <img
-                                                         src={item.iconsrc3}
-                                                         alt="Instagram"
-                                                         className="icon"
-                                                         style={item.style3}
-                                                       />
-                                                     </a>
-                         
-                                                     <a
-                                                       href={item.links4 || "#"}
-                                                       target="_blank"
-                                                       rel="noopener noreferrer"
-                                                       onClick={(e) => handleLinksClick2(e, item.links4)}
-                                                     >
-                                                       <img
-                                                         src={item.iconsrc4}
-                                                         alt="Youtube"
-                                                         className="icon"
-                                                         style={item.style4}
-                                                       />
-                                                     </a>
-                                                   </div>
-                                                 </div>
-                                               )}
-                                               {item.type === "break" && (
-                                                 <div className="border-break">
-                                                   <hr style={item.style} />
-                                                 </div>
-                                               )}
-                         
-                                               {item.type === "gap" && (
-                                                 <div className="border-break">
-                                                   {<div style={item.styles}></div>}
-                                                 </div>
-                                               )}
-                         
-                                               {item.type === "imagewithtext" ? (
-                                                 <div className="image-text-container">
-                                                   <div
-                                                     className="image-text-wrapper"
-                                                     style={item.style1}
-                                                   >
-                                                     <img
-                                                       src={
-                                                         item.src1 || "https://via.placeholder.com/200"
-                                                       }
-                                                       alt="Editable"
-                                                       className="image-item"
-                                                       title="Upload Image"
-                                                       onClick={() => handleopenFiles(index, 1)}
-                                                     />
-                                                     <p
-                                                       className="text-item"
-                                                       contentEditable
-                                                       suppressContentEditableWarning
-                                                       onClick={() => setModalIndex(index)} // Open modal for this index
-                                                       style={item.style}
-                                                       dangerouslySetInnerHTML={{
-                                                         __html: item.content1,
-                                                       }}
-                                                     />
-                                                   </div>
-                                                   {modalIndex === index && ( // Open only for the selected index
-                                                     <ParaEditor
-                                                       isOpen={true}
-                                                       content={item.content1}
-                                                       onSave={(newContent) => {
-                                                         updateContent(index, { content1: newContent });
-                                                         setModalIndex(null); // Close modal after save
-                                                       }}
-                                                       onClose={() => setModalIndex(null)}
-                                                     />
-                                                   )}
-                                                 </div>
-                                               ) : null}
-                         
-                                               {item.type === "banner" && (
-                                                 <div className="border">
-                                                   <img
-                                                     src={item.src || "https://via.placeholder.com/200"}
-                                                     alt="Editable"
-                                                     className="img"
-                                                     style={item.style}
-                                                     onClick={() => handleopenFiles(index, 1)}
-                                                   />
-                                                 </div>
-                                               )}
-                         
-                                               {item.type === "textwithimage" ? (
-                                                 <div className="image-text-container">
-                                                   <div
-                                                     className="image-text-wrapper"
-                                                     style={item.style}
-                                                   >
-                                                     <p
-                                                       className="text-item"
-                                                       contentEditable
-                                                       suppressContentEditableWarning
-                                                       onClick={() => setModalIndex(index)} // Open modal for this index
-                                                       style={item.style}
-                                                       dangerouslySetInnerHTML={{
-                                                         __html: item.content2,
-                                                       }}
-                                                     />
-                                                     <img
-                                                       src={
-                                                         item.src2 || "https://via.placeholder.com/200"
-                                                       }
-                                                       alt="Editable"
-                                                       className="image-item"
-                                                       title="Upload Image"
-                                                       onClick={() => handleopenFiles(index, 2)}
-                                                     />
-                                                   </div>
-                                                   {modalIndex === index && ( // Open only for the selected index
-                                                     <ParaEditor
-                                                       isOpen={true}
-                                                       content={item.content2}
-                                                       onSave={(newContent) => {
-                                                         updateContent(index, { content2: newContent });
-                                                         setModalIndex(null); // Close modal after save
-                                                       }}
-                                                       onClose={() => setModalIndex(null)}
-                                                     />
-                                                   )}
-                                                 </div>
-                                               ) : null}
-                         
-                                               {item.type === "logo" && (
-                                                 <div className="border">
-                                                   <img
-                                                     src={item.src || "https://via.placeholder.com/200"}
-                                                     alt="Editable"
-                                                     className="logo"
-                                                     style={item.style}
-                                                     onClick={() => handleopenFiles(index, 1)}
-                                                     title="Upload Image"
-                                                   />
-                                                 </div>
-                                               )}
-                                               {item.type === "button" && (
-                                                 <div className="border-btn">
-                                                   <a
-                                                     href={item.link || "#"}
-                                                     target="_blank"
-                                                     rel="noopener noreferrer"
-                                                     style={item.style}
-                                                     className="button-preview"
-                                                   >
-                                                     {item.content}
-                                                   </a>
-                                                 </div>
-                                               )}
-                                               {item.type === "link" && (
-                                                 <div className="border-btn">
-                                                   <a
-                                                     href={item.href || "#"}
-                                                     onClick={(e) => handleLinkClick(e, index)}
-                                                     style={item.style}
-                                                   >
-                                                     {item.content}
-                                                   </a>
-                                                 </div>
-                                               )}
+                            {item.type === "para" && (
+                              <>
+                                <p
+                                  className="border"
+                                  contentEditable
+                                  suppressContentEditableWarning
+                                  onClick={() => {
+                                    setSelectedIndex(index);
+                                    setSelectedContent(item.content); // Store the correct content
+                                    setIsModalOpen(true); // Open the modal
+                                  }}
+                                  style={item.style}
+                                  dangerouslySetInnerHTML={{
+                                    __html: item.content,
+                                  }}
+                                />
+                                {isModalOpen && selectedIndex === index && (
+                                  <ParaEditor
+                                    isOpen={isModalOpen}
+                                    content={selectedContent} // Pass the correct content
+                                    style={item.style}
+                                    onSave={(newContent) => {
+                                      updateContent(index, {
+                                        content: newContent,
+                                      }); // Save the new content
+                                      setIsModalOpen(false);
+                                    }}
+                                    onClose={() => setIsModalOpen(false)}
+                                  />
+                                )}
+                              </>
+                            )}
+
+                            {item.type === "multi-image-card" ? (
+                              <div className="Layout-img">
+                                <div className="Layout">
+                                  <img
+                                    src={
+                                      item.src1 ||
+                                      "https://via.placeholder.com/200"
+                                    }
+                                    alt="Editable"
+                                    className="multiimgcard"
+                                    title="Upload Image"
+                                    style={item.style}
+                                    onClick={() => handleopenFiles(index, 1)}
+                                  />
+                                  <h3 className="card-text-image">
+                                    {item.title1 || " "}
+                                  </h3>
+                                  <p>
+                                    <s>
+                                      {item.originalPrice1
+                                        ? `$${item.originalPrice1}`
+                                        : " "}
+                                    </s>
+                                  </p>
+                                  <p>
+                                    {item.offerPrice1
+                                      ? `Off Price $${item.offerPrice1}`
+                                      : " "}
+                                  </p>
+                                  <a
+                                    href={item.link1}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="button-preview"
+                                    style={item.buttonStyle1}
+                                  >
+                                    {item.content1}
+                                  </a>
+                                </div>
+
+                                <div className="Layout">
+                                  <img
+                                    src={
+                                      item.src2 ||
+                                      "https://via.placeholder.com/200"
+                                    }
+                                    alt="Editable"
+                                    className="multiimgcard"
+                                    title="Upload Image"
+                                    style={item.style}
+                                    onClick={() => handleopenFiles(index, 2)}
+                                  />
+                                  <h3 className="card-text-image">
+                                    {item.title2 || " "}
+                                  </h3>
+                                  <p>
+                                    <s>
+                                      {item.originalPrice2
+                                        ? `$${item.originalPrice2}`
+                                        : " "}
+                                    </s>
+                                  </p>
+                                  <p>
+                                    {item.offerPrice2
+                                      ? `Off Price $${item.offerPrice2}`
+                                      : " "}
+                                  </p>
+                                  <a
+                                    href={item.link2}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="button-preview"
+                                    style={item.buttonStyle2}
+                                  >
+                                    {item.content2}
+                                  </a>
+                                </div>
+                              </div>
+                            ) : null}
+
+                            {item.type === "multipleimage" ? (
+                              <div className="Layout-img">
+                                <div className="Layout">
+                                  <img
+                                    src={
+                                      item.src1 ||
+                                      "https://via.placeholder.com/200"
+                                    }
+                                    alt="Editable"
+                                    className="multiple-img"
+                                    title="Upload Image"
+                                    style={item.style}
+                                    onClick={() => handleopenFiles(index, 1)}
+                                  />
+                                </div>
+
+                                <div className="Layout">
+                                  <img
+                                    src={
+                                      item.src2 ||
+                                      "https://via.placeholder.com/200"
+                                    }
+                                    alt="Editable"
+                                    className="multiple-img"
+                                    title="Upload Image"
+                                    style={item.style}
+                                    onClick={() => handleopenFiles(index, 2)}
+                                  />
+                                </div>
+                              </div>
+                            ) : null}
+
+                            {item.type === "multi-image" ? (
+                              <div className="Layout-img">
+                                <div className="Layout">
+                                  <img
+                                    src={
+                                      item.src1 ||
+                                      "https://via.placeholder.com/200"
+                                    }
+                                    alt="Editable"
+                                    className="multiimg"
+                                    title="Upload Image"
+                                    style={item.style}
+                                    onClick={() => handleopenFiles(index, 1)}
+                                  />
+                                  <a
+                                    href={item.link1}
+                                    target="_blank"
+                                    className="button-preview"
+                                    rel="noopener noreferrer"
+                                    style={item.buttonStyle1}
+                                  >
+                                    {item.content1}
+                                  </a>
+                                </div>
+
+                                <div className="Layout">
+                                  <img
+                                    src={
+                                      item.src2 ||
+                                      "https://via.placeholder.com/200"
+                                    }
+                                    alt="Editable"
+                                    className="multiimg"
+                                    title="Upload Image"
+                                    style={item.style}
+                                    onClick={() => handleopenFiles(index, 2)}
+                                  />
+                                  <a
+                                    href={item.link2}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="button-preview"
+                                    style={item.buttonStyle2}
+                                  >
+                                    {item.content2}
+                                  </a>
+                                </div>
+                              </div>
+                            ) : null}
+
+                            {item.type === "video-icon" ? (
+                              <div className="video-icon">
+                                <img
+                                  src={
+                                    item.src1 ||
+                                    "https://via.placeholder.com/200"
+                                  }
+                                  alt="Editable"
+                                  className="videoimg"
+                                  title="Upload Thumbnail Image"
+                                  style={item.style}
+                                  onClick={() => handleopenFiles(index, 1)}
+                                />
+                                <a
+                                  href={item.link}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                >
+                                  <img
+                                    src={item.src2}
+                                    className="video-btn"
+                                    alt="icon"
+                                  />
+                                </a>
+                              </div>
+                            ) : null}
+
+                            {item.type === "cardimage" ? (
+                              <div
+                                className="card-image-container"
+                                style={item.style1}
+                              >
+                                <img
+                                  src={
+                                    item.src1 ||
+                                    "https://via.placeholder.com/200"
+                                  }
+                                  style={item.style}
+                                  alt="Editable"
+                                  className="card-image"
+                                  title="Upload Image"
+                                  onClick={() => handleopenFiles(index, 1)}
+                                />
+                                <p
+                                  className="card-text"
+                                  contentEditable
+                                  suppressContentEditableWarning
+                                  onClick={() => setModalIndex(index)} // Open modal for this index
+                                  style={item.style}
+                                  dangerouslySetInnerHTML={{
+                                    __html: item.content1,
+                                  }}
+                                />
+
+                                {modalIndex === index && ( // Open only for the selected index
+                                  <ParaEditor
+                                    isOpen={true}
+                                    content={item.content1}
+                                    onSave={(newContent) => {
+                                      updateContent(index, {
+                                        content1: newContent,
+                                      });
+                                      setModalIndex(null); // Close modal after save
+                                    }}
+                                    onClose={() => setModalIndex(null)}
+                                  />
+                                )}
+                              </div>
+                            ) : null}
+
+                            {item.type === "head" && (
+                              <div ref={dropdownRef}>
+                                <p
+                                  className="border"
+                                  contentEditable
+                                  suppressContentEditableWarning
+                                  onBlur={(e) =>
+                                    updateContent(index, {
+                                      content: e.target.textContent,
+                                    })
+                                  }
+                                  onMouseUp={(e) =>
+                                    handleCursorPosition(e, index)
+                                  }
+                                  onSelect={(e) =>
+                                    handleCursorPosition(e, index)
+                                  }
+                                  style={item.style}
+                                >
+                                  {item.content}
+                                </p>
+
+                                {/* Local state for each heading */}
+                                <div className="select-group-container">
+                                  {/* Select Group */}
+                                  <select
+                                    onChange={(e) =>
+                                      handleGroupChange(e, index)
+                                    }
+                                    value={selectedGroup[index] || ""}
+                                    className="select-variable"
+                                  >
+                                    <option
+                                      value=""
+                                      disabled
+                                      className="template-title"
+                                    >
+                                      Add Variable
+                                    </option>
+                                    <option value="" disabled>
+                                      Select Group
+                                    </option>
+                                    {groups.map((group, idx) => (
+                                      <option key={idx} value={group._id}>
+                                        {group.name}
+                                      </option>
+                                    ))}
+                                  </select>
+
+                                  {/* Show fields only for the selected heading */}
+                                  {selectedGroup[index] &&
+                                    openedGroups[index] && (
+                                      <div className="dropdown-container">
+                                        <p className="template-title">
+                                          <span>Add</span> Variable
+                                        </p>
+                                        {fieldNames[index] &&
+                                        fieldNames[index].length > 0 ? (
+                                          <div>
+                                            {fieldNames[index].map(
+                                              (field, idx) => (
+                                                <div
+                                                  className="list-field"
+                                                  key={idx}
+                                                  onClick={() =>
+                                                    handleInsertName(
+                                                      index,
+                                                      `{${field}}`
+                                                    )
+                                                  }
+                                                >
+                                                  {field}
+                                                </div>
+                                              )
+                                            )}
+                                          </div>
+                                        ) : (
+                                          <p className="no-variables">
+                                            No Variables
+                                          </p>
+                                        )}
+                                      </div>
+                                    )}
+                                </div>
+                              </div>
+                            )}
+                            {item.type === "link-image" && (
+                              <div className="border">
+                                <a
+                                  href={item.link || "#"}
+                                  onClick={(e) => handleLinkClick(e, index)}
+                                >
+                                  <img
+                                    src={
+                                      item.src ||
+                                      "https://via.placeholder.com/200"
+                                    }
+                                    alt="Editable"
+                                    className="img"
+                                    style={item.style}
+                                    onClick={() => handleopenFiles(index, 1)}
+                                    title="Upload Image"
+                                  />
+                                </a>
+                              </div>
+                            )}
+                            {item.type === "image" && (
+                              <div className="border">
+                                <img
+                                  src={
+                                    item.src ||
+                                    "https://via.placeholder.com/200"
+                                  }
+                                  alt="Editable"
+                                  className="img"
+                                  style={item.style}
+                                  onClick={() => handleopenFiles(index, 1)}
+                                  title="Upload Image"
+                                />
+                              </div>
+                            )}
+
+                            {item.type === "icons" && (
+                              <div
+                                className="border"
+                                style={item.ContentStyle}
+                                key={index}
+                              >
+                                <div className="icon-containers">
+                                  <a
+                                    href={item.links1 || "#"}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    onClick={(e) =>
+                                      handleLinksClick2(e, item.links1)
+                                    }
+                                  >
+                                    <img
+                                      src={item.iconsrc1}
+                                      alt="Facebook"
+                                      className="icon"
+                                      style={item.style1}
+                                    />
+                                  </a>
+
+                                  <a
+                                    href={item.links2 || "#"}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    onClick={(e) =>
+                                      handleLinksClick2(e, item.links2)
+                                    }
+                                  >
+                                    <img
+                                      src={item.iconsrc2}
+                                      alt="Twitter"
+                                      className="icon"
+                                      rel="noopener noreferrer"
+                                      style={item.style2}
+                                    />
+                                  </a>
+
+                                  <a
+                                    href={item.links3 || "#"}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    onClick={(e) =>
+                                      handleLinksClick2(e, item.links3)
+                                    }
+                                  >
+                                    <img
+                                      src={item.iconsrc3}
+                                      alt="Instagram"
+                                      className="icon"
+                                      style={item.style3}
+                                    />
+                                  </a>
+
+                                  <a
+                                    href={item.links4 || "#"}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    onClick={(e) =>
+                                      handleLinksClick2(e, item.links4)
+                                    }
+                                  >
+                                    <img
+                                      src={item.iconsrc4}
+                                      alt="Youtube"
+                                      className="icon"
+                                      style={item.style4}
+                                    />
+                                  </a>
+                                </div>
+                              </div>
+                            )}
+                            {item.type === "break" && (
+                              <div className="border-break">
+                                <hr style={item.style} />
+                              </div>
+                            )}
+
+                            {item.type === "gap" && (
+                              <div className="border-break">
+                                {<div style={item.styles}></div>}
+                              </div>
+                            )}
+
+                            {item.type === "imagewithtext" ? (
+                              <div className="image-text-container">
+                                <div
+                                  className="image-text-wrapper"
+                                  style={item.style1}
+                                >
+                                  <img
+                                    src={
+                                      item.src1 ||
+                                      "https://via.placeholder.com/200"
+                                    }
+                                    alt="Editable"
+                                    className="image-item"
+                                    title="Upload Image"
+                                    onClick={() => handleopenFiles(index, 1)}
+                                  />
+                                  <p
+                                    className="text-item"
+                                    contentEditable
+                                    suppressContentEditableWarning
+                                    onClick={() => setModalIndex(index)} // Open modal for this index
+                                    style={item.style}
+                                    dangerouslySetInnerHTML={{
+                                      __html: item.content1,
+                                    }}
+                                  />
+                                </div>
+                                {modalIndex === index && ( // Open only for the selected index
+                                  <ParaEditor
+                                    isOpen={true}
+                                    content={item.content1}
+                                    onSave={(newContent) => {
+                                      updateContent(index, {
+                                        content1: newContent,
+                                      });
+                                      setModalIndex(null); // Close modal after save
+                                    }}
+                                    onClose={() => setModalIndex(null)}
+                                  />
+                                )}
+                              </div>
+                            ) : null}
+
+                            {item.type === "banner" && (
+                              <div className="border">
+                                <img
+                                  src={
+                                    item.src ||
+                                    "https://via.placeholder.com/200"
+                                  }
+                                  alt="Editable"
+                                  className="img"
+                                  style={item.style}
+                                  onClick={() => handleopenFiles(index, 1)}
+                                />
+                              </div>
+                            )}
+
+                            {item.type === "textwithimage" ? (
+                              <div className="image-text-container">
+                                <div
+                                  className="image-text-wrapper"
+                                  style={item.style}
+                                >
+                                  <p
+                                    className="text-item"
+                                    contentEditable
+                                    suppressContentEditableWarning
+                                    onClick={() => setModalIndex(index)} // Open modal for this index
+                                    style={item.style}
+                                    dangerouslySetInnerHTML={{
+                                      __html: item.content2,
+                                    }}
+                                  />
+                                  <img
+                                    src={
+                                      item.src2 ||
+                                      "https://via.placeholder.com/200"
+                                    }
+                                    alt="Editable"
+                                    className="image-item"
+                                    title="Upload Image"
+                                    onClick={() => handleopenFiles(index, 2)}
+                                  />
+                                </div>
+                                {modalIndex === index && ( // Open only for the selected index
+                                  <ParaEditor
+                                    isOpen={true}
+                                    content={item.content2}
+                                    onSave={(newContent) => {
+                                      updateContent(index, {
+                                        content2: newContent,
+                                      });
+                                      setModalIndex(null); // Close modal after save
+                                    }}
+                                    onClose={() => setModalIndex(null)}
+                                  />
+                                )}
+                              </div>
+                            ) : null}
+
+                            {item.type === "logo" && (
+                              <div className="border">
+                                <img
+                                  src={
+                                    item.src ||
+                                    "https://via.placeholder.com/200"
+                                  }
+                                  alt="Editable"
+                                  className="logo"
+                                  style={item.style}
+                                  onClick={() => handleopenFiles(index, 1)}
+                                  title="Upload Image"
+                                />
+                              </div>
+                            )}
+                            {item.type === "button" && (
+                              <div className="border-btn">
+                                <a
+                                  href={item.link || "#"}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  style={item.style}
+                                  className="button-preview"
+                                >
+                                  {item.content}
+                                </a>
+                              </div>
+                            )}
+                            {item.type === "link" && (
+                              <div className="border-btn">
+                                <a
+                                  href={item.href || "#"}
+                                  onClick={(e) => handleLinkClick(e, index)}
+                                  style={item.style}
+                                >
+                                  {item.content}
+                                </a>
+                              </div>
+                            )}
                           </div>
                         );
                       })}

@@ -2343,10 +2343,17 @@ router.get('/images/:userId', async (req, res) => {
   const { folderName } = req.query;
 
   try {
-    const query = { user: userId }; // ✅ correct field is "user"
+    const query = { user: userId };
 
     if (folderName) {
-      query.folderName = folderName; // ✅ filter by folder if provided
+      query.folderName = folderName;
+    } else {
+      // Show only images in the "root" (i.e., no folder)
+      query.$or = [
+        { folderName: null },
+        { folderName: "" },
+        { folderName: { $exists: false } }
+      ];
     }
 
     const images = await ImageUrl.find(query).sort({ createdAt: -1 });
