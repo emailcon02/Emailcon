@@ -8,7 +8,7 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 99999;
+  /* z-index: 9999 !important; */
 }
 
 .dropdown-container {
@@ -67,10 +67,13 @@
   .para-btn:disabled {
     background-color: #ccc;
     cursor: not-allowed;
-  }
+  }*/
   .ai-input{
-    width: 98% !important;
-  } */
+    width: 80% !important;
+    padding: 8px;
+    border:1px solid rgb(211, 208, 208);
+    border-radius: 5px;
+  } 
 .ai-btn {
   width: 50px !important;
   margin-left: 10px;
@@ -95,6 +98,7 @@
 .gemini-icon {
   width: 25px;
   height: 22px;
+  margin-top: 15px;
   animation: blink 1.5s infinite;
 }
 
@@ -199,7 +203,7 @@
   cursor: pointer;
 }
 
-.button-group {
+.button-group-para {
   margin-top: 10px;
   display: flex;
 }
