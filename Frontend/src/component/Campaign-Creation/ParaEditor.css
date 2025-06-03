@@ -8,7 +8,14 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  /* z-index: 9999 !important; */
+  z-index: 9999;
+}
+/* Ensure TinyMCE elements appear above modal */
+.tox-tinymce-aux {
+  z-index: 10001 !important;
+}
+.tox .tox-menu {
+  z-index: 10002 !important;
 }
 
 .dropdown-container {

@@ -143,6 +143,7 @@ const ParaEditor = ({ isOpen, content, onSave, onClose }) => {
   onInit={(evt, editor) => (editorRef.current = { editor })}
   init={{
     menubar: true,
+    zIndex: 10000, // Higher than your modal
     branding: false,
     plugins: [
       'lists',
