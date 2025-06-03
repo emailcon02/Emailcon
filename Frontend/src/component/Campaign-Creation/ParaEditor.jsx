@@ -175,7 +175,7 @@ const ParaEditor = ({ isOpen, content, onSave, onClose }) => {
     
     // Other settings
     forced_root_block: 'p',
-    content_style: "body { font-family: Arial; font-size: 14px; }",
+    // content_style: "body { font-family: Arial; font-size: 14px; }",
     skin: 'oxide',
     content_css: 'default'
   }}
