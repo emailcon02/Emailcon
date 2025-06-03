@@ -27,10 +27,10 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 
 // Routes
-app.use('/api/stud', studentRoutes);
-app.use('/api/auth', authRoutes);
-app.use('/api/admin', adminRoutes);
-app.use("/api/order", createOrderRoute);
+app.use('/stud', studentRoutes);
+app.use('/auth', authRoutes);
+app.use('/admin', adminRoutes);
+app.use("/order", createOrderRoute);
 
 
 app.get('/', (req, res) => {
