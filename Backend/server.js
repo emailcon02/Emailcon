@@ -30,7 +30,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use('/stud', studentRoutes);
 app.use('/auth', authRoutes);
 app.use('/admin', adminRoutes);
-app.use("/", createOrderRoute);
+app.use("/order", createOrderRoute);
 
 
 app.get('/', (req, res) => {

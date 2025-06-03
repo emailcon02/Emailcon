@@ -58,7 +58,7 @@ function PaymentPage() {
       const shortId = user._id.slice(-6);
       const receipt = `rcpt_${shortId}_${Date.now()}`.slice(0, 40);
   
-      const orderRes = await axios.post(`${apiconfig.baseURL}/api/create-order`, {
+      const orderRes = await axios.post(`${apiconfig.baseURL}/api/order/create-order`, {
         amount: amount * 100, // Razorpay expects amount in paise
         currency: "INR",
         receipt,
