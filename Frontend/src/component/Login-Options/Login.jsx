@@ -205,7 +205,7 @@ function Login() {
 
             <div className="log-sign">
               <button onClick={() => navigate("/signup")} className="logins-button">
-                Don't have an account? <span style={{ color: "#2f327d" }}>Signup</span>
+                Don't have an account? <span style={{ color: "#2f327d" }}>Signup option</span>
               </button>
             </div>
 {/* 
