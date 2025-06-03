@@ -28,6 +28,7 @@ import { FaInfoCircle } from "react-icons/fa";
 import sampleexcel from "../../Images/excelsheet.png";
 import CustomHourSelect from "./CustomHourSelect.jsx";
 import EditProfile from "./EditProfile.jsx";
+import ParaEditor from "./ParaEditor.jsx";
 
 
 const Home = () => {
@@ -55,6 +56,8 @@ const Home = () => {
   const [isBirthPreviewOpen, setIsBirthPreviewOpen] = useState(false);
   const [isPreviewOpenauto, setIsPreviewOpenauto] = useState(false);
   const [bdycampaignname, setBdyCampaignname] = useState("");
+    const [modalIndex, setModalIndex] = useState(null);
+  
 
 
   const navigate = useNavigate();
@@ -2365,7 +2368,7 @@ const handlebirthDelete = async (templateId) => {
                                                      className="card-text"
                                                      contentEditable
                                                      suppressContentEditableWarning
-                                                     onClick={() => setModalIndex(index)} // Open modal for this index
+                                                    //  onClick={() => setModalIndex(index)} // Open modal for this index
                                                      style={item.style}
                                                      dangerouslySetInnerHTML={{
                                                        __html: item.content1,

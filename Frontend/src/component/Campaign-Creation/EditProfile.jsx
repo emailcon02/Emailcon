@@ -148,10 +148,7 @@ const saveUsername = async () => {
       toast.error("New password must be at least 8 characters long.");
       return;
     }
-    if (formData.userPassword !== users?.password) {
-      toast.error("Old password is incorrect.");
-      return;
-    }
+ 
     setSaveLoading(true);
     try {
       await axios.put(`${apiConfig.baseURL}/api/auth/update-password`, {

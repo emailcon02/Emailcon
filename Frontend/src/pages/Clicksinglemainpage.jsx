@@ -2117,12 +2117,13 @@ const Clicksinglemainpage = () => {
                       </div>
                     )}
 
-                    {/* Folder title */}
-                    {currentFolder && (
-                      <div style={{ marginBottom: "10px", fontWeight: "bold" }}>
-                        Showing images in folder: {currentFolder}
-                      </div>
-                    )}
+                   {/* Folder title */}
+{currentFolder && (
+  <div style={{ marginBottom: "10px" }}>
+    📂 {currentFolder}
+  </div>
+)}
+
 
                     {/* Images */}
                     <div className="gallery-scroll-container">
