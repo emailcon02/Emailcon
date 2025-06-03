@@ -37,7 +37,7 @@ jobs:
             npm install
 
             echo "Restarting backend with PM2..."
-            pm2 restart backend-app || pm2 start npm --name "backend-app" -- start
+            pm2 restart backend || pm2 start npm --name "backend" -- start
 
             echo "Reloading Nginx..."
             sudo systemctl reload nginx
