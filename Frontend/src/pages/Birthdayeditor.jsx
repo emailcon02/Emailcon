@@ -1849,9 +1849,10 @@ const Birthdayeditor = () => {
                           border: "none",
                           fontSize: "20px",
                           cursor: "pointer",
+                            fontWeight:"bold",
                         }}
                       >
-                        x
+                        &times;
                       </button>
                     </div>
 
