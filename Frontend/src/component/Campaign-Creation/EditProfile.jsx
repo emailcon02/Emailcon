@@ -154,6 +154,7 @@ const saveUsername = async () => {
       await axios.put(`${apiConfig.baseURL}/api/auth/update-password`, {
         userId: users?._id,
         newPassword: formData.newUserPassword,
+        oldPassword:formData.userPassword,
       });
       toast.success("User password updated successfully!");
       setFormData({
@@ -163,10 +164,14 @@ const saveUsername = async () => {
         confirmUserPassword: "",
       });
       setEditField(null);
+      setSaveLoading(false);
     } catch (error) {
       setSaveLoading(false);
-      toast.error("Error updating user password.");
+      if(error.response){
+        const errormessage = error.response.data.message || "Error updating user password"
+        toast.error(errormessage);
       console.error(error);
+      }
     }
   };
 
@@ -185,6 +190,7 @@ const saveUsername = async () => {
       });
       toast.success("SMTP password updated successfully!");
       setEditField(null);
+      setSaveLoading(false);
     } catch (error) {
       setSaveLoading(false);
       if (error.response) {
@@ -271,7 +277,6 @@ const saveUsername = async () => {
     ))}
   </div>
 </div>
-
 
             <div className="ep-field">
               <label className="ep-label">Username:</label>
