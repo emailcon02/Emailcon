@@ -3,7 +3,7 @@ import User from "../models/User.js";
 import PaymentHistory from "../models/PaymentHistory.js";
 import { decryptPassword, encryptPassword } from "../config/encryption.js";
 import nodemailer from "nodemailer";
-import apiConfig from "../api/apiconfigbackend.js";
+import apiConfig from "../api/apiconfigfrontend.js";
 import otptransporter from "../config/otp-mailer.js";
 import resettransporter from "../config/reset-mailer.js";
 import Adminuser from "../models/Adminuser.js";
