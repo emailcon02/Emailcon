@@ -23,7 +23,7 @@ const Pricing= () => {
       <div className="pricing-container">
         <div className="pricing-card basic">
           <h2>Free Plan</h2>
-          <p className="price">$10.90/Per Week</p>
+          <p className="price">1 day duration</p>
           <ul>
             <li>50GB Storage</li>
             <li>Bandwidth 10GB</li>
