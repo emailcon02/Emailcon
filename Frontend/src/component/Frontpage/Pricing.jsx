@@ -13,13 +13,16 @@ const Pricing= () => {
     <div className="Pricing" id="Price">
       <h3>TOP-TIER SERVICE WITHOUT TOP-TIER PRICE.</h3>
       <h1>
-        Our Email<span style={{ color: "#ff8434" }}>con</span> Service With
-        Pricing{" "}
+        Our Email<span style={{ color: "#ff8434" }}>con</span> Services
       </h1>
+        {/* <h1>
+        Our Email<span style={{ color: "#ff8434" }}>con</span> 
+        Service With Pricing{" "}
+      </h1> */}
 
       <div className="pricing-container">
         <div className="pricing-card basic">
-          <h2>Starter</h2>
+          <h2>Free Plan</h2>
           <p className="price">$10.90/Per Week</p>
           <ul>
             <li>50GB Storage</li>

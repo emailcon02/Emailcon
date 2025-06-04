@@ -7,6 +7,7 @@ import Footer from "../../component/Frontpage/Footer";
 import FadeInSection from "../../component/Frontpage/FadeInSection";
 import FeatureSection from "../../component/Frontpage/FeatureSection";
 import NavbarBanner from "../../component/Frontpage/NavbarBanner";
+import BookDemo from "../../component/Frontpage/BookDemo";
 
 function Frontpageroute() {
   return (
@@ -39,6 +40,9 @@ function Frontpageroute() {
       </div>
       <div id="contact">
         <Footer />
+      </div>
+      <div>
+        <BookDemo />
       </div>
     </div>     
     </>

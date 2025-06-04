@@ -1,0 +1,122 @@
+@import url("https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css");
+
+@font-face {
+  font-family: "Geist Sans";
+  src: url("https://assets.codepen.io/605876/GeistVF.ttf") format("truetype");
+}
+
+.demo-button-wrapper {
+  position: fixed;
+  bottom: 20px;
+  right: 0px;
+  z-index: 999;
+  transform: scale(0.8); /* Adjust if needed */
+}
+
+.demo-button-wrapper button {
+  height: 45px;
+  padding: 0;
+  display: grid;
+  border-radius: 8px;
+  border: 2px solid #2f327d;
+  letter-spacing: 0.20px;
+  cursor: pointer;
+  position: relative;
+  background:#2f327d;
+  color: white;
+  font-weight: 500;
+  outline-color:#f48c06;
+  outline-offset: 0.25rem;
+}
+
+.demo-button-wrapper button:is(:hover, :focus-visible) {
+  --active: 1;
+}
+
+.demo-button-wrapper button:active {
+  --pressed: 1;
+}
+
+.demo-button-wrapper button > span:nth-of-type(1) {
+  height: 100%;
+  width: 100%;
+  border-radius: 8px;
+  position: absolute;
+  inset: 0;
+  scale: calc(1 - (var(--pressed, 0) * 0.05));
+  transition: scale 0.1s;
+}
+
+.demo-button-wrapper button:is(:hover, :focus-visible) .container {
+  width: 100%;
+}
+
+.container {
+  --mask-image: url(https://assets.codepen.io/605876/chev-mask_1.png);
+  --spread: 24px;
+  --size: 28px;
+  width: 58px;
+  height: 100%;
+  background:#f48c06;
+  position: absolute;
+  left: 0;
+  transition: width 0.25s;
+  border-radius: 6px;
+  box-shadow: 0 10px 10px -5px hsl(0 0% 0% / 0.5);
+  container-type: inline-size;
+}
+
+.primary {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: white;
+  z-index: 2;
+  mask: var(--mask-image) 50% 50% / var(--size) var(--size) no-repeat;
+  container-type: inline-size;
+}
+
+:where(.primary, .complimentary)::after {
+  --distance: calc(100cqi + 100%);
+  content: "";
+  height: calc(var(--size) * 4);
+  aspect-ratio: 1;
+  position: absolute;
+  left: 0%;
+  top: 50%;
+  translate: -50% -50%;
+  background: radial-gradient(white, transparent);
+  animation: fly-by calc((2 - var(--active, 0)) * 1s) infinite linear;
+}
+
+@keyframes fly-by {
+  0% {
+    translate: -100% -50%;
+  }
+  100% {
+    translate: var(--distance) -50%;
+  }
+}
+
+.complimentary {
+  content: "";
+  position: absolute;
+  inset: 0;
+  opacity: var(--active, 0);
+  transition: opacity 0.25s;
+  background:#2f327d;
+  mask:
+    var(--mask-image) calc(50% - (var(--spread) * 1)) 50% / var(--size) var(--size) no-repeat,
+    var(--mask-image) calc(50% - (var(--spread) * 2)) 50% / var(--size) var(--size) no-repeat,
+    var(--mask-image) calc(50% - (var(--spread) * 3)) 50% / var(--size) var(--size) no-repeat,
+    var(--mask-image) calc(50% + (var(--spread) * 1)) 50% / var(--size) var(--size) no-repeat,
+    var(--mask-image) calc(50% + (var(--spread) * 2)) 50% / var(--size) var(--size) no-repeat,
+    var(--mask-image) calc(50% + (var(--spread) * 3)) 50% / var(--size) var(--size) no-repeat;
+}
+
+.demo-button-wrapper button > span:nth-of-type(2) {
+  padding: 0 1.1rem 0 calc(58px + 1.1rem);
+  display: grid;
+  place-items: center;
+  height: 100%;
+}
