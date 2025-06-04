@@ -281,18 +281,19 @@ export const adminLogin = async (req, res) => {
 
 
 export const updateUserpassword = async (req, res) => {
-  const { userId, newPassword } = req.body;
+  const { userId, newPassword ,oldPassword} = req.body;
 
   const user=await User.findById(userId);
 
   if (!userId || !newPassword) {
     return res.status(400).json({ message: "Missing fields" });
   }
-  const newencrpytedPassword = encryptPassword(newPassword);
-  if (newencrpytedPassword === user.password) {
-    return res.status(400).json({ message: "New password cannot be the same as the old password." });
-  }
 
+  const oldencrpytedPassword = decryptPassword(user.password);
+   if (oldencrpytedPassword !== oldPassword) {
+    return res.status(400).json({ message: "old password is mismatched." });
+  } 
+  const newencrpytedPassword = encryptPassword(newPassword);
   try {
     const updatedUser = await User.findByIdAndUpdate(
       userId,

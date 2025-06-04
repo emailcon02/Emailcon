@@ -197,12 +197,12 @@ export const sendPaymentDetailsEmail = async (user, paymentInfo) => {
 
   doc.font("Helvetica")
     .text(`Subscription for ${duration}`, 50)
-    .text(`₹${amount}`, 450, doc.y - 15)
+    .text(`Rs.${amount}`, 450, doc.y - 15)
     .moveDown();
 
   doc.moveDown(2);
   doc.font("Helvetica-Bold").text("Total", 50);
-  doc.text(`₹${amount}`, 450, doc.y - 15);
+  doc.text(`Rs.${amount}`, 450, doc.y - 15);
 
   doc.moveDown();
   doc.fontSize(10).text(`Invoice valid till: ${new Date(expiryDate).toDateString()}`);

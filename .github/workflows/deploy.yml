@@ -1,0 +1,50 @@
+name: Deploy MERN Project to EC2
+
+on:
+  push:
+    branches:
+      - main  # update if you use a different branch
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - name: Setup SSH key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.EC2_SSH_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H ${{ secrets.EC2_HOST }} >> ~/.ssh/known_hosts
+
+      - name: Deploy frontend build to EC2
+        run: |
+          # Copy the Vite build output (dist folder) to EC2 frontend directory
+          scp -r ./Frontend/dist/* ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }}:/home/ubuntu/frontend/
+
+      - name: Deploy backend and restart services
+        run: |
+          ssh ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} << 'EOF'
+            cd ~/Emailcon/Backend
+            
+            echo "Discarding any local changes to avoid merge conflicts..."
+            git reset --hard
+            git clean -fd
+            
+            echo "Pulling latest backend code..."
+            git pull origin main
+
+            echo "Installing backend dependencies..."
+            npm install
+
+            echo "Restarting backend with PM2..."
+            pm2 restart backend || pm2 start npm --name "backend" -- start
+
+            echo "Reloading Nginx..."
+            sudo systemctl reload nginx
+
+            echo "Deployment complete."
+          EOF

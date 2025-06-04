@@ -19,6 +19,7 @@ import Aliasname from "../models/Aliasname.js";
 import Replyto from "../models/Replyto.js";
 import Adminuser from "../models/Adminuser.js";
 import ImageUrl from "../models/Imageurl.js";
+import Folder from "../models/Folder.js";
 const router = express.Router();
 
 // Upload image to s3 bucket
@@ -330,8 +331,8 @@ else if (item.type === 'multi-image-card') {
       <td style="width:50%;text-align:center;padding:8px; vertical-align:top;">
         <img src="${item.src1}" style="border-radius:10px;object-fit:contain;height:230px !important;width:100%;pointer-events:none !important; object-fit:cover;" alt="image"/>
         <h3 style="margin:10px 0;">${item.title1 || 'Name of the product'}</h3>
-        <p style="margin:5px 0;"><s>${item.originalPrice1 ? `$${item.originalPrice1}` : '$9000'}</s></p>
-        <p style="margin:5px 0;">${item.offerPrice1 ? `Off Price $${item.offerPrice1}` : 'Off Price $5999'}</p>
+        <p style="margin:5px 0;"><s>${item.originalPrice1 ? `₹${item.originalPrice1}` : '₹9000'}</s></p>
+        <p style="margin:5px 0;">${item.offerPrice1 ? `Off Price ₹${item.offerPrice1}` : 'Off Price ₹5999'}</p>
         <a class="img-btn"
           href="${generateTrackingLink(item.link1, userId, campaignId, emailData.recipient)}"
           target="_blank"
@@ -342,8 +343,8 @@ else if (item.type === 'multi-image-card') {
       <td style="width:50%;text-align:center;padding:8px; vertical-align:top;">
         <img src="${item.src2}" style="border-radius:10px;object-fit:contain;height:230px !important;width:100%;pointer-events:none !important; object-fit:cover;" alt="image"/>
         <h3 style="margin:10px 0;">${item.title2 || 'Name of the product'}</h3>
-        <p style="margin:5px 0;"><s>${item.originalPrice2 ? `$${item.originalPrice2}` : '$8000'}</s></p>
-        <p style="margin:5px 0;">${item.offerPrice2 ? `Off Price $${item.offerPrice2}` : 'Off Price $4999'}</p>
+        <p style="margin:5px 0;"><s>${item.originalPrice2 ? `₹${item.originalPrice2}` : '₹8000'}</s></p>
+        <p style="margin:5px 0;">${item.offerPrice2 ? `Off Price ₹${item.offerPrice2}` : 'Off Price ₹4999'}</p>
         <a class="img-btn"
           href="${generateTrackingLink(item.link2, userId, campaignId, emailData.recipient)}"
           target="_blank"
@@ -588,6 +589,7 @@ router.post('/sendexcelEmail', async (req, res) => {
         link1,
         buttonStyle1,
         buttonStyle2,
+        title1,title2,offerPrice1,offerPrice2,originalPrice1,originalPrice2,
       } = element;
       const ContentStyleString = Object.entries(ContentStyle || {}).map(([key, value]) => `${key.replace(/([A-Z])/g, '-$1').toLowerCase()}:${value}`).join(';');
       const styleString4 = Object.entries(style4 || {}).map(([key, value]) => `${key.replace(/([A-Z])/g, '-$1').toLowerCase()}:${value}`).join(';');
@@ -629,40 +631,59 @@ router.post('/sendexcelEmail', async (req, res) => {
       </tr>
   </table>`;
 
-  case 'banner':
-    return `<div><img src="${item.src}" style="margintop:10px;width:${item.style.width};pointerevents:none;height:${item.style.height};border-radius:${item.style.borderRadius}; background-color:${item.style.backgroundColor}"/>
- </div>`;
+   
+case 'break':
+  return `<table style="width:100%; border-collapse:collapse; margin:10px auto !important;">
+    <tr>
+      <td style="padding: 0;">
+        <hr style="width:100%;background-color:#000000;margin: 30px 0px;" />
+      </td>
+    </tr>
+  </table>`;
+
+    case 'banner':
+          return `<div style="margin:10px auto !important;${styleString};">
+       <img src="${src}" style="${styleString};margin-top:10px;" alt="image" />
+       </div>`;
 
   case 'multi-image-card':
       return `<table class="multi" style="width:100%; border-collapse:collapse;margin:10px auto !important;">
     <tr>
       <td style="width:50%;text-align:center;padding:8px; vertical-align:top;">
-        <img src="${item.src1}" style="border-radius:10px;object-fit:contain;height:230px !important;width:100%;pointer-events:none !important; object-fit:cover;" alt="image"/>
-        <h3 style="margin:10px 0;">${item.title1 || 'Name of the product'}</h3>
-        <p style="margin:5px 0;"><s>${item.originalPrice1 ? `$${item.originalPrice1}` : '$9000'}</s></p>
-        <p style="margin:5px 0;">${item.offerPrice1 ? `Off Price $${item.offerPrice1}` : 'Off Price $5999'}</p>
+        <img src="${src1}" style="border-radius:10px;object-fit:contain;height:230px !important;width:100%;pointer-events:none !important; object-fit:cover;" alt="image"/>
+        <h3 style="margin:10px 0;">${title1 || 'Name of the product'}</h3>
+        <p style="margin:5px 0;"><s>${originalPrice1 ? `₹${originalPrice1}` : '₹9000'}</s></p>
+        <p style="margin:5px 0;">${offerPrice1 ? `Off Price ₹${offerPrice1}` : 'Off Price ₹5999'}</p>
         <a class="img-btn"
-          href="${generateTrackingLink(item.link1, userId, campaignId, emailData.recipient)}"
+          href="${generateTrackingLink(link1, userId, campaignId,recipientEmail)}"
           target="_blank"
-          style="display:inline-block;padding:12px 25px;margin-top:20px;font-weight:bold;font-size:${item.buttonStyle1.fontSize || '18px'};width:${item.buttonStyle1.width || 'auto'};color:${item.buttonStyle1.color || '#000'};text-decoration:none;background-color:${item.buttonStyle1.backgroundColor || '#f0f0f0'};text-align:${item.buttonStyle1.textAlign || 'left'};border-radius:${item.buttonStyle1.borderRadius || '5px'};">
-          ${item.content1}
+          style="display:inline-block;padding:12px 25px;margin-top:20px;text-decoration:none;font-weight:bold;${stylebuttonString1}">
+          ${content1}
         </a>
       </td>
       <td style="width:50%;text-align:center;padding:8px; vertical-align:top;">
-        <img src="${item.src2}" style="border-radius:10px;object-fit:contain;height:230px !important;width:100%;pointer-events:none !important; object-fit:cover;" alt="image"/>
-        <h3 style="margin:10px 0;">${item.title2 || 'Name of the product'}</h3>
-        <p style="margin:5px 0;"><s>${item.originalPrice2 ? `$${item.originalPrice2}` : '$8000'}</s></p>
-        <p style="margin:5px 0;">${item.offerPrice2 ? `Off Price $${item.offerPrice2}` : 'Off Price $4999'}</p>
+        <img src="${src2}" style="border-radius:10px;object-fit:contain;height:230px !important;width:100%;pointer-events:none !important; object-fit:cover;" alt="image"/>
+        <h3 style="margin:10px 0;">${title2 || 'Name of the product'}</h3>
+        <p style="margin:5px 0;"><s>${originalPrice2 ? `₹${originalPrice2}` : '₹8000'}</s></p>
+        <p style="margin:5px 0;">${offerPrice2 ? `Off Price ₹${offerPrice2}` : 'Off Price ₹4999'}</p>
         <a class="img-btn"
-          href="${generateTrackingLink(item.link2, userId, campaignId, emailData.recipient)}"
+          href="${generateTrackingLink(link2, userId, campaignId, recipientEmail)}"
           target="_blank"
-          style="display:inline-block;padding:12px 25px;font-weight:bold;font-size:${item.buttonStyle2.fontSize || '18px'};margin-top:20px;width:${item.buttonStyle2.width || 'auto'};color:${item.buttonStyle2.color || '#000'};text-decoration:none;background-color:${item.buttonStyle2.backgroundColor || '#f0f0f0'};text-align:${item.buttonStyle2.textAlign || 'left'};border-radius:${item.buttonStyle2.borderRadius || '5px'};">
-          ${item.content2}
+          style="display:inline-block;padding:12px 25px;text-decoration:none;font-weight:bold;${stylebuttonString2}">
+          ${content2}
         </a>
       </td>
     </tr>
   </table>`;
 
+  case 'gap':
+  return `<table style="width:100%; border-collapse:collapse; margin:30px 0;">
+    <tr>
+      <td style="padding: 0;">
+        <div style="margin:0 auto;width:100%;height:40px"></div>
+      </td>
+    </tr>
+  </table>`;
         case 'cardimage':
           return `
     <table role="presentation" align="center"  style="${styleString};border-collapse: separate; border-spacing: 0; margin: 10px auto!important;">
@@ -678,26 +699,6 @@ router.post('/sendexcelEmail', async (req, res) => {
     </td>
 </tr>
 </table>`
-
-
-case 'break':
-    return `<table style="width:100%; border-collapse:collapse; margin:10px auto !important;">
-      <tr>
-        <td style="padding: 0;">
-          <hr style="width:100%;background-color:#000000;margin: 30px 0px;" />
-        </td>
-      </tr>
-    </table>`;
-
-    case 'gap':
-    return `<table style="width:100%; border-collapse:collapse; margin: ${item.style.margin || '30px 0'};">
-      <tr>
-        <td style="padding: 0;">
-          <div style="width: ${item.style.width || '100%'}; height: ${item.style.height || '40px'}; margin: 0 auto;"></div>
-        </td>
-      </tr>
-    </table>`;
-
 
         case 'textwithimage':
           return `<table class="image-text" style="width:100%;height:220px !important;border-collapse:seperate;border-radius:10px;margin:15px 0px !important;${styleString};">
@@ -1016,6 +1017,7 @@ router.post('/sendbulkEmail', async (req, res) => {
         link1,
         buttonStyle1,
         buttonStyle2,
+        title1,title2,offerPrice1,offerPrice2,originalPrice1,originalPrice2,
       } = element;
       const ContentStyleString = Object.entries(ContentStyle || {}).map(([key, value]) => `${key.replace(/([A-Z])/g, '-$1').toLowerCase()}:${value}`).join(';');
       const styleString4 = Object.entries(style4 || {}).map(([key, value]) => `${key.replace(/([A-Z])/g, '-$1').toLowerCase()}:${value}`).join(';');
@@ -1069,45 +1071,46 @@ case 'break':
     </tr>
   </table>`;
 
-  case 'banner':
-    return `<div><img src="${item.src}" style="margintop:10px;width:${item.style.width};pointerevents:none;height:${item.style.height};border-radius:${item.style.borderRadius}; background-color:${item.style.backgroundColor}"/>
- </div>`;
+    case 'banner':
+          return `<div style="margin:10px auto !important;${styleString};">
+       <img src="${src}" style="${styleString};margin-top:10px;" alt="image" />
+       </div>`;
 
   case 'multi-image-card':
       return `<table class="multi" style="width:100%; border-collapse:collapse;margin:10px auto !important;">
     <tr>
       <td style="width:50%;text-align:center;padding:8px; vertical-align:top;">
-        <img src="${item.src1}" style="border-radius:10px;object-fit:contain;height:230px !important;width:100%;pointer-events:none !important; object-fit:cover;" alt="image"/>
-        <h3 style="margin:10px 0;">${item.title1 || 'Name of the product'}</h3>
-        <p style="margin:5px 0;"><s>${item.originalPrice1 ? `$${item.originalPrice1}` : '$9000'}</s></p>
-        <p style="margin:5px 0;">${item.offerPrice1 ? `Off Price $${item.offerPrice1}` : 'Off Price $5999'}</p>
+        <img src="${src1}" style="border-radius:10px;object-fit:contain;height:230px !important;width:100%;pointer-events:none !important; object-fit:cover;" alt="image"/>
+        <h3 style="margin:10px 0;">${title1 || 'Name of the product'}</h3>
+        <p style="margin:5px 0;"><s>${originalPrice1 ? `₹${originalPrice1}` : '₹9000'}</s></p>
+        <p style="margin:5px 0;">${offerPrice1 ? `Off Price ₹${offerPrice1}` : 'Off Price ₹5999'}</p>
         <a class="img-btn"
-          href="${generateTrackingLink(item.link1, userId, campaignId, emailData.recipient)}"
+          href="${generateTrackingLink(link1, userId, campaignId,recipientEmail)}"
           target="_blank"
-          style="display:inline-block;padding:12px 25px;margin-top:20px;font-weight:bold;font-size:${item.buttonStyle1.fontSize || '18px'};width:${item.buttonStyle1.width || 'auto'};color:${item.buttonStyle1.color || '#000'};text-decoration:none;background-color:${item.buttonStyle1.backgroundColor || '#f0f0f0'};text-align:${item.buttonStyle1.textAlign || 'left'};border-radius:${item.buttonStyle1.borderRadius || '5px'};">
-          ${item.content1}
+          style="display:inline-block;padding:12px 25px;text-decoration: none;margin-top:20px;font-weight:bold;${stylebuttonString1}">
+          ${content1}
         </a>
       </td>
       <td style="width:50%;text-align:center;padding:8px; vertical-align:top;">
-        <img src="${item.src2}" style="border-radius:10px;object-fit:contain;height:230px !important;width:100%;pointer-events:none !important; object-fit:cover;" alt="image"/>
-        <h3 style="margin:10px 0;">${item.title2 || 'Name of the product'}</h3>
-        <p style="margin:5px 0;"><s>${item.originalPrice2 ? `$${item.originalPrice2}` : '$8000'}</s></p>
-        <p style="margin:5px 0;">${item.offerPrice2 ? `Off Price $${item.offerPrice2}` : 'Off Price $4999'}</p>
+        <img src="${src2}" style="border-radius:10px;object-fit:contain;height:230px !important;width:100%;pointer-events:none !important; object-fit:cover;" alt="image"/>
+        <h3 style="margin:10px 0;">${title2 || 'Name of the product'}</h3>
+        <p style="margin:5px 0;"><s>${originalPrice2 ? `₹${originalPrice2}` : '₹8000'}</s></p>
+        <p style="margin:5px 0;">${offerPrice2 ? `Off Price ₹${offerPrice2}` : 'Off Price ₹4999'}</p>
         <a class="img-btn"
-          href="${generateTrackingLink(item.link2, userId, campaignId, emailData.recipient)}"
+          href="${generateTrackingLink(link2, userId, campaignId, recipientEmail)}"
           target="_blank"
-          style="display:inline-block;padding:12px 25px;font-weight:bold;font-size:${item.buttonStyle2.fontSize || '18px'};margin-top:20px;width:${item.buttonStyle2.width || 'auto'};color:${item.buttonStyle2.color || '#000'};text-decoration:none;background-color:${item.buttonStyle2.backgroundColor || '#f0f0f0'};text-align:${item.buttonStyle2.textAlign || 'left'};border-radius:${item.buttonStyle2.borderRadius || '5px'};">
-          ${item.content2}
+          style="display:inline-block;padding:12px 25px;font-weight:bold;text-decoration: none;${stylebuttonString2}">
+          ${content2}
         </a>
       </td>
     </tr>
   </table>`;
 
   case 'gap':
-  return `<table style="width:100%; border-collapse:collapse; margin: ${item.style.margin || '30px 0'};">
+  return `<table style="width:100%; border-collapse:collapse; margin:30px 0;">
     <tr>
       <td style="padding: 0;">
-        <div style="width: ${item.style.width || '100%'}; height: ${item.style.height || '40px'}; margin: 0 auto;"></div>
+        <div style="margin:0 auto;width:100%;height:40px"></div>
       </td>
     </tr>
   </table>`;
@@ -2286,34 +2289,80 @@ router.get("/validate", authMiddleware, async (req, res) => {
   res.send({ user });
 });
 
-// Save image URL
-router.post("/save-image", async (req, res) => {
-  const { userId, imageUrl } = req.body;
-
-  if (!userId || !imageUrl) {
-    return res.status(400).json({ error: "Missing userId or imageUrl" });
+// POST /api/stud/create-folder
+router.post('/create-folder', async (req, res) => {
+  const { userId, folderName } = req.body;
+  if (!userId || !folderName) {
+    return res.status(400).json({ error: 'Missing userId or folderName' });
   }
 
+  try {
+    const existingFolder = await Folder.findOne({ userId, name: folderName });
+    if (existingFolder) {
+      return res.status(400).json({ error: 'Folder already exists' });
+    }
+
+    const folder = new Folder({ user:userId, name: folderName });
+    await folder.save();
+    res.status(201).json({ message: 'Folder created', folder });
+  } catch (err) {
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// GET all folder based on user
+router.get("/folders/:userId", async (req, res) => {
+  try {
+    const folders = await Folder.find({ user: req.params.userId });
+    res.status(200).json(folders);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Failed to fetch folders" });
+  }
+});
+
+// POST /api/stud/save-image
+router.post('/save-image', async (req, res) => {
+  const { userId, imageUrl, folderName } = req.body;
+  if (!userId || !imageUrl) {
+    return res.status(400).json({ error: 'Missing userId or imageUrl' });
+  }
 
   try {
-    const saved = new ImageUrl({ user: userId, imageUrl });
-    await saved.save();
-    res.status(201).json({ message: "Image URL saved successfully", data: saved });
+    const image = new ImageUrl({user:userId, imageUrl, folderName });
+    await image.save();
+    res.status(201).json({ message: 'Image saved', image });
   } catch (err) {
-    console.error("Error saving image URL:", err);
-    res.status(500).json({ error: "Server error" });
+    res.status(500).json({ error: 'Server error' });
   }
 });
 
 
-// Fetch all images for a user
-router.get("/images/:userId", async (req, res) => {
+
+// GET /api/stud/images/:userId
+router.get('/images/:userId', async (req, res) => {
+  const { userId } = req.params;
+  const { folderName } = req.query;
+
   try {
-    const images = await ImageUrl.find({ user: req.params.userId });
+    const query = { user: userId };
+
+    if (folderName) {
+      query.folderName = folderName;
+    } else {
+      // Show only images in the "root" (i.e., no folder)
+      query.$or = [
+        { folderName: null },
+        { folderName: "" },
+        { folderName: { $exists: false } }
+      ];
+    }
+
+    const images = await ImageUrl.find(query).sort({ createdAt: -1 });
     res.status(200).json(images);
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "Failed to fetch images" });
+    console.error("Error fetching images:", err);
+    res.status(500).json({ error: 'Server error' });
   }
 });
 
@@ -2324,6 +2373,32 @@ router.delete("/images/:id", async (req, res) => {
     res.status(200).json({ message: "Image deleted" });
   } catch (err) {
     res.status(500).json({ error: "Delete failed" });
+  }
+});
+
+// DELETE /api/folder/:folderName
+router.delete('/folder/:folderName', async (req, res) => {
+  try {
+    const { folderName } = req.params;
+
+    // Delete all images with that folder name
+    const imageResult = await ImageUrl.deleteMany({ folderName });
+
+    // Delete the folder entry
+    const folderResult = await Folder.deleteOne({ name: folderName });
+
+    res.status(200).json({
+      success: true,
+      message: `Folder '${folderName}' and all its images were deleted.`,
+      deletedImages: imageResult.deletedCount,
+      deletedFolder: folderResult.deletedCount,
+    });
+  } catch (err) {
+    res.status(500).json({
+      success: false,
+      message: 'Server error',
+      error: err.message,
+    });
   }
 });
 

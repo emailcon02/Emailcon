@@ -290,7 +290,7 @@ button[data-tooltip]:hover::after {
   border-bottom: 3px solid #2f327D;
 }
 .modal-overlay-file-editor {
-     position: fixed;
+    position: fixed;
     top: 0;
     left: 0;
     width: 100%;
@@ -299,7 +299,7 @@ button[data-tooltip]:hover::after {
     display: flex;
     justify-content: center;
     align-items: center;
-    z-index: 9000 !important;
+    z-index: 99999 !important; /* Even higher if needed */
 }
 
 .modal-content-file {
@@ -920,12 +920,8 @@ button[data-tooltip]:hover::after {
 }
 
 .videoimg {
-    /* width: 400px; */
     cursor: pointer;
-    /* margin: 0 auto; */
-    /* height: 300px; */
     text-align: center;
-
 }
 
 .video-btn {
@@ -1012,6 +1008,24 @@ button[data-tooltip]:hover::after {
 }
 
 .edit-con-btn:hover {
+    background-color: rgb(226, 226, 226);
+}
+
+
+.edit-desktop-btn{
+    background-color: rgb(247, 244, 244);
+    color: red;
+    border: none;
+    padding: 5px;
+    cursor: pointer;
+    border-radius: 5px;
+    font-size: 15px;
+    width: 35px;
+    height: 35px;
+    margin-top: 10px;
+}
+
+.edit-desktop-btn:hover {
     background-color: rgb(226, 226, 226);
 }
 
@@ -1454,6 +1468,10 @@ input:checked+.slider-send:before {
         height: 100vh;
         width: 100%;
     }
+    .edit-desktop-btn{
+        display: none !important;    
+     }
+
 
     .mobile-head {
         font-size: 20px;
@@ -1982,3 +2000,11 @@ input:checked+.slider-send:before {
     text-align: center;
     padding: 10px;
 }
+
+/* newly added content */
+  .preview-title{
+    margin-bottom: 20px;
+  }
+  .preview-title-card{
+    margin: 20px 0px;
+  }

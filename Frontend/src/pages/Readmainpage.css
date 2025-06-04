@@ -281,7 +281,7 @@ button[data-tooltip]:hover::after {
     display: flex;
     justify-content: center;
     align-items: center;
-    z-index: 9000 !important;
+    z-index: 99999 !important; /* Even higher if needed */
 }
 
 .modal-content-file {
@@ -991,7 +991,22 @@ button[data-tooltip]:hover::after {
 .edit-con-btn:hover {
     background-color: rgb(226, 226, 226);
 }
+.edit-desktop-btn{
+    background-color: rgb(247, 244, 244);
+    color: red;
+    border: none;
+    padding: 5px;
+    cursor: pointer;
+    border-radius: 5px;
+    font-size: 15px;
+    width: 35px;
+    height: 35px;
+    margin-top: 10px;
+}
 
+.edit-desktop-btn:hover {
+    background-color: rgb(226, 226, 226);
+}
 /* Modal Styles */
 .campaign-modal-overlay-tem {
     position: fixed;
@@ -1730,6 +1745,10 @@ input:checked+.slider-send:before {
         margin-right: 5px;
         width: 180px !important;
     }
+      .edit-desktop-btn{
+        display: none !important;    
+     }
+
 
     .navbar-button-send {
         padding: 8px 10px;
@@ -1957,3 +1976,11 @@ input:checked+.slider-send:before {
     text-align: center;
     padding: 10px;
 }
+
+/* newly added content */
+  .preview-title{
+    margin-bottom: 20px;
+  }
+  .preview-title-card{
+    margin: 20px 0px;
+  }

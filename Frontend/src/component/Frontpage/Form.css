@@ -8,6 +8,7 @@
     display: flex;
     align-items: center;
     gap: 0.25rem;
+    font-size: 14px;
   }
   
 .forms_content {

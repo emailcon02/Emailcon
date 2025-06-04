@@ -1,13 +1,21 @@
 import { ChromePicker } from "react-color";
 import { useState, useRef, useEffect } from "react";
 
-const ColorPicker = ({ label, objectKey, previewContent, selectedIndex, updateContent }) => {
+const ColorPicker = ({
+  label,
+  objectKey,
+  previewContent,
+  selectedIndex,
+  updateContent,
+}) => {
   const [displayPicker, setDisplayPicker] = useState(false);
   const pickerRef = useRef(null);
 
   // Get the current color from the specific style path
   const currentStyle = previewContent[selectedIndex];
-  const currentColor = objectKey.split(".").reduce((obj, key) => obj?.[key], currentStyle) || "#000000";
+  const currentColor =
+    objectKey.split(".").reduce((obj, key) => obj?.[key], currentStyle) ||
+    "#000000";
 
   // Detect clicks outside and close picker
   useEffect(() => {
@@ -27,7 +35,9 @@ const ColorPicker = ({ label, objectKey, previewContent, selectedIndex, updateCo
   }, [displayPicker]);
 
   const handleColorChange = (color) => {
-    const newContent = JSON.parse(JSON.stringify(previewContent[selectedIndex])); // Deep copy
+    const newContent = JSON.parse(
+      JSON.stringify(previewContent[selectedIndex])
+    ); // Deep copy
     let temp = newContent;
     const keys = objectKey.split(".");
 
@@ -45,7 +55,7 @@ const ColorPicker = ({ label, objectKey, previewContent, selectedIndex, updateCo
   };
 
   return (
-    <div className="editor-bg" ref={pickerRef} style={{position:"relative"}}>
+    <div className="editor-bg" ref={pickerRef} style={{ position: "relative" }}>
       {label}
       <div
         style={{
@@ -56,14 +66,23 @@ const ColorPicker = ({ label, objectKey, previewContent, selectedIndex, updateCo
           border: "1px solid  rgb(150, 149, 149)",
           cursor: "pointer",
           marginLeft: "10px",
-          padding:"0",
-          overflow:"hidden",
-          borderRadius:"50%",      
+          padding: "0",
+          overflow: "hidden",
+          borderRadius: "50%",
         }}
         onClick={() => setDisplayPicker(!displayPicker)}
       />
       {displayPicker && (
-        <div style={{ position: "absolute",top:"-10%", zIndex: 2,height:"200px",maxHeight:"300px",overflow:"auto"}}>
+        <div
+          style={{
+            position: "absolute",
+            top: "-10%",
+            zIndex: 2,
+            height: "200px",
+            maxHeight: "300px",
+            overflow: "auto",
+          }}
+        >
           <ChromePicker color={currentColor} onChange={handleColorChange} />
         </div>
       )}

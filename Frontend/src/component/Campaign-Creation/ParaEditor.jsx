@@ -136,23 +136,51 @@ const ParaEditor = ({ isOpen, content, onSave, onClose }) => {
   return (
     <div className="modal-overlay-para">
       <div className="modal-content-para">
-        <Editor
-          apiKey="hddpazfss5mb3ppinipav37ap1zt3pqs9oz3c897fidqfddq"
-          value={editorContent}
-          onEditorChange={(newContent) => setEditorContent(newContent)}
-          onInit={(evt, editor) => (editorRef.current = { editor })}
-          init={{
-            menubar: true,
-            branding: false,
-            plugins: ["lists", "link", "textcolor", "colorpicker", "code"],
-            toolbar: `undo redo | bold italic underline | fontselect fontsize | 
-                      alignleft aligncenter alignright | bullist numlist | forecolor backcolor | code`,
-            forced_root_block: "",
-            content_style: "white-space: pre-wrap;",
-          }}
-        />
-
-        <div className="button-group">
+       <Editor
+  apiKey="hddpazfss5mb3ppinipav37ap1zt3pqs9oz3c897fidqfddq"
+  value={editorContent}
+  onEditorChange={(newContent) => setEditorContent(newContent)}
+  onInit={(evt, editor) => (editorRef.current = { editor })}
+  init={{
+    menubar: true,
+    zIndex: 10000, // Higher than your modal
+    branding: false,
+    plugins: [
+      'lists',
+      'link',
+      'code',
+      'quickbars',
+      'advlist',
+      'autolink',
+      'charmap',
+      'table'
+    ],
+    toolbar: `undo redo | bold italic underline | fontfamily fontsize | 
+              alignleft aligncenter alignright | bullist numlist | 
+              forecolor backcolor | code`,
+    // Color settings
+    quickbars_selection_toolbar: 'bold italic | forecolor backcolor',
+    color_cols: 5,
+    color_map: [
+      "000000", "Black",
+      "FFFFFF", "White",
+      "FF0000", "Red",
+      "00FF00", "Green",
+      "0000FF", "Blue"
+    ],
+    
+    // Font settings
+    font_size_formats: "8px 10px 12px 14px 16px 18px 20px 24px 28px 32px 36px 48px",
+    font_family_formats: "Andale Mono=andale mono,times; Arial=arial,helvetica,sans-serif; Arial Black=arial black,avant garde; Book Antiqua=book antiqua,palatino; Comic Sans MS=comic sans ms,sans-serif; Courier New=courier new,courier; Georgia=georgia,palatino; Helvetica=helvetica; Impact=impact,chicago; Symbol=symbol; Tahoma=tahoma,arial,helvetica,sans-serif; Terminal=terminal,monaco; Times New Roman=times new roman,times; Trebuchet MS=trebuchet ms,geneva; Verdana=verdana,geneva; Webdings=webdings; Wingdings=wingdings,zapf dingbats",
+    
+    // Other settings
+    forced_root_block: 'p',
+    // content_style: "body { font-family: Arial; font-size: 14px; }",
+    skin: 'oxide',
+    content_css: 'default'
+  }}
+/>
+        <div className="button-group-para">
           <button className="para-btn" onClick={() => onSave(editorContent)}>
             Save
           </button>

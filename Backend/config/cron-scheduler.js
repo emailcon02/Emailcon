@@ -40,7 +40,7 @@ cron.schedule('*/10 * * * *', async () => {
       let failedEmails = [];
 
       await axios.put(`${apiConfig.baseURL}/api/stud/camhistory/${camhistory._id}`, { status: "Pending" });
-
+      const BATCH_SIZE = 50;
       if (!groupId || groupId.toLowerCase() === "no group") {
         const recipients = camhistory.recipients.split(",").map(email => email.trim());
 
@@ -75,9 +75,8 @@ cron.schedule('*/10 * * * *', async () => {
         }
 
       } 
-      const BATCH_SIZE = 50;
 
-      if (groupId.toLowerCase() === "no id") {
+      else if(groupId.toLowerCase() === "no id") {
         const students = camhistory.exceldata.map(student => ({
           ...(student._doc || student),
           ...student.additionalFields,
@@ -187,7 +186,9 @@ cron.schedule('*/10 * * * *', async () => {
           })
         );
       }
-      
+      else {
+  console.warn(`⚠️ Invalid groupId "${groupId}" for campaign ${camhistory._id}`);
+}
 
       // ✅ Final status & progress calculation
       const totalEmails = camhistory.totalcount || sentEmails.length + failedEmails.length;
