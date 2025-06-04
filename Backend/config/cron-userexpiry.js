@@ -1,7 +1,7 @@
 import cron from "node-cron";
 import PaymentHistory from "../models/PaymentHistory.js";
 import accounttransporter from "./account-mailer.js";
-import apiConfig from "../api/apiconfigbackend.js";
+import apiConfig from "../api/apiconfigfrontend.js";
 
 cron.schedule("*/10 * * * *", async () => {
   const now = new Date();

@@ -6,6 +6,9 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faArrowLeft } from "@fortawesome/free-solid-svg-icons";
+
 
 const Form = () => {
   const [formData, setFormData] = useState({
@@ -64,6 +67,10 @@ const Form = () => {
     fetchDistricts();
   }, [formData.state]);
 
+  const handlenavigateback =()=>{
+    navigate('/');
+  }
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
@@ -108,8 +115,12 @@ const Form = () => {
 
   return (
     <div className="forms_content" id="register-form">
-      <div className="form-container">
+      <div className="form-container">   
+  <button className="demo-btn back-btn-form" onClick={handlenavigateback}>
+  <FontAwesomeIcon icon={faArrowLeft} className="arrow-icon" /> Back 
+</button>
         <form onSubmit={handleSubmit} className="form">
+          
           <h2 className="form-heading">
             Demo Request <span style={{ color: "#ff8434" }}>Form</span>
           </h2>

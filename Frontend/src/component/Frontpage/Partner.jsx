@@ -2,18 +2,17 @@ import React from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import animate from "../../Images/featureanimated.svg";
 import {
-  faEnvelopeOpenText, // Intuitive Email Builder
-  faAddressBook, // Contact Management
-  faChartLine, // Campaign Report History
-  faMousePointer, // Drag and Drop
-  faBullseye, // Tracking Campaign
-  faRedoAlt, // Retargeting Users
+  faEnvelopeOpenText, 
+  faAddressBook, 
+  faChartLine, 
+  faMousePointer, 
+  faBullseye, 
+  faRedoAlt, 
 } from "@fortawesome/free-solid-svg-icons";
 import "./Partner.css";
 import partnerimg from "../../Images/FeaturedImage.jpeg";
 
 function Partner() {
-  // Sidebar items with Font Awesome icons and text
   const sidebarItems = [
     { id: 1, icon: faEnvelopeOpenText, text: "Intuitive Email Builder" },
     { id: 2, icon: faMousePointer, text: "Drag and Drop" },

@@ -62,7 +62,7 @@ const Footer = () => {
         {/* Contact Info */}
         <div className="footer-section">
           <h6>Contact</h6>
-          <p>0422 4957575</p>
+          <p>8667238830</p>
           <h6>Email</h6>
           <p>
             <a href="mailto:support@atts.in">support@emailcon.in</a>

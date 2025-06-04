@@ -405,7 +405,6 @@ else if (item.type === 'multi-image-card') {
       contentType: file.mimetype
     }));
 
-
     const trackingPixel = `<img src="${apiConfig.baseURL}/api/stud/track-email-open?emailId=${encodeURIComponent(emailData.recipient)}&userId=${userId}&campaignId=${campaignId}&t=${Date.now()}" width="1" height="1" style="display:none;" />`;
 
     const mailOptions = {
