@@ -1,7 +1,7 @@
 // src/apiConfig.js
-const apiconfigbackend = {
+const apiconfigfrontend = {
     // baseURL:"http://localhost:8000",
     baseURL:"https://emailcon.in"
 };
 
-export default apiconfigbackend;
+export default apiconfigfrontend;
