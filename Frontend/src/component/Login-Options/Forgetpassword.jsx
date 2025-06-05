@@ -16,9 +16,7 @@ function Forgetpassword() {
 
   const [resendTimer, setResendTimer] = useState(0);
   const navigate = useNavigate();
-  useEffect(() => {
-    console.log("sended otp",otp); // Temporary usage to suppress the warning
-  },[otp]);
+
  useEffect(() => {
     let timer;
     if (resendTimer > 0) {
