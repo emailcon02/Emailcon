@@ -1,17 +1,11 @@
 import React from "react";
-import { useNavigate } from "react-router-dom";
 import "./BookDemo.css"; 
 
-const BookDemo = () => {
-  const navigate = useNavigate();
-
-  const handleClick = () => {
-    navigate("/register-form"); 
-  };
-
+const BookDemo = ({ onOpenModal }) => {
+  
   return (
     <div className="demo-button-wrapper">
-      <button onClick={handleClick}>
+      <button onClick={onOpenModal}>
         <span>
           <span className="container">
             <span className="primary"></span>
