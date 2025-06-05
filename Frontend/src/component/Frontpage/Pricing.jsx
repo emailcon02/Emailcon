@@ -23,13 +23,13 @@ const Pricing= () => {
       <div className="pricing-container">
         <div className="pricing-card basic">
           <h2>Free Plan</h2>
-          <p className="price">1 day duration</p>
+          <p className="price">24-Hour Preview</p>
           <ul>
-            <li>50GB Storage</li>
-            <li>Bandwidth 10GB</li>
-            <li>Up to 3 Databases</li>
-            <li>Email accounts YES</li>
-            <li>Up to 10 free SMS</li>
+            <li>300 Mails Per Day</li>
+            <li>Tracking Email Records</li>
+            <li>Retarget Audience</li>
+            <li>Secure Access</li>
+            <li>Upgrade Anytime</li>
           </ul>
           <button onClick={handlenavigate}>Select Plan</button>
         </div>

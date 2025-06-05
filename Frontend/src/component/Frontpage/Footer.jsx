@@ -1,12 +1,8 @@
 import React from "react";
 import "./Footer.css";
-import { useNavigate } from "react-router-dom";
 
-const Footer = () => {
-  const navigate = useNavigate();
-  const handlenavigate = () => {
-    navigate("/register-form");
-  }
+const Footer = ({onOpenModal }) => {
+
 
   return (
     <footer className="footer-container" id="contact">
@@ -26,7 +22,7 @@ const Footer = () => {
           <p>
             Ready To Begin?
           </p>
-            <button onClick={handlenavigate} className="cta-button">Get a Demo</button>
+            <button onClick={onOpenModal } className="cta-button">Get a Demo</button>
         </div>
       </div>
 
