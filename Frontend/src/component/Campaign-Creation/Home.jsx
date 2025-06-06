@@ -1043,12 +1043,12 @@ const handlebirthDelete = async (templateId) => {
             >
               Automation
             </button>
-            <button
+            {/* <button
               className="sidebar-button contact-button"
               onClick={handlepayment}
             >
               Upgrade Plan
-            </button>
+            </button> */}
           </div>
           <div className="side-img">
             <img src={imghome} alt="Home img" className="home-image" />
@@ -1525,7 +1525,7 @@ const handlebirthDelete = async (templateId) => {
                 Email<span style={{ color: "#f48c06" }}>Con</span>
               </h2>
             </div>
-            <div className="expiry-date"> 
+            {/* <div className="expiry-date"> 
   {daysRemaining !== null && (
     <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
       <p
@@ -1549,7 +1549,7 @@ const handlebirthDelete = async (templateId) => {
       </button>
     </div>
   )}
-</div>
+</div> */}
 
             <div className="nav-split">                 
               <h4>
@@ -4099,12 +4099,12 @@ const handlebirthDelete = async (templateId) => {
             >
             Automation
           </button>
-          <button
+          {/* <button
               className="sidebar-button contact-button"
               onClick={handlepayment}
             >
               Upgrade Plan
-            </button>
+            </button> */}
         </div>
       </div>
     </>

@@ -230,7 +230,7 @@ export const resetPassword = async (req, res) => {
 
 
 const ADMIN_EMAIL = "admin@emailcon.com";
-const ADMIN_PASSWORD = "admin123";
+const ADMIN_PASSWORD = "Superadmin123";
 const ADMIN_ROLE = "super-admin";
 
 export const adminLogin = async (req, res) => {

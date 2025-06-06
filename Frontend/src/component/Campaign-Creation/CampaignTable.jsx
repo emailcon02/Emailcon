@@ -738,8 +738,8 @@ function CampaignTable() {
         boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
       }}
     >
-      <h3>Delete Birthday Reminder?</h3>
-      <p>Are you sure you want to delete this birthday reminder campaign?</p>
+      <h3>Delete Campaign History</h3>
+      <p>Are you sure you want to delete this campaign history?</p>
       <div style={{ marginTop: "20px" }}>
         <button
           onClick={() => {
