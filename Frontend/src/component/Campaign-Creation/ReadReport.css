@@ -9,9 +9,9 @@
   align-items: center;
   cursor: pointer;
   width: 100px;
-  height: 40px;
+  padding: 8px 5px;
   font-size: 12px;
-  border-radius: 25px;
+  border-radius: 8px;
 }
 
 .refresh-btn {
@@ -21,15 +21,15 @@
   cursor: pointer;
   color: #333;
   margin-left: 10px;
-  margin-top: 10px;
+  margin-top: 5px;
 }
 
 .nav-content {
   display: flex;
   justify-content: space-between;
-  background-color: #eae3fd;
+  background-color:white;
   font-weight: bold;
-  padding:30px 10px;
+  padding:15px;
   margin: 0px;
   position: sticky;
   top: 0;
@@ -37,61 +37,123 @@
 }
 
 .Report-heading {
-  font-size: 26px;
+  font-size: 24px;
   color: #2f327d;
 }
 
 .Report-heading-2 {
   padding:40px;
+  font-weight: bold;
+}
+.Report-heading-2 .send-date{
+  font-weight: 400;
+  margin-bottom: 5px;
+  color: rgb(117, 116, 116);
+}
+.readreport-main{
+  background-color: #fff2e1;
+  height: 105vh;
 }
 
 .Report-heading-head {
   font-size: 24px;
   color: #2f327d;
 }
-
-.reports-content {
+.email-report-dashboard {
   display: flex;
+  flex-wrap: wrap;
+  gap: 24px;
   justify-content: space-between;
-  padding: 20px 40px;
-  gap: 10px;
+  padding: 40px;
 }
 
-.headings-report {
-  font-size: 20px;
-  font-weight: 400;
-  color: #2f327d;
+.report-card {
+  flex: 1 1 220px;
+  max-width: 240px;
+  background: #ffffff;
+  border-radius: 20px;
+  padding: 24px;
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.05);
+  text-align: center;
+  position: relative;
+  transition: all 0.3s;
+}
+.report-card:hover{
+  transform: scale(1.04);
 }
 
-.report-counts {
-  font-size: 24px;
-  font-weight: 600;
-  color: #f48c06;
+.report-icon {
+  width: 60px;
+  height: 60px;
+  margin: 0 auto 16px auto;
+  border-radius: 50%;
+  background: #eee;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 26px;
+  color: #fff;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
 }
 
-.report-view {
-  font-size: 15px;
+.report-title {
+  font-size: 16px;
+  color: #888;
+  margin-bottom: 6px;
+  font-weight: 500;
 }
-.report-view:hover {
-  color: #f48c06;
+
+.report-value {
+  font-size: 28px;
+  font-weight: 700;
+  color: #222;
+  margin-bottom: 12px;
+}
+
+.report-badge {
+  display: inline-block;
+  padding: 4px 12px;
+  background: #f2f2f2;
+  color: #555;
+  font-size: 13px;
+  border-radius: 999px;
+  font-weight: 500;
   cursor: pointer;
-  text-decoration: underline;
 }
-.reports-content div {
-  border: 1px solid rgb(212, 211, 211);
-  background-color: rgb(243, 240, 240);
-  padding:20px;
-  width: 280px;
-  border-radius: 5px;
-  cursor: pointer;
+.report-badge.read{
+  color: #1a94d1;
 }
-.reports-content div:hover {
-  transform: scale(1.03);
-  transition: transform 0.5s;
+.report-badge.click{
+  color: #1cc88a;
 }
-.reports-content div p{
-  margin-bottom: 20px;
+.report-badge.deliver{
+      color: #7c3aed;
+
 }
+.report-badge.failed{
+    color: #f6c23e;
+
+}
+
+
+
+/* Gradient icon backgrounds */
+.report-card.read .report-icon {
+  background: linear-gradient(135deg, #4facfe, #00f2fe);
+}
+
+.report-card.click .report-icon {
+  background: linear-gradient(135deg, #43e97b, #38f9d7);
+}
+
+.report-card.delivered .report-icon {
+  background: linear-gradient(135deg, #667eea, #764ba2);
+}
+
+.report-card.failed .report-icon {
+    background: linear-gradient(to right, #f7971e, #ffd200);
+  }
+
 .modal-overlay-read {
   position: fixed;
   top: 0;

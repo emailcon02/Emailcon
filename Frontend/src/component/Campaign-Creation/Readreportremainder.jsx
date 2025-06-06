@@ -197,7 +197,7 @@ const Readreportremainder = () => {
   return (
     <>
       <nav className="nav-content">
-        <div>
+        <div >
           <p className="Report-heading">
             <span style={{ color: "#f48c06" }}>{campaigns.campaignname}</span>{" "}
             Campaign Report
@@ -212,35 +212,51 @@ const Readreportremainder = () => {
           </button>
         </div>
       </nav>
-      <div>
+      <div className="readreport-main">
         <div className="Report-heading-2">
           <p style={{marginBottom:"20px"}} className="Report-heading-head">Email Template</p>
-          <p>{campaigns.senddate}</p>
+          <p className="send-date">{campaigns.senddate}</p>
           <hr />
         </div>
 
-        <div className="reports-content">
-          <div onClick={fetchEmailDetails}>
-            <p className="headings-report">Read Rate</p>
-            <p className="report-counts">{readRate} %</p>
-            <p className="report-view">{openCount} Opened mail</p>
-          </div>
-          <div onClick={fetchEmailClickDetails}>
-            <p className="headings-report">Click Rate</p>
-            <p className="report-counts">{clickRate} %</p>
-            <p className="report-view">{urlCount} Clicked mail</p>
-          </div>
-          <div onClick={handleopendelmodal}>
-            <p className="headings-report">Delivered Rate</p>
-            <p className="report-counts">{deliveredRate} %</p>
-            <p className="report-view">{campaigns.sendcount} Delivered</p>
-          </div>
-          <div onClick={handleopenfailmodal}>
-            <p className="headings-report">Failed Rate</p>
-            <p className="report-counts">{failedRate} %</p>
-            <p className="report-view">{campaigns.failedcount} Failed</p>
-          </div>
-        </div>
+  <div className="email-report-dashboard">
+  <div className="report-card read" onClick={fetchEmailDetails}>
+    <div className="report-icon">
+      <i className="fas fa-envelope-open-text"></i>
+    </div>
+    <p className="report-title">Read Rate</p>
+    <p className="report-value">{readRate} %</p>
+    <span className="report-badge  read">{openCount} Opened mail</span>
+  </div>
+
+  <div className="report-card click" onClick={fetchEmailClickDetails}>
+    <div className="report-icon">
+      <i className="fas fa-mouse-pointer"></i>
+    </div>
+    <p className="report-title">Click Rate</p>
+    <p className="report-value">{clickRate} %</p>
+    <span className="report-badge click">{urlCount} Clicked mail</span>
+  </div>
+
+  <div className="report-card delivered" onClick={handleopendelmodal}>
+    <div className="report-icon">
+      <i className="fas fa-paper-plane"></i>
+    </div>
+    <p className="report-title">Delivered Rate</p>
+    <p className="report-value">{deliveredRate} %</p>
+    <span className="report-badge deliver">{campaigns.sendcount} Delivered</span>
+  </div>
+
+  <div className="report-card failed" onClick={handleopenfailmodal}>
+    <div className="report-icon">
+      <i className="fas fa-times-circle"></i>
+    </div>
+    <p className="report-title">Failed Rate</p>
+    <p className="report-value">{failedRate} %</p>
+    <span className="report-badge failed">{campaigns.failedcount} Failed</span>
+  </div>
+</div>
+
       </div>
       {/* Modal for Delevered Details */}
       {showdelModal && (
