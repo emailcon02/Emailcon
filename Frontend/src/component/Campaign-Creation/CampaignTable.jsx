@@ -14,14 +14,86 @@ function CampaignTable() {
   const [processingCampaigns, setProcessingCampaigns] = useState({});
   const [showBirthdayDeleteModal, setShowBirthdayDeleteModal] = useState(false);
   const [selectedBirthdayCampaignId, setSelectedBirthdayCampaignId] = useState(null);
-  const [searchTerm, setSearchTerm] = useState("");
-  const navigate = useNavigate();
   const user = JSON.parse(localStorage.getItem("user"));
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [newTime, setNewTime] = useState({});
   const [activeCampaignId, setActiveCampaignId] = useState(null); 
   const [selectedCampaigns, setSelectedCampaigns] = useState([]);
   const [selectAll, setSelectAll] = useState(false);
+   const [sortOrder, setSortOrder] = useState("asc");
+     const [filteredCampaign, setFilteredCampaign] = useState([]);
+      const [searchTerm, setSearchTerm] = useState("");
+      const [fromDate, setFromDate] = useState("");
+      const [toDate, setToDate] = useState("");
+      const [rowsPerPage, setRowsPerPage] = useState(20);
+      const [currentPage, setCurrentPage] = useState(1);
+    
+    const navigate = useNavigate();
+  
+
+ const handleSortByDate = () => {
+  const sorted = [...filteredCampaign].sort((a, b) => {
+    const dateA = new Date(a.senddate);
+    const dateB = new Date(b.senddate);
+    return sortOrder === "asc" ? dateA - dateB : dateB - dateA;
+  });
+
+  setFilteredCampaign(sorted);
+  setSortOrder(sortOrder === "asc" ? "desc" : "asc");
+};
+
+    
+  
+   useEffect(() => {
+      filterCampaigns();
+    }, [searchTerm, fromDate, toDate, campaigns]);
+  
+   const filterCampaigns = () => {
+  let filtered = [...campaigns];
+
+  // Apply search
+  if (searchTerm) {
+    const term = searchTerm.toLowerCase();
+    filtered = filtered.filter((campaign) => {
+      return (
+        campaign.campaignname?.toLowerCase().includes(term) ||
+        campaign.groupname?.toLowerCase().includes(term)
+      );
+    });
+  }
+
+  // Apply senddate filter
+  if (fromDate || toDate) {
+    filtered = filtered.filter((campaign) => {
+      const campaignDate = new Date(campaign.senddate); // change from createdAt to senddate
+      const start = fromDate ? new Date(fromDate) : null;
+      const end = toDate
+        ? new Date(new Date(toDate).setHours(23, 59, 59, 999))
+        : null;
+
+      const afterFrom = !start || campaignDate >= start;
+      const beforeTo = !end || campaignDate <= end;
+
+      return afterFrom && beforeTo;
+    });
+  }
+
+  setFilteredCampaign(filtered);
+  setCurrentPage(1); // Reset page after filtering
+};
+
+const indexOfLast = currentPage * rowsPerPage;
+const indexOfFirst = indexOfLast - rowsPerPage;
+const currentUsers = filteredCampaign.slice(indexOfFirst, indexOfLast); // change from campaigns
+const totalPages = Math.ceil(filteredCampaign.length / rowsPerPage);
+
+  
+    const resetFilter = () => {
+      setSearchTerm("");
+      setFromDate("");
+      setToDate("");
+    };
+  
 
   // Function to handle "Select All" checkbox toggle
   const handleSelectAll = () => {
@@ -65,26 +137,37 @@ function CampaignTable() {
     }
   };
 
-  useEffect(() => {
-    const fetchCampaigns = async () => {
-      if (!user?.id) {
-        navigate("/user-login");
-        return;
-      }
-      try {
-        const response = await axios.get(`${apiConfig.baseURL}/api/stud/campaigns/${user.id}`);
-        setCampaigns(response.data);
-      } catch (error) {
-        console.error("Error fetching campaigns", {
-          message: error.message,
-          stack: error.stack,
-          response: error.response?.data,
-        });
-      }
-    };
+useEffect(() => {
+  const fetchCampaigns = async () => {
+    if (!user?.id) {
+      navigate("/user-login");
+      return;
+    }
+    try {
+      const response = await axios.get(`${apiConfig.baseURL}/api/stud/campaigns/${user.id}`);
+      const sortedCampaigns = response.data.sort(
+        (a, b) => new Date(b.senddate) - new Date(a.senddate)
+      );
 
-    fetchCampaigns();
-  }, [user?.id, navigate]); // Only run when user ID or navigate changes
+      const filteredCampaigns = sortedCampaigns.filter(campaign => {
+        const campaignName = campaign.campaignname?.toLowerCase() || "";
+        const exclude = campaignName.includes("birthday campaign");
+        return !exclude;
+      });
+
+      setCampaigns(filteredCampaigns);
+    } catch (error) {
+      console.error("Error fetching campaigns", {
+        message: error.message,
+        stack: error.stack,
+        response: error.response?.data,
+      });
+    }
+  };
+
+  fetchCampaigns();
+}, [user?.id, navigate]); // <-- Added searchTerm in dependency
+
 
   const handleBackCampaign = () => {
     navigate("/home");
@@ -458,17 +541,7 @@ function CampaignTable() {
     }
   };
   
-  const filteredCampaigns = campaigns.filter(campaign => {
-    const campaignName = campaign.campaignname?.toLowerCase() || "";
-    const searchContent = Object.values(campaign).join(" ").toLowerCase();
-    
-    const exclude = campaignName.includes("birthday campaign");
-    return !exclude && searchContent.includes(searchTerm.toLowerCase());
-
-  });
   
-  
-
 
   return (
     <div className="admin-dashboard-page">
@@ -485,16 +558,6 @@ function CampaignTable() {
             <span className="nav-names">Home</span>
           </button>
         </div>
-        <div className="search-container">
-          <FaSearch className="search-icon" />
-          <input
-            type="text"
-            placeholder="Search campaigns..."
-            className="search-input"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
-        </div>
         <div>
           <button
             onClick={handleBackCampaign}
@@ -507,6 +570,61 @@ function CampaignTable() {
           </button>
         </div>
       </div>
+
+  <div className="search-bar-search" style={{marginTop:"20px"}}>
+                  <div className="search-container-table">
+                    <FaSearch className="search-icon" />
+                    <input
+                      type="text"
+                      placeholder="Search across all columns..."
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      className="search-input"
+                    />
+                  </div>
+                </div>
+        
+                <div className="admin-dashboard-table-header">
+                  <div className="rows-dropdown-left">
+                    <label htmlFor="rowsPerPage">Rows per page:</label>
+                    <select
+                      id="rowsPerPage"
+                      value={rowsPerPage}
+                      onChange={(e) => {
+                        const value =
+                          e.target.value === "all"
+                            ? filteredCampaign.length
+                            : parseInt(e.target.value);
+                        setRowsPerPage(value);
+                        setCurrentPage(1);
+                      }}
+                    >
+                      <option value={20}>20</option>
+                      <option value={50}>50</option>
+                      <option value={100}>100</option>
+                      <option value="all">All</option>
+                    </select>
+                  </div>
+        
+                  <div className="date-filter">
+                    <label>From:</label>
+                    <input
+                      type="date"
+                      value={fromDate}
+                      onChange={(e) => setFromDate(e.target.value)}
+                    />
+        
+                    <label>To:</label>
+                    <input
+                      type="date"
+                      value={toDate}
+                      onChange={(e) => setToDate(e.target.value)}
+                    />
+        
+                    <button onClick={resetFilter}>Reset</button>
+                  </div>
+                </div>
+
       <button onClick={handleDeleteAllSelected} className="delete-all-btn">
         Delete All
       </button>
@@ -522,9 +640,11 @@ function CampaignTable() {
                   onChange={handleSelectAll}
                 />
               </th>
-              <th>Send Date</th>
-              <th>Campaign Name</th>
-              <th>Alias Name</th>
+              <th>S.No</th>
+    <th onClick={handleSortByDate} style={{ cursor: "pointer" }}>
+        Send Date {sortOrder === "asc" ? "▲" : "▼"}
+      </th>               
+       <th>Campaign Name</th>
               <th>Group Name</th>
               <th>Total Count</th>
               <th>Send Count</th>
@@ -536,9 +656,9 @@ function CampaignTable() {
             </tr>
           </thead>
           <tbody>
-            {campaigns.length > 0 ? (
-              filteredCampaigns.map((campaign) => (
-                <tr key={campaign._id}>
+         {currentUsers && currentUsers.length > 0 ? (
+                currentUsers.map((campaign) => (
+        <tr key={campaign._id}>
                    <td>
                     <input
                       type="checkbox"
@@ -546,9 +666,9 @@ function CampaignTable() {
                       onChange={() => handleCheckboxChange(campaign._id)}
                     />
                   </td>
+                  <td>{campaigns.indexOf(campaign) + 1}</td>
                   <td>{campaign.senddate}</td>
                   <td>{campaign.campaignname}</td>
-                  <td>{campaign.aliasName}</td>
                   <td>{campaign.groupname}</td>
                   <td>{campaign.totalcount}</td>
                   <td>{campaign.sendcount}</td>
@@ -700,6 +820,28 @@ function CampaignTable() {
           </tbody>
         </table>
       </div>
+
+  {/* Pagination */}
+        <div className="pagination-container">
+          <div className="pagination-controls">
+            <button
+              disabled={currentPage === 1}
+              onClick={() => setCurrentPage((p) => p - 1)}
+            >
+              Prev
+            </button>
+            <span>
+              Page {currentPage} of {totalPages}
+            </span>
+            <button
+              disabled={currentPage === totalPages}
+              onClick={() => setCurrentPage((p) => p + 1)}
+            >
+              Next
+            </button>
+          </div>
+        </div>
+
       <ToastContainer
         className="custom-toast"
         position="bottom-center"
@@ -738,8 +880,8 @@ function CampaignTable() {
         boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
       }}
     >
-      <h3>Delete Birthday Reminder?</h3>
-      <p>Are you sure you want to delete this birthday reminder campaign?</p>
+      <h3>Delete Campaign History</h3>
+      <p>Are you sure you want to delete this campaign history?</p>
       <div style={{ marginTop: "20px" }}>
         <button
           onClick={() => {

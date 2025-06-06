@@ -90,6 +90,8 @@ export const login = async (req, res) => {
     if (newEncryptedPassword !== password) {
       return res.status(401).send("Invalid credentials.");
     }
+    if (user.isActive === false) return res.status(404).send("Account not activated contact admin.");
+
     const latestPayment = await PaymentHistory.findOne({ userId: user._id })
       .sort({ createdAt: -1 });
 
@@ -230,7 +232,7 @@ export const resetPassword = async (req, res) => {
 
 
 const ADMIN_EMAIL = "admin@emailcon.com";
-const ADMIN_PASSWORD = "admin123";
+const ADMIN_PASSWORD = "Superadmin123";
 const ADMIN_ROLE = "super-admin";
 
 export const adminLogin = async (req, res) => {

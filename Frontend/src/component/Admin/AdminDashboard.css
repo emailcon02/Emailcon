@@ -92,10 +92,7 @@
   border-radius: 8px;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
-/* .admin-scroll {
-  height: 550px !important;
-  overflow: auto;
-} */
+
 .admin-dashboard-table th {
   text-align: center;
   padding: 0.6rem;

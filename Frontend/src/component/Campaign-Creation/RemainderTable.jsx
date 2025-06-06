@@ -27,9 +27,77 @@ function RemainderTable() {
     const [newTime, setNewTime] = useState({});
    const [activeeditorCampaignId, setActiveeditorCampaignId] = useState(null); // Track the active campaign's modal
     const [activeCampaignId, setActiveCampaignId] = useState(null); // Track the active campaign's modal
-  const [searchTerm, setSearchTerm] = useState("");
-  const navigate = useNavigate();
   const user = JSON.parse(localStorage.getItem("user"));
+     const [sortOrder, setSortOrder] = useState("asc");
+       const [filteredCampaign, setFilteredCampaign] = useState([]);
+        const [searchTerm, setSearchTerm] = useState("");
+        const [fromDate, setFromDate] = useState("");
+        const [toDate, setToDate] = useState("");
+        const [rowsPerPage, setRowsPerPage] = useState(20);
+        const [currentPage, setCurrentPage] = useState(1);
+      const navigate = useNavigate();
+      
+  
+   const handleSortByDate = () => {
+    const sorted = [...filteredCampaign].sort((a, b) => {
+      const dateA = new Date(a.senddate);
+      const dateB = new Date(b.senddate);
+      return sortOrder === "asc" ? dateA - dateB : dateB - dateA;
+    });
+  
+    setFilteredCampaign(sorted);
+    setSortOrder(sortOrder === "asc" ? "desc" : "asc");
+  };
+  
+      
+    
+     useEffect(() => {
+        filterCampaigns();
+      }, [searchTerm, fromDate, toDate, campaigns]);
+    
+     const filterCampaigns = () => {
+    let filtered = [...campaigns];
+  
+    // Apply search
+    if (searchTerm) {
+      const term = searchTerm.toLowerCase();
+      filtered = filtered.filter((campaign) => {
+        return (
+          campaign.campaignname?.toLowerCase().includes(term) ||
+          campaign.groupname?.toLowerCase().includes(term)
+        );
+      });
+    }
+  
+    // Apply senddate filter
+    if (fromDate || toDate) {
+      filtered = filtered.filter((campaign) => {
+        const campaignDate = new Date(campaign.senddate); // change from createdAt to senddate
+        const start = fromDate ? new Date(fromDate) : null;
+        const end = toDate
+          ? new Date(new Date(toDate).setHours(23, 59, 59, 999))
+          : null;
+  
+        const afterFrom = !start || campaignDate >= start;
+        const beforeTo = !end || campaignDate <= end;
+  
+        return afterFrom && beforeTo;
+      });
+    }
+  
+    setFilteredCampaign(filtered);
+    setCurrentPage(1); // Reset page after filtering
+  };
+  
+  const indexOfLast = currentPage * rowsPerPage;
+  const indexOfFirst = indexOfLast - rowsPerPage;
+  const currentUsers = filteredCampaign.slice(indexOfFirst, indexOfLast); // change from campaigns
+  const totalPages = Math.ceil(filteredCampaign.length / rowsPerPage);  
+      const resetFilter = () => {
+        setSearchTerm("");
+        setFromDate("");
+        setToDate("");
+      };
 
   useEffect(() => {
       const fetchAllGroup = async () => {
@@ -39,13 +107,11 @@ function RemainderTable() {
         }
     
         try {
-          const [groupsRes,birthtemplatesRes,campaignRes] = await Promise.all([
+          const [groupsRes,birthtemplatesRes] = await Promise.all([
             axios.get(`${apiConfig.baseURL}/api/stud/groups/${user.id}`),
             axios.get(`${apiConfig.baseURL}/api/stud/birthtemplates/${user.id}`), 
-            axios.get(`${apiConfig.baseURL}/api/stud/campaigns/${user.id}`)
 
           ]);
-          setCampaigns(campaignRes.data);
           setGroups(groupsRes.data);
           setBirthTemplates(birthtemplatesRes.data);
         } catch (error) {
@@ -59,6 +125,38 @@ function RemainderTable() {
     
       fetchAllGroup();
     }, [user?.id]);
+
+    useEffect(() => {
+  const fetchCampaigns = async () => {
+    if (!user?.id) {
+      navigate("/user-login");
+      return;
+    }
+    try {
+      const response = await axios.get(`${apiConfig.baseURL}/api/stud/campaigns/${user.id}`);
+      const sortedCampaigns = response.data.sort(
+        (a, b) => new Date(b.senddate) - new Date(a.senddate)
+      );
+
+      const filteredCampaigns = sortedCampaigns.filter(campaign => {
+        const campaignName = campaign.campaignname?.toLowerCase() || "";
+        const exclude = campaignName.includes("birthday campaign");
+        return exclude;
+      });
+
+      setCampaigns(filteredCampaigns);
+    } catch (error) {
+      console.error("Error fetching campaigns", {
+        message: error.message,
+        stack: error.stack,
+        response: error.response?.data,
+      });
+    }
+  };
+
+  fetchCampaigns();
+}, [user?.id, navigate]); // <-- Added searchTerm in dependency
+
     
   
     const handlePreviewautomate = (template) => {
@@ -222,18 +320,7 @@ const handlesaveEditcampaign = async (campaignId) => {
         }
       };
       
-  const filteredCampaigns = campaigns.filter(campaign => {
-    const campaignName = campaign.campaignname?.toLowerCase() || "";
-    const searchContent = Object.values(campaign).join(" ").toLowerCase();
-    
-    // Only include birthday campaigns
-    if (!campaignName.includes("birthday") && !campaignName.includes("birthday campaign")) {
-      return false;
-    }
 
-    return searchContent.includes(searchTerm.toLowerCase());
-  });
-  
   return (
     <div className="admin-dashboard-page">
       <div className="admin-nav">
@@ -249,16 +336,7 @@ const handlesaveEditcampaign = async (campaignId) => {
             <span className="nav-names">Home</span>
           </button>
         </div>
-        <div className="search-container">
-          <FaSearch className="search-icon" />
-          <input
-            type="text"
-            placeholder="Search campaigns..."
-            className="search-input"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
-        </div>
+   
         <div>
           <button
             onClick={handleBackCampaign}
@@ -271,13 +349,69 @@ const handlesaveEditcampaign = async (campaignId) => {
           </button>
         </div>
       </div>
+<div className="search-bar-search" style={{marginTop:"20px"}}>
+                  <div className="search-container-table">
+                    <FaSearch className="search-icon" />
+                    <input
+                      type="text"
+                      placeholder="Search across all columns..."
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      className="search-input"
+                    />
+                  </div>
+                </div>
+        
+                <div className="admin-dashboard-table-header">
+                  <div className="rows-dropdown-left">
+                    <label htmlFor="rowsPerPage">Rows per page:</label>
+                    <select
+                      id="rowsPerPage"
+                      value={rowsPerPage}
+                      onChange={(e) => {
+                        const value =
+                          e.target.value === "all"
+                            ? filteredCampaign.length
+                            : parseInt(e.target.value);
+                        setRowsPerPage(value);
+                        setCurrentPage(1);
+                      }}
+                    >
+                      <option value={20}>20</option>
+                      <option value={50}>50</option>
+                      <option value={100}>100</option>
+                      <option value="all">All</option>
+                    </select>
+                  </div>
+        
+                  <div className="date-filter">
+                    <label>From:</label>
+                    <input
+                      type="date"
+                      value={fromDate}
+                      onChange={(e) => setFromDate(e.target.value)}
+                    />
+        
+                    <label>To:</label>
+                    <input
+                      type="date"
+                      value={toDate}
+                      onChange={(e) => setToDate(e.target.value)}
+                    />
+        
+                    <button onClick={resetFilter}>Reset</button>
+                  </div>
+                </div>
+
       <div className="cam-scroll" style={{ overflowX: "auto" }}>
         <table className="cam-dashboard-table">
           <thead>
             <tr>
-              <th>Set Date</th>
+              <th>S.No</th>
+    <th onClick={handleSortByDate} style={{ cursor: "pointer" }}>
+        Set Date {sortOrder === "asc" ? "▲" : "▼"}
+      </th>  
               <th>Campaign Name</th>
-              <th>Alias Name</th>
               <th>Group Name</th>
               <th>Total Count</th>
               <th>Send Count</th>
@@ -290,12 +424,12 @@ const handlesaveEditcampaign = async (campaignId) => {
             </tr>
           </thead>
           <tbody>
-            {campaigns.length > 0 ? (
-              filteredCampaigns.map((campaign) => (
+             {currentUsers && currentUsers.length > 0 ? (
+                currentUsers.map((campaign) => (
                 <tr key={campaign._id}>
+                  <td>{campaigns.indexOf(campaign) + 1}</td>
                   <td>{campaign.senddate}</td>
                   <td>{campaign.campaignname}</td>
-                  <td>{campaign.aliasName}</td>
                   <td>{campaign.groupname}</td>
                   <td>{campaign.totalcount}</td>
                   <td>{campaign.sendcount}</td>
@@ -427,6 +561,27 @@ const handlesaveEditcampaign = async (campaignId) => {
           </tbody>
         </table>
       </div>
+
+       {/* Pagination */}
+        <div className="pagination-container">
+          <div className="pagination-controls">
+            <button
+              disabled={currentPage === 1}
+              onClick={() => setCurrentPage((p) => p - 1)}
+            >
+              Prev
+            </button>
+            <span>
+              Page {currentPage} of {totalPages}
+            </span>
+            <button
+              disabled={currentPage === totalPages}
+              onClick={() => setCurrentPage((p) => p + 1)}
+            >
+              Next
+            </button>
+          </div>
+        </div>
       <ToastContainer
         className="custom-toast"
         position="bottom-center"

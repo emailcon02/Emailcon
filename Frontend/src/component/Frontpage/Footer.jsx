@@ -1,5 +1,7 @@
 import React from "react";
 import "./Footer.css";
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faPhone, faEnvelope } from '@fortawesome/free-solid-svg-icons';
 
 const Footer = ({onOpenModal }) => {
 
@@ -56,14 +58,19 @@ const Footer = ({onOpenModal }) => {
         </div>
 
         {/* Contact Info */}
-        <div className="footer-section">
-          <h6>Contact</h6>
-          <p>8667238830</p>
-          <h6>Email</h6>
-          <p>
-            <a href="mailto:support@atts.in">support@emailcon.in</a>
-          </p>
-        </div>
+       <div className="footer-section">
+  <h6>Contact</h6>
+  <p>
+    <FontAwesomeIcon icon={faPhone} style={{ marginRight: '8px' }} />
+    +91-8667238830
+  </p>
+  <h6>Email</h6>
+  <p>
+    <FontAwesomeIcon icon={faEnvelope} style={{ marginRight: '8px' }} />
+    <a href="mailto:support@atts.in">support@emailcon.in</a>
+  </p>
+</div>
+
       </div>
 
   
