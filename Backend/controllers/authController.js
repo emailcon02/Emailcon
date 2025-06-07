@@ -80,6 +80,77 @@ export const signup = async (req, res) => {
   }
 };
 
+export const employeesignup = async (req, res) => {
+  const { email, username, password, smtppassword, gender,phone} = req.body;
+
+  try {
+    // Check for existing user by email or username
+    const existingUser = await User.findOne({ $or: [{ email }, { username }] });
+    if (existingUser) {
+      // If user exists but hasn't completed signup
+      if (!existingUser.isActive) {
+        await User.deleteOne({ _id: existingUser._id }); // Delete incomplete user
+      } else {
+        return res.status(400).json({
+          message: "User already exists with this email or username.",
+        });
+      }
+    }
+
+    // Validate SMTP credentials only for Gmail addresses
+    if (email.includes("@gmail.com")) {
+      const transporter = nodemailer.createTransport({
+        service: "Gmail",
+        auth: {
+          user: email,
+          pass: smtppassword,
+        },
+      });
+
+      try {
+        await transporter.verify();
+      } catch (smtpError) {
+        console.error("SMTP verification failed:", smtpError);
+        return res.status(400).json({
+          message:
+            "Invalid Gmail SMTP credentials. Please check your email or app password.",
+        });
+      }
+    }
+
+    // Encrypt SMTP password
+    const encryptedSmtpPassword = encryptPassword(smtppassword);
+    const encryptedUserPassword = encryptPassword(password);
+
+
+    // Save user to DB
+    const user = new User({
+      email,
+      username,
+      gender,
+      phone,
+      role:"employee",
+      password: encryptedUserPassword, 
+      smtppassword: encryptedSmtpPassword,
+      paymentStatus: "pending",
+      isActive: false,
+    });
+
+    await user.save();
+
+    res.status(201).json({
+      message: "Your details are saved",
+      user: {
+        id: user._id,
+        email: user.email,
+        username: user.username,
+      },
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Error saving user." });
+  }
+};
 
 export const login = async (req, res) => {
   const { email, password } = req.body;

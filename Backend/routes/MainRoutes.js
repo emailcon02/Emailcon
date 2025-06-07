@@ -20,6 +20,8 @@ import Replyto from "../models/Replyto.js";
 import Adminuser from "../models/Adminuser.js";
 import ImageUrl from "../models/Imageurl.js";
 import Folder from "../models/Folder.js";
+import accounttransporter from "../config/account-mailer.js";
+import { S3Client } from "@aws-sdk/client-s3";
 const router = express.Router();
 
 // Upload image to s3 bucket
@@ -2365,41 +2367,158 @@ router.get('/images/:userId', async (req, res) => {
   }
 });
 
-// Delete image by ID
-router.delete("/images/:id", async (req, res) => {
-  try {
-    await ImageUrl.findByIdAndDelete(req.params.id);
-    res.status(200).json({ message: "Image deleted" });
-  } catch (err) {
-    res.status(500).json({ error: "Delete failed" });
-  }
-});
 
-// DELETE /api/folder/:folderName
+// Configure AWS SDK
+const s3 = new S3Client({
+  region: process.env.AWS_REGION,
+  credentials: {
+    accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+  },
+});
 router.delete('/folder/:folderName', async (req, res) => {
   try {
     const { folderName } = req.params;
 
-    // Delete all images with that folder name
-    const imageResult = await ImageUrl.deleteMany({ folderName });
+    // Step 1: Find all images in the folder
+    const images = await ImageUrl.find({ folderName });
 
-    // Delete the folder entry
+    // Step 2: Extract keys from URLs
+    const objectsToDelete = images.map((img) => {
+      const s3Key = decodeURIComponent(
+        img.imageUrl.split('.amazonaws.com/')[1]
+      );
+      return { Key: s3Key };
+    });
+
+    // Step 3: Delete files from S3 (if any exist)
+    if (objectsToDelete.length > 0) {
+      const deleteParams = {
+        Bucket: process.env.AWS_BUCKET_NAME,
+        Delete: { Objects: objectsToDelete },
+      };
+
+      await s3.deleteObjects(deleteParams).promise();
+    }
+
+    // Step 4: Delete from MongoDB
+    const imageResult = await ImageUrl.deleteMany({ folderName });
     const folderResult = await Folder.deleteOne({ name: folderName });
 
     res.status(200).json({
       success: true,
-      message: `Folder '${folderName}' and all its images were deleted.`,
+      message: `Folder '${folderName}' and all images deleted from S3 and DB.`,
       deletedImages: imageResult.deletedCount,
       deletedFolder: folderResult.deletedCount,
     });
   } catch (err) {
+    console.error("Error deleting folder and images:", err);
     res.status(500).json({
       success: false,
-      message: 'Server error',
+      message: 'Server error while deleting folder and images.',
       error: err.message,
     });
   }
 });
+
+
+// In routes/user.js or similar
+router.delete('/user/:id', async (req, res) => {
+  try {
+    const userId = req.params.id;
+
+    await User.findByIdAndDelete(userId);
+    await PaymentHistory.deleteMany({ userId });
+    await Aliasname.deleteMany({ user: userId }); 
+    await BirthdayTemplate.deleteMany({ user:userId});
+    await Camhistory.deleteMany({ user:userId});
+    await BirthdayTemplate.deleteMany({ user:userId});
+    await Campaign.deleteMany({ user:userId});
+    await Folder.deleteMany({ user:userId});
+    await Group.deleteMany({ user:userId});
+    await ImageUrl.deleteMany({ user:userId});
+    await Replyto.deleteMany({ user:userId});
+    await Template.deleteMany({ user:userId});
+
+    res.json({ message: "User and related data deleted successfully" });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Server error while deleting user data" });
+  }
+});
+
+// send alert mail for user
+router.post('/send-alert', async (req, res) => {
+  const { userId } = req.body;
+
+  try {
+    const user = await User.findById(userId);
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    // Check if the plan is NOT a trail plan
+    if (user.plan && user.plan.toLowerCase() === 'trail') {
+      return res.status(400).json({ message: "Trail users are not eligible for renewal alert." });
+    }
+
+    const htmlContent = `
+      <body style="margin: 0; padding: 20px; font-family: Arial, sans-serif; background-color: #f7f7f7; color: #333;">
+        <table role="presentation" style="width: 100%; background-color: #f9f9f9; padding: 30px;" cellpadding="0" cellspacing="0">
+          <tr>
+            <td align="center">
+              <table role="presentation" style="max-width: 600px; width: 100%; background: #fff; border: 1px solid #e0e0e0; border-radius: 10px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);" cellpadding="0" cellspacing="0">
+                <tr>
+                  <td align="center" style="background: #2f327d; color: white; padding: 20px; border-top-left-radius: 10px; border-top-right-radius: 10px;">
+                    <div style="font-size: 50px; margin-bottom: 10px;">⏰</div>
+                    <h1 style="margin: 0; font-size: 24px;">Renew Your <span style="color: #f48c06;">Emailcon</span> Account</h1>
+                  </td>
+                </tr>
+                <tr>
+                  <td align="left" style="padding: 20px;">
+                    <p style="margin: 10px 0; font-size: 16px;">Hi <strong>${user.username}</strong>,</p>
+                    <p style="margin: 10px 0; font-size: 14px;">We noticed your subscription has expired.</p>
+                    <p style="margin: 10px 0; font-size: 14px;">To continue using your account and access all features, please renew your plan now.</p>
+                    <p style="margin: 10px 0; font-size: 14px; color: red; font-weight: bold;">
+                      ⚠️ Warning: If you do not renew within 7 days, your account and all associated data will be permanently deleted.
+                    </p>
+                    <div style="text-align: center; margin: 20px 0;">
+                      <a href="${apiConfig.baseURL}/userpayment/${user._id}" 
+                        style="background-color:#f48c06; color: white; padding: 12px 20px; text-decoration: none; border-radius: 5px; font-size: 16px;">
+                        Renew Now
+                      </a>
+                    </div>
+                  </td>
+                </tr>
+                <tr>
+                  <td align="center" style="padding: 20px; background: #f7f7f7; border-bottom-left-radius: 10px; border-bottom-right-radius: 10px;">
+                    <p style="font-size: 12px; color: #666;">
+                      Need help? Contact us at
+                      <a href="mailto:support@emailcon.in" style="color: #1a5eb8; text-decoration: none;">support@emailcon.in</a>
+                    </p>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+        </table>
+      </body>
+    `;
+
+    await accounttransporter.sendMail({
+      from: `"Emailcon Support" <account-noreply@account.emailcon.in>`,
+      to: user.email,
+      subject: "⚠️ Action Required: Renew Your Emailcon Account",
+      replyTo: "support@emailcon.in",
+      html: htmlContent,
+    });
+
+    res.status(200).json({ message: "Renewal alert email sent successfully" });
+  } catch (error) {
+    console.error("Email sending failed:", error);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+});
+
+
 
 
 export default router;

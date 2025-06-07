@@ -355,8 +355,6 @@ export const updateStatus = async (req, res) => {
 };
 
 
-
-
 export const updateStatusmanually = async (req, res) => {
   const { id, status } = req.body;
 
@@ -420,6 +418,103 @@ export const updateStatusmanually = async (req, res) => {
                         <p>Email: <span style="color: #333;">${user.email}</span></p>
                         <p>Password: <span style="color: #333;">${userpassword || "N/A"}</span></p>
                         <p style="color: red; font-size: 14px; margin-top: 15px;"><strong>Note:</strong> This is a <strong>trial account</strong> and will <strong>expire on ${expiryDate.toDateString()}</strong>.</p>
+                      </div>
+                    `
+                        : `<p style="margin: 10px 0; font-size: 14px;">Please contact admin for more details.</p>`
+                    }
+                  </td>
+                </tr>
+                <tr>
+                  <td align="center" style="padding: 20px; background: #f7f7f7; border-bottom-left-radius: 10px; border-bottom-right-radius: 10px;">
+                    <p style="font-size: 12px; color: #666;">
+                      If you have any questions, contact us at
+                      <a href="mailto:support@emailcon.in" style="color: #1a5eb8; text-decoration: none;">support@emailcon.in</a>.
+                    </p>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+        </table>
+      </body>
+    `;
+
+    await accounttransporter.sendMail({
+      from: `"Emailcon Support" <account-noreply@account.emailcon.in>`,
+      to: user.email,
+      subject: `Account ${status ? "Activated" : "Deactivated"}`,
+      replyTo: "support@emailcon.in",
+      html: htmlContent,
+    });
+
+    res.send(`Account ${status ? "activated" : "deactivated"} successfully.`);
+  } catch (err) {
+    console.error("Error updating account status or sending email:", err);
+    res.status(500).send("Failed to update status or send email.");
+  }
+};
+
+export const updateStatusemployee = async (req, res) => {
+  const { id, status } = req.body;
+
+  try {
+    const user = await User.findByIdAndUpdate(
+      id,
+      { isActive: status },
+      { new: true }
+    );
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    let expiryDate;
+    if (status === true) {
+      // Step 1: Set trial expiry
+      expiryDate = new Date();
+
+      // Step 2: Log trial in PaymentHistory
+      await PaymentHistory.create({
+        userId: id,
+        paymentStatus: "Employee-Trail",
+        expiryDate,
+        duration: "Employee-Usage",
+        amount: 0,
+        razorpayPaymentId: "TRIAL-MANUAL",
+        razorpayOrderId: "TRIAL-MANUAL",
+        razorpaySignature: "TRIAL-MANUAL",
+      });
+    }
+
+    const userpassword=decryptPassword(user.password);
+
+    // Step 3: Compose Email Template
+    const htmlContent = `
+      <body style="margin: 0; padding: 20px; font-family: Arial, sans-serif; background-color: #f7f7f7; color: #333;">
+        <table role="presentation" style="width: 100%; background-color: #f9f9f9; padding: 30px;" cellpadding="0" cellspacing="0">
+          <tr>
+            <td align="center">
+              <table role="presentation" style="max-width: 600px; width: 100%; background: #fff; border: 1px solid #e0e0e0; border-radius: 10px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);" cellpadding="0" cellspacing="0">
+                <tr>
+                  <td align="center" style="background: #2f327d; color: white; padding: 20px; border-top-left-radius: 10px; border-top-right-radius: 10px;">
+                    <div style="font-size: 50px; margin-bottom: 10px;">✉️</div>
+                    <h1 style="margin: 0; font-size: 24px;">Email<span style="color: #f48c06;">con</span> Account Notification</h1>
+                  </td>
+                </tr>
+                <tr>
+                  <td align="left" style="padding: 20px;">
+                    <p style="margin: 10px 0; font-size: 16px;">Hello <strong>${user.username}</strong>,</p>
+                    <h3 style="color: ${status ? '#28a745' : '#dc3545'};">
+                      Your account has been ${status ? 'activated' : 'deactivated'}.
+                    </h3>
+                    ${
+                      status
+                        ? `
+                      <p style="margin: 10px 0; font-size: 14px;">You can now access your account using the details below:</p>
+                      <div style="text-align: left; margin-top: 20px;">
+                        <p><strong>Login Credentials:</strong></p>
+                        <p>Email: <span style="color: #333;">${user.email}</span></p>
+                        <p>Password: <span style="color: #333;">${userpassword || "N/A"}</span></p>
                       </div>
                     `
                         : `<p style="margin: 10px 0; font-size: 14px;">Please contact admin for more details.</p>`

@@ -2,17 +2,15 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import "./AdminDashboard.css";
 import { useNavigate } from "react-router-dom";
-import { FaSearch,FaTrash} from "react-icons/fa";
+import { FaSearch } from "react-icons/fa";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import apiconfig from "../../apiconfig/apiConfig.js";
 import Header from "./Header.jsx";
 import AdminSidebar from "./AdminSidebar.jsx";
 
-
-function UserDetail() {
+function EmployeeDetails() {
   const [users, setUsers] = useState([]);
-  const [sendloadingalert,setSendloadingalert] = useState(false)
   const [statusLoadingId, setStatusLoadingId] = useState(null);
   const [sendLoadingId, setSendLoadingId] = useState(null);
    const [filteredUsers, setFilteredUsers] = useState([]);
@@ -22,28 +20,28 @@ function UserDetail() {
     const [rowsPerPage, setRowsPerPage] = useState(20);
     const [currentPage, setCurrentPage] = useState(1);
     const [sortOrder, setSortOrder] = useState("asc");
-     const [showDeleteModal, setShowDeleteModal] = useState(false);
-      const [deleteUserId, setDeleteUserId] = useState(null);
     
-    const navigate = useNavigate();
-
-  const fetchUsers = async () => {
-    try {
-      const response = await axios.get(`${apiconfig.baseURL}/api/admin/users`);
-      const sortedUsers = response.data.sort(
-        (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
-      );
-      setUsers(sortedUsers);
-    } catch (error) {
-      console.error("Error fetching users:", error);
-    }
-  };
+  const navigate = useNavigate();
 
   useEffect(() => {
     const adminToken = localStorage.getItem("adminToken");
     if (!adminToken) {
       navigate("/admin-login");
     } else {
+      const fetchUsers = async () => {
+        const response = await axios.get(
+          `${apiconfig.baseURL}/api/admin/users`
+        );
+    const sortedUsers = response.data.sort(
+      (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+    );
+      const filteredemployees = sortedUsers.filter(user => {
+        const roles = user.role?.toLowerCase() || "";
+        const exclude = roles.includes("employee");
+        return exclude;
+      });
+    setUsers(filteredemployees);     
+ };
       fetchUsers();
     }
   }, [navigate]);
@@ -59,41 +57,10 @@ function UserDetail() {
       const dateB = new Date(b.createdAt);
       return sortOrder === "desc" ? dateA - dateB : dateB - dateA;
     });
+
     setFilteredUsers(sorted);
     setSortOrder(sortOrder === "asc" ? "desc" : "asc");
   };
-
-const handleDeleteClick = (id) => {
-  setDeleteUserId(id);
-  setShowDeleteModal(true);
-};
-
-const SendAlertEmail = async () => {
-  setSendloadingalert(true);
-  try {
-    const response = await axios.post(`${apiconfig.baseURL}/api/stud/send-alert`, {
-      userId: deleteUserId,
-    });
-    toast.success("Alert email sent successfully");
-    setSendloadingalert(false);
-  } catch (error) {
-    setSendloadingalert(false);
-    toast.error("Failed to send alert email:", error);
-  }
-};
-
-const ConfirmDeleteUser = async () => {
-  try {
-    const response = await axios.delete(`${apiconfig.baseURL}/api/stud/user/${deleteUserId}`);
-        setShowDeleteModal(false);
-        fetchUsers();
-        toast.success(response.data.message);   
-  } catch (error) {
-    console.error("Error deleting user:", error);
-    toast.error("Failed to delete user.");
-  }
-};
-
   
   const filterUsers = () => {
     let filtered = [...users];
@@ -170,7 +137,7 @@ const ConfirmDeleteUser = async () => {
     setStatusLoadingId(id);
     try {
       // Step 1: Update user status
-      await axios.post(`${apiconfig.baseURL}/api/admin/update-status-manually`, {
+      await axios.post(`${apiconfig.baseURL}/api/admin/update-status-employee`, {
         id,
         status
       });
@@ -269,7 +236,6 @@ const ConfirmDeleteUser = async () => {
               <th>Action</th>
               <th>Send Login</th>
               <th>Payment History</th>
-              <th>Permanent Deactivate</th>
             </tr>
           </thead>
           <tbody>
@@ -321,14 +287,6 @@ const ConfirmDeleteUser = async () => {
                       View
                     </button>
                 </td>
-                <td>
-                     <button
-                          className="deleteadmin"
-                                          onClick={() => handleDeleteClick(user._id)}
-                            >
-                            <FaTrash size={18} color="#f48c06" />
-                      </button>
-                </td>
               </tr>
             ))
             ) : (
@@ -341,44 +299,6 @@ const ConfirmDeleteUser = async () => {
           </tbody>
         </table>
       </div>
-
-       {showDeleteModal && (
-          <div className="admin-dashboard-modal-overlay">
-            <div className="admin-dashboard-modal-box">
-              <h2 className="admin-dashboard-modal-title">
-                Confirm <span style={{ color: "#f48c06" }}>Delete</span>
-              </h2>
-              <p>Are you sure you want to delete this user?</p>
-              <div className="modal-buttons">
-                <button
-                  onClick={ConfirmDeleteUser}
-                  className="admin-dashboard-submit-btn"
-                >
-                  Yes, Delete
-                </button>
-    <button
-      style={{ marginLeft: '10px' }}
-      onClick={SendAlertEmail}
-      className="admin-dashboard-submit-btn"
-      disabled={sendloadingalert}
-    >
-      {sendloadingalert ? (
-            <span className="loader-send-alert"></span>
-      ) : (
-        'Send Alert'
-      )}
-    </button>
-    
-                <button
-                  onClick={() => setShowDeleteModal(false)}
-                  className="admin-dashboard-cancel-btn"
-                >
-                  Cancel
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
 
          {/* Pagination */}
          <div className="pagination-container">
@@ -417,4 +337,4 @@ const ConfirmDeleteUser = async () => {
   );
 }
 
-export default UserDetail;
+export default EmployeeDetails;
