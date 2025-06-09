@@ -203,16 +203,13 @@
 }
 
 .signup-input {
-  /* padding-left: 30px; To make room for the icon inside */
-  width: 80% !important;
+  width: 95% !important;
   padding: 0px 5px !important;
   border-radius: 5px !important;
   border: none !important;
   outline: none !important;
   margin: 0 !important;
-  /* font-size: larger; */
-  /* border: 1px solid #ccc; */
-  /* background-color: #faeedf; */
+
 }
 
 .signup-button {

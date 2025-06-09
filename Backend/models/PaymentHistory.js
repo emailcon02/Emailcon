@@ -4,7 +4,7 @@ const paymentHistorySchema = new mongoose.Schema({
     userId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
     paymentStatus: {
         type: String,
-        enum: ["pending", "paid", "failed","expired","trial"],
+        enum: ["pending","paid","failed","expired","trial","Employee-Trail"],
         default: "pending"
     },
     expiryDate: { type: Date },

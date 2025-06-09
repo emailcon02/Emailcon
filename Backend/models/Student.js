@@ -18,7 +18,7 @@ const studentSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: "Group",
     },
-    lastSentYear: { // 👈 Add this field
+    lastSentYear: { 
         type: Number,
         default: 0,
     }

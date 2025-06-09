@@ -30,7 +30,8 @@ function UserPaymenthistory() {
       }
       try {
         const response = await axios.get(`${apiConfig.baseURL}/api/stud/payment-history/${userId}`);
-        setPaymenthistory(response.data);
+        const sortedUsers = response.data.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+        setPaymenthistory(sortedUsers);
       } catch (error) {
         console.error("Error fetching payment history", {
           message: error.message,
@@ -41,7 +42,7 @@ function UserPaymenthistory() {
     };
 
     fetchPayments();
-  }, [userId, navigate]); // Only run when user ID or navigate changes
+  }, [userId, navigate]); 
 
   const handleSortByDate = () => {
     const sorted = [...filteredPayments].sort((a, b) => {
@@ -54,7 +55,6 @@ function UserPaymenthistory() {
     setSortOrder(sortOrder === "asc" ? "desc" : "asc");
   };
   
-
  useEffect(() => {
     filterPayments();
   }, [searchTerm, fromDate, toDate, paymenthistory]);
@@ -75,7 +75,7 @@ function UserPaymenthistory() {
       });
     }
 
-    // Date filter
+  // Date filter
   if (fromDate || toDate) {
     filtered = filtered.filter((payment) => {
       const paymentDate = new Date(payment.createdAt);
@@ -104,8 +104,6 @@ function UserPaymenthistory() {
     setFromDate("");
     setToDate("");
   };
-
-
 
 
   return (
@@ -172,11 +170,11 @@ function UserPaymenthistory() {
       <thead>
     <tr>
         <th>S.No</th>
-                <th onClick={handleSortByDate} style={{ cursor: "pointer" }}>
+        <th onClick={handleSortByDate} style={{ cursor: "pointer" }}>
         Payment Date {sortOrder === "asc" ? "▲" : "▼"}
       </th>  
       <th>UserName</th>
-            <th>Amount</th>
+      <th>Amount</th>
       <th>Plan Details(Days)</th>
       <th>Expiry Date</th>
       <th>Payment Status</th>

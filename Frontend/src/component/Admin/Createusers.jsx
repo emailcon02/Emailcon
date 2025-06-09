@@ -273,14 +273,14 @@ const handleSendCredentials = async (userId) => {
           onClick={() => setShowModal(true)}
           className="admin-dashboard-create-btn"
         >
-          + Create New Employee
+          + Create New Admin
         </button>
 
         {showModal && (
           <div className="admin-dashboard-modal-overlay">
             <div className="admin-dashboard-modal-box">
               <h2 className="admin-dashboard-modal-title">
-                Create <span style={{ color: "#f48c06" }}>Employee</span>
+                Create <span style={{ color: "#f48c06" }}>Admin</span>
               </h2>
               <form onSubmit={handleCreate}>
                 <label>Email</label>
@@ -345,7 +345,7 @@ const handleSendCredentials = async (userId) => {
           <div className="admin-dashboard-modal-overlay">
             <div className="admin-dashboard-modal-box">
               <h2 className="admin-dashboard-modal-title">
-                Edit <span style={{ color: "#f48c06" }}>Employee</span>
+                Edit <span style={{ color: "#f48c06" }}>Admin</span>
               </h2>
               <form onSubmit={handleEditSubmit}>
                 <label>Email</label>
