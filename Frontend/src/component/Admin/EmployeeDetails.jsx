@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import "./AdminDashboard.css";
 import { useNavigate } from "react-router-dom";
-import { FaSearch } from "react-icons/fa";
+import { FaSearch,FaTrash } from "react-icons/fa";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import apiconfig from "../../apiconfig/apiConfig.js";
@@ -20,15 +20,12 @@ function EmployeeDetails() {
     const [rowsPerPage, setRowsPerPage] = useState(20);
     const [currentPage, setCurrentPage] = useState(1);
     const [sortOrder, setSortOrder] = useState("asc");
+         const [showDeleteModal, setShowDeleteModal] = useState(false);
+          const [deleteUserId, setDeleteUserId] = useState(null);
     
   const navigate = useNavigate();
 
-  useEffect(() => {
-    const adminToken = localStorage.getItem("adminToken");
-    if (!adminToken) {
-      navigate("/admin-login");
-    } else {
-      const fetchUsers = async () => {
+    const fetchUsers = async () => {
         const response = await axios.get(
           `${apiconfig.baseURL}/api/admin/users`
         );
@@ -42,6 +39,13 @@ function EmployeeDetails() {
       });
     setUsers(filteredemployees);     
  };
+
+  useEffect(() => {
+    const adminToken = localStorage.getItem("adminToken");
+    if (!adminToken) {
+      navigate("/admin-login");
+    } else {
+    
       fetchUsers();
     }
   }, [navigate]);
@@ -110,6 +114,27 @@ function EmployeeDetails() {
     setFromDate("");
     setToDate("");
   };
+
+  
+const handleDeleteClick = (id) => {
+  setDeleteUserId(id);
+  setShowDeleteModal(true);
+};
+
+
+
+const ConfirmDeleteUser = async () => {
+  try {
+    const response = await axios.delete(`${apiconfig.baseURL}/api/stud/user/${deleteUserId}`);
+        setShowDeleteModal(false);
+        fetchUsers();
+        toast.success(response.data.message);   
+  } catch (error) {
+    console.error("Error deleting user:", error);
+    toast.error("Failed to delete user.");
+  }
+};
+
   const handlepaymentview = (userId) => {
     navigate(`/user-payment-history/${userId}`);
   };
@@ -236,6 +261,8 @@ function EmployeeDetails() {
               <th>Action</th>
               <th>Send Login</th>
               <th>Payment History</th>
+                            <th>Permanent Deactivate</th>
+
             </tr>
           </thead>
           <tbody>
@@ -287,6 +314,14 @@ function EmployeeDetails() {
                       View
                     </button>
                 </td>
+                   <td>
+                                     <button
+                                          className="deleteadmin"
+                                                          onClick={() => handleDeleteClick(user._id)}
+                                            >
+                                            <FaTrash size={18} color="#f48c06" />
+                                      </button>
+                                </td>
               </tr>
             ))
             ) : (
@@ -299,6 +334,31 @@ function EmployeeDetails() {
           </tbody>
         </table>
       </div>
+
+             {showDeleteModal && (
+          <div className="admin-dashboard-modal-overlay">
+            <div className="admin-dashboard-modal-box">
+              <h2 className="admin-dashboard-modal-title">
+                Confirm <span style={{ color: "#f48c06" }}>Delete</span>
+              </h2>
+              <p>Are you sure you want to delete this user?</p>
+              <div className="modal-buttons">
+                <button
+                  onClick={ConfirmDeleteUser}
+                  className="admin-dashboard-submit-btn"
+                >
+                  Yes, Delete
+                </button>    
+                <button
+                  onClick={() => setShowDeleteModal(false)}
+                  className="admin-dashboard-cancel-btn"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
          {/* Pagination */}
          <div className="pagination-container">

@@ -5,7 +5,7 @@ import accounttransporter from "../config/account-mailer.js";
 import PDFDocument from "pdfkit";
 import fs from "fs";
 import path from "path";
-import { uploadToS3 } from "../config/s3Uploder.js";
+import { uploadFileToS3 } from "../config/s3Uploder.js";
 import { decryptPassword } from "../config/encryption.js";
 import Adminuser from "../models/Adminuser.js";
 
@@ -99,9 +99,10 @@ export const sendPaymentDetailsEmail = async (user, paymentInfo) => {
     const pdfBuffer = Buffer.concat(buffers);
     const fileName = `${invoiceNumber}.pdf`;
     const mimeType = "application/pdf";
+    const userId = user._id;
 
     // Upload to S3
-    const s3Url = await uploadToS3(pdfBuffer, fileName, mimeType);
+    const s3Url = await uploadFileToS3(pdfBuffer, fileName, mimeType,userId);
 
     // Save invoice URL in DB
     await PaymentHistory.findByIdAndUpdate(paymentId, { invoiceUrl: s3Url });

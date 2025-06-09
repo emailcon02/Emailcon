@@ -33,7 +33,12 @@ function UserDetail() {
       const sortedUsers = response.data.sort(
         (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
       );
-      setUsers(sortedUsers);
+         const filteredemployees = sortedUsers.filter(user => {
+        const roles = user.role?.toLowerCase() || "";
+        const exclude = roles.includes("employee");
+        return !exclude;
+      });
+      setUsers(filteredemployees);
     } catch (error) {
       console.error("Error fetching users:", error);
     }

@@ -161,7 +161,7 @@ export const login = async (req, res) => {
     if (newEncryptedPassword !== password) {
       return res.status(401).send("Invalid credentials.");
     }
-    if (user.isActive === false) return res.status(404).send("Account not activated contact admin.");
+    if (user.isActive === false && user.role === "employee") return res.status(404).send("Account not activated contact admin.");
 
     const latestPayment = await PaymentHistory.findOne({ userId: user._id })
       .sort({ createdAt: -1 });

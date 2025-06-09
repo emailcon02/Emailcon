@@ -1,6 +1,6 @@
 import express from "express";
 import nodemailer from "nodemailer";
-import { upload,uploadToS3,deleteFromS3 } from "../config/s3Uploder.js";
+import { upload,uploadFileToS3,uploadImageToS3,deleteFromS3 } from "../config/s3Uploder.js";
 import Student from "../models/Student.js";
 import Group from "../models/Group.js";
 import Campaign from "../models/Campaign.js";
@@ -21,25 +21,43 @@ import Adminuser from "../models/Adminuser.js";
 import ImageUrl from "../models/Imageurl.js";
 import Folder from "../models/Folder.js";
 import accounttransporter from "../config/account-mailer.js";
-import { S3Client } from "@aws-sdk/client-s3";
+import {
+  S3Client,
+  DeleteObjectsCommand,
+  ListObjectsV2Command,
+} from '@aws-sdk/client-s3';
 const router = express.Router();
 
 // Upload image to s3 bucket
 router.post('/upload', upload.single('image'), async (req, res) => {
   try {
-    const url = await uploadToS3(req.file.buffer, req.file.originalname, req.file.mimetype);
+    const { userId,folderName } = req.body;
+    if (!userId) return res.status(400).send("Missing userId");
+
+    const url = await uploadImageToS3(
+      req.file.buffer,
+      req.file.originalname,
+      req.file.mimetype,
+      folderName,
+      userId
+
+    );
+
     res.json({ imageUrl: url });
   } catch (err) {
     console.error(err);
-    res.status(500).send('Upload failed');
+    res.status(400).json({ error: err.message });
   }
 });
 
+
 router.post('/uploadfile', upload.array('attachments', 10), async (req, res) => {
   try {
+    const { userId } = req.body;
+    if (!userId) return res.status(400).send("Missing userId");
     const fileUrls = await Promise.all(
       req.files.map(file =>
-        uploadToS3(file.buffer, file.originalname, file.mimetype)
+        uploadFileToS3(file.buffer, file.originalname, file.mimetype,userId)
       )
     );
     res.json({ fileUrls });
@@ -2368,7 +2386,8 @@ router.get('/images/:userId', async (req, res) => {
 });
 
 
-// Configure AWS SDK
+
+// Initialize AWS SDK
 const s3 = new S3Client({
   region: process.env.AWS_REGION,
   credentials: {
@@ -2376,38 +2395,68 @@ const s3 = new S3Client({
     secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
   },
 });
+
+router.delete('/images/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const result = await ImageUrl.findByIdAndDelete(id);
+
+    if (!result) {
+      return res.status(404).json({ error: 'Image not found in database' });
+    }
+
+    res.status(200).json({ message: 'Image record deleted from DB' });
+  } catch (err) {
+    console.error('DB Delete Error:', err);
+    res.status(500).json({ error: 'Error deleting image from DB' });
+  }
+});
+
+
 router.delete('/folder/:folderName', async (req, res) => {
   try {
     const { folderName } = req.params;
 
-    // Step 1: Find all images in the folder
-    const images = await ImageUrl.find({ folderName });
+    // Step 1: Find the folder and get userId
+    const folder = await Folder.findOne({ name: folderName });
 
-    // Step 2: Extract keys from URLs
-    const objectsToDelete = images.map((img) => {
-      const s3Key = decodeURIComponent(
-        img.imageUrl.split('.amazonaws.com/')[1]
-      );
-      return { Key: s3Key };
-    });
-
-    // Step 3: Delete files from S3 (if any exist)
-    if (objectsToDelete.length > 0) {
-      const deleteParams = {
-        Bucket: process.env.AWS_BUCKET_NAME,
-        Delete: { Objects: objectsToDelete },
-      };
-
-      await s3.deleteObjects(deleteParams).promise();
+    if (!folder) {
+      return res.status(404).json({ success: false, message: "Folder not found" });
     }
 
-    // Step 4: Delete from MongoDB
+    const userId = folder.user?.toString();
+    if (!userId) {
+      return res.status(400).json({ success: false, message: "User ID not found in folder" });
+    }
+
+    // Step 1: List all S3 objects with prefix
+    const listCommand = new ListObjectsV2Command({
+      Bucket: process.env.AWS_BUCKET_NAME,
+      Prefix: `uploads/${userId}/${folderName}/`,
+    });
+
+    const listResult = await s3.send(listCommand);
+    const objectsToDelete = (listResult.Contents || []).map((item) => ({
+      Key: item.Key,
+    }));
+
+    // Step 2: Delete from S3
+    if (objectsToDelete.length > 0) {
+      const deleteCommand = new DeleteObjectsCommand({
+        Bucket: process.env.AWS_BUCKET_NAME,
+        Delete: { Objects: objectsToDelete },
+      });
+      await s3.send(deleteCommand);
+    }
+
+    // Step 3: Delete from DB
     const imageResult = await ImageUrl.deleteMany({ folderName });
     const folderResult = await Folder.deleteOne({ name: folderName });
 
     res.status(200).json({
       success: true,
-      message: `Folder '${folderName}' and all images deleted from S3 and DB.`,
+      message: `Folder '${folderName}' and all associated images deleted from S3 and MongoDB.`,
       deletedImages: imageResult.deletedCount,
       deletedFolder: folderResult.deletedCount,
     });
@@ -2415,37 +2464,66 @@ router.delete('/folder/:folderName', async (req, res) => {
     console.error("Error deleting folder and images:", err);
     res.status(500).json({
       success: false,
-      message: 'Server error while deleting folder and images.',
+      message: 'Error deleting folder and images.',
+      error: err.message,
+    });
+  }
+});
+
+router.delete('/user/:id', async (req, res) => {
+  try {
+    const userId = req.params.id;
+    const prefix = `uploads/${userId}/`;
+
+    // Step 1: List all S3 objects in the user's upload folder
+    const listCommand = new ListObjectsV2Command({
+      Bucket: process.env.AWS_BUCKET_NAME,
+      Prefix: prefix,
+    });
+
+    const listResult = await s3.send(listCommand);
+    const objectsToDelete = (listResult.Contents || []).map((item) => ({
+      Key: item.Key,
+    }));
+
+    // Step 2: Delete from S3
+    if (objectsToDelete.length > 0) {
+      const deleteCommand = new DeleteObjectsCommand({
+        Bucket: process.env.AWS_BUCKET_NAME,
+        Delete: { Objects: objectsToDelete },
+      });
+      await s3.send(deleteCommand);
+    }
+
+    // Step 3: Delete from MongoDB
+    await User.findByIdAndDelete(userId);
+    await PaymentHistory.deleteMany({ userId });
+    await Aliasname.deleteMany({ user: userId });
+    await BirthdayTemplate.deleteMany({ user: userId });
+    await Camhistory.deleteMany({ user: userId });
+    await Campaign.deleteMany({ user: userId });
+    await Folder.deleteMany({ user: userId });
+    await Group.deleteMany({ user: userId });
+    await ImageUrl.deleteMany({ user: userId });
+    await Replyto.deleteMany({ user: userId });
+    await Template.deleteMany({ user: userId });
+
+    res.status(200).json({
+      success: true,
+      message: `User and its all related data/images deleted from S3 and Database.`,
+      deletedFiles: objectsToDelete.length,
+    });
+  } catch (err) {
+    console.error("Error deleting user and data:", err);
+    res.status(500).json({
+      success: false,
+      message: 'Error deleting user data.',
       error: err.message,
     });
   }
 });
 
 
-// In routes/user.js or similar
-router.delete('/user/:id', async (req, res) => {
-  try {
-    const userId = req.params.id;
-
-    await User.findByIdAndDelete(userId);
-    await PaymentHistory.deleteMany({ userId });
-    await Aliasname.deleteMany({ user: userId }); 
-    await BirthdayTemplate.deleteMany({ user:userId});
-    await Camhistory.deleteMany({ user:userId});
-    await BirthdayTemplate.deleteMany({ user:userId});
-    await Campaign.deleteMany({ user:userId});
-    await Folder.deleteMany({ user:userId});
-    await Group.deleteMany({ user:userId});
-    await ImageUrl.deleteMany({ user:userId});
-    await Replyto.deleteMany({ user:userId});
-    await Template.deleteMany({ user:userId});
-
-    res.json({ message: "User and related data deleted successfully" });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "Server error while deleting user data" });
-  }
-});
 
 // send alert mail for user
 router.post('/send-alert', async (req, res) => {

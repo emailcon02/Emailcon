@@ -121,9 +121,11 @@ const Clicksinglemainpage = () => {
         setFolderList((prev) =>
           prev.filter((f) => f.name !== folderToDelete.name)
         );
-        setModalVisible(false);
-        setFolderToDelete(null);
         toast.success("Deleted Successfully");
+        setTimeout(()=>{
+           setModalVisible(false);
+           setFolderToDelete(null);
+        },2000)
       } else {
         toast.error("Failed to delete folder.");
       }
@@ -186,6 +188,7 @@ const Clicksinglemainpage = () => {
       const file = e.target.files[0];
       const formData = new FormData();
       formData.append("image", file);
+      formData.append("folderName",currentFolder || "Sample");
 
       try {
         const uploadRes = await axios.post(
@@ -1169,7 +1172,8 @@ const Clicksinglemainpage = () => {
         const formData = new FormData();
 
         emailData.attachments.forEach((file) => {
-          formData.append("attachments", file);
+          formData.append("attachments", file),
+          formData.append("userId",user.id)
         });
 
         const uploadResponse = await axios.post(
@@ -1279,7 +1283,8 @@ const Clicksinglemainpage = () => {
         const formData = new FormData();
 
         emailData.attachments.forEach((file) => {
-          formData.append("attachments", file);
+          formData.append("attachments", file),
+          formData.append("userId",user.id)
         });
 
         const uploadResponse = await axios.post(
