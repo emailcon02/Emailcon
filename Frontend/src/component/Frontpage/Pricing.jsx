@@ -24,6 +24,7 @@ const Pricing= () => {
         <div className="pricing-card basic">
           <h2>Free Plan</h2>
           <p className="price">24-Hour Preview</p>
+
           <ul>
             <li>300 Mails Per Day</li>
             <li>Tracking Email Records</li>
