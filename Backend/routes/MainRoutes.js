@@ -2456,7 +2456,7 @@ router.delete('/folder/:folderName', async (req, res) => {
 
     res.status(200).json({
       success: true,
-      message: `Folder '${folderName}' and all associated images deleted from S3 and MongoDB.`,
+      message: `Folder '${folderName}' and all associated images deleted Successfully`,
       deletedImages: imageResult.deletedCount,
       deletedFolder: folderResult.deletedCount,
     });
@@ -2508,11 +2508,11 @@ router.delete('/user/:id', async (req, res) => {
     await Replyto.deleteMany({ user: userId });
     await Template.deleteMany({ user: userId });
 
-    res.status(200).json({
-      success: true,
-      message: `User and its all related data/images deleted from S3 and Database.`,
-      deletedFiles: objectsToDelete.length,
-    });
+   res.status(200).json({
+  success: true,
+  message: `User and all associated data, including images, have been successfully deleted.`,
+  deletedFiles: objectsToDelete.length,
+});
   } catch (err) {
     console.error("Error deleting user and data:", err);
     res.status(500).json({
@@ -2595,8 +2595,5 @@ router.post('/send-alert', async (req, res) => {
     res.status(500).json({ message: "Internal Server Error" });
   }
 });
-
-
-
 
 export default router;
