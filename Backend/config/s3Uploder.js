@@ -22,11 +22,27 @@ const s3 = new S3Client({
 const storage = multer.memoryStorage();
 const upload = multer({ storage });
 
-// Compress if image > 2MB
 const compressImageIfNeeded = async (fileBuffer, mimeType) => {
-  if (fileBuffer.length > 2 * 1024 * 1024 && mimeType.startsWith('image')) {
-    return await sharp(fileBuffer).resize({ width: 2000 }).toBuffer();
+  const maxSize = 250 * 1024; // 250KB
+  const targetSize = 200 * 1024; // 200KB
+
+  if (fileBuffer.length > maxSize && mimeType.startsWith('image')) {
+    let quality = 80;
+    let resizedBuffer;
+
+    // Try compressing repeatedly until below 200KB or quality becomes too low
+    do {
+      resizedBuffer = await sharp(fileBuffer)
+        .resize({ width: 2000 }) // Optional: Adjust width for additional control
+        .jpeg({ quality })
+        .toBuffer();
+
+      quality -= 10;
+    } while (resizedBuffer.length > targetSize && quality >= 40); // Stop if too low quality
+
+    return resizedBuffer;
   }
+
   return fileBuffer;
 };
 
@@ -53,18 +69,17 @@ const getUserTotalSize = async (prefix) => {
 
   return totalSize;
 };
+const MAX_USER_STORAGE = 100 * 1024 * 1024; // 100MB
 
-// Upload with size check
-const uploadImageToS3 = async (fileBuffer, fileName, mimeType,folderName,userId) => {
+const uploadImageToS3 = async (fileBuffer, fileName, mimeType, folderName, userId) => {
   const compressedBuffer = await compressImageIfNeeded(fileBuffer, mimeType);
   const fileSize = compressedBuffer.length;
 
   const prefix = `uploads/${userId}/${folderName}/`;
   const totalSize = await getUserTotalSize(`uploads/${userId}/`);
 
-  const oneGB = 1 * 1024 * 1024 * 1024;
-  if (totalSize + fileSize > oneGB) {
-    throw new Error("1GB storage limit exceeded. Please delete old files.");
+  if (totalSize + fileSize > MAX_USER_STORAGE) {
+    throw new Error("Your storage limit exceeded. Please delete old files.");
   }
 
   const key = `${prefix}${Date.now()}-${randomUUID()}-${fileName}`;
@@ -81,7 +96,7 @@ const uploadImageToS3 = async (fileBuffer, fileName, mimeType,folderName,userId)
 
   return `https://${process.env.AWS_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${key}`;
 };
-// Upload with size check
+
 const uploadFileToS3 = async (fileBuffer, fileName, mimeType, userId) => {
   const compressedBuffer = await compressImageIfNeeded(fileBuffer, mimeType);
   const fileSize = compressedBuffer.length;
@@ -89,9 +104,8 @@ const uploadFileToS3 = async (fileBuffer, fileName, mimeType, userId) => {
   const prefix = `uploads/${userId}/`;
   const totalSize = await getUserTotalSize(prefix);
 
-  const oneGB = 1 * 1024 * 1024 * 1024;
-  if (totalSize + fileSize > oneGB) {
-    throw new Error("1GB storage limit exceeded. Please delete old files.");
+  if (totalSize + fileSize > MAX_USER_STORAGE) {
+    throw new Error("Your storage limit exceeded. Please delete old files.");
   }
 
   const key = `${prefix}${Date.now()}-${randomUUID()}-${fileName}`;
