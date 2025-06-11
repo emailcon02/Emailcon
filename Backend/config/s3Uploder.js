@@ -98,7 +98,7 @@ const uploadImageToS3 = async (fileBuffer, fileName, mimeType, folderName, userI
   return `https://${process.env.AWS_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${key}`;
 };
 
-const uploadFileToS3 = async (fileBuffer, fileName, mimeType, userId,folderName) => {
+const uploadFileToS3 = async (fileBuffer, fileName, mimeType,userId,folderName) => {
   const compressedBuffer = await compressImageIfNeeded(fileBuffer, mimeType);
   const fileSize = compressedBuffer.length;
 
