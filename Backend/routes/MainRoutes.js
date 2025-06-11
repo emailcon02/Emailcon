@@ -53,11 +53,11 @@ router.post('/upload', upload.single('image'), async (req, res) => {
 
 router.post('/uploadfile', upload.array('attachments', 10), async (req, res) => {
   try {
-    const { userId } = req.body;
+    const { folderName = 'files', userId } = req.body;
     if (!userId) return res.status(400).send("Missing userId");
     const fileUrls = await Promise.all(
       req.files.map(file =>
-        uploadFileToS3(file.buffer, file.originalname, file.mimetype,userId)
+        uploadFileToS3(file.buffer, file.originalname, file.mimetype,userId,folderName)
       )
     );
     res.json({ fileUrls });
