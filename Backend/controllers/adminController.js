@@ -100,9 +100,11 @@ export const sendPaymentDetailsEmail = async (user, paymentInfo) => {
     const fileName = `${invoiceNumber}.pdf`;
     const mimeType = "application/pdf";
     const userId = user._id;
+    const folderName = 'invoices'; 
+
 
     // Upload to S3
-    const s3Url = await uploadFileToS3(pdfBuffer, fileName, mimeType,userId);
+    const s3Url = await uploadFileToS3(pdfBuffer, fileName, mimeType,userId,folderName);
 
     // Save invoice URL in DB
     await PaymentHistory.findByIdAndUpdate(paymentId, { invoiceUrl: s3Url });
@@ -153,7 +155,7 @@ export const sendPaymentDetailsEmail = async (user, paymentInfo) => {
     `;
 
     await accounttransporter.sendMail({
-      from: `"Emailcon Support" <account-noreply@account.emailcon.in>`,
+      from: `"Emailcon Support" <user-noreply@account.emailcon.in>`,
       to: user.email,
       subject: `💳 Payment Confirmation`,
       replyTo: "support@emailcon.in",
@@ -261,7 +263,7 @@ const sendActivationEmail = async (user) => {
   `;
 
   await accounttransporter.sendMail({
-    from: `"Emailcon Support" <account-noreply@account.emailcon.in>`,
+      from: `"Emailcon Support" <user-noreply@account.emailcon.in>`,
     to: user.email,
     subject: `✅ Account Activated`,
     replyTo: "support@emailcon.in",
@@ -441,7 +443,7 @@ export const updateStatusmanually = async (req, res) => {
     `;
 
     await accounttransporter.sendMail({
-      from: `"Emailcon Support" <account-noreply@account.emailcon.in>`,
+      from: `"Emailcon Support" <user-noreply@account.emailcon.in>`,
       to: user.email,
       subject: `Account ${status ? "Activated" : "Deactivated"}`,
       replyTo: "support@emailcon.in",
@@ -538,7 +540,7 @@ export const updateStatusemployee = async (req, res) => {
     `;
 
     await accounttransporter.sendMail({
-      from: `"Emailcon Support" <account-noreply@account.emailcon.in>`,
+      from: `"Emailcon Support" <user-noreply@account.emailcon.in>`,
       to: user.email,
       subject: `Account ${status ? "Activated" : "Deactivated"}`,
       replyTo: "support@emailcon.in",
@@ -587,7 +589,7 @@ export const sendCredentials = async (req, res) => {
     const userpassword=decryptPassword(user.password);
     // Define the email options
     const mailOptions = {
-      from: `"Emailcon Support" <account-noreply@account.emailcon.in>`,
+      from: `"Emailcon Support" <user-noreply@account.emailcon.in>`,
       to: user.email,
       subject: "Your Login Credentials",
       replyTo: "support@emailcon.in",
@@ -676,7 +678,7 @@ export const sendAdminCredentials = async (req, res) => {
     }
     // Define the email options
     const mailOptions = {
-      from: `"Emailcon Support" <account-noreply@account.emailcon.in>`,
+      from: `"Emailcon Support" <user-noreply@account.emailcon.in>`,
       to: user.email,
       subject: "Your Admin Login Credentials",
       replyTo: "support@emailcon.in",
@@ -834,8 +836,8 @@ export const updateAdminStatusmanually = async (req, res) => {
       </body>
     `;
 
-   await accounttransporter.sendMail({
-      from: `"Emailcon Support" <account-noreply@account.emailcon.in>`,
+     accounttransporter.sendMail({
+      from: `"Emailcon Support" <user-noreply@account.emailcon.in>`,
       to: user.email,
       subject: `Account ${status ? "Activated" : "Deactivated"}`,
       replyTo: "support@emailcon.in",
