@@ -1154,9 +1154,9 @@ const Birthdayeditor = () => {
         const formData = new FormData();
 
         emailData.attachments.forEach((file) => {
-          formData.append("attachments", file),
-          formData.append("userId",user.id)
+          formData.append("attachments", file);
         });
+          formData.append("userId",user.id)
 
         const uploadResponse = await axios.post(
           `${apiConfig.baseURL}/api/stud/uploadfile`,
@@ -1164,7 +1164,6 @@ const Birthdayeditor = () => {
           { headers: { "Content-Type": "multipart/form-data" } }
         );
 
-        console.log("Uploaded Files:", uploadResponse.data);
         // Structure the uploaded files with original name and URL
         attachments = uploadResponse.data.fileUrls.map((file, index) => ({
           originalName: emailData.attachments[index].name, // Get original file name
@@ -1247,9 +1246,9 @@ const Birthdayeditor = () => {
         const formData = new FormData();
 
         emailData.attachments.forEach((file) => {
-          formData.append("attachments", file),
-          formData.append("userId",user.id)
+          formData.append("attachments", file);
         });
+          formData.append("userId",user.id)
 
         const uploadResponse = await axios.post(
           `${apiConfig.baseURL}/api/stud/uploadfile`,
@@ -1257,7 +1256,6 @@ const Birthdayeditor = () => {
           { headers: { "Content-Type": "multipart/form-data" } }
         );
 
-        console.log("Uploaded Files:", uploadResponse.data);
         // Structure the uploaded files with original name and URL
         attachments = uploadResponse.data.fileUrls.map((file, index) => ({
           originalName: emailData.attachments[index].name, // Get original file name

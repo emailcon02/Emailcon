@@ -69,6 +69,7 @@ const getUserTotalSize = async (prefix) => {
 
   return totalSize;
 };
+
 const MAX_USER_STORAGE = 100 * 1024 * 1024; // 100MB
 
 const uploadImageToS3 = async (fileBuffer, fileName, mimeType, folderName, userId) => {
@@ -97,11 +98,11 @@ const uploadImageToS3 = async (fileBuffer, fileName, mimeType, folderName, userI
   return `https://${process.env.AWS_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${key}`;
 };
 
-const uploadFileToS3 = async (fileBuffer, fileName, mimeType, userId) => {
+const uploadFileToS3 = async (fileBuffer, fileName, mimeType, userId,folderName) => {
   const compressedBuffer = await compressImageIfNeeded(fileBuffer, mimeType);
   const fileSize = compressedBuffer.length;
 
-  const prefix = `uploads/${userId}/`;
+  const prefix = `uploads/${userId}/${folderName}/`;
   const totalSize = await getUserTotalSize(prefix);
 
   if (totalSize + fileSize > MAX_USER_STORAGE) {
@@ -131,5 +132,6 @@ const deleteFromS3 = async (key) => {
   });
   await s3.send(command);
 };
+
 
 export { upload, uploadImageToS3,uploadFileToS3,deleteFromS3 };
