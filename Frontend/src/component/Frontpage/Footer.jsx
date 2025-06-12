@@ -1,12 +1,10 @@
 import React from "react";
 import "./Footer.css";
-import { useNavigate } from "react-router-dom";
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faPhone, faEnvelope } from '@fortawesome/free-solid-svg-icons';
 
-const Footer = () => {
-  const navigate = useNavigate();
-  const handlenavigate = () => {
-    navigate("/register-form");
-  }
+const Footer = ({onOpenModal }) => {
+
 
   return (
     <footer className="footer-container" id="contact">
@@ -26,7 +24,7 @@ const Footer = () => {
           <p>
             Ready To Begin?
           </p>
-            <button onClick={handlenavigate} className="cta-button">Get a Demo</button>
+            <button onClick={onOpenModal } className="cta-button">Get a Demo</button>
         </div>
       </div>
 
@@ -60,14 +58,19 @@ const Footer = () => {
         </div>
 
         {/* Contact Info */}
-        <div className="footer-section">
-          <h6>Contact</h6>
-          <p>0422 4957575</p>
-          <h6>Email</h6>
-          <p>
-            <a href="mailto:support@atts.in">support@emailcon.in</a>
-          </p>
-        </div>
+       <div className="footer-section">
+  <h6>Contact</h6>
+  <p>
+    <FontAwesomeIcon icon={faPhone} style={{ marginRight: '8px' }} />
+    +91-8667238830
+  </p>
+  <h6>Email</h6>
+  <p>
+    <FontAwesomeIcon icon={faEnvelope} style={{ marginRight: '8px' }} />
+    <a href="mailto:support@atts.in">support@emailcon.in</a>
+  </p>
+</div>
+
       </div>
 
   

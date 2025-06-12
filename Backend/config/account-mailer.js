@@ -5,12 +5,12 @@ const accounttransporter = nodemailer.createTransport({
           port: 465,
           secure: true, 
           auth: {
-            user:"account-noreply@account.emailcon.in",
-            pass:"Account@con01"
+            user:"user-noreply@account.emailcon.in",
+            pass:"Email@marketinguser#*$04"
           },
           tls: {
             rejectUnauthorized: false,
-          },
+          },       
 });
 
 export default accounttransporter;

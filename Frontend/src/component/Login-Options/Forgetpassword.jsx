@@ -11,14 +11,10 @@ function Forgetpassword() {
  
   const [forgotEmail, setForgotEmail] = useState("");
   const [otp, setOtp] = useState("");
-
   const [sendOtpLoading, setSendOtpLoading] = useState(false);
-
   const [resendTimer, setResendTimer] = useState(0);
   const navigate = useNavigate();
-  useEffect(() => {
-    console.log("sended otp",otp); // Temporary usage to suppress the warning
-  },[otp]);
+
  useEffect(() => {
     let timer;
     if (resendTimer > 0) {
@@ -81,16 +77,15 @@ const handleBackCampaign = () => {
     
   return (
     
-    <div class="unique-container">
+    <div class="unique-container">      
+    <div class="unique-left-block">         
+      <div class="unique-form-box">
            <button onClick={handleBackCampaign} className="report-nav-btn">
                     <span className="admin-nav-icons">
                       <FaArrowLeft />
                     </span>
                     <span className="nav-names">Back</span>
         </button>
-        
-    <div class="unique-left-block">      
-      <div class="unique-form-box">
    
         <h2>Forget <br/><span style={{color: "#f48c06"}}>Password</span> ?</h2>
         <p className='unique-logo-para'>Please enter your email address.It should belong to an already registered account.</p>
@@ -132,4 +127,4 @@ const handleBackCampaign = () => {
   )
 }
 
-export default Forgetpassword
+export default Forgetpassword;

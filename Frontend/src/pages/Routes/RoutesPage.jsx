@@ -40,6 +40,8 @@ import ExpiredUser from "../../component/Admin/ExpiredUser";
 import UserRequestForm from "../../component/Admin/UserRequestForm";
 import Signup from "../../component/Login-Options/Signup";
 import UserDemoRequest from "../../component/Business-Admin/UserDemoRequest";
+import EmployeeSignup from "../../component/Login-Options/EmployeeSignup";
+import EmployeeDetails from "../../component/Admin/EmployeeDetails";
 
 function RoutesPage() {
   const [isOnline, setIsOnline] = useState(navigator.onLine);
@@ -77,6 +79,8 @@ function RoutesPage() {
         <Route path="/all-user-payment-history" element={<AllUserPaymenthistory/>} />
         <Route path="/register-form" element={<Form/>} />
         <Route path="/admin-login" element={<AdminLogin />} />
+        <Route path="/employee-signup" element={<EmployeeSignup />} />
+        <Route path="/employee-detail" element={<EmployeeDetails />} />
         <Route path="/user-detail" element={<UserDetail />} />
         <Route path="/expired-users" element={<ExpiredUser />} />
         <Route path="/super-admin-dashboard" element={<DashboardPage/>} />

@@ -13,9 +13,7 @@ const GroupfilesingleModal = ({ onClose }) => {
   const [contactKeys, setContactKeys] = useState([]);
   const [isLoadingsave, setIsLoadingsave] = useState(false);
   const user = JSON.parse(localStorage.getItem("user"));
-  useEffect(() => {
-    console.log(students); // Temporary usage to suppress the warning
-  }, [students]);
+
   
   // Fetch only groups on mount
   useEffect(() => {

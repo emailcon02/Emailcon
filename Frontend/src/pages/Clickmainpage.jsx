@@ -120,9 +120,11 @@ const Clickmainpage = () => {
         setFolderList((prev) =>
           prev.filter((f) => f.name !== folderToDelete.name)
         );
+     toast.success("Deleted Successfully");
+        setTimeout(()=>{
         setModalVisible(false);
         setFolderToDelete(null);
-        toast.success("Deleted Successfully");
+        },2000)
       } else {
         toast.error("Failed to delete folder.");
       }
@@ -185,6 +187,8 @@ const Clickmainpage = () => {
       const file = e.target.files[0];
       const formData = new FormData();
       formData.append("image", file);
+      formData.append("folderName",currentFolder || "Sample");
+
 
       try {
         const uploadRes = await axios.post(
@@ -1196,6 +1200,7 @@ const Clickmainpage = () => {
         emailData.attachments.forEach((file) => {
           formData.append("attachments", file);
         });
+          formData.append("userId",user.id)
 
         const uploadResponse = await axios.post(
           `${apiConfig.baseURL}/api/stud/uploadfile`,
@@ -1203,7 +1208,6 @@ const Clickmainpage = () => {
           { headers: { "Content-Type": "multipart/form-data" } }
         );
 
-        console.log("Uploaded Files:", uploadResponse.data);
         attachments = uploadResponse.data.fileUrls.map((file, index) => ({
           originalName: emailData.attachments[index].name,
           fileUrl: file,
@@ -1306,6 +1310,7 @@ const Clickmainpage = () => {
         emailData.attachments.forEach((file) => {
           formData.append("attachments", file);
         });
+          formData.append("userId",user.id)
 
         const uploadResponse = await axios.post(
           `${apiConfig.baseURL}/api/stud/uploadfile`,
@@ -1313,7 +1318,6 @@ const Clickmainpage = () => {
           { headers: { "Content-Type": "multipart/form-data" } }
         );
 
-        console.log("Uploaded Files:", uploadResponse.data);
         // Structure the uploaded files with original name and URL
         attachments = uploadResponse.data.fileUrls.map((file, index) => ({
           originalName: emailData.attachments[index].name, // Get original file name

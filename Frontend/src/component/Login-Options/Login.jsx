@@ -66,7 +66,8 @@ function Login() {
         setUserId(userId);
         setExpiryDate(expiryDate);  // setState to show in modal
         setShowExpiryModal(true);   // open modal
-      } else {
+      } 
+      else {
         toast.error(response?.data || "Error logging in");
       }
     } finally {

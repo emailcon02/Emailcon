@@ -10,9 +10,9 @@ function SignupOption() {
   const navigate = useNavigate();
   const [showModal, setShowModal] = useState(false);
 
-  const handlePayment = () => {
-    navigate(`/userpayment/${userId}`);
-  };
+  // const handlePayment = () => {
+  //   navigate(`/userpayment/${userId}`);
+  // };
 
   const handleDemoClick = () => {
     setShowModal(true);
@@ -53,9 +53,9 @@ function SignupOption() {
             <div onClick={handleDemoClick} className="signupopt-demo-btn">
               Free Trail
             </div>
-            <div onClick={handlePayment} className="signupopt-pay-btn">
+            {/* <div onClick={handlePayment} className="signupopt-pay-btn">
               Pay Now
-            </div>
+            </div> */}
           </div>
         </div>
       </div>

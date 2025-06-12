@@ -5,7 +5,7 @@ import "./NavbarBanner.css";
 import { useNavigate } from "react-router-dom";
 import BannerImg from "../../Images/banner.png";
 
-const NavbarBanner = () => {
+const NavbarBanner = ({onOpenModal }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isSticky, setIsSticky] = useState(false);
   const navigate = useNavigate();
@@ -32,10 +32,7 @@ const NavbarBanner = () => {
     navigate("/user-login");
   }
   
-  const hadlenavigatedemo = () => {
-    navigate("/register-form");
-  }
-
+ 
   // Attach scroll listener
   useEffect(() => {
     window.addEventListener("scroll", handleScroll);
@@ -95,7 +92,7 @@ const NavbarBanner = () => {
             Transform Your Email Campaigns With EmailCon - Your All-In-One Email
             Sending Solution.
           </p>
-          <button className="schedule-btn slide-up" onClick={hadlenavigatedemo}>Schedule A Demo</button>
+          <button className="schedule-btn slide-up" onClick={onOpenModal }>Schedule A Demo</button>
         </div>
         <div className="Banner-Image">
           <img className="ban-img" src={BannerImg} alt="ban-img" />

@@ -168,7 +168,7 @@ const saveUsername = async () => {
     } catch (error) {
       setSaveLoading(false);
       if(error.response){
-        const errormessage = error.response.data.message || "Error updating user password"
+        const errormessage = error.response.data.message || "Error updating user password";
         toast.error(errormessage);
       console.error(error);
       }

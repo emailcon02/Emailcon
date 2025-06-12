@@ -1,6 +1,6 @@
 import express from "express";
 import nodemailer from "nodemailer";
-import { upload,uploadToS3,deleteFromS3 } from "../config/s3Uploder.js";
+import { upload,uploadFileToS3,uploadImageToS3,deleteFromS3 } from "../config/s3Uploder.js";
 import Student from "../models/Student.js";
 import Group from "../models/Group.js";
 import Campaign from "../models/Campaign.js";
@@ -20,24 +20,44 @@ import Replyto from "../models/Replyto.js";
 import Adminuser from "../models/Adminuser.js";
 import ImageUrl from "../models/Imageurl.js";
 import Folder from "../models/Folder.js";
+import accounttransporter from "../config/account-mailer.js";
+import {
+  S3Client,
+  DeleteObjectsCommand,
+  ListObjectsV2Command,
+} from '@aws-sdk/client-s3';
 const router = express.Router();
 
 // Upload image to s3 bucket
 router.post('/upload', upload.single('image'), async (req, res) => {
   try {
-    const url = await uploadToS3(req.file.buffer, req.file.originalname, req.file.mimetype);
+    const { userId,folderName } = req.body;
+    if (!userId) return res.status(400).send("Missing userId");
+
+    const url = await uploadImageToS3(
+      req.file.buffer,
+      req.file.originalname,
+      req.file.mimetype,
+      folderName,
+      userId
+
+    );
+
     res.json({ imageUrl: url });
   } catch (err) {
     console.error(err);
-    res.status(500).send('Upload failed');
+    res.status(400).json({ error: err.message });
   }
 });
 
+
 router.post('/uploadfile', upload.array('attachments', 10), async (req, res) => {
   try {
+    const { folderName = 'files', userId } = req.body;
+    if (!userId) return res.status(400).send("Missing userId");
     const fileUrls = await Promise.all(
       req.files.map(file =>
-        uploadToS3(file.buffer, file.originalname, file.mimetype)
+        uploadFileToS3(file.buffer, file.originalname, file.mimetype,userId,folderName)
       )
     );
     res.json({ fileUrls });
@@ -404,7 +424,6 @@ else if (item.type === 'multi-image-card') {
       path: file.fileUrl, // Use Cloudinary URL directly
       contentType: file.mimetype
     }));
-
 
     const trackingPixel = `<img src="${apiConfig.baseURL}/api/stud/track-email-open?emailId=${encodeURIComponent(emailData.recipient)}&userId=${userId}&campaignId=${campaignId}&t=${Date.now()}" width="1" height="1" style="display:none;" />`;
 
@@ -2366,41 +2385,215 @@ router.get('/images/:userId', async (req, res) => {
   }
 });
 
-// Delete image by ID
-router.delete("/images/:id", async (req, res) => {
+
+
+// Initialize AWS SDK
+const s3 = new S3Client({
+  region: process.env.AWS_REGION,
+  credentials: {
+    accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+  },
+});
+
+router.delete('/images/:id', async (req, res) => {
   try {
-    await ImageUrl.findByIdAndDelete(req.params.id);
-    res.status(200).json({ message: "Image deleted" });
+    const { id } = req.params;
+
+    const result = await ImageUrl.findByIdAndDelete(id);
+
+    if (!result) {
+      return res.status(404).json({ error: 'Image not found in database' });
+    }
+
+    res.status(200).json({ message: 'Image record deleted from DB' });
   } catch (err) {
-    res.status(500).json({ error: "Delete failed" });
+    console.error('DB Delete Error:', err);
+    res.status(500).json({ error: 'Error deleting image from DB' });
   }
 });
 
-// DELETE /api/folder/:folderName
+
 router.delete('/folder/:folderName', async (req, res) => {
   try {
     const { folderName } = req.params;
 
-    // Delete all images with that folder name
-    const imageResult = await ImageUrl.deleteMany({ folderName });
+    // Step 1: Find the folder and get userId
+    const folder = await Folder.findOne({ name: folderName });
 
-    // Delete the folder entry
+    if (!folder) {
+      return res.status(404).json({ success: false, message: "Folder not found" });
+    }
+
+    const userId = folder.user?.toString();
+    if (!userId) {
+      return res.status(400).json({ success: false, message: "User ID not found in folder" });
+    }
+
+    // Step 1: List all S3 objects with prefix
+    const listCommand = new ListObjectsV2Command({
+      Bucket: process.env.AWS_BUCKET_NAME,
+      Prefix: `uploads/${userId}/${folderName}/`,
+    });
+
+    const listResult = await s3.send(listCommand);
+    const objectsToDelete = (listResult.Contents || []).map((item) => ({
+      Key: item.Key,
+    }));
+
+    // Step 2: Delete from S3
+    if (objectsToDelete.length > 0) {
+      const deleteCommand = new DeleteObjectsCommand({
+        Bucket: process.env.AWS_BUCKET_NAME,
+        Delete: { Objects: objectsToDelete },
+      });
+      await s3.send(deleteCommand);
+    }
+
+    // Step 3: Delete from DB
+    const imageResult = await ImageUrl.deleteMany({ folderName });
     const folderResult = await Folder.deleteOne({ name: folderName });
 
     res.status(200).json({
       success: true,
-      message: `Folder '${folderName}' and all its images were deleted.`,
+      message: `Folder '${folderName}' and all associated images deleted Successfully`,
       deletedImages: imageResult.deletedCount,
       deletedFolder: folderResult.deletedCount,
     });
   } catch (err) {
+    console.error("Error deleting folder and images:", err);
     res.status(500).json({
       success: false,
-      message: 'Server error',
+      message: 'Error deleting folder and images.',
       error: err.message,
     });
   }
 });
 
+router.delete('/user/:id', async (req, res) => {
+  try {
+    const userId = req.params.id;
+    const prefix = `uploads/${userId}/`;
+
+    // Step 1: List all S3 objects in the user's upload folder
+    const listCommand = new ListObjectsV2Command({
+      Bucket: process.env.AWS_BUCKET_NAME,
+      Prefix: prefix,
+    });
+
+    const listResult = await s3.send(listCommand);
+    const objectsToDelete = (listResult.Contents || []).map((item) => ({
+      Key: item.Key,
+    }));
+
+    // Step 2: Delete from S3
+    if (objectsToDelete.length > 0) {
+      const deleteCommand = new DeleteObjectsCommand({
+        Bucket: process.env.AWS_BUCKET_NAME,
+        Delete: { Objects: objectsToDelete },
+      });
+      await s3.send(deleteCommand);
+    }
+
+    // Step 3: Delete from MongoDB
+    await User.findByIdAndDelete(userId);
+    await PaymentHistory.deleteMany({ userId });
+    await Aliasname.deleteMany({ user: userId });
+    await BirthdayTemplate.deleteMany({ user: userId });
+    await Camhistory.deleteMany({ user: userId });
+    await Campaign.deleteMany({ user: userId });
+    await Folder.deleteMany({ user: userId });
+    await Group.deleteMany({ user: userId });
+    await ImageUrl.deleteMany({ user: userId });
+    await Replyto.deleteMany({ user: userId });
+    await Template.deleteMany({ user: userId });
+
+   res.status(200).json({
+  success: true,
+  message: `User and all associated data, including images, have been successfully deleted.`,
+  deletedFiles: objectsToDelete.length,
+});
+  } catch (err) {
+    console.error("Error deleting user and data:", err);
+    res.status(500).json({
+      success: false,
+      message: 'Error deleting user data.',
+      error: err.message,
+    });
+  }
+});
+
+
+
+// send alert mail for user
+router.post('/send-alert', async (req, res) => {
+  const { userId } = req.body;
+
+  try {
+    const user = await User.findById(userId);
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    // Check if the plan is NOT a trail plan
+    if (user.plan && user.plan.toLowerCase() === 'trail') {
+      return res.status(400).json({ message: "Trail users are not eligible for renewal alert." });
+    }
+
+    const htmlContent = `
+      <body style="margin: 0; padding: 20px; font-family: Arial, sans-serif; background-color: #f7f7f7; color: #333;">
+        <table role="presentation" style="width: 100%; background-color: #f9f9f9; padding: 30px;" cellpadding="0" cellspacing="0">
+          <tr>
+            <td align="center">
+              <table role="presentation" style="max-width: 600px; width: 100%; background: #fff; border: 1px solid #e0e0e0; border-radius: 10px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);" cellpadding="0" cellspacing="0">
+                <tr>
+                  <td align="center" style="background: #2f327d; color: white; padding: 20px; border-top-left-radius: 10px; border-top-right-radius: 10px;">
+                    <div style="font-size: 50px; margin-bottom: 10px;">⏰</div>
+                    <h1 style="margin: 0; font-size: 24px;">Renew Your <span style="color: #f48c06;">Emailcon</span> Account</h1>
+                  </td>
+                </tr>
+                <tr>
+                  <td align="left" style="padding: 20px;">
+                    <p style="margin: 10px 0; font-size: 16px;">Hi <strong>${user.username}</strong>,</p>
+                    <p style="margin: 10px 0; font-size: 14px;">We noticed your subscription has expired.</p>
+                    <p style="margin: 10px 0; font-size: 14px;">To continue using your account and access all features, please renew your plan now.</p>
+                    <p style="margin: 10px 0; font-size: 14px; color: red; font-weight: bold;">
+                      ⚠️ Warning: If you do not renew within 7 days, your account and all associated data will be permanently deleted.
+                    </p>
+                    <div style="text-align: center; margin: 20px 0;">
+                      <a href="${apiConfig.baseURL}/userpayment/${user._id}" 
+                        style="background-color:#f48c06; color: white; padding: 12px 20px; text-decoration: none; border-radius: 5px; font-size: 16px;">
+                        Renew Now
+                      </a>
+                    </div>
+                  </td>
+                </tr>
+                <tr>
+                  <td align="center" style="padding: 20px; background: #f7f7f7; border-bottom-left-radius: 10px; border-bottom-right-radius: 10px;">
+                    <p style="font-size: 12px; color: #666;">
+                      Need help? Contact us at
+                      <a href="mailto:support@emailcon.in" style="color: #1a5eb8; text-decoration: none;">support@emailcon.in</a>
+                    </p>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+        </table>
+      </body>
+    `;
+
+    await accounttransporter.sendMail({
+      from: `"Emailcon Support" <account-noreply@account.emailcon.in>`,
+      to: user.email,
+      subject: "⚠️ Action Required: Renew Your Emailcon Account",
+      replyTo: "support@emailcon.in",
+      html: htmlContent,
+    });
+
+    res.status(200).json({ message: "Renewal alert email sent successfully" });
+  } catch (error) {
+    console.error("Email sending failed:", error);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+});
 
 export default router;

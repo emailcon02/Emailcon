@@ -2,17 +2,15 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import "./AdminDashboard.css";
 import { useNavigate } from "react-router-dom";
-import { FaSearch,FaTrash} from "react-icons/fa";
+import { FaSearch,FaTrash } from "react-icons/fa";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import apiconfig from "../../apiconfig/apiConfig.js";
 import Header from "./Header.jsx";
 import AdminSidebar from "./AdminSidebar.jsx";
 
-
-function UserDetail() {
+function EmployeeDetails() {
   const [users, setUsers] = useState([]);
-  const [sendloadingalert,setSendloadingalert] = useState(false)
   const [statusLoadingId, setStatusLoadingId] = useState(null);
   const [sendLoadingId, setSendLoadingId] = useState(null);
    const [filteredUsers, setFilteredUsers] = useState([]);
@@ -22,33 +20,32 @@ function UserDetail() {
     const [rowsPerPage, setRowsPerPage] = useState(20);
     const [currentPage, setCurrentPage] = useState(1);
     const [sortOrder, setSortOrder] = useState("asc");
-     const [showDeleteModal, setShowDeleteModal] = useState(false);
-      const [deleteUserId, setDeleteUserId] = useState(null);
+         const [showDeleteModal, setShowDeleteModal] = useState(false);
+          const [deleteUserId, setDeleteUserId] = useState(null);
     
-    const navigate = useNavigate();
+  const navigate = useNavigate();
 
-  const fetchUsers = async () => {
-    try {
-      const response = await axios.get(`${apiconfig.baseURL}/api/admin/users`);
-      const sortedUsers = response.data.sort(
-        (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
-      );
-         const filteredemployees = sortedUsers.filter(user => {
+    const fetchUsers = async () => {
+        const response = await axios.get(
+          `${apiconfig.baseURL}/api/admin/users`
+        );
+    const sortedUsers = response.data.sort(
+      (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+    );
+      const filteredemployees = sortedUsers.filter(user => {
         const roles = user.role?.toLowerCase() || "";
         const exclude = roles.includes("employee");
-        return !exclude;
+        return exclude;
       });
-      setUsers(filteredemployees);
-    } catch (error) {
-      console.error("Error fetching users:", error);
-    }
-  };
+    setUsers(filteredemployees);     
+ };
 
   useEffect(() => {
     const adminToken = localStorage.getItem("adminToken");
     if (!adminToken) {
       navigate("/admin-login");
     } else {
+    
       fetchUsers();
     }
   }, [navigate]);
@@ -64,41 +61,10 @@ function UserDetail() {
       const dateB = new Date(b.createdAt);
       return sortOrder === "desc" ? dateA - dateB : dateB - dateA;
     });
+
     setFilteredUsers(sorted);
     setSortOrder(sortOrder === "asc" ? "desc" : "asc");
   };
-
-const handleDeleteClick = (id) => {
-  setDeleteUserId(id);
-  setShowDeleteModal(true);
-};
-
-const SendAlertEmail = async () => {
-  setSendloadingalert(true);
-  try {
-    const response = await axios.post(`${apiconfig.baseURL}/api/stud/send-alert`, {
-      userId: deleteUserId,
-    });
-    toast.success("Alert email sent successfully");
-    setSendloadingalert(false);
-  } catch (error) {
-    setSendloadingalert(false);
-    toast.error("Failed to send alert email:", error);
-  }
-};
-
-const ConfirmDeleteUser = async () => {
-  try {
-    const response = await axios.delete(`${apiconfig.baseURL}/api/stud/user/${deleteUserId}`);
-        setShowDeleteModal(false);
-        fetchUsers();
-        toast.success(response.data.message);   
-  } catch (error) {
-    console.error("Error deleting user:", error);
-    toast.error("Failed to delete user.");
-  }
-};
-
   
   const filterUsers = () => {
     let filtered = [...users];
@@ -148,6 +114,27 @@ const ConfirmDeleteUser = async () => {
     setFromDate("");
     setToDate("");
   };
+
+  
+const handleDeleteClick = (id) => {
+  setDeleteUserId(id);
+  setShowDeleteModal(true);
+};
+
+
+
+const ConfirmDeleteUser = async () => {
+  try {
+    const response = await axios.delete(`${apiconfig.baseURL}/api/stud/user/${deleteUserId}`);
+        setShowDeleteModal(false);
+        fetchUsers();
+        toast.success(response.data.message);   
+  } catch (error) {
+    console.error("Error deleting user:", error);
+    toast.error("Failed to delete user.");
+  }
+};
+
   const handlepaymentview = (userId) => {
     navigate(`/user-payment-history/${userId}`);
   };
@@ -175,7 +162,7 @@ const ConfirmDeleteUser = async () => {
     setStatusLoadingId(id);
     try {
       // Step 1: Update user status
-      await axios.post(`${apiconfig.baseURL}/api/admin/update-status-manually`, {
+      await axios.post(`${apiconfig.baseURL}/api/admin/update-status-employee`, {
         id,
         status
       });
@@ -274,7 +261,8 @@ const ConfirmDeleteUser = async () => {
               <th>Action</th>
               <th>Send Login</th>
               <th>Payment History</th>
-              <th>Permanent Deactivate</th>
+                            <th>Permanent Deactivate</th>
+
             </tr>
           </thead>
           <tbody>
@@ -326,14 +314,14 @@ const ConfirmDeleteUser = async () => {
                       View
                     </button>
                 </td>
-                <td>
-                     <button
-                          className="deleteadmin"
-                                          onClick={() => handleDeleteClick(user._id)}
-                            >
-                            <FaTrash size={18} color="#f48c06" />
-                      </button>
-                </td>
+                   <td>
+                                     <button
+                                          className="deleteadmin"
+                                                          onClick={() => handleDeleteClick(user._id)}
+                                            >
+                                            <FaTrash size={18} color="#f48c06" />
+                                      </button>
+                                </td>
               </tr>
             ))
             ) : (
@@ -347,7 +335,7 @@ const ConfirmDeleteUser = async () => {
         </table>
       </div>
 
-       {showDeleteModal && (
+             {showDeleteModal && (
           <div className="admin-dashboard-modal-overlay">
             <div className="admin-dashboard-modal-box">
               <h2 className="admin-dashboard-modal-title">
@@ -360,20 +348,7 @@ const ConfirmDeleteUser = async () => {
                   className="admin-dashboard-submit-btn"
                 >
                   Yes, Delete
-                </button>
-    <button
-      style={{ marginLeft: '10px' }}
-      onClick={SendAlertEmail}
-      className="admin-dashboard-submit-btn"
-      disabled={sendloadingalert}
-    >
-      {sendloadingalert ? (
-            <span className="loader-send-alert"></span>
-      ) : (
-        'Send Alert'
-      )}
-    </button>
-    
+                </button>    
                 <button
                   onClick={() => setShowDeleteModal(false)}
                   className="admin-dashboard-cancel-btn"
@@ -422,4 +397,4 @@ const ConfirmDeleteUser = async () => {
   );
 }
 
-export default UserDetail;
+export default EmployeeDetails;

@@ -19,7 +19,7 @@ function AllUserPaymenthistory() {
   const [toDate, setToDate] = useState("");
   const [rowsPerPage, setRowsPerPage] = useState(20);
   const [currentPage, setCurrentPage] = useState(1);
-    const [sortOrder, setSortOrder] = useState("asc");
+    const [sortOrder, setSortOrder] = useState("desc");
 
 
   useEffect(() => {
@@ -28,8 +28,14 @@ function AllUserPaymenthistory() {
         const response = await axios.get(
           `${apiConfig.baseURL}/api/stud/all-payment-history`
         );
-        setPaymenthistory(response.data);
-      } catch (error) {
+     const sortedHistory = response.data.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+        const filteredhistory = sortedHistory.filter(payment => {
+        const roles = payment.paymentStatus?.toLowerCase() || "";
+        const exclude = roles.includes("employee-trail");
+        return !exclude;
+      });
+        setPaymenthistory(filteredhistory);
+            } catch (error) {
         console.error("Error fetching payment history", error);
       }
     };

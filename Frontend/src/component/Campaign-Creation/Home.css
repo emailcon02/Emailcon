@@ -7,7 +7,7 @@
 .expiry-date{
   position: absolute;
   top:13px;
-  right:25%;
+  right:27%;
 }
 .upgrade-btn-home{
   cursor: pointer;
@@ -590,7 +590,7 @@ li {
 .nav-split h4 {
   color: #2f327d;
   position: absolute;
-  top: 2%;
+  top:16px;
   right: 4%;
   font-size: 1.2rem;
   font-weight: 400;
@@ -742,6 +742,7 @@ li {
   border-radius: 6px;
   font-size: 16px;
   cursor: pointer;
+  margin-top: 10px;
   /* transition: 0.3s; */
 }
 
