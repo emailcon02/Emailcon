@@ -311,7 +311,7 @@ export const updateStatus = async (req, res) => {
     // 1. Update user status
     const user = await User.findByIdAndUpdate(
       id,
-      { isActive: status },
+      { isActive: status,role:"paid" },
       { new: true }
     );
 
@@ -364,7 +364,7 @@ export const updateStatusmanually = async (req, res) => {
   try {
     const user = await User.findByIdAndUpdate(
       id,
-      { isActive: status },
+      { isActive: status,role:"paid" },
       { new: true }
     );
 

@@ -62,6 +62,7 @@ export const signup = async (req, res) => {
       smtppassword: encryptedSmtpPassword,
       paymentStatus: "pending",
       isActive: false,
+      role:"demo",
     });
 
     await user.save();
@@ -162,6 +163,7 @@ export const login = async (req, res) => {
       return res.status(401).send("Invalid credentials.");
     }
     if (user.isActive === false && user.role === "employee") return res.status(404).send("Account not activated contact admin.");
+    if (user.isActive === false && user.role === "demo") return res.status(404).send("Account not activated wait for admin response.");
 
     const latestPayment = await PaymentHistory.findOne({ userId: user._id })
       .sort({ createdAt: -1 });

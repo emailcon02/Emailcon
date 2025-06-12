@@ -67,6 +67,8 @@ const EditProfile = ({ users, handleLogout }) => {
     if (!file) return;
     const form = new FormData();
     form.append("image", file);
+    form.append("userId",users._id);
+    form.append("folderName","profile");
 
     try {
       const res = await axios.post(`${apiConfig.baseURL}/api/stud/upload`, form, {
@@ -258,6 +260,8 @@ const saveUsername = async () => {
         
             const formDataUpload = new FormData();
             formDataUpload.append("image", file);
+            formDataUpload.append("userId",users._id);
+            formDataUpload.append("folderName","profile");
         
             const uploadRes = await axios.post(`${apiConfig.baseURL}/api/stud/upload`, formDataUpload, {
               headers: { "Content-Type": "multipart/form-data" },
