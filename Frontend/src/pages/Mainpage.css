@@ -1819,6 +1819,10 @@ input:checked+.slider-send:before {
         width: 95%;
         padding: 10px;
     }
+    .Layout img{
+    width:100px !important;
+    height: 100px !important;
+}
 
     .navbar h3 {
         font-size: 20px;
