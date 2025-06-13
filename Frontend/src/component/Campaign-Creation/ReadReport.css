@@ -282,6 +282,10 @@
   .modal-content-read-graph {
     width: 88%;
   }
+  .readreport-main{
+  background-color: #f9e6cd;
+  height: auto !important;
+}
 
 
 }
