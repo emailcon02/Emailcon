@@ -771,9 +771,7 @@ useEffect(() => {
   ) : (
     <>
       <span>
-        {campaign.status === "Success" || campaign.status === "Failed"
-          ? `${campaign.status} - ${campaign.progress}%`
-          : campaign.status}
+        {campaign.status} - {campaign.progress}%
       </span>
 
       {campaign.status === "Failed" && (

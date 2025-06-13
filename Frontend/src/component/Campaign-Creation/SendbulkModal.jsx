@@ -346,180 +346,186 @@ const SendbulkModal = ({ isOpen, onClose, previewContent = [], bgColor }) => {
   };
 
   const handleSend = async () => {
-    if (!selectedGroup || !message || !previewtext || !aliasName || !replyTo) {
-      toast.warning(
-        "Please ensure all fields are selected."
-      );
-      return;
-    }
-    if (!previewContent || previewContent.length === 0) {
-      toast.warning("No preview content available.");
-      return;
-    }
-    setIsProcessing(true);
-    navigate("/campaigntable");
-    sessionStorage.removeItem("firstVisit");
-    sessionStorage.removeItem("toggled");
-  
-    let sentEmails = [];
-    let failedEmails = [];
-    let attachments = [];
-  
-    // Handle attachments if available
+  if (!selectedGroup || !message || !previewtext || !aliasName || !replyTo) {
+    toast.warning("Please ensure all fields are selected.");
+    return;
+  }
+
+  if (!previewContent || previewContent.length === 0) {
+    toast.warning("No preview content available.");
+    return;
+  }
+
+  setIsProcessing(true);
+  navigate("/campaigntable");
+  sessionStorage.removeItem("firstVisit");
+  sessionStorage.removeItem("toggled");
+
+  let sentEmails = [];
+  let failedEmails = [];
+  let attachments = [];
+
+  try {
+    // Upload attachments
     if (emailData.attachments && emailData.attachments.length > 0) {
       const formData = new FormData();
       emailData.attachments.forEach((file) => formData.append("attachments", file));
-  
+      formData.append("userId", user.id);
+
       const uploadResponse = await axios.post(
         `${apiConfig.baseURL}/api/stud/uploadfile`,
         formData,
         { headers: { "Content-Type": "multipart/form-data" } }
       );
-      attachments = uploadResponse.data.fileUrls.map((file, index) => ({
+
+      attachments = uploadResponse.data.filePaths.map((file, index) => ({
         originalName: emailData.attachments[index].name,
         fileUrl: file,
       }));
     }
-  
-    try {
-      const studentsResponse = await axios.get(
-        `${apiConfig.baseURL}/api/stud/groups/${selectedGroup}/students`
-      );
-      const students = studentsResponse.data;
-  
-      if (students.length === 0) {
-        toast.warning("No students found in the selected group.");
-        setIsProcessing(false);
-        return;
-      }
-  
-      const campaignHistoryData = {
-        campaignname: campaign.camname,
-        groupname: groups.find((group) => group._id === selectedGroup)?.name,
-        totalcount: students.length,
-        recipients: "no mail",
-        sendcount: 0,
-        failedcount: 0,
-        failedEmails: 0,
-        sentEmails: 0,
-        subject: message,
-        attachments,
-        exceldata: [{}],
-        previewtext,
-        aliasName,
-        replyTo,
-        previewContent,
-        bgColor,
-        scheduledTime: new Date(),
-        status: "Pending",
-        progress: 0,
-        senddate: new Date().toLocaleString(),
-        user: user.id,
-        groupId: selectedGroup,
-      };
-  
-      const campaignResponse = await axios.post(
-        `${apiConfig.baseURL}/api/stud/camhistory`,
-        campaignHistoryData
-      );
-      const campaignId = campaignResponse.data.id;
-  
-     // Send emails in batches of 50
-     const BATCH_SIZE = 50;
-     const batches = [];
-     
-     for (let i = 0; i < students.length; i += BATCH_SIZE) {
-       const batch = students.slice(i, i + BATCH_SIZE);
-       batches.push(batch);
-     }
-     
-     // Process all batches in parallel
-     await Promise.all(
-       batches.map(async (batch) => {
-         for (const student of batch) {
-           const personalizedContent = previewContent.map((item) => {
-             const personalizedItem = { ...item };
-             if (item.content) {
-               Object.entries(student).forEach(([key, value]) => {
-                 const placeholderRegex = new RegExp(`\\{?${key}\\}?`, "g");
-                 const cellValue = value != null ? String(value).trim() : "";
-                 personalizedItem.content = personalizedItem.content.replace(
-                   placeholderRegex,
-                   cellValue
-                 );
-               });
-             }
-             return personalizedItem;
-           });
-     
-           let personalizedSubject = message;
-           Object.entries(student).forEach(([key, value]) => {
-             const placeholderRegex = new RegExp(`\\{?${key}\\}?`, "g");
-             const cellValue = value != null ? String(value).trim() : "";
-             personalizedSubject = personalizedSubject.replace(
-               placeholderRegex,
-               cellValue
-             );
-           });
-     
-           const emailPayload = {
-             recipientEmail: student.Email,
-             subject: personalizedSubject,
-             body: JSON.stringify(personalizedContent),
-             bgColor,
-             attachments,
-             campaignId,
-             previewtext,
-             aliasName,
-             replyTo,
-             userId: user.id,
-             groupId: selectedGroup,
-           };
-     
-           try {
-             await axios.post(`${apiConfig.baseURL}/api/stud/sendbulkEmail`, emailPayload);
-             sentEmails.push(student.Email);
-           } catch (error) {
-             failedEmails.push(student.Email);
-           }
-         }
-       })
-     );
-     
- 
-      // Final progress calculation
-      const totalEmails = students.length;
-      const successCount = sentEmails.length;
-      const failureCount = failedEmails.length;
-      let finalStatus, finalProgress;
 
-      if (failureCount > 0) {
-        finalStatus = "Failed";
-        finalProgress = Math.round((failureCount / totalEmails) * 100); 
-      } else {
-        finalStatus = "Success";
-        finalProgress = 100;
-      }
-      
-  
-      await axios.put(`${apiConfig.baseURL}/api/stud/camhistory/${campaignId}`, {
-        sendcount: successCount,
-        failedcount: failureCount,
-        sentEmails,
-        failedEmails: failureCount > 0 ? failedEmails : 0,
-        status: finalStatus,
-        progress: finalProgress,
-      });
-  
-      console.log(`Final status: ${finalStatus}, Progress: ${finalProgress}%`);
-      console.log("Emails sent successfully");
-  
-    } catch (error) {
-      console.error("Error sending emails:", error);
-    } finally {
+    // Get students from selected group
+    const studentsResponse = await axios.get(
+      `${apiConfig.baseURL}/api/stud/groups/${selectedGroup}/students`
+    );
+    const students = studentsResponse.data;
+
+    if (students.length === 0) {
+      toast.warning("No students found in the selected group.");
       setIsProcessing(false);
+      return;
     }
-  };
+
+    // Create campaign history entry
+    const campaignHistoryData = {
+      campaignname: campaign.camname,
+      groupname: groups.find((group) => group._id === selectedGroup)?.name,
+      totalcount: students.length,
+      recipients: "no mail",
+      sendcount: 0,
+      failedcount: 0,
+      failedEmails: [],
+      sentEmails: [],
+      subject: message,
+      attachments,
+      exceldata: [{}],
+      previewtext,
+      aliasName,
+      replyTo,
+      previewContent,
+      bgColor,
+      scheduledTime: new Date(),
+      status: "Pending",
+      progress: 0,
+      senddate: new Date().toLocaleString(),
+      user: user.id,
+      groupId: selectedGroup,
+    };
+
+    const campaignResponse = await axios.post(
+      `${apiConfig.baseURL}/api/stud/camhistory`,
+      campaignHistoryData
+    );
+    const campaignId = campaignResponse.data.id;
+
+    const BATCH_SIZE = 10;
+    const totalEmails = students.length;
+    let processedEmails = 0;
+
+    for (let i = 0; i < students.length; i += BATCH_SIZE) {
+      const batch = students.slice(i, i + BATCH_SIZE);
+      const batchSent = [];
+      const batchFailed = [];
+
+      await Promise.all(
+        batch.map(async (student) => {
+          const personalizedContent = previewContent.map((item) => {
+            const personalizedItem = { ...item };
+            if (item.content) {
+              Object.entries(student).forEach(([key, value]) => {
+                const regex = new RegExp(`\\{?${key}\\}?`, "g");
+                personalizedItem.content = personalizedItem.content.replace(
+                  regex,
+                  value != null ? String(value).trim() : ""
+                );
+              });
+            }
+            return personalizedItem;
+          });
+
+          let personalizedSubject = message;
+          Object.entries(student).forEach(([key, value]) => {
+            const regex = new RegExp(`\\{?${key}\\}?`, "g");
+            personalizedSubject = personalizedSubject.replace(
+              regex,
+              value != null ? String(value).trim() : ""
+            );
+          });
+
+          const emailPayload = {
+            recipientEmail: student.Email,
+            subject: personalizedSubject,
+            body: JSON.stringify(personalizedContent),
+            bgColor,
+            attachments,
+            campaignId,
+            previewtext,
+            aliasName,
+            replyTo,
+            userId: user.id,
+            groupId: selectedGroup,
+          };
+
+          try {
+            await axios.post(`${apiConfig.baseURL}/api/stud/sendbulkEmail`, emailPayload);
+            batchSent.push(student.Email);
+          } catch (error) {
+            batchFailed.push(student.Email);
+          } finally {
+            processedEmails++;
+          }
+        })
+      );
+
+      sentEmails.push(...batchSent);
+      failedEmails.push(...batchFailed);
+
+      const currentProgress = Math.round((processedEmails / totalEmails) * 100);
+
+      await axios.put(`${apiConfig.baseURL}/api/stud/camhistory/${campaignId}`, {
+        progress: currentProgress,
+        sendcount: sentEmails.length,
+        failedcount: failedEmails.length,
+        sentEmails,
+        failedEmails,
+      });
+    }
+
+    // ✅ Final update
+    const finalStatus = failedEmails.length > 0 ? "Failed" : "Success";
+    const finalPayload = {
+      sendcount: sentEmails.length,
+      failedcount: failedEmails.length,
+      sentEmails,
+      failedEmails,
+      status: finalStatus,
+      progress: 100,
+    };
+
+    console.log("Final Update Payload:", finalPayload);
+
+    const finalUpdate = await axios.put(
+      `${apiConfig.baseURL}/api/stud/camhistory/${campaignId}`,
+      finalPayload
+    );
+
+    console.log("Final update response:", finalUpdate.data);
+  } catch (error) {
+    console.error("Error during sending or updating campaign:", error.response?.data || error.message);
+  } finally {
+    setIsProcessing(false);
+  }
+};
 
   if (!isOpen) return null;
 
