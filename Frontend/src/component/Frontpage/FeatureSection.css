@@ -75,3 +75,29 @@
         font-size: 0.95rem;
     }
 }
+@media (min-width: 768px) and (max-width: 1024px) {
+    .feature-section {
+        flex-direction: row !important;
+        text-align: center;
+    }
+    .feature-section {
+        padding: 5% 5%;
+    }
+
+    .feature-content {
+        width: 60%;
+    }
+
+    .feature-image {
+        width: 40%;
+    }
+
+    .feature-title {
+        font-size: 2.2rem;
+    }
+
+    .feature-description {
+        font-size: 1.1rem;
+    }
+}
+

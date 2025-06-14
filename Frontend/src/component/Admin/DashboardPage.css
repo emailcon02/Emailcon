@@ -934,3 +934,32 @@
 }
      
 }
+
+@media (min-width: 768px) and (max-width: 1024px) {
+  .rows-dropdown-left {
+    /* display: flex;
+    align-items: center;
+    justify-content: flex-start; */
+    /* width: 400px; */
+    padding: 0px 10px !important;
+    margin: 0px !important;
+  }
+  .admin-dashboard-table-header{
+    padding:0px;
+  }
+  .header-bar {
+     padding: 0px 10px;
+  }
+  .revenue-chart-container{
+    grid-column: span 12;
+  }
+  .performance-container {
+    grid-column: span 12 !important;
+  }
+  .date-filter{
+     grid-template-columns: auto auto;
+  }
+  .rows-dropdown-left select {
+    width: 100px;
+  }
+}

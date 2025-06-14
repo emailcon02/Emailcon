@@ -1,0 +1,12 @@
+.privacy-policy{
+    color:black;
+
+}
+.privacy-policy h3{
+    margin-bottom: 10px;
+    text-align: center;
+}
+.privacy-policy p{
+    padding:10px 50px;
+    line-height:1.8;
+}

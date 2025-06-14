@@ -280,6 +280,10 @@
     .img-form h3 {
         font-size: 28px;
     }
+    .modal-close-btn-demo{
+        top: 0px;
+        color: black;
+    }
 
     .form-heading {
         font-size: 28px;

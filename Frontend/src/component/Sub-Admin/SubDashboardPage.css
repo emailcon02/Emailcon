@@ -914,3 +914,14 @@
 }
      
 }
+
+
+@media (min-width: 768px) and (max-width: 1024px) {
+.date-filter {
+  grid-template-columns: auto auto ;
+}
+
+.rows-dropdown-left select {
+  width:200px;
+}
+}

@@ -9,6 +9,7 @@ import FeatureSection from "../../component/Frontpage/FeatureSection";
 import NavbarBanner from "../../component/Frontpage/NavbarBanner";
 import BookDemo from "../../component/Frontpage/BookDemo";
 import FormModal from "../../component/Frontpage/Form";
+import Privacypolicy from "../../component/Frontpage/Privacypolicy";
 
 function Frontpageroute() {
     const [showFormModal, setShowFormModal] = useState(false);
@@ -32,6 +33,7 @@ function Frontpageroute() {
           <Pricing />
       </div>
       <div id="contact">
+        <Privacypolicy/>
         <Footer onOpenModal={() => setShowFormModal(true)}/>
       </div>
         <div>

@@ -6634,6 +6634,7 @@ setTimeout(() => {
                       className="alias-container-select"
                     >
                       <option value="">Select ReplyTo</option>
+                        <option value={user.email}>{user.email}</option>
                       {replyOptions.map((reply) => (
                         <option key={reply._id} value={reply.replyTo}>
                           {reply.replyTo}
