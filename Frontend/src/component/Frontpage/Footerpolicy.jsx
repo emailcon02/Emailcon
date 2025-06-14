@@ -4,7 +4,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPhone, faEnvelope } from '@fortawesome/free-solid-svg-icons';
 import { Link } from "react-router-dom";
 
-const Footer = ({onOpenModal }) => {
+const Footerpolicy = ({onOpenModal }) => {
 
 
   return (
@@ -47,17 +47,18 @@ const Footer = ({onOpenModal }) => {
           <h6>QUICKLINKS</h6>
           <ul>
             <li>
-              <a href="#feature">Features</a>
+  <Link to="/" reloadDocument>Features</Link>
             </li>
             <li>
-              <a href="#Price">Prices</a>
+  <Link to="/" reloadDocument>Prices</Link>
             </li>
             <li>
-              <a href="#contact">Contact Us</a>
+  <Link to="/" reloadDocument>Contact Us</Link>
             </li>
-            <li>
-           <Link to="/privacy-policy" reloadDocument>Privacy Policy</Link>
-         </li>
+           <li>
+  <Link to="/privacy-policy" reloadDocument>Privacy Policy</Link>
+</li>
+
           </ul>
         </div>
 
@@ -91,4 +92,4 @@ const Footer = ({onOpenModal }) => {
   );
 };
 
-export default Footer;
+export default Footerpolicy;

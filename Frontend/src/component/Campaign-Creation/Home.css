@@ -336,6 +336,8 @@ li {
     flex-direction: column;
     width: 50%;
     padding: 20px !important;
+    margin-top: 30px;
+
   }
 
   .main-content {
@@ -383,6 +385,7 @@ li {
     justify-content: space-between !important;
     top: 0;
     position: fixed;
+    height: 8% !important;
   }
 
   .sidebar-title {
@@ -402,7 +405,7 @@ li {
   .nav-split h4 {
     right: 5% !important;
     width: 180px !important;
-    top:20% !important;
+    top:20px !important;
     font-size: 1.1rem !important;
   }
   .sidebar-container {
@@ -1070,7 +1073,7 @@ li {
   }
 }
 
-@media only screen and (max-width: 768px) {
+@media only screen and (max-width: 760px) {
   .steps-container {
     flex-direction: column;
     align-items: center;
@@ -1207,28 +1210,26 @@ li {
     height: 130px;
   }
 
-  .navbars {
-    height: 5%;
-  }
+ .navbars{
+  height: 12% !important;
+}
 
   .nav-split h4 {
-    right: 8%;
-    top:3%;
+    right: 10%;
     font-size: 1.8rem;
-    width: 200px !important;
+  }
+  .sidebar-button{
+    margin-top: 20px;
   }
 
   .profile-container {
-    top: 1%;
     right: 1%; 
   }
   .profile-avatar{
     width: 40px;
     height: 40px;
   }
-  .sidebar-title {
-    margin-top: 20px;
-  }
+ 
 
   .card-grid-auto {
     display: flex;
