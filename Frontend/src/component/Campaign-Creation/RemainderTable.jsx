@@ -6,6 +6,7 @@ import { useNavigate } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import apiConfig from "../../apiconfig/apiConfig";
+import CustomHourSelect from "./CustomHourSelect";
 
 function RemainderTable() {
   const [campaigns, setCampaigns] = useState([]);
@@ -241,12 +242,13 @@ const handlesaveEditcampaign = async (campaignId) => {
 };
         
 
-    const handleTimeChange = (e, campaignId) => {
-        const selectedTime = e.target.value; // "HH:MM"
-        console.log("Selected Time:", selectedTime, campaignId);
-        setNewTime((prev) => ({ ...prev, [campaignId]: selectedTime }));
-      };
-      
+const handleTimeChange = (value, id) => {
+  setNewTime((prev) => ({
+    ...prev,
+    [id]: value,
+  }));
+};
+
       const handleSaveTime = async () => {
         const timeOnly = newTime[activeCampaignId];
         if (!timeOnly) {
@@ -466,13 +468,12 @@ const handlesaveEditcampaign = async (campaignId) => {
         onClick={(e) => e.stopPropagation()}
       >
         <h3>Edit Scheduled Time</h3>
-        <input
-          type="time"
-          value={newTime[activeCampaignId] || ""}
-          onChange={(e) =>
-            handleTimeChange(e, activeCampaignId)
-          }
-        />
+        
+      <CustomHourSelect
+  scheduledTime={newTime[activeCampaignId] || "09:00 AM"}  
+  setScheduledTime={(value) => handleTimeChange(value, activeCampaignId)}
+/>
+
 
         <div className="modal-actions-schedule">
           <button onClick={handleSaveTime}>Save</button>

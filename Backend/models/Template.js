@@ -8,7 +8,6 @@ const templateSchema = new mongoose.Schema({
     },
     camname: {
         type: String,
-        required: true,
     },
     previewContent: {
         type: Array,

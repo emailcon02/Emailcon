@@ -209,7 +209,7 @@ const GroupfileModal = ({ onClose }) => {
               </h4>
               <input
                 type="file"
-                accept=".xlsx, .xls"
+                accept=".xlsx, .xls,.csv"
                 ref={fileInputRef} // Attach the reference to the file input
                 onChange={handleFileUpload}
               />

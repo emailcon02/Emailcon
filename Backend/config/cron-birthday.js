@@ -16,17 +16,16 @@ cron.schedule('*/30 * * * *', async () => {
 
         const camhistories = await Camhistory.find({
             status: "Remainder On",
-            campaignname: { $regex: /Birthday Remainder/i }
+            campaignname: { $regex: /Birthday Campaign/i }
         });
 
         const matchingCampaigns = camhistories.filter(camhistory => {
             const scheduled = new Date(camhistory.scheduledTime);
             return (
-                scheduled.getUTCHours() === nowUTC.getUTCHours() ||
+                scheduled.getUTCHours() === nowUTC.getUTCHours() &&
                 scheduled.getUTCMinutes() === nowUTC.getUTCMinutes()
             );
         });
-        
 
         if (matchingCampaigns.length === 0) {
             console.log("No birthday campaigns scheduled for this exact time.");
@@ -36,11 +35,24 @@ cron.schedule('*/30 * * * *', async () => {
         console.log(`Matched campaigns: ${matchingCampaigns.map(c => c.campaignname).join(", ")}`);
 
         await Promise.allSettled(matchingCampaigns.map(async (camhistory) => {
+            const isNewYear = nowUTC.getMonth() === 0 && nowUTC.getDate() === 1 && nowUTC.getHours() === 0 && nowUTC.getMinutes() < 30;
+
+            if (isNewYear) {
+                await axios.put(`${apiConfig.baseURL}/api/stud/camhistory/${camhistory._id}`, {
+                    sendcount: 0,
+                    failedcount: 0,
+                    sentEmails: [],
+                    failedEmails: [],
+                    progress: 0
+                });
+                console.log(`🔁 Reset stats for campaign ${camhistory.campaignname} on New Year.`);
+            }
+
             // Check if the user associated with the campaign is active
-            const user = await User.findById(camhistory.user); // Fetch the user by their ID
+            const user = await User.findById(camhistory.user);
             if (!user || !user.isActive) {
                 console.log(`Skipping campaign ${camhistory.campaignname} as the user is inactive.`);
-                return;  // Skip this campaign if the user is inactive
+                return;
             }
 
             const groupId = camhistory.groupId?.trim();
@@ -100,7 +112,7 @@ cron.schedule('*/30 * * * *', async () => {
                     bgColor: camhistory.bgColor,
                     previewtext: camhistory.previewtext,
                     aliasName: camhistory.aliasName,
-                    replyTo:camhistory.replyTo,
+                    replyTo: camhistory.replyTo,
                     attachments: camhistory.attachments,
                     userId: camhistory.user,
                     groupId: camhistory.groupname,
@@ -111,7 +123,6 @@ cron.schedule('*/30 * * * *', async () => {
                     await axios.post(`${apiConfig.baseURL}/api/stud/sendbulkEmail`, emailData);
                     sentEmails.push(student.Email);
 
-                    // Update last sent year for this student
                     await axios.put(`${apiConfig.baseURL}/api/stud/updateStudent/${student._id}`, {
                         lastSentYear: currentYear
                     });

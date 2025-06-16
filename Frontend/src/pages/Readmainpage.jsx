@@ -826,7 +826,7 @@ const Readmainpage = () => {
           textAlign: "center",
           margin: "5px auto",
         },
-        link: "https://www.imageconindia.com/",
+        link: "Enter URL",
       },
     ]);
   };
@@ -892,8 +892,8 @@ const Readmainpage = () => {
         type: "multi-image-card",
         src1: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTjCoUtOal33JWLqals1Wq7p6GGCnr3o-lwpQ&s",
         src2: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTjCoUtOal33JWLqals1Wq7p6GGCnr3o-lwpQ&s",
-        link1: "https://www.imageconindia.com/",
-        link2: "https://www.imageconindia.com/",
+        link1: "Enter URL",
+        link2: "Enter URL",
         title1: "Name of the product", // Title for the first section
         title2: "Name of the product", // Title for the second section
         originalPrice1: "9000", // Original price for the first section
@@ -945,7 +945,7 @@ const Readmainpage = () => {
         type: "video-icon",
         src1: "https://zawiya.org/wp-content/themes/zawiyah/images/thumbnail-default.jpg",
         src2: "https://media1.giphy.com/media/v1.Y2lkPTc5MGI3NjExb2J2eGkwZHZ6ZmQxMzV2OWQzOG1qazZsNGs1dXNxaWV3NTJqbHd0YSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9cw/gcBq6Nom44PGBoUhWm/giphy.gif",
-        link: "https://www.imageconindia.com/",
+        link: "Enter URL",
         style: {
           width: "100%",
           height: isMobile ? "230px" : "350px", // Adjust height based on screen size
@@ -1005,8 +1005,8 @@ const Readmainpage = () => {
         type: "multi-image",
         src1: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTjCoUtOal33JWLqals1Wq7p6GGCnr3o-lwpQ&s",
         src2: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTjCoUtOal33JWLqals1Wq7p6GGCnr3o-lwpQ&s",
-        link1: "https://www.imageconindia.com/",
-        link2: "https://www.imageconindia.com/",
+        link1: "Enter URL",
+        link2: "Enter URL",
         buttonStyle1: {
           textAlign: "center",
           padding: isMobile ? "8px 8px" : "12px 25px", // Adjust padding based on screen size
@@ -1062,7 +1062,7 @@ const Readmainpage = () => {
           alignItem: "center",
           borderRadius: "5px",
         },
-        link: "https://www.imageconindia.com/",
+        link: "Enter URL",
       },
     ]);
   };
