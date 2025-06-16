@@ -125,7 +125,6 @@ const GroupModalnew = ({ onClose }) => {
         .filter((row) => row.some((cell) => cell));
 
       setUploadedData(formattedData);
-      console.log(formattedData);
     };
     reader.readAsArrayBuffer(file);
   };

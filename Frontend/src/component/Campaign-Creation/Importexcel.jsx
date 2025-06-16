@@ -33,11 +33,11 @@ const ExcelModal = ({ isOpen, onClose, previewContent = [], bgColor }) => {
   const campaign = JSON.parse(localStorage.getItem("campaign"));
   const navigate = useNavigate();
 
-  useEffect(() => {
-    if (isOpen) {
-      console.log("previewContent in SendexcelModal:", previewContent, bgColor);
-    }
-  }, [isOpen, previewContent, bgColor]);
+  // useEffect(() => {
+  //   if (isOpen) {
+  //     console.log("previewContent in SendexcelModal:", previewContent, bgColor);
+  //   }
+  // }, [isOpen, previewContent, bgColor]);
 
    useEffect(() => {
         const fetchaliasname = async () => {
@@ -208,7 +208,6 @@ const ExcelModal = ({ isOpen, onClose, previewContent = [], bgColor }) => {
         .filter((row) => row.some((cell) => cell));
 
       setExcelData(formattedData);
-      console.log(formattedData);
     };
     reader.readAsArrayBuffer(file);
   };

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import "./CampaignTable.css";
-import { FaArrowLeft, FaSearch,FaTrash } from "react-icons/fa";
+import { FaArrowLeft, FaSearch,FaSync,FaTrash } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -20,7 +20,7 @@ function CampaignTable() {
   const [activeCampaignId, setActiveCampaignId] = useState(null); 
   const [selectedCampaigns, setSelectedCampaigns] = useState([]);
   const [selectAll, setSelectAll] = useState(false);
-   const [sortOrder, setSortOrder] = useState("asc");
+  //  const [sortOrder, setSortOrder] = useState("desc");
      const [filteredCampaign, setFilteredCampaign] = useState([]);
       const [searchTerm, setSearchTerm] = useState("");
       const [fromDate, setFromDate] = useState("");
@@ -31,16 +31,17 @@ function CampaignTable() {
     const navigate = useNavigate();
   
 
- const handleSortByDate = () => {
-  const sorted = [...filteredCampaign].sort((a, b) => {
-    const dateA = new Date(a.senddate);
-    const dateB = new Date(b.senddate);
-    return sortOrder === "asc" ? dateA - dateB : dateB - dateA;
-  });
+ // Remove this function
+// const handleSortByDate = () => {
+//   const sorted = [...filteredCampaign].sort((a, b) => {
+//     const dateA = new Date(a.senddate);
+//     const dateB = new Date(b.senddate);
+//     return sortOrder === "asc" ? dateA - dateB : dateB - dateA;
+//   });
 
-  setFilteredCampaign(sorted);
-  setSortOrder(sortOrder === "asc" ? "desc" : "asc");
-};
+//   setFilteredCampaign(sorted);
+//   setSortOrder(sortOrder === "asc" ? "desc" : "asc");
+// };
 
     
   
@@ -65,7 +66,7 @@ function CampaignTable() {
   // Apply senddate filter
   if (fromDate || toDate) {
     filtered = filtered.filter((campaign) => {
-      const campaignDate = new Date(campaign.senddate); // change from createdAt to senddate
+      const campaignDate = new Date(campaign.senddate);
       const start = fromDate ? new Date(fromDate) : null;
       const end = toDate
         ? new Date(new Date(toDate).setHours(23, 59, 59, 999))
@@ -77,6 +78,9 @@ function CampaignTable() {
       return afterFrom && beforeTo;
     });
   }
+
+  // Always sort by senddate in descending order (newest first)
+  filtered.sort((a, b) => new Date(b.senddate) - new Date(a.senddate));
 
   setFilteredCampaign(filtered);
   setCurrentPage(1); // Reset page after filtering
@@ -136,8 +140,29 @@ const totalPages = Math.ceil(filteredCampaign.length / rowsPerPage);
       toast.error("Failed to delete selected campaigns.");
     }
   };
+const refreshCampaigns = async () => {
+  try {
+    const response = await axios.get(`${apiConfig.baseURL}/api/stud/campaigns/${user.id}`);
+    const sortedCampaigns = response.data.sort(
+      (a, b) => new Date(b.senddate) - new Date(a.senddate)
+    );
+    const filteredCampaigns = sortedCampaigns.filter(campaign => {
+      const campaignName = campaign.campaignname?.toLowerCase() || "";
+      const exclude = campaignName.includes("birthday campaign");
+      return !exclude;
+    });
+    setCampaigns(filteredCampaigns);
+    setFilteredCampaign(filteredCampaigns);
+  } catch (error) {
+    console.error("Error refreshing campaigns", error);
+    toast.error("Failed to refresh campaigns");
+  }
+};
 
+// In your fetchCampaigns function:
 useEffect(() => {
+    let intervalId;
+
   const fetchCampaigns = async () => {
     if (!user?.id) {
       navigate("/user-login");
@@ -145,8 +170,9 @@ useEffect(() => {
     }
     try {
       const response = await axios.get(`${apiConfig.baseURL}/api/stud/campaigns/${user.id}`);
+      // Sort by senddate in descending order (newest first)
       const sortedCampaigns = response.data.sort(
-        (a, b) => new Date(b.senddate) - new Date(a.senddate)
+        (a, b) => new Date(b.senddate) - new Date(a.senddate) // Changed from createdAt to senddate
       );
 
       const filteredCampaigns = sortedCampaigns.filter(campaign => {
@@ -156,6 +182,7 @@ useEffect(() => {
       });
 
       setCampaigns(filteredCampaigns);
+      setFilteredCampaign(filteredCampaigns); // Initialize filteredCampaign with sorted data
     } catch (error) {
       console.error("Error fetching campaigns", {
         message: error.message,
@@ -166,7 +193,11 @@ useEffect(() => {
   };
 
   fetchCampaigns();
-}, [user?.id, navigate]); // <-- Added searchTerm in dependency
+  
+  intervalId = setInterval(fetchCampaigns, 3000);
+
+  return () => clearInterval(intervalId);
+}, [user?.id, navigate]);
 
 
   const handleBackCampaign = () => {
@@ -625,9 +656,28 @@ useEffect(() => {
                   </div>
                 </div>
 
-      <button onClick={handleDeleteAllSelected} className="delete-all-btn">
-        Delete All
-      </button>
+     <div style={{ display: 'flex', gap: '10px', marginBottom: '10px' }}>
+  <button onClick={handleDeleteAllSelected} className="delete-all-btn">
+    Delete All
+  </button>
+  <button 
+    onClick={refreshCampaigns} 
+    className="refresh-btn"
+    style={{
+      padding: '8px 15px',
+      backgroundColor: '#2f327d',
+      color: 'white',
+      border: 'none',
+      borderRadius: '4px',
+      cursor: 'pointer',
+      display: 'flex',
+      alignItems: 'center',
+      gap: '5px'
+    }}
+  >
+    <FaSync /> 
+  </button>
+</div>
       <div className="cam-scroll" style={{ overflowX: "auto" }}>
         <table className="cam-dashboard-table">
           <thead>
@@ -641,8 +691,8 @@ useEffect(() => {
                 />
               </th>
               <th>S.No</th>
-    <th onClick={handleSortByDate} style={{ cursor: "pointer" }}>
-        Send Date {sortOrder === "asc" ? "▲" : "▼"}
+      <th>
+        Send Date 
       </th>               
        <th>Campaign Name</th>
               <th>Group Name</th>

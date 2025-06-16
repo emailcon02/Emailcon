@@ -33,6 +33,7 @@ const SendbulkModal = ({ isOpen, onClose, previewContent = [], bgColor }) => {
   const campaign = JSON.parse(localStorage.getItem("campaign"));
   const navigate = useNavigate();
   const dropdownRef=useRef(null);
+  
     useEffect(() => {
       const handleClickOutside = (event) => {
         if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
@@ -428,78 +429,58 @@ const handleSend = async () => {
     );
     const campaignId = campaignResponse.data.id;
 
-    const BATCH_SIZE = 10;
     const totalEmails = students.length;
     let processedEmails = 0;
 
-    // Split into batches
-    const batches = [];
-    for (let i = 0; i < students.length; i += BATCH_SIZE) {
-      batches.push(students.slice(i, i + BATCH_SIZE));
-    }
-
-    // Handler function for each batch
-    const handleBatch = async (batch, batchIndex) => {
-      const batchSent = [];
-      const batchFailed = [];
-
-      console.log(`🚀 Starting batch ${batchIndex + 1}/${batches.length}...`);
-
-      for (let student of batch) {
-        const personalizedContent = previewContent.map((item) => {
-          const personalizedItem = { ...item };
-          if (item.content) {
-            Object.entries(student).forEach(([key, value]) => {
-              const regex = new RegExp(`\\{?${key}\\}?`, "g");
-              personalizedItem.content = personalizedItem.content.replace(
-                regex,
-                value != null ? String(value).trim() : ""
-              );
-            });
-          }
-          return personalizedItem;
-        });
-
-        let personalizedSubject = message;
-        Object.entries(student).forEach(([key, value]) => {
-          const regex = new RegExp(`\\{?${key}\\}?`, "g");
-          personalizedSubject = personalizedSubject.replace(
-            regex,
-            value != null ? String(value).trim() : ""
-          );
-        });
-
-        const emailPayload = {
-          recipientEmail: student.Email,
-          subject: personalizedSubject,
-          body: JSON.stringify(personalizedContent),
-          bgColor,
-          attachments,
-          campaignId,
-          previewtext,
-          aliasName,
-          replyTo,
-          userId: user.id,
-          groupId: selectedGroup,
-        };
-
-        try {
-          await axios.post(`${apiConfig.baseURL}/api/stud/sendbulkEmail`, emailPayload);
-          console.log(`✅ Sent to: ${student.Email}`);
-          batchSent.push(student.Email);
-        } catch (error) {
-          console.error(`❌ Failed to send to ${student.Email}:`, error.response?.data || error.message);
-          batchFailed.push(student.Email);
+    for (const student of students) {
+      const personalizedContent = previewContent.map((item) => {
+        const personalizedItem = { ...item };
+        if (item.content) {
+          Object.entries(student).forEach(([key, value]) => {
+            const regex = new RegExp(`\\{?${key}\\}?`, "g");
+            personalizedItem.content = personalizedItem.content.replace(
+              regex,
+              value != null ? String(value).trim() : ""
+            );
+          });
         }
+        return personalizedItem;
+      });
 
-        processedEmails++;
+      let personalizedSubject = message;
+      Object.entries(student).forEach(([key, value]) => {
+        const regex = new RegExp(`\\{?${key}\\}?`, "g");
+        personalizedSubject = personalizedSubject.replace(
+          regex,
+          value != null ? String(value).trim() : ""
+        );
+      });
+
+      const emailPayload = {
+        recipientEmail: student.Email,
+        subject: personalizedSubject,
+        body: JSON.stringify(personalizedContent),
+        bgColor,
+        attachments,
+        campaignId,
+        previewtext,
+        aliasName,
+        replyTo,
+        userId: user.id,
+        groupId: selectedGroup,
+      };
+
+      try {
+        await axios.post(`${apiConfig.baseURL}/api/stud/sendbulkEmail`, emailPayload);
+        console.log(`✅ Sent to: ${student.Email}`);
+        sentEmails.push(student.Email);
+      } catch (error) {
+        console.error(`❌ Failed to send to ${student.Email}:`, error.response?.data || error.message);
+        failedEmails.push(student.Email);
       }
 
-      sentEmails.push(...batchSent);
-      failedEmails.push(...batchFailed);
-
+      processedEmails++;
       const progress = Math.round((processedEmails / totalEmails) * 100);
-      console.log(`📊 Batch ${batchIndex + 1} completed. Progress: ${progress}%`);
 
       await axios.put(`${apiConfig.baseURL}/api/stud/camhistory/${campaignId}`, {
         progress,
@@ -508,12 +489,7 @@ const handleSend = async () => {
         sentEmails,
         failedEmails,
       });
-    };
-
-    // Process all batches in parallel
-    await Promise.all(batches.map((batch, index) => handleBatch(batch, index)));
-
-    // Final update
+    }
     const finalStatus = failedEmails.length > 0 ? "Failed" : "Success";
     const finalPayload = {
       sendcount: sentEmails.length,
@@ -524,7 +500,7 @@ const handleSend = async () => {
       progress: 100,
     };
 
-    console.log("✅ All batches finished. Final update:", finalPayload);
+    console.log("✅ Campaign finished. Final update:", finalPayload);
 
     await axios.put(`${apiConfig.baseURL}/api/stud/camhistory/${campaignId}`, finalPayload);
   } catch (error) {
