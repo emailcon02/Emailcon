@@ -43,6 +43,7 @@ import UserDemoRequest from "../../component/Business-Admin/UserDemoRequest";
 import EmployeeSignup from "../../component/Login-Options/EmployeeSignup";
 import EmployeeDetails from "../../component/Admin/EmployeeDetails";
 import Privacypolicy from "../../component/Frontpage/Privacypolicy";
+import Termsofservice from "../../component/Frontpage/Termsofservice";
 
 function RoutesPage() {
   const [isOnline, setIsOnline] = useState(navigator.onLine);
@@ -83,7 +84,8 @@ function RoutesPage() {
         <Route path="/employee-signup" element={<EmployeeSignup />} />
         <Route path="/employee-detail" element={<EmployeeDetails />} />
         <Route path="/user-detail" element={<UserDetail />} />
-         <Route path="/privacy-policy" element={<Privacypolicy />} />
+        <Route path="/privacy-policy" element={<Privacypolicy />} />
+        <Route path="/terms-of-service" element={<Termsofservice />} />
         <Route path="/expired-users" element={<ExpiredUser />} />
         <Route path="/super-admin-dashboard" element={<DashboardPage/>} />
         <Route path="/sub-user-detail" element={<SubAdminUserDetail />} />

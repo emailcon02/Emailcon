@@ -56,8 +56,12 @@ const Footer = ({onOpenModal }) => {
               <a href="#contact">Contact Us</a>
             </li>
             <li>
+           <Link to="/terms-of-service" reloadDocument>Terms Of Service</Link>
+           </li>
+            <li>
            <Link to="/privacy-policy" reloadDocument>Privacy Policy</Link>
-         </li>
+           </li>
+         
           </ul>
         </div>
 

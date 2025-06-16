@@ -8,7 +8,7 @@ const Footerpolicy = ({onOpenModal }) => {
 
 
   return (
-    <footer className="footer-container" id="contact">
+    <footer className="footer-container footer-policy" id="contact">
       {/* Top Section */}
       <div className="top-section">
         <div className="nav-links">
@@ -55,6 +55,9 @@ const Footerpolicy = ({onOpenModal }) => {
             <li>
   <Link to="/" reloadDocument>Contact Us</Link>
             </li>
+                 <li>
+                       <Link to="/terms-of-service" reloadDocument>Terms Of Service</Link>
+                       </li>
            <li>
   <Link to="/privacy-policy" reloadDocument>Privacy Policy</Link>
 </li>
