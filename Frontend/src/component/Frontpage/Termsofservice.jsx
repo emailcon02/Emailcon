@@ -10,7 +10,7 @@ function Termsofservice() {
     <>
       <nav className="privacy-navbar">
         <div className="privacy-navbar-heading">
-          Terms of <span style={{color: "#f48c06"}}>Service</span>
+          Terms & <span style={{color: "#f48c06"}}>Conditions</span>
         </div>
         <Link to="/" className="privacy-navbar-back-btn">
                       <FontAwesomeIcon icon={faArrowLeft} style={{ marginRight: '5px' }} />Back

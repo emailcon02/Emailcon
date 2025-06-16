@@ -345,7 +345,8 @@ const SendbulkModal = ({ isOpen, onClose, previewContent = [], bgColor }) => {
     }
   };
 
-  const handleSend = async () => {
+const handleSend = async () => {
+  // Initial validation
   if (!selectedGroup || !message || !previewtext || !aliasName || !replyTo) {
     toast.warning("Please ensure all fields are selected.");
     return;
@@ -361,15 +362,12 @@ const SendbulkModal = ({ isOpen, onClose, previewContent = [], bgColor }) => {
   sessionStorage.removeItem("firstVisit");
   sessionStorage.removeItem("toggled");
 
-  let sentEmails = [];
-  let failedEmails = [];
-  let attachments = [];
-
   try {
-    // Upload attachments
-    if (emailData.attachments && emailData.attachments.length > 0) {
+    // 1. Upload attachments if any
+    let attachments = [];
+    if (emailData.attachments?.length > 0) {
       const formData = new FormData();
-      emailData.attachments.forEach((file) => formData.append("attachments", file));
+      emailData.attachments.forEach(file => formData.append("attachments", file));
       formData.append("userId", user.id);
 
       const uploadResponse = await axios.post(
@@ -384,7 +382,7 @@ const SendbulkModal = ({ isOpen, onClose, previewContent = [], bgColor }) => {
       }));
     }
 
-    // Get students from selected group
+    // 2. Get students from selected group
     const studentsResponse = await axios.get(
       `${apiConfig.baseURL}/api/stud/groups/${selectedGroup}/students`
     );
@@ -396,75 +394,72 @@ const SendbulkModal = ({ isOpen, onClose, previewContent = [], bgColor }) => {
       return;
     }
 
-    // Create campaign history entry
-    const campaignHistoryData = {
-      campaignname: campaign.camname,
-      groupname: groups.find((group) => group._id === selectedGroup)?.name,
-      totalcount: students.length,
-      recipients: "no mail",
-      sendcount: 0,
-      failedcount: 0,
-      failedEmails: [],
-      sentEmails: [],
-      subject: message,
-      attachments,
-      exceldata: [{}],
-      previewtext,
-      aliasName,
-      replyTo,
-      previewContent,
-      bgColor,
-      scheduledTime: new Date(),
-      status: "Pending",
-      progress: 0,
-      senddate: new Date().toLocaleString(),
-      user: user.id,
-      groupId: selectedGroup,
-    };
-
+    // 3. Create campaign history entry
     const campaignResponse = await axios.post(
       `${apiConfig.baseURL}/api/stud/camhistory`,
-      campaignHistoryData
+      {
+        campaignname: campaign.camname,
+        groupname: groups.find(g => g._id === selectedGroup)?.name,
+        totalcount: students.length,
+        recipients: JSON.stringify(students.map(s => s.Email)),
+        sendcount: 0,
+        failedcount: 0,
+        failedEmails: [],
+        sentEmails: [],
+        subject: message,
+        attachments,
+        previewtext,
+        aliasName,
+        replyTo,
+        previewContent,
+        bgColor,
+        status: "Pending",
+        progress: 0,
+        user: user.id,
+        groupId: selectedGroup,
+      }
     );
     const campaignId = campaignResponse.data.id;
 
+    // 4. Enhanced batch processing with contact tracking
     const BATCH_SIZE = 10;
-    const totalEmails = students.length;
-    let processedEmails = 0;
+    const processedContacts = new Set();
+    let globalPosition = 0;
 
-    for (let i = 0; i < students.length; i += BATCH_SIZE) {
-      const batch = students.slice(i, i + BATCH_SIZE);
-      const batchSent = [];
-      const batchFailed = [];
+    const processBatch = async (batchIndex) => {
+      const batchStart = batchIndex * BATCH_SIZE;
+      const batchEnd = Math.min(batchStart + BATCH_SIZE, students.length);
+      const batchStudents = students.slice(batchStart, batchEnd);
 
-      await Promise.all(
-        batch.map(async (student) => {
-          const personalizedContent = previewContent.map((item) => {
-            const personalizedItem = { ...item };
+      console.log(`Processing batch ${batchIndex + 1} (contacts ${batchStart + 1}-${batchEnd})`);
+
+      for (const [batchPosition, student] of batchStudents.entries()) {
+        globalPosition = batchStart + batchPosition;
+        
+        if (processedContacts.has(student.Email)) {
+          console.warn(`Duplicate contact skipped: ${student.Email}`);
+          continue;
+        }
+
+        try {
+          // Personalize content
+          const personalizedContent = previewContent.map(item => {
+            const newItem = { ...item };
             if (item.content) {
               Object.entries(student).forEach(([key, value]) => {
-                const regex = new RegExp(`\\{?${key}\\}?`, "g");
-                personalizedItem.content = personalizedItem.content.replace(
-                  regex,
+                newItem.content = newItem.content.replace(
+                  new RegExp(`\\{?${key}\\}?`, "g"),
                   value != null ? String(value).trim() : ""
                 );
               });
             }
-            return personalizedItem;
+            return newItem;
           });
 
-          let personalizedSubject = message;
-          Object.entries(student).forEach(([key, value]) => {
-            const regex = new RegExp(`\\{?${key}\\}?`, "g");
-            personalizedSubject = personalizedSubject.replace(
-              regex,
-              value != null ? String(value).trim() : ""
-            );
-          });
-
-          const emailPayload = {
+          // Send email
+          await axios.post(`${apiConfig.baseURL}/api/stud/sendbulkEmail`, {
             recipientEmail: student.Email,
-            subject: personalizedSubject,
+            subject: message,
             body: JSON.stringify(personalizedContent),
             bgColor,
             attachments,
@@ -474,59 +469,109 @@ const SendbulkModal = ({ isOpen, onClose, previewContent = [], bgColor }) => {
             replyTo,
             userId: user.id,
             groupId: selectedGroup,
-          };
+          });
 
-          try {
-            await axios.post(`${apiConfig.baseURL}/api/stud/sendbulkEmail`, emailPayload);
-            batchSent.push(student.Email);
-          } catch (error) {
-            batchFailed.push(student.Email);
-          } finally {
-            processedEmails++;
-          }
-        })
-      );
+          processedContacts.add(student.Email);
 
-      sentEmails.push(...batchSent);
-      failedEmails.push(...batchFailed);
+          // Update success
+          await axios.put(`${apiConfig.baseURL}/api/stud/camhistory/${campaignId}`, {
+            $addToSet: { sentEmails: student.Email },
+            $inc: { sendcount: 1 },
+            $set: {
+              progress: Math.round(((globalPosition + 1) / students.length) * 100),
+              status: "In Progress",
+              lastProcessed: student.Email,
+              lastProcessedAt: new Date().toISOString()
+            }
+          });
 
-      const currentProgress = Math.round((processedEmails / totalEmails) * 100);
+          console.log(`Successfully processed ${student.Email} (${globalPosition + 1}/${students.length})`);
 
-      await axios.put(`${apiConfig.baseURL}/api/stud/camhistory/${campaignId}`, {
-        progress: currentProgress,
-        sendcount: sentEmails.length,
-        failedcount: failedEmails.length,
-        sentEmails,
-        failedEmails,
-      });
-    }
+        } catch (error) {
+          console.error(`Failed to process ${student.Email}:`, error.message);
+          processedContacts.add(student.Email);
 
-    // ✅ Final update
-    const finalStatus = failedEmails.length > 0 ? "Failed" : "Success";
-    const finalPayload = {
-      sendcount: sentEmails.length,
-      failedcount: failedEmails.length,
-      sentEmails,
-      failedEmails,
-      status: finalStatus,
-      progress: 100,
+          await axios.put(`${apiConfig.baseURL}/api/stud/camhistory/${campaignId}`, {
+            $addToSet: { failedEmails: student.Email },
+            $inc: { failedcount: 1 },
+            $set: {
+              lastError: error.message,
+              lastFailed: student.Email,
+              lastFailedAt: new Date().toISOString()
+            }
+          });
+        }
+      }
     };
 
-    console.log("Final Update Payload:", finalPayload);
+    // Process batches with controlled concurrency
+    const MAX_CONCURRENT_BATCHES = 5;
+    const activeBatches = [];
 
-    const finalUpdate = await axios.put(
-      `${apiConfig.baseURL}/api/stud/camhistory/${campaignId}`,
-      finalPayload
+    for (let batchIndex = 0; batchIndex < Math.ceil(students.length / BATCH_SIZE); batchIndex++) {
+      // Wait for slot if we've reached maximum concurrency
+      if (activeBatches.length >= MAX_CONCURRENT_BATCHES) {
+        await Promise.race(activeBatches);
+      }
+
+      const batchPromise = processBatch(batchIndex)
+        .finally(() => {
+          activeBatches.splice(activeBatches.indexOf(batchPromise), 1);
+        });
+
+      activeBatches.push(batchPromise);
+    }
+
+    // Wait for all remaining batches to complete
+    await Promise.all(activeBatches);
+
+    // 5. Final verification and status update
+    const { data: campaignData } = await axios.get(
+      `${apiConfig.baseURL}/api/stud/camhistory/${campaignId}`
     );
 
-    console.log("Final update response:", finalUpdate.data);
+    const expectedCount = students.length;
+    const processedCount = campaignData.sendcount + campaignData.failedcount;
+    const missingCount = expectedCount - processedCount;
+
+    let finalStatus = "Completed";
+    if (missingCount > 0) {
+      console.error(`Missing ${missingCount} contacts! Expected ${expectedCount}, processed ${processedCount}`);
+      finalStatus = "Completed With Missing Contacts";
+      
+      const missingContacts = students
+        .filter(s => !processedContacts.has(s.Email))
+        .map(s => s.Email);
+
+      await axios.put(`${apiConfig.baseURL}/api/stud/camhistory/${campaignId}`, {
+        $set: {
+          missingContacts,
+          missingCount
+        }
+      });
+    } else {
+      finalStatus = campaignData.failedcount === 0 ? "Success" :
+                   campaignData.failedcount === expectedCount ? "Failed" : "Partial Success";
+    }
+
+    await axios.put(`${apiConfig.baseURL}/api/stud/camhistory/${campaignId}`, {
+      status: finalStatus,
+      progress: 100,
+      completedAt: new Date().toISOString()
+    });
+
+    toast[missingCount > 0 ? "warning" : "success"](
+      `Campaign ${finalStatus}: ${campaignData.sendcount} sent, ${campaignData.failedcount} failed` +
+      (missingCount > 0 ? `, ${missingCount} missing` : "")
+    );
+
   } catch (error) {
-    console.error("Error during sending or updating campaign:", error.response?.data || error.message);
+    console.error("Campaign processing error:", error);
+    toast.error("Failed to complete campaign");
   } finally {
     setIsProcessing(false);
   }
 };
-
   if (!isOpen) return null;
 
   return (
