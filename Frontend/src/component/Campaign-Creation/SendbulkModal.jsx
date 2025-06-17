@@ -242,11 +242,11 @@ const SendbulkModal = ({ isOpen, onClose, previewContent = [], bgColor }) => {
     fetchGroupsAndStudents(); 
   }, [user?.id]);
   
-  useEffect(() => {
-    if (isOpen) {
-      console.log("PreviewContent in SendbulkModal:", previewContent); // Log to verify
-    }
-  }, [isOpen, previewContent]);
+  // useEffect(() => {
+  //   if (isOpen) {
+  //     console.log("PreviewContent in SendbulkModal:", previewContent); // Log to verify
+  //   }
+  // }, [isOpen, previewContent]);
 
 
 
@@ -295,7 +295,6 @@ const SendbulkModal = ({ isOpen, onClose, previewContent = [], bgColor }) => {
           { headers: { "Content-Type": "multipart/form-data" } }
         );
 
-        console.log("Uploaded Files:", uploadResponse.data);
         // Structure the uploaded files with original name and URL
         attachments = uploadResponse.data.fileUrls.map((file, index) => ({
           originalName: emailData.attachments[index].name, // Get original file name
@@ -362,28 +361,28 @@ const handleSend = async () => {
   sessionStorage.removeItem("firstVisit");
   sessionStorage.removeItem("toggled");
 
-  let sentEmails = [];
-  let failedEmails = [];
   let attachments = [];
 
   try {
-    // Upload attachments
     if (emailData.attachments && emailData.attachments.length > 0) {
-      const formData = new FormData();
-      emailData.attachments.forEach((file) => formData.append("attachments", file));
-      formData.append("userId", user.id);
+        const formData = new FormData();
 
-      const uploadResponse = await axios.post(
-        `${apiConfig.baseURL}/api/stud/uploadfile`,
-        formData,
-        { headers: { "Content-Type": "multipart/form-data" } }
-      );
+        emailData.attachments.forEach((file) => {
+          formData.append("attachments", file);
+        });
 
-      attachments = uploadResponse.data.filePaths.map((file, index) => ({
-        originalName: emailData.attachments[index].name,
-        fileUrl: file,
-      }));
-    }
+        const uploadResponse = await axios.post(
+          `${apiConfig.baseURL}/api/stud/uploadfile`,
+          formData,
+          { headers: { "Content-Type": "multipart/form-data" } }
+        );
+
+        // Structure the uploaded files with original name and URL
+        attachments = uploadResponse.data.fileUrls.map((file, index) => ({
+          originalName: emailData.attachments[index].name, // Get original file name
+          fileUrl: file, // Cloudinary URL
+        }));
+      }
 
     // Get students from group
     const studentsResponse = await axios.get(
@@ -397,118 +396,35 @@ const handleSend = async () => {
       return;
     }
 
-    // Create campaign record
-    const campaignHistoryData = {
+    // Prepare campaign data
+    const payload = {
       campaignname: campaign.camname,
       groupname: groups.find((group) => group._id === selectedGroup)?.name,
       totalcount: students.length,
-      recipients: "no mail",
-      sendcount: 0,
-      failedcount: 0,
-      failedEmails: [],
-      sentEmails: [],
       subject: message,
       attachments,
-      exceldata: [{}],
       previewtext,
       aliasName,
       replyTo,
       previewContent,
       bgColor,
       scheduledTime: new Date(),
-      status: "Pending",
-      progress: 0,
       senddate: new Date().toLocaleString(),
       user: user.id,
       groupId: selectedGroup,
+      students
     };
-
-    const campaignResponse = await axios.post(
-      `${apiConfig.baseURL}/api/stud/camhistory`,
-      campaignHistoryData
-    );
-    const campaignId = campaignResponse.data.id;
-
-    const totalEmails = students.length;
-    let processedEmails = 0;
-
-    for (const student of students) {
-      const personalizedContent = previewContent.map((item) => {
-        const personalizedItem = { ...item };
-        if (item.content) {
-          Object.entries(student).forEach(([key, value]) => {
-            const regex = new RegExp(`\\{?${key}\\}?`, "g");
-            personalizedItem.content = personalizedItem.content.replace(
-              regex,
-              value != null ? String(value).trim() : ""
-            );
-          });
-        }
-        return personalizedItem;
-      });
-
-      let personalizedSubject = message;
-      Object.entries(student).forEach(([key, value]) => {
-        const regex = new RegExp(`\\{?${key}\\}?`, "g");
-        personalizedSubject = personalizedSubject.replace(
-          regex,
-          value != null ? String(value).trim() : ""
-        );
-      });
-
-      const emailPayload = {
-        recipientEmail: student.Email,
-        subject: personalizedSubject,
-        body: JSON.stringify(personalizedContent),
-        bgColor,
-        attachments,
-        campaignId,
-        previewtext,
-        aliasName,
-        replyTo,
-        userId: user.id,
-        groupId: selectedGroup,
-      };
-
-      try {
-        await axios.post(`${apiConfig.baseURL}/api/stud/sendbulkEmail`, emailPayload);
-        console.log(`✅ Sent to: ${student.Email}`);
-        sentEmails.push(student.Email);
-      } catch (error) {
-        console.error(`❌ Failed to send to ${student.Email}:`, error.response?.data || error.message);
-        failedEmails.push(student.Email);
-      }
-
-      processedEmails++;
-      const progress = Math.round((processedEmails / totalEmails) * 100);
-
-      await axios.put(`${apiConfig.baseURL}/api/stud/camhistory/${campaignId}`, {
-        progress,
-        sendcount: sentEmails.length,
-        failedcount: failedEmails.length,
-        sentEmails,
-        failedEmails,
-      });
-    }
-    const finalStatus = failedEmails.length > 0 ? "Failed" : "Success";
-    const finalPayload = {
-      sendcount: sentEmails.length,
-      failedcount: failedEmails.length,
-      sentEmails,
-      failedEmails,
-      status: finalStatus,
-      progress: 100,
-    };
-
-    console.log("✅ Campaign finished. Final update:", finalPayload);
-
-    await axios.put(`${apiConfig.baseURL}/api/stud/camhistory/${campaignId}`, finalPayload);
+    // Start campaign - backend will handle all email sending
+    await axios.post(`${apiConfig.baseURL}/api/stud/start-campaign`, payload);
+    // toast.success("📨 Campaign initiated successfully!");
   } catch (error) {
-    console.error("🔥 Campaign send failed:", error.response?.data || error.message);
+    console.error("🔥 Campaign initiation failed:", error.response?.data || error.message);
+    toast.error("Failed to start campaign.");
   } finally {
     setIsProcessing(false);
   }
 };
+
 
 
   if (!isOpen) return null;

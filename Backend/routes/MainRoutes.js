@@ -527,6 +527,649 @@ else if (item.type === 'multi-image-card') {
   }
 });
 
+// New route for starting campaigns
+router.post('/start-campaign', async (req, res) => {
+  let campaignId = null;
+
+  try {
+    const {
+      campaignname,
+      groupname,
+      subject,
+      attachments,
+      previewtext,
+      aliasName,
+      replyTo,
+      previewContent,
+      bgColor,
+      scheduledTime,
+      senddate,
+      user: userId,
+      groupId,
+      students
+    } = req.body;
+
+    // Validate required fields
+    if (!groupId || !subject || !previewtext || !aliasName || !replyTo) {
+      return res.status(400).json({ error: "Please ensure all required fields are provided." });
+    }
+
+    if (!previewContent || previewContent.length === 0) {
+      return res.status(400).json({ error: "No preview content available." });
+    }
+
+    // Filter out students with invalid emails before processing
+    const validStudents = students.filter(student => 
+      student?.Email && isValidEmail(student.Email)
+    );
+    const invalidEmails = students
+      .filter(student => !student?.Email || !isValidEmail(student.Email))
+      .map(student => student?.Email || 'missing');
+
+    // Create initial campaign record
+    const campaignData = {
+      campaignname,
+      groupname,
+      totalcount: students.length,
+      recipients: "no mail",
+      sendcount: 0,
+      failedcount: invalidEmails.length, // Count invalid emails as initial failures
+      failedEmails: invalidEmails,
+      sentEmails: [],
+      subject,
+      attachments,
+      exceldata: [{}],
+      previewtext,
+      aliasName,
+      replyTo,
+      previewContent,
+      bgColor,
+      scheduledTime,
+      status: "Pending",
+      progress: 0,
+      senddate,
+      user: userId,
+      groupId,
+    };
+
+    const newCampaign = await Camhistory.create(campaignData);
+    campaignId = newCampaign._id;
+
+    const batchSize = 10;
+    const totalEmails = validStudents.length;
+    let processedEmails = 0;
+    let sentEmails = [];
+    let failedEmails = [...invalidEmails]; // Start with invalid emails
+
+    // Split into batches
+    const batches = [];
+    for (let i = 0; i < validStudents.length; i += batchSize) {
+      batches.push(validStudents.slice(i, i + batchSize));
+    }
+
+    // Process batches in parallel
+    await Promise.all(
+      batches.map(async (batch) => {
+        for (const student of batch) {
+          try {
+            // Personalize content
+            const personalizedContent = previewContent.map((item) => {
+              const personalizedItem = { ...item };
+              if (item.content) {
+                Object.entries(student).forEach(([key, value]) => {
+                  const regex = new RegExp(`\\{?${key}\\}?`, "g");
+                  personalizedItem.content = personalizedItem.content.replace(
+                    regex,
+                    value != null ? String(value).trim() : ""
+                  );
+                });
+              }
+              return personalizedItem;
+            });
+
+            // Personalize subject
+            let personalizedSubject = subject;
+            Object.entries(student).forEach(([key, value]) => {
+              const regex = new RegExp(`\\{?${key}\\}?`, "g");
+              personalizedSubject = personalizedSubject.replace(
+                regex,
+                value != null ? String(value).trim() : ""
+              );
+            });
+
+            // Send email
+            await sendEmailToStudent({
+              student,
+              campaignId,
+              userId,
+              subject: personalizedSubject,
+              attachments,
+              previewtext,
+              aliasName,
+              replyTo,
+              previewContent: personalizedContent,
+              bgColor,
+            });
+            sentEmails.push(student.Email);
+          } catch (error) {
+            console.error(`❌ Error sending to ${student.Email}:`, error);
+            failedEmails.push(student.Email);
+          }
+
+          processedEmails++;
+          const progress = Math.round((processedEmails / totalEmails) * 100);
+
+          // Update progress dynamically
+          await Camhistory.findByIdAndUpdate(campaignId, {
+            progress,
+            sendcount: sentEmails.length,
+            failedcount: failedEmails.length,
+            sentEmails,
+            failedEmails,
+            status:
+              progress === 100
+                ? failedEmails.length > 0
+                  ? "Partial Success"
+                  : "Success"
+                : "Processing",
+          });
+
+          // Optional throttling: delay between emails
+          await new Promise((resolve) => setTimeout(resolve, 1000));
+        }
+      })
+    );
+
+    // Final update
+    const finalStatus = failedEmails.length > 0 ? "Failed" : "Success";
+      const finalProgress = failedEmails.length > 0
+        ? Math.round((failedEmails.length / students.length) * 100)
+        : 100;
+
+    await Camhistory.findByIdAndUpdate(campaignId, {
+      status: finalStatus,
+      progress: finalProgress,
+      recipients: sentEmails.join(", "),
+      sendcount: sentEmails.length,
+      failedcount: failedEmails.length,
+      sentEmails,
+      failedEmails,
+    });
+
+    res.status(200).json({
+      message: "Campaign processed successfully",
+      campaignId,
+      sentCount: sentEmails.length,
+      failedCount: failedEmails.length,
+      invalidEmailsCount: invalidEmails.length,
+    });
+  } catch (error) {
+    console.error("Error processing campaign:", error);
+
+    if (campaignId) {
+      await Camhistory.findByIdAndUpdate(campaignId, {
+        status: "Failed",
+        error: error.message,
+      });
+    }
+
+    res.status(500).json({
+      error: "Failed to process campaign",
+      details: error.message,
+    });
+  }
+});
+
+// Email validation helper
+function isValidEmail(email) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+}
+// Helper function to send email to a single student
+async function sendEmailToStudent({
+  student,
+  campaignId,
+  userId,
+  subject,
+  attachments,
+  previewtext,
+  aliasName,
+  replyTo,
+  previewContent,
+  bgColor
+}) {
+  try {
+    const user = await User.findById(userId);
+    if (!user) {
+      console.error('User not found');
+      return;
+    }
+
+    // Validate student object and email format first
+  if (!student || typeof student !== 'object') {
+    const error = new Error('Invalid student object');
+    error.invalidStudent = true;
+    throw error;
+  }
+
+  if (!student.Email) {
+    const error = new Error('Missing email address');
+    error.missingEmail = true;
+    error.studentData = student; // Include the student data for debugging
+    throw error;
+  }
+
+  if (!isValidEmail(student.Email)) {
+    const error = new Error(`Invalid email address: ${student.Email}`);
+    error.invalidEmail = true;
+    error.email = student.Email;
+    throw error;
+  }
+
+    // Determine the transporter based on email provider
+    let transporter;
+    if (user.email.includes("gmail")) {
+      transporter = nodemailer.createTransport({
+        service: "gmail",
+        auth: {
+          user: user.email,
+          pass: decryptPassword(user.smtppassword),
+        },
+      });
+    } else {
+      transporter = nodemailer.createTransport({
+        host: "smtp.hostinger.com",
+        port: 465,
+        secure: true,
+        auth: {
+          user: user.email,
+          pass: decryptPassword(user.smtppassword),
+        },
+        tls: {
+          rejectUnauthorized: false,
+        },
+      });
+    }
+
+// Modify the generateHtml call
+const dynamicHtml = previewContent.map(item => 
+  generateHtml(item, userId, campaignId, student.Email)
+).join('');
+
+    // Prepare attachments
+    const emailAttachments = attachments.map(file => ({
+      filename: file.originalName,
+      path: file.fileUrl,
+      contentType: file.mimetype
+    }));
+    // Add tracking pixel
+    const trackingPixel = `<img src="${apiConfig.baseURL}/api/stud/track-email-open?emailId=${encodeURIComponent(student.Email)}&userId=${userId}&campaignId=${campaignId}&t=${Date.now()}" width="1" height="1" style="display:none;" />`;
+
+    const mailOptions = {
+      from: `"${aliasName}" <${user.email}>`,
+      to: student.Email,
+      subject: subject,
+      replyTo: replyTo,
+      attachments: emailAttachments,
+      html: `
+        <html>
+          <head>
+            <style>
+              body { font-family: Arial, sans-serif; margin: 0; padding: 0; }
+              
+             .img-case {
+  margin:0 auto !important;
+  text-align:center !important;
+  display:block;
+  width:100%;
+  max-width: 650px; /* Adjust as needed */
+}
+
+.img-case img {
+  display: block;
+  margin: 0 auto; /* Ensures the image is centered */
+  max-width: 100%;
+  height: auto; /* Ensures the image maintains its aspect ratio */
+}
+           
+
+              @media(max-width:768px) {
+                .main { width: 330px !important; }
+                .img-case { width: 330px !important; }
+
+                .para{
+                  font-size:15px !important;
+                }
+                .img-para{
+                  font-size:12px !important;
+                }
+                  .image-text tr{
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    justify-content: space-between !important;
+  }
+                
+  /* Keep images inline on small screens */
+  .multi tr {
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    justify-content: space-between !important;
+  }
+  .multi tr td {
+    width: 48% !important; /* Ensures images stay side by side */
+    padding: 5px !important;
+  }
+  .multi tr td img {
+    height: 150px !important; /* Adjust image height for better fit */
+    width: 100% !important;
+    object-fit: cover !important;
+  } 
+
+                // .multimain td{
+                //   padding:5px 8px 0px 0px !important;
+                // }
+                // .multi-img{
+                //   width:100% !important;
+                //   max-width:170px !important;
+                //   height:auto !important;
+                //   object-fit: contain !important; 
+
+                // }
+                 .img-btn{
+                  width:85% !important;
+                  margin:20px auto !important;
+                  font-size:10px !important;
+                  padding:10px !important;
+                  
+                }
+                .head{
+                  font-size:20px !important;
+                }
+              }
+            </style>
+          </head>
+          <body>
+            <div style="display:none !important; max-height:0px; max-width:0px; opacity:0; overflow:hidden;">
+              ${previewtext}
+            </div>
+              <div class="main" style="background-color:${bgColor || "white"}; box-shadow:0 4px 8px rgba(0, 0, 0, 0.2); border:1px solid rgb(255, 245, 245); padding:20px;width:700px;height:auto;border-radius:10px;margin:0 auto;">
+                ${dynamicHtml}
+                 ${trackingPixel}
+              </div>
+          </body>
+        </html>
+      `
+    };
+
+    await transporter.sendMail(mailOptions);
+    console.log(`Email sent to: ${student.Email}`);
+
+
+  } catch (error) {
+    console.error(`Error sending email to ${student.email}:`, error);
+    
+  }
+}
+
+// Keep your existing generateHtml function as is
+function generateHtml(element, userId, campaignId, recipientEmail) {
+      const {
+        type,
+        content,
+        content1,
+        content2,
+        src1,
+        src2,
+        src,
+        style,
+        style1, style2, style3, style4,
+        link, links1, links2, links3, links4,
+        ContentStyle,
+        iconsrc1, iconsrc2, iconsrc3, iconsrc4,
+        link2,
+        link1,
+        buttonStyle1,
+        buttonStyle2,
+        title1,title2,offerPrice1,offerPrice2,originalPrice1,originalPrice2,
+      } = element;
+      const ContentStyleString = Object.entries(ContentStyle || {}).map(([key, value]) => `${key.replace(/([A-Z])/g, '-$1').toLowerCase()}:${value}`).join(';');
+      const styleString4 = Object.entries(style4 || {}).map(([key, value]) => `${key.replace(/([A-Z])/g, '-$1').toLowerCase()}:${value}`).join(';');
+      const styleString3 = Object.entries(style3 || {}).map(([key, value]) => `${key.replace(/([A-Z])/g, '-$1').toLowerCase()}:${value}`).join(';');
+      const styleString2 = Object.entries(style2 || {}).map(([key, value]) => `${key.replace(/([A-Z])/g, '-$1').toLowerCase()}:${value}`).join(';');
+      const styleString1 = Object.entries(style1 || {}).map(([key, value]) => `${key.replace(/([A-Z])/g, '-$1').toLowerCase()}:${value}`).join(';');
+      const styleString = Object.entries(style || {}).map(([key, value]) => `${key.replace(/([A-Z])/g, '-$1').toLowerCase()}:${value}`).join(';');
+      const stylebuttonString1 = Object.entries(buttonStyle1 || {}).map(([key, value]) => `${key.replace(/([A-Z])/g, '-$1').toLowerCase()}:${value}`).join(';');
+      const stylebuttonString2 = Object.entries(buttonStyle2 || {}).map(([key, value]) => `${key.replace(/([A-Z])/g, '-$1').toLowerCase()}:${value}`).join(';');
+      const styleStringvideo = Object.entries(style || {})
+        .filter(([key]) => key === 'width' || key === 'height')
+        .map(([key, value]) => `${key}:${value}`)
+        .join(';');
+
+   const generateTrackingLink = (originalUrl, userId, campaignId, recipientEmail) => {
+  if (!originalUrl || !userId || !campaignId || !recipientEmail) {
+    console.error('Missing parameters for tracking link:', { originalUrl, userId, campaignId, recipientEmail });
+    return originalUrl; 
+  }
+    return `${apiConfig.baseURL}/api/stud/track-click?emailId=${encodeURIComponent(recipientEmail)}&url=${encodeURIComponent(originalUrl)}&userId=${userId}&campaignId=${campaignId}`;
+};
+      switch (type) {
+        case 'logo':
+          return `<div style="margin:10px auto !important;${styleString};">
+                  <img src="${src}" style="margin-top:10px;${styleString};" alt="image"/>
+                </div>`;
+
+        case 'image':
+          return `<div class="img-case" style="margin:10px auto !important;${styleString};">
+       <img src="${src}" style="${styleString};margin-top:10px;" alt="image" />
+       </div>`;
+
+        case 'imagewithtext':
+          return `<table class="image-text" style="width:100%;height:220px !important;border-collapse:seperate;border-radius:10px;margin:15px 0px !important;${styleString1};">
+      <tr>
+          <td style = "vertical-align:top;padding:10px;">
+              <img  src="${src1}" style="border-radius:10px;width:200px !important;height:auto;pointer-events:none !important; object-fit:cover;" alt="image"/>                  
+          </td>
+          <td style = "vertical-align:top;padding:10px;${styleString1};">
+              <div class="img-para" style="overflow: auto;max-height: 200px !important;font-size:18px;">
+              ${content1}
+              </div>
+          </td>
+      </tr>
+  </table>`;
+
+  
+case 'break':
+  return `<table style="width:100%; border-collapse:collapse; margin:10px auto !important;">
+    <tr>
+      <td style="padding: 0;">
+        <hr style="width:100%;background-color:#000000;margin: 30px 0px;" />
+      </td>
+    </tr>
+  </table>`;
+
+    case 'banner':
+          return `<div style="margin:10px auto !important;${styleString};">
+       <img src="${src}" style="${styleString};margin-top:10px;" alt="image" />
+       </div>`;
+
+  case 'multi-image-card':
+      return `<table class="multi" style="width:100%; border-collapse:collapse;margin:10px auto !important;">
+    <tr>
+      <td style="width:50%;text-align:center;padding:8px; vertical-align:top;">
+        <img src="${src1}" style="border-radius:10px;object-fit:contain;height:230px !important;width:100%;pointer-events:none !important; object-fit:cover;" alt="image"/>
+        <h3 style="margin:10px 0;">${title1 || 'Name of the product'}</h3>
+        <p style="margin:5px 0;"><s>${originalPrice1 ? `₹${originalPrice1}` : '₹9000'}</s></p>
+        <p style="margin:5px 0;">${offerPrice1 ? `Off Price ₹${offerPrice1}` : 'Off Price ₹5999'}</p>
+        <a class="img-btn"
+          href="${generateTrackingLink(link1, userId, campaignId,recipientEmail)}"
+          target="_blank"
+          style="display:inline-block;padding:12px 25px;text-decoration: none;margin-top:20px;font-weight:bold;${stylebuttonString1}">
+          ${content1}
+        </a>
+      </td>
+      <td style="width:50%;text-align:center;padding:8px; vertical-align:top;">
+        <img src="${src2}" style="border-radius:10px;object-fit:contain;height:230px !important;width:100%;pointer-events:none !important; object-fit:cover;" alt="image"/>
+        <h3 style="margin:10px 0;">${title2 || 'Name of the product'}</h3>
+        <p style="margin:5px 0;"><s>${originalPrice2 ? `₹${originalPrice2}` : '₹8000'}</s></p>
+        <p style="margin:5px 0;">${offerPrice2 ? `Off Price ₹${offerPrice2}` : 'Off Price ₹4999'}</p>
+        <a class="img-btn"
+          href="${generateTrackingLink(link2, userId, campaignId, recipientEmail)}"
+          target="_blank"
+          style="display:inline-block;padding:12px 25px;font-weight:bold;text-decoration: none;${stylebuttonString2}">
+          ${content2}
+        </a>
+      </td>
+    </tr>
+  </table>`;
+
+  case 'gap':
+  return `<table style="width:100%; border-collapse:collapse; margin:30px 0;">
+    <tr>
+      <td style="padding: 0;">
+        <div style="margin:0 auto;width:100%;height:40px"></div>
+      </td>
+    </tr>
+  </table>`;
+
+        case 'cardimage':
+          return `
+    <table role="presentation" align="center"  style="${styleString};border-collapse: separate; border-spacing: 0; margin: 10px auto!important;">
+<tr>
+    <td align="center"  style="vertical-align: top;${styleString} border-radius: 10px; padding: 0;">
+        <!-- Image -->
+        <img src="${src1}" style="display: block;${styleString}; border-top-left-radius: 10px; border-top-right-radius: 10px; object-fit: cover;" alt="image"/>
+        
+        <!-- Text Content -->
+        <div style="font-size: 15px;${styleString};${styleString1}; padding:10px 0px; border-bottom-left-radius: 10px; border-bottom-right-radius: 10px;">
+            ${content1}
+        </div>
+    </td>
+</tr>
+</table>`
+
+
+        case 'textwithimage':
+          return `<table class="image-text" style="width:100%;height:220px !important;border-collapse:seperate;border-radius:10px;margin:15px 0px !important;${styleString};">
+      <tr>
+        <td style = "vertical-align:top;padding:10px;${styleString};">
+              <div class="img-para" style="overflow: auto;max-height: 200px !important;font-size:18px;">
+              ${content2}
+              </div>
+          </td>
+          <td style = "vertical-align:top;padding:10px;">
+              <img  src="${src2}" style="border-radius:10px;width:200px !important;height:auto;pointer-events:none !important; object-fit:cover;" alt="image"/>                  
+          </td>
+        
+      </tr>
+  </table>`;
+
+        case 'video-icon':
+          return `
+  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" align="center">
+<tr>
+  <td align="center">
+    <table role="presentation"  cellspacing="0" cellpadding="0" border="0" 
+           style="${styleStringvideo};background: url('${src1}') no-repeat center center; background-size: cover; border-radius: 10px; overflow: hidden;margin:15px 0px !important;">
+      <tr>
+        <td align="center" valign="middle" style="${styleStringvideo};padding: 0;">
+            <a href="${generateTrackingLink(link, userId, campaignId, recipientEmail)}" target="_blank" rel="noopener noreferrer" style="text-decoration: none;">
+            <img src="${src2}" width="70" height="70" 
+                 style="display: block; border-radius: 50%; background-color: white;" 
+                 alt="Click Now" />
+          </a>
+        </td>
+      </tr>
+    </table>
+  </td>
+</tr>
+</table>
+  `;
+
+
+        case 'icons':
+          return `<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="${ContentStyleString};margin:15px 0px !important;">
+        <tr>
+            <td style="padding: 20px; text-align:center;${ContentStyleString};">
+                <table role="presentation" cellspacing="0" cellpadding="0" border="0" align="center">
+                    <tr>
+                        <td style="padding: 0 10px;">
+                            <a href="${generateTrackingLink(links1, userId, campaignId, recipientEmail)}" target="_blank" style="text-decoration:none;">
+                                <img src="${iconsrc1}" style="cursor:pointer;${styleString1};" alt="icon1"/>
+                            </a>
+                        </td>
+                        <td style="padding: 0 10px;">
+                            <a href="${generateTrackingLink(links2, userId, campaignId, recipientEmail)}" target="_blank" style="text-decoration:none;">
+                                <img src="${iconsrc2}" style="cursor:pointer;${styleString2};" alt="icon2"/>
+                            </a>
+                        </td>
+                        <td style="padding: 0 12px;">
+                        <a href="${generateTrackingLink(links3, userId, campaignId, recipientEmail)}" target="_blank" style="text-decoration:none;">
+                            <img src="${iconsrc3}" style="cursor:pointer;${styleString3};" alt="icon3"/>
+                        </a>
+                    </td>
+                     <td style="padding: 0 10px;">
+                        <a href="${generateTrackingLink(links4, userId, campaignId, recipientEmail)}"  target="_blank" style="text-decoration:none;">
+                            <img src="${iconsrc4}" style="cursor:pointer;${styleString4};" alt="icon3"/>
+                        </a>
+                    </td>                     
+                  </tr>
+                </table>
+            </td>
+        </tr>
+    </table>`;
+
+        case 'link-image':
+          return `<div class="img-case" style="margin:10px auto !important;${styleString};">
+        <a href ="${generateTrackingLink(link, userId, campaignId, recipientEmail)}" target = "_blank" style="text-decoration:none;"><img src="${src}" style="${styleString};margin-top:10px;" alt="image"/></a>
+        </div>`;
+
+        case 'multi-image':
+          return `<table class="multi" style="width:100%; border-collapse:collapse;margin:10px auto !important;">
+          <tr>
+              <td style="width:50%;text-align:center;padding:8px; vertical-align:top;">
+                  <img src="${src1}" style="border-radius:10px;object-fit:contain;height:230px !important;width:100%;pointer-events:none !important; object-fit:cover; ${styleString}" alt="image"/>
+                  <a class="img-btn" href="${generateTrackingLink(link1, userId, campaignId, recipientEmail)}"  target="_blank" style="${stylebuttonString1}; display:inline-block;margin-top:20px; padding:12px 25px; text-decoration:none;">
+                      ${content1}
+                  </a>
+              </td>
+              <td style="width:50%;text-align:center;padding:8px; vertical-align:top;">
+                  <img src="${src2}" style="border-radius:10px;object-fit:contain;height:230px !important;width:100%;pointer-events:none !important; object-fit:cover;${styleString}" alt="image"/>
+                  <a class="img-btn" href="${generateTrackingLink(link2, userId, campaignId, recipientEmail)}" target="_blank" style="${stylebuttonString2}; display:inline-block;margin-top:20px; padding:12px 25px; text-decoration:none;">
+                      ${content2}
+                  </a>
+              </td>
+          </tr>
+        </table>`;
+
+        case 'multipleimage':
+          return `<table class="multi" style="width:100%; border-collapse:collapse;margin:10px auto !important;">
+          <tr>
+              <td style="width:50%;text-align:center;padding:8px; vertical-align:top;">
+                  <img src="${src1}" style="border-radius:10px;object-fit:contain;height:230px !important;width:100%;pointer-events:none !important; object-fit:cover;" alt="image"/>
+              </td>
+              <td style="width:50%;text-align:center;padding:8px; vertical-align:top;">
+                  <img src="${src2}" style="border-radius:10px;object-fit:contain;height:230px !important;width:100%;pointer-events:none !important; object-fit:cover;" alt="image"/>
+              </td>
+          </tr>
+      </table>`
+
+        case 'head':
+          return `<p class="head" style="${styleString};border-radius:10px;margin-top:10px;padding:10px;font-weight:bold;">${content}</p>`;
+        case 'para':
+          return `<div class="para" style="${styleString};margin-top:20px;padding:10px;">${content}</div>`;
+        case 'button':
+          return `<div style="margin:20px auto 0 auto;text-align:center;">
+                  <a href = "${generateTrackingLink(link, userId, campaignId, recipientEmail)}"
+                  target = "_blank"
+                  style = "${styleString};display:inline-block;padding:12px 25px;text-decoration:none;" >
+                    ${content}
+                  </a>
+                </div>`;
+        default:
+          return '';
+      }
+    };
+
+
 //sendexcelmail directly
 router.post('/sendexcelEmail', async (req, res) => {
   const {
@@ -539,7 +1182,6 @@ router.post('/sendexcelEmail', async (req, res) => {
     userId,
     campaignId
   } = req.body;
-  console.log("Attachments Data:", attachments);
 
   if (!recipientEmail) {
     return res.status(400).send("Email is required.");
