@@ -4,6 +4,7 @@ const imageUrlSchema = new mongoose.Schema({
     imageUrl: {
         type: String,
         required: true,
+        unique: true 
 
     },
      user: {

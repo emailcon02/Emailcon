@@ -29,21 +29,25 @@ import {
 const router = express.Router();
 
 // Upload image to s3 bucket
-router.post('/upload', upload.single('image'), async (req, res) => {
+router.post('/upload', upload.array('image', 10), async (req, res) => {
   try {
-    const { userId,folderName } = req.body;
+    const { userId, folderName } = req.body;
     if (!userId) return res.status(400).send("Missing userId");
 
-    const url = await uploadImageToS3(
-      req.file.buffer,
-      req.file.originalname,
-      req.file.mimetype,
-      folderName,
-      userId
+    const urls = [];
 
-    );
+    for (const file of req.files) {
+      const url = await uploadImageToS3(
+        file.buffer,
+        file.originalname,
+        file.mimetype,
+        folderName,
+        userId
+      );
+      urls.push(url);
+    }
 
-    res.json({ imageUrl: url });
+    res.json({ imageUrls: urls });
   } catch (err) {
     console.error(err);
     res.status(400).json({ error: err.message });
@@ -2981,22 +2985,22 @@ router.get("/folders/:userId", async (req, res) => {
   }
 });
 
-// POST /api/stud/save-image
 router.post('/save-image', async (req, res) => {
   const { userId, imageUrl, folderName } = req.body;
+
   if (!userId || !imageUrl) {
     return res.status(400).json({ error: 'Missing userId or imageUrl' });
   }
 
   try {
-    const image = new ImageUrl({user:userId, imageUrl, folderName });
+    const image = new ImageUrl({ user: userId, imageUrl, folderName });
     await image.save();
     res.status(201).json({ message: 'Image saved', image });
   } catch (err) {
+    console.error(err);
     res.status(500).json({ error: 'Server error' });
   }
 });
-
 
 
 // GET /api/stud/images/:userId

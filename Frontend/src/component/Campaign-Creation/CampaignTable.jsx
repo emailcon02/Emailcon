@@ -161,8 +161,6 @@ const refreshCampaigns = async () => {
 
 // In your fetchCampaigns function:
 useEffect(() => {
-    let intervalId;
-
   const fetchCampaigns = async () => {
     if (!user?.id) {
       navigate("/user-login");
@@ -194,9 +192,6 @@ useEffect(() => {
 
   fetchCampaigns();
   
-  intervalId = setInterval(fetchCampaigns, 3000);
-
-  return () => clearInterval(intervalId);
 }, [user?.id, navigate]);
 
 

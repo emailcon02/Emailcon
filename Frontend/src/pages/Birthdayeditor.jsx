@@ -174,46 +174,12 @@ const Birthdayeditor = () => {
     }
   };
 
-  const uploadImagefile = async () => {
-    const input = document.createElement("input");
-    input.type = "file";
-    input.accept = "image/*";
-
-    input.onchange = async (e) => {
-      const file = e.target.files[0];
-      const formData = new FormData();
-      formData.append("image", file);
-      formData.append("folderName",currentFolder || "Sample");
-
-      try {
-        const uploadRes = await axios.post(
-          `${apiConfig.baseURL}/api/stud/upload`,
-          formData,
-          { headers: { "Content-Type": "multipart/form-data" } }
-        );
-
-        const imageUrl = uploadRes.data.imageUrl;
-
-        await axios.post(`${apiConfig.baseURL}/api/stud/save-image`, {
-          userId: user.id,
-          imageUrl,
-          folderName: currentFolder, // NULL for root
-        });
-
-        toast.success("Image uploaded");
-        fetchImages();
-      } catch (err) {
-        toast.error("Upload failed");
-      }
-    };
-    input.click();
-  };
-
+  
   const fetchImages = async () => {
     try {
       const res = await axios.get(
         `${apiConfig.baseURL}/api/stud/images/${user.id}`,
-        { params: { folderName: currentFolder || "" } }
+        { params: { folderName: currentFolder || "Sample" || "" } }
       );
 
       const sortedImages = res.data.sort(
@@ -636,8 +602,8 @@ const Birthdayeditor = () => {
         type: "multi-image-card",
         src1: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTjCoUtOal33JWLqals1Wq7p6GGCnr3o-lwpQ&s",
         src2: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTjCoUtOal33JWLqals1Wq7p6GGCnr3o-lwpQ&s",
-        link1: "Enter URL",
-        link2: "Enter URL",
+        link1: "",
+        link2: "",
         title1: "Name of the product", // Title for the first section
         title2: "Name of the product", // Title for the second section
         originalPrice1: "9000", // Original price for the first section
@@ -856,7 +822,7 @@ const Birthdayeditor = () => {
           textAlign: "center",
           margin: "5px auto",
         },
-        link: "Enter URL",
+        link: "",
       },
     ]);
   };
@@ -905,7 +871,7 @@ const Birthdayeditor = () => {
         type: "video-icon",
         src1: "https://zawiya.org/wp-content/themes/zawiyah/images/thumbnail-default.jpg",
         src2: "https://media1.giphy.com/media/v1.Y2lkPTc5MGI3NjExb2J2eGkwZHZ6ZmQxMzV2OWQzOG1qazZsNGs1dXNxaWV3NTJqbHd0YSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9cw/gcBq6Nom44PGBoUhWm/giphy.gif",
-        link: "Enter URL",
+        link: "",
         style: {
           width: "100%",
           height: isMobile ? "230px" : "350px", // Adjust height based on screen size
@@ -965,8 +931,8 @@ const Birthdayeditor = () => {
         type: "multi-image",
         src1: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTjCoUtOal33JWLqals1Wq7p6GGCnr3o-lwpQ&s",
         src2: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTjCoUtOal33JWLqals1Wq7p6GGCnr3o-lwpQ&s",
-        link1: "Enter URL",
-        link2: "Enter URL",
+        link1: "",
+        link2: "",
         buttonStyle1: {
           textAlign: "center",
           padding: isMobile ? "8px 8px" : "12px 25px", // Adjust padding based on screen size
@@ -1022,7 +988,7 @@ const Birthdayeditor = () => {
           alignItem: "center",
           borderRadius: "5px",
         },
-        link: "Enter URL",
+        link: "",
       },
     ]);
   };
@@ -2164,7 +2130,8 @@ const Birthdayeditor = () => {
                                     selectedIndex={selectedIndex}
                                     updateContent={updateContent}
                                   />
-                                  <label>Border Radius:</label>
+
+                                  <label>Border Radius (%):</label>
                                   <input
                                     type="range"
                                     min="0"
@@ -2184,6 +2151,14 @@ const Birthdayeditor = () => {
                                       })
                                     }
                                   />
+                                    <span>
+                              {parseInt(
+                                previewContent[
+                                  selectedIndex
+                                ].style.borderRadius.replace("%", "")
+                              )}
+                              %
+                            </span>
                                 </>
                               )}
                               {previewContent[selectedIndex].type ===
@@ -2290,6 +2265,7 @@ const Birthdayeditor = () => {
                                       <label>Button Link:</label>
                                       <input
                                         type="text"
+                                        placeholder="Enter URL"
                                         value={
                                           previewContent[selectedIndex].link1
                                         }
@@ -2403,7 +2379,7 @@ const Birthdayeditor = () => {
                                           Large
                                         </button>
                                       </div>
-                                      <label>Border Radius:</label>
+                                      <label>Border Radius (%):</label>
                                       <input
                                         type="range"
                                         min="0"
@@ -2426,6 +2402,14 @@ const Birthdayeditor = () => {
                                           })
                                         }
                                       />
+                                        <span>
+                              {parseInt(
+                                previewContent[
+                                  selectedIndex
+                                ].buttonStyle1.borderRadius.replace("%", "")
+                              )}
+                              %
+                            </span>
                                     </div>
                                   )}
 
@@ -2502,6 +2486,7 @@ const Birthdayeditor = () => {
                                       <label>Button Link:</label>
                                       <input
                                         type="text"
+                                        placeholder="Enter URL"
                                         value={
                                           previewContent[selectedIndex].link2
                                         }
@@ -2618,7 +2603,7 @@ const Birthdayeditor = () => {
                                         </button>
                                       </div>
 
-                                      <label>Border Radius:</label>
+                                      <label>Border Radius (%):</label>
                                       <input
                                         type="range"
                                         min="0"
@@ -2641,6 +2626,14 @@ const Birthdayeditor = () => {
                                           })
                                         }
                                       />
+                                        <span>
+                              {parseInt(
+                                previewContent[
+                                  selectedIndex
+                                ].buttonStyle2.borderRadius.replace("%", "")
+                              )}
+                              %
+                            </span>
                                     </div>
                                   )}
                                 </div>
@@ -2823,7 +2816,7 @@ const Birthdayeditor = () => {
                                     </button>
                                   </div>
 
-                                  <label>Border Radius:</label>
+                                  <label>Border Radius (%):</label>
                                   <input
                                     type="range"
                                     min="0"
@@ -2843,6 +2836,14 @@ const Birthdayeditor = () => {
                                       })
                                     }
                                   />
+                                    <span>
+                              {parseInt(
+                                previewContent[
+                                  selectedIndex
+                                ].style.borderRadius.replace("%", "")
+                              )}
+                              %
+                            </span>
                                   <label>Button Text Size:</label>
                                   <input
                                     type="range"
@@ -2904,6 +2905,7 @@ const Birthdayeditor = () => {
                                     <label>Button Link:</label>
                                     <input
                                       type="text"
+                                      placeholder="Enter URL"
                                       value={
                                         previewContent[selectedIndex].link1
                                       }
@@ -2992,7 +2994,7 @@ const Birthdayeditor = () => {
                                         Large
                                       </button>
                                     </div>
-                                    <label>Border Radius:</label>
+                                    <label>Border Radius (%):</label>
                                     <input
                                       type="range"
                                       min="0"
@@ -3015,6 +3017,14 @@ const Birthdayeditor = () => {
                                         })
                                       }
                                     />
+                                      <span>
+                              {parseInt(
+                                previewContent[
+                                  selectedIndex
+                                ].buttonStyle1.borderRadius.replace("%", "")
+                              )}
+                              %
+                            </span>
                                   </div>
                                   <h4>Button-2 Style</h4>
                                   <div>
@@ -3036,6 +3046,7 @@ const Birthdayeditor = () => {
                                     <label>Button Link:</label>
                                     <input
                                       type="text"
+                                      placeholder="Enter URL"
                                       value={
                                         previewContent[selectedIndex].link2
                                       }
@@ -3128,7 +3139,7 @@ const Birthdayeditor = () => {
                                       </button>
                                     </div>
 
-                                    <label>Border Radius:</label>
+                                    <label>Border Radius (%):</label>
                                     <input
                                       type="range"
                                       min="0"
@@ -3136,7 +3147,7 @@ const Birthdayeditor = () => {
                                       value={parseInt(
                                         previewContent[
                                           selectedIndex
-                                        ].buttonStyle2.borderRadius.replace(
+                                        ].style.borderRadius.replace(
                                           "px",
                                           ""
                                         )
@@ -3151,6 +3162,14 @@ const Birthdayeditor = () => {
                                         })
                                       }
                                     />
+                                      <span>
+                              {parseInt(
+                                previewContent[
+                                  selectedIndex
+                                ].buttonStyle2.borderRadius.replace("%", "")
+                              )}
+                              %
+                            </span>
                                   </div>
                                 </>
                               )}
@@ -3266,6 +3285,7 @@ const Birthdayeditor = () => {
                                       <label>Button Link:</label>
                                       <input
                                         type="text"
+                                        placeholder="Enter URL"
                                         value={
                                           previewContent[selectedIndex].link1
                                         }
@@ -3379,7 +3399,7 @@ const Birthdayeditor = () => {
                                           Large
                                         </button>
                                       </div>
-                                      <label>Border Radius:</label>
+                                      <label>Border Radius (%):</label>
                                       <input
                                         type="range"
                                         min="0"
@@ -3402,6 +3422,14 @@ const Birthdayeditor = () => {
                                           })
                                         }
                                       />
+                                        <span>
+                              {parseInt(
+                                previewContent[
+                                  selectedIndex
+                                ].buttonStyle1.borderRadius.replace("%", "")
+                              )}
+                              %
+                            </span>
                                     </div>
                                   )}
 
@@ -3474,6 +3502,7 @@ const Birthdayeditor = () => {
                                       <label>Button Link:</label>
                                       <input
                                         type="text"
+                                        placeholder="Enter URL"
                                         value={
                                           previewContent[selectedIndex].link2
                                         }
@@ -3590,7 +3619,7 @@ const Birthdayeditor = () => {
                                         </button>
                                       </div>
 
-                                      <label>Border Radius:</label>
+                                      <label>Border Radius (%):</label>
                                       <input
                                         type="range"
                                         min="0"
@@ -3613,6 +3642,14 @@ const Birthdayeditor = () => {
                                           })
                                         }
                                       />
+                                        <span>
+                              {parseInt(
+                                previewContent[
+                                  selectedIndex
+                                ].buttonStyle2.borderRadius.replace("%", "")
+                              )}
+                              %
+                            </span>
                                     </div>
                                   )}
                                 </div>
@@ -3766,7 +3803,7 @@ const Birthdayeditor = () => {
                                     %
                                   </span>
 
-                                  <label>Border Radius:</label>
+                                  <label>Border Radius (%):</label>
                                   <input
                                     type="range"
                                     min="0"
@@ -3786,6 +3823,14 @@ const Birthdayeditor = () => {
                                       })
                                     }
                                   />
+                                    <span>
+                              {parseInt(
+                                previewContent[
+                                  selectedIndex
+                                ].style.borderRadius.replace("%", "")
+                              )}
+                              %
+                            </span>
 
                                   <ColorPicker
                                     label="Image Background"
@@ -3847,7 +3892,7 @@ const Birthdayeditor = () => {
                                     %
                                   </span>
 
-                                  <label>Border Radius:</label>
+                                  <label>Border Radius (%):</label>
                                   <input
                                     type="range"
                                     min="0"
@@ -3867,6 +3912,14 @@ const Birthdayeditor = () => {
                                       })
                                     }
                                   />
+                                    <span>
+                              {parseInt(
+                                previewContent[
+                                  selectedIndex
+                                ].style.borderRadius.replace("%", "")
+                              )}
+                              %
+                            </span>
                                   <ColorPicker
                                     label="Image Background"
                                     objectKey="style.backgroundColor"
@@ -3999,7 +4052,7 @@ const Birthdayeditor = () => {
                                     )}
                                     %
                                   </span>
-                                  <label>Border Radius:</label>
+                                  <label>Border Radius (%):</label>
                                   <input
                                     type="range"
                                     min="0"
@@ -4019,6 +4072,14 @@ const Birthdayeditor = () => {
                                       })
                                     }
                                   />
+                                    <span>
+                              {parseInt(
+                                previewContent[
+                                  selectedIndex
+                                ].style.borderRadius.replace("%", "")
+                              )}
+                              %
+                            </span>
 
                                   <ColorPicker
                                     label="Image Background"
@@ -4076,7 +4137,7 @@ const Birthdayeditor = () => {
                               />
                             </div>
 
-                            <label>Border Radius:</label>
+                            <label>Border Radius (%):</label>
                             <input
                               type="range"
                               min="0"
@@ -4095,6 +4156,14 @@ const Birthdayeditor = () => {
                                 })
                               }
                             />
+                              <span>
+                              {parseInt(
+                                previewContent[
+                                  selectedIndex
+                                ].style.borderRadius.replace("%", "")
+                              )}
+                              %
+                            </span>
                           </>
                         )}
 
@@ -4287,7 +4356,7 @@ const Birthdayeditor = () => {
                               </button>
                             </div>
 
-                            <label>Border Radius:</label>
+                            <label>Border Radius (%):</label>
                             <input
                               type="range"
                               min="0"
@@ -4306,6 +4375,14 @@ const Birthdayeditor = () => {
                                 })
                               }
                             />
+                              <span>
+                              {parseInt(
+                                previewContent[
+                                  selectedIndex
+                                ].style.borderRadius.replace("%", "")
+                              )}
+                              %
+                            </span>
                             <label>Button Text Size:</label>
                             <input
                               type="range"
@@ -4433,6 +4510,7 @@ const Birthdayeditor = () => {
                                 <label>Button Link:</label>
                                 <input
                                   type="text"
+                                  placeholder="Enter URL"
                                   value={previewContent[selectedIndex].link1}
                                   onChange={(e) =>
                                     updateContent(selectedIndex, {
@@ -4544,7 +4622,7 @@ const Birthdayeditor = () => {
                                     Large
                                   </button>
                                 </div>
-                                <label>Border Radius:</label>
+                                <label>Border Radius (%):</label>
                                 <input
                                   type="range"
                                   min="0"
@@ -4567,6 +4645,14 @@ const Birthdayeditor = () => {
                                     })
                                   }
                                 />
+                                  <span>
+                              {parseInt(
+                                previewContent[
+                                  selectedIndex
+                                ].buttonStyle1.borderRadius.replace("%", "")
+                              )}
+                              %
+                            </span>
                               </div>
                             )}
 
@@ -4639,6 +4725,7 @@ const Birthdayeditor = () => {
                                 <label>Button Link:</label>
                                 <input
                                   type="text"
+                                  placeholder="Enter URL"
                                   value={previewContent[selectedIndex].link2}
                                   onChange={(e) =>
                                     updateContent(selectedIndex, {
@@ -4753,7 +4840,7 @@ const Birthdayeditor = () => {
                                   </button>
                                 </div>
 
-                                <label>Border Radius:</label>
+                                <label>Border Radius (%):</label>
                                 <input
                                   type="range"
                                   min="0"
@@ -4776,6 +4863,14 @@ const Birthdayeditor = () => {
                                     })
                                   }
                                 />
+                                  <span>
+                              {parseInt(
+                                previewContent[
+                                  selectedIndex
+                                ].buttonStyle2.borderRadius.replace("%", "")
+                              )}
+                              %
+                            </span>
                               </div>
                             )}
                           </div>
@@ -4823,6 +4918,7 @@ const Birthdayeditor = () => {
                                 <label>Button Link:</label>
                                 <input
                                   type="text"
+                                  placeholder="Enter URL"
                                   value={previewContent[selectedIndex].link1}
                                   onChange={(e) =>
                                     updateContent(selectedIndex, {
@@ -4934,7 +5030,7 @@ const Birthdayeditor = () => {
                                     Large
                                   </button>
                                 </div>
-                                <label>Border Radius:</label>
+                                <label>Border Radius (%):</label>
                                 <input
                                   type="range"
                                   min="0"
@@ -4957,6 +5053,14 @@ const Birthdayeditor = () => {
                                     })
                                   }
                                 />
+                                  <span>
+                              {parseInt(
+                                previewContent[
+                                  selectedIndex
+                                ].buttonStyle1.borderRadius.replace("%", "")
+                              )}
+                              %
+                            </span>
                               </div>
                             )}
 
@@ -4979,6 +5083,7 @@ const Birthdayeditor = () => {
                                 <label>Button Link:</label>
                                 <input
                                   type="text"
+                                  placeholder="Enter URL"
                                   value={previewContent[selectedIndex].link2}
                                   onChange={(e) =>
                                     updateContent(selectedIndex, {
@@ -5093,7 +5198,7 @@ const Birthdayeditor = () => {
                                   </button>
                                 </div>
 
-                                <label>Border Radius:</label>
+                                <label>Border Radius (%):</label>
                                 <input
                                   type="range"
                                   min="0"
@@ -5116,6 +5221,14 @@ const Birthdayeditor = () => {
                                     })
                                   }
                                 />
+                                  <span>
+                              {parseInt(
+                                previewContent[
+                                  selectedIndex
+                                ].buttonStyle2.borderRadius.replace("%", "")
+                              )}
+                              %
+                            </span>
                               </div>
                             )}
                           </div>
@@ -5225,7 +5338,7 @@ const Birthdayeditor = () => {
                               %
                             </span>
 
-                            <label>Border Radius:</label>
+                            <label>Border Radius(%):</label>
                             <input
                               type="range"
                               min="0"
@@ -5244,6 +5357,14 @@ const Birthdayeditor = () => {
                                 })
                               }
                             />
+                              <span>
+                              {parseInt(
+                                previewContent[
+                                  selectedIndex
+                                ].style.borderRadius.replace("%", "")
+                              )}
+                              %
+                            </span>
 
                             <div className="editor-bg">
                               Image Background
@@ -5312,7 +5433,7 @@ const Birthdayeditor = () => {
                               %
                             </span>
 
-                            <label>Border Radius:</label>
+                            <label>Border Radius (%):</label>
                             <input
                               type="range"
                               min="0"
@@ -5331,6 +5452,14 @@ const Birthdayeditor = () => {
                                 })
                               }
                             />
+                              <span>
+                              {parseInt(
+                                previewContent[
+                                  selectedIndex
+                                ].style.borderRadius.replace("%", "")
+                              )}
+                              %
+                            </span>
 
                             <div className="editor-bg">
                               Image Background
@@ -5586,7 +5715,7 @@ const Birthdayeditor = () => {
                               )}
                               %
                             </span>
-                            <label>Border Radius:</label>
+                            <label>Border Radius (%):</label>
                             <input
                               type="range"
                               min="0"
@@ -5605,6 +5734,14 @@ const Birthdayeditor = () => {
                                 })
                               }
                             />
+                              <span>
+                              {parseInt(
+                                previewContent[
+                                  selectedIndex
+                                ].style.borderRadius.replace("%", "")
+                              )}
+                              %
+                            </span>
 
                             <div className="editor-bg">
                               Image Background
