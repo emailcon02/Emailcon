@@ -20,8 +20,12 @@ const s3 = new S3Client({
 });
 
 const storage = multer.memoryStorage();
-const upload = multer({ storage });
-
+const upload = multer({ 
+  storage: storage,
+  limits: { 
+    fileSize: 50 * 1024 * 1024 // 50MB limit
+  } 
+});
 const compressImageIfNeeded = async (fileBuffer, mimeType) => {
   const maxSize = 250 * 1024; // 250KB
   const targetSize = 200 * 1024; // 200KB
