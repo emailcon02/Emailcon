@@ -231,7 +231,7 @@ const Readmainpage = () => {
     try {
       const res = await axios.get(
         `${apiConfig.baseURL}/api/stud/images/${user.id}`,
-        { params: { folderName: currentFolder || "Sample" || "" } }
+        { params: { folderName: currentFolder || "Sample" } }
       );
 
       const sortedImages = res.data.sort(

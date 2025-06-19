@@ -227,13 +227,12 @@ setTimeout(() => {
     try {
       const res = await axios.get(
         `${apiConfig.baseURL}/api/stud/images/${user.id}`,
-        { params: { folderName: currentFolder || "Sample" || ""  } }
+        { params: { folderName: currentFolder || "Sample"  } }
       );
 
       const sortedImages = res.data.sort(
         (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
       );
-
       setGalleryImages(sortedImages);
     } catch (err) {
       console.error("Error fetching images", err);

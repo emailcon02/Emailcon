@@ -173,13 +173,61 @@ const Birthdayeditor = () => {
       toast.error("Failed to create folder");
     }
   };
+  const uploadImagefile = async () => {
+   const input = document.createElement("input");
+   input.type = "file";
+   input.accept = "image/*";
+   input.multiple = true;
+ 
+   input.onchange = async (e) => {
+     const files = Array.from(e.target.files);
+     if (files.length > 10) {
+       toast.error("Maximum 10 files allowed.");
+       return;
+     }
+ 
+     const formData = new FormData();
+     for (const file of files) {
+       formData.append("image", file); // append each file under same key
+     }
+     formData.append("userId", user.id);
+     formData.append("folderName", currentFolder || "Sample");
+ 
+     try {
+       const uploadRes = await axios.post(
+         `${apiConfig.baseURL}/api/stud/upload`,
+         formData,
+         { headers: { "Content-Type": "multipart/form-data" } }
+       );
+ 
+       const imageUrls = uploadRes?.data?.imageUrls || [];
+ 
+       // ✅ Save all images to DB
+       await Promise.all(
+         imageUrls.map((imageUrl) =>
+           axios.post(`${apiConfig.baseURL}/api/stud/save-image`, {
+             userId: user.id,
+             imageUrl,
+             folderName: currentFolder || "Sample"
+           })
+         )
+       );
+       fetchImages(); 
+     } catch (err) {
+       console.error(err);
+       toast.error("Upload failed");
+     }
+   };
+ 
+   input.click();
+ };
 
   
   const fetchImages = async () => {
     try {
       const res = await axios.get(
         `${apiConfig.baseURL}/api/stud/images/${user.id}`,
-        { params: { folderName: currentFolder || "Sample" || "" } }
+        { params: { folderName: currentFolder || "Sample" } }
       );
 
       const sortedImages = res.data.sort(

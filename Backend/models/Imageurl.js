@@ -12,7 +12,6 @@ const imageUrlSchema = new mongoose.Schema({
          ref: "User",
      },
        folderName: { type: String },
-
     
 }, {
     timestamps: true
