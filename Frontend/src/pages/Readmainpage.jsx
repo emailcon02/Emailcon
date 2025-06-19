@@ -6011,7 +6011,7 @@ const Readmainpage = () => {
                               }
                               alt="Editable"
                               className="multiimgcard"
-                              title="Upload Image"
+                            title="Upload Image 240 x 240"
                               style={item.style}
                               onClick={() => handleopenFiles(index, 1)}
                             />
@@ -6048,7 +6048,7 @@ const Readmainpage = () => {
                               }
                               alt="Editable"
                               className="multiimgcard"
-                              title="Upload Image"
+                             title="Upload Image 240 x 240"
                               style={item.style}
                               onClick={() => handleopenFiles(index, 2)}
                             />
@@ -6089,7 +6089,7 @@ const Readmainpage = () => {
                               }
                               alt="Editable"
                               className="multiple-img"
-                              title="Upload Image"
+                             title="Upload Image 240 x 240"
                               style={item.style}
                               onClick={() => handleopenFiles(index, 1)}
                             />
@@ -6102,7 +6102,7 @@ const Readmainpage = () => {
                               }
                               alt="Editable"
                               className="multiple-img"
-                              title="Upload Image"
+                              title="Upload Image 240 x 240"
                               style={item.style}
                               onClick={() => handleopenFiles(index, 2)}
                             />
@@ -6119,7 +6119,7 @@ const Readmainpage = () => {
                               }
                               alt="Editable"
                               className="multiimg"
-                              title="Upload Image"
+                             title="Upload Image 240 x 240"
                               style={item.style}
                               onClick={() => handleopenFiles(index, 1)}
                             />
@@ -6141,7 +6141,7 @@ const Readmainpage = () => {
                               }
                               alt="Editable"
                               className="multiimg"
-                              title="Upload Image"
+                             title="Upload Image 240 x 240"
                               style={item.style}
                               onClick={() => handleopenFiles(index, 2)}
                             />

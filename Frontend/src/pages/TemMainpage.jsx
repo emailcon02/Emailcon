@@ -5908,7 +5908,7 @@ const TemMainpage = () => {
                               }
                               alt="Editable"
                               className="multiimgcard"
-                              title="Upload Image"
+                            title="Upload Image 240 x 240"
                               style={item.style}
                               onClick={() => handleopenFiles(index, 1)}
                             />
@@ -5945,7 +5945,7 @@ const TemMainpage = () => {
                               }
                               alt="Editable"
                               className="multiimgcard"
-                              title="Upload Image"
+                             title="Upload Image 240 x 240"
                               style={item.style}
                               onClick={() => handleopenFiles(index, 2)}
                             />
@@ -5986,7 +5986,7 @@ const TemMainpage = () => {
                               }
                               alt="Editable"
                               className="multiple-img"
-                              title="Upload Image"
+                             title="Upload Image 240 x 240"
                               style={item.style}
                               onClick={() => handleopenFiles(index, 1)}
                             />
@@ -5999,7 +5999,7 @@ const TemMainpage = () => {
                               }
                               alt="Editable"
                               className="multiple-img"
-                              title="Upload Image"
+                             title="Upload Image 240 x 240"
                               style={item.style}
                               onClick={() => handleopenFiles(index, 2)}
                             />
@@ -6016,7 +6016,7 @@ const TemMainpage = () => {
                               }
                               alt="Editable"
                               className="multiimg"
-                              title="Upload Image"
+                             title="Upload Image 240 x 240"
                               style={item.style}
                               onClick={() => handleopenFiles(index, 1)}
                             />
@@ -6038,7 +6038,7 @@ const TemMainpage = () => {
                               }
                               alt="Editable"
                               className="multiimg"
-                              title="Upload Image"
+                              title="Upload Image 240 x 240"
                               style={item.style}
                               onClick={() => handleopenFiles(index, 2)}
                             />
@@ -6805,13 +6805,13 @@ const TemMainpage = () => {
                                     value={selectedGroup[index] || ""}
                                     className="select-variable"
                                   >
-                                    <option
+                                    {/* <option
                                       value=""
                                       disabled
                                       className="template-title"
                                     >
                                       Add Variable
-                                    </option>
+                                    </option> */}
                                     <option value="" disabled>
                                       Select Group
                                     </option>

@@ -250,7 +250,7 @@ router.post('/sendtestmail', async (req, res) => {
         return `<table class="multi" style="width:100%; border-collapse:collapse;margin:10px auto !important;">
         <tr>
             <td style="width:50%;text-align:center;padding:8px; vertical-align:top;">
-                <img src="${item.src1}" style="border-radius:10px;object-fit:contain;height:230px !important;width:100%;pointer-events:none !important; object-fit:cover;" alt="image"/>
+                <img src="${item.src1}" style="border-radius:10px;height:240px !important;width:100%;pointer-events:none !important; object-fit:cover;" alt="image"/>
                     <a class = "img-btn"
                     href="${generateTrackingLink(item.link1, userId, campaignId, emailData.recipient)}"
                     target = "_blank"
@@ -259,7 +259,7 @@ router.post('/sendtestmail', async (req, res) => {
                     </a>
             </td>
             <td style="width:50%;text-align:center;padding:8px; vertical-align:top;">
-                <img src="${item.src2}" style="border-radius:10px;object-fit:contain;height:230px !important;width:100%;pointer-events:none !important; object-fit:cover;" alt="image"/>
+                <img src="${item.src2}" style="border-radius:10px;height:240px !important;width:100%;pointer-events:none !important; object-fit:cover;" alt="image"/>
                     <a class = "img-btn"
                     href="${generateTrackingLink(item.link2, userId, campaignId, emailData.recipient)}"
                     target = "_blank"

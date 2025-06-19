@@ -23,6 +23,8 @@ app.use(cors());
 app.use(express.json({ limit: '100mb' })); // For JSON payloads
 app.use(express.urlencoded({ limit: '100mb', extended: true })); // For URL-encoded data
 
+
+
 // Routes
 app.use('/stud', studentRoutes);
 app.use('/auth', authRoutes);

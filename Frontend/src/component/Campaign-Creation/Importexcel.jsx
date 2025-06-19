@@ -333,170 +333,92 @@ const ExcelModal = ({ isOpen, onClose, previewContent = [], bgColor }) => {
     }
   };
   const handleSend = async () => {
-    if (excelData.length === 0 || excelData.length <= 1) {
-      toast.error("Please upload a valid Excel file.");
-      return;
-    }
-  
-    const [headers, ...rows] = excelData;
-    if (!headers.includes("Email")) {
-      toast.error("Excel must include an 'Email' column.");
-      return;
-    }
-  
-    if (!previewContent?.length) {
-      toast.error("No Preview Content provided.");
-      return;
-    }
-  
-    if (!previewtext || !aliasName || !message || !replyTo) {
-      toast.error("Please fill all required fields: Previewtext,Alias Name,ReplyTo,Subject.");
-      return;
-    }
-  
-    setIsLoading(true);
-    navigate("/campaigntable");
-    sessionStorage.removeItem("firstVisit");
-    sessionStorage.removeItem("toggled");
-  
-    const emailIndex = headers.indexOf("Email");
-  
-    let sentEmails = [];
-    let failedEmails = [];
-    let attachments = [];
-  
-    if (emailData.attachments?.length > 0) {
+  if (excelData.length === 0 || excelData.length <= 1) {
+    toast.error("Please upload a valid Excel file.");
+    return;
+  }
+
+  const [headers, ...rows] = excelData;
+  if (!headers.includes("Email")) {
+    toast.error("Excel must include an 'Email' column.");
+    return;
+  }
+
+  if (!previewContent || previewContent.length === 0) {
+    toast.error("No Preview Content provided.");
+    return;
+  }
+
+  if (!previewtext || !aliasName || !message || !replyTo) {
+    toast.error("Please fill all required fields: Previewtext, Alias Name, ReplyTo, Subject.");
+    return;
+  }
+
+  setIsLoading(true);
+  navigate("/campaigntable");
+  sessionStorage.removeItem("firstVisit");
+  sessionStorage.removeItem("toggled");
+
+  let attachments = [];
+
+  try {
+    // Upload attachments if any
+    if (emailData.attachments && emailData.attachments.length > 0) {
       const formData = new FormData();
       emailData.attachments.forEach((file) => formData.append("attachments", file));
-  
+
       const uploadResponse = await axios.post(
         `${apiConfig.baseURL}/api/stud/uploadfile`,
         formData,
         { headers: { "Content-Type": "multipart/form-data" } }
       );
-  
+
       attachments = uploadResponse.data.fileUrls.map((file, index) => ({
         originalName: emailData.attachments[index].name,
         fileUrl: file,
       }));
     }
-  
+
+    // Format Excel rows into JSON objects
     const formattedExcelData = rows.map((row) =>
       headers.reduce((obj, header, index) => {
         obj[header] = row[index] || "";
         return obj;
       }, {})
     );
-  
-    try {
-      const totalEmails = rows.filter((row) => row[emailIndex]).length;
-  
-      const campaignResponse = await axios.post(`${apiConfig.baseURL}/api/stud/camhistory`, {
-        campaignname: campaign.camname,
-        groupname: "Instant Send",
-        totalcount: totalEmails,
-        sendcount: 0,
-        recipients: "no mail",
-        failedcount: 0,
-        subject: message,
-        previewtext,
-        previewContent,
-        aliasName,replyTo,
-        bgColor,
-        sentEmails,
-        attachments,
-        failedEmails,
-        scheduledTime: new Date(),
-        status: "Pending",
-        progress: 0,
-        senddate: new Date().toLocaleString(),
-        user: user.id,
-        groupId: "No id",
-        exceldata: formattedExcelData,
-      });
-  
-      const campaignId = campaignResponse.data.id;
-      // Send emails in batches of 50
-      const BATCH_SIZE = 50;
-      const batches = [];      
-      for (let i = 0; i < rows.length; i += BATCH_SIZE) {
-        const batch = rows.slice(i, i + BATCH_SIZE);
-        batches.push(batch);
-      }      
-      // Process all batches in parallel
-      await Promise.all(
-        batches.map(async (batch) => {
-          for (const row of batch) {
-            const email = row[emailIndex];
-            if (!email) continue;
-      
-            const personalizedContent = previewContent.map((item) => {
-              const personalizedItem = { ...item };
-              if (item.content) {
-                headers.forEach((header, index) => {
-                  const placeholder = new RegExp(`{?${header.trim()}\\}?`, "g");
-                  const cellValue = row[index] ? String(row[index]).trim() : "";
-                  personalizedItem.content = personalizedItem.content.replace(placeholder, cellValue);
-                });
-              }
-              return personalizedItem;
-            });
-      
-            let personalizedSubject = message;
-            headers.forEach((header, index) => {
-              const placeholder = new RegExp(`{?${header.trim()}\\}?`, "g");
-              const cellValue = row[index] ? String(row[index]).trim() : "";
-              personalizedSubject = personalizedSubject.replace(placeholder, cellValue);
-            });
-      
-            const emailPayload = {
-              recipientEmail: email,
-              subject: personalizedSubject,
-              body: JSON.stringify(personalizedContent),
-              bgColor,
-              previewtext,
-              attachments,
-              aliasName,replyTo,
-              userId: user.id,
-              campaignId,
-            };
-      
-            try {
-              await axios.post(`${apiConfig.baseURL}/api/stud/sendbulkEmail`, emailPayload);
-              sentEmails.push(email);
-            } catch (error) {
-              console.error(`Failed to send to ${email}:`, error);
-              failedEmails.push(email);
-            }
-          }
-        })
-      );
-       
-      // ✅ Final status & progress calculation
-      const successCount = sentEmails.length;
-      const failureCount = failedEmails.length;
-      const finalStatus = failureCount > 0 ? "Failed" : "Success";
-      const finalProgress = failureCount > 0
-        ? Math.round((failureCount / totalEmails) * 100)
-        : 100;
-  
-      await axios.put(`${apiConfig.baseURL}/api/stud/camhistory/${campaignId}`, {
-        sendcount: successCount,
-        failedcount: failureCount,
-        sentEmails,
-        failedEmails,
-        status: finalStatus,
-        progress: finalProgress,
-      });
-  
-      console.log(`Final Status: ${finalStatus}, Progress: ${finalProgress}%`);
-    } catch (error) {
-      console.error("Error during sending process:", error.response?.data || error.message);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-  
+
+    const totalEmails = formattedExcelData.length;
+
+    const payload = {
+      campaignname: campaign.camname,
+      groupname: "Instant Send",
+      totalcount: totalEmails,
+      subject: message,
+      attachments,
+      previewtext,
+      aliasName,
+      replyTo,
+      previewContent,
+      bgColor,
+      scheduledTime: new Date(),
+      senddate: new Date().toLocaleString(),
+      user: user.id,
+      groupId: "No id",
+      students: formattedExcelData, 
+    };
+
+    // Send to backend for processing & sending
+    await axios.post(`${apiConfig.baseURL}/api/stud/start-campaign`, payload);
+
+    // Optional: toast.success("Campaign initiated successfully!");
+  } catch (error) {
+    console.error("🔥 Campaign initiation failed:", error.response?.data || error.message);
+    toast.error("Failed to start campaign.");
+  } finally {
+    setIsLoading(false);
+  }
+};
+
  
   if (!isOpen) return null;
 

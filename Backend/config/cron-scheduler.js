@@ -7,6 +7,30 @@ import apiConfig from "../api/apiconfigbackend.js";
 
 console.log("Cron job started for sending scheduled emails.");
 
+// Helper function to validate email
+const isValidEmail = (email) => {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+};
+
+// Helper function to send email (mocked, replace with actual implementation)
+const sendEmailToStudent = async ({ student, campaignId, userId, subject, attachments, previewtext, aliasName, replyTo, previewContent, bgColor }) => {
+  const emailData = {
+    recipientEmail: student.Email,
+    subject,
+    aliasName,
+    replyTo,
+    body: JSON.stringify(previewContent),
+    bgColor,
+    previewtext,
+    attachments,
+    userId,
+    groupId: student.groupname || 'no group',
+    campaignId,
+  };
+  
+  await axios.post(`${apiConfig.baseURL}/api/stud/sendbulkEmail`, emailData);
+};
+
 cron.schedule('*/10 * * * *', async () => {
   try {
     const nowUTC = new Date();
@@ -28,189 +52,153 @@ cron.schedule('*/10 * * * *', async () => {
     }
 
     for (const camhistory of camhistories) {
-        // Check if the user is active before proceeding
-        const user = await User.findById(camhistory.user); // Fetch the user by their ID
-        if (!user || !user.isActive) {
-          console.log(`Skipping email processing for user ${camhistory.user} as they are inactive.`);
-          continue;  // Skip processing this entry and move to the next
-        }
+      // Check if the user is active before proceeding
+      const user = await User.findById(camhistory.user);
+      if (!user || !user.isActive) {
+        console.log(`Skipping email processing for user ${camhistory.user} as they are inactive.`);
+        continue;
+      }
+
       console.log(`Processing scheduled email for user: ${camhistory.user}`);
       const groupId = camhistory.groupId?.trim();
-      let sentEmails = [];
-      let failedEmails = [];
 
-      await axios.put(`${apiConfig.baseURL}/api/stud/camhistory/${camhistory._id}`, { status: "Pending" });
-      const BATCH_SIZE = 50;
+      // Update status to Pending
+      await Camhistory.findByIdAndUpdate(camhistory._id, { status: "Pending" });
+
+      // Get students based on groupId
+      let students = [];
       if (!groupId || groupId.toLowerCase() === "no group") {
-        const recipients = camhistory.recipients.split(",").map(email => email.trim());
-
-        for (const email of recipients) {
-          const personalizedContent = camhistory.previewContent.map(item =>
-            item.content
-              ? { ...item, content: item.content.replace(/\{?Email\}?/g, email) }
-              : item
-          );
-
-          const emailData = {
-            recipientEmail: email,
-            subject: camhistory.subject,
-            aliasName: camhistory.aliasName,
-            replyTo:camhistory.replyTo,
-            body: JSON.stringify(personalizedContent),
-            bgColor: camhistory.bgColor,
-            previewtext: camhistory.previewtext,
-            attachments: camhistory.attachments,
-            userId: camhistory.user,
-            groupId: camhistory.groupname,
-            campaignId: camhistory._id,
-          };
-
-          try {
-            await axios.post(`${apiConfig.baseURL}/api/stud/sendbulkEmail`, emailData);
-            sentEmails.push(email);
-          } catch (error) {
-            console.error(`Failed to send email to ${email}:`, error.message);
-            failedEmails.push(email);
-          }
-        }
-
-      } 
-
-      else if(groupId.toLowerCase() === "no id") {
-        const students = camhistory.exceldata.map(student => ({
+        students = camhistory.recipients.split(",").map(email => ({ Email: email.trim() }));
+      } else if (groupId.toLowerCase() === "no id") {
+        students = camhistory.exceldata.map(student => ({
           ...(student._doc || student),
           ...student.additionalFields,
         }));
-      
-        const batches = [];
-        for (let i = 0; i < students.length; i += BATCH_SIZE) {
-          batches.push(students.slice(i, i + BATCH_SIZE));
-        }
-      
-        await Promise.all(
-          batches.map(async (batch) => {
-            for (const student of batch) {
-              const email = student.Email;
-              if (!email) continue;
-      
-              const personalizedContent = camhistory.previewContent.map(item => {
-                const personalizedItem = { ...item };
-                if (item.content) {
-                  Object.entries(student).forEach(([key, value]) => {
-                    const regex = new RegExp(`\\{${key.trim()}\\}`, "gi");
-                    personalizedItem.content = personalizedItem.content.replace(regex, value != null ? String(value).trim() : "");
-                  });
-                }
-                return personalizedItem;
-              });
-      
-              const emailData = {
-                recipientEmail: email,
-                subject: camhistory.subject,
-                aliasName: camhistory.aliasName,
-                replyTo:camhistory.replyTo,
-                body: JSON.stringify(personalizedContent),
-                bgColor: camhistory.bgColor,
-                previewtext: camhistory.previewtext,
-                attachments: camhistory.attachments,
-                userId: camhistory.user,
-                groupId: camhistory.groupname,
-                campaignId: camhistory._id,
-              };
-      
-              try {
-                await axios.post(`${apiConfig.baseURL}/api/stud/sendbulkEmail`, emailData);
-                sentEmails.push(email);
-              } catch (error) {
-                console.error(`Failed to send email to ${email}:`, error.message);
-                failedEmails.push(email);
-              }
-            }
-          })
-        );
-      
       } else if (mongoose.Types.ObjectId.isValid(groupId)) {
         const studentsResponse = await axios.get(`${apiConfig.baseURL}/api/stud/groups/${groupId}/students`);
-        const students = studentsResponse.data;
-      
-        const batches = [];
-        for (let i = 0; i < students.length; i += BATCH_SIZE) {
-          batches.push(students.slice(i, i + BATCH_SIZE));
-        }
-      
-        await Promise.all(
-          batches.map(async (batch) => {
-            for (const student of batch) {
-              const email = student.Email;
-              if (!email) continue;
-      
-              let personalizedSubject = camhistory.subject;
-              Object.entries(student).forEach(([key, value]) => {
-                const regex = new RegExp(`\\{?${key}\\}?`, "g");
-                personalizedSubject = personalizedSubject.replace(regex, value != null ? String(value).trim() : "");
-              });
-      
-              const personalizedContent = camhistory.previewContent.map(item => {
+        students = studentsResponse.data;
+      } else {
+        console.warn(`⚠️ Invalid groupId "${groupId}" for campaign ${camhistory._id}`);
+        continue;
+      }
+
+      // Filter valid students
+      const validStudents = students.filter(student => 
+        student?.Email && isValidEmail(student.Email)
+      );
+      const invalidEmails = students
+        .filter(student => !student?.Email || !isValidEmail(student.Email))
+        .map(student => student?.Email || 'missing');
+
+      // Initial update with invalid emails
+      await Camhistory.findByIdAndUpdate(camhistory._id, {
+        failedcount: invalidEmails.length,
+        failedEmails: invalidEmails,
+      });
+
+      const batchSize = 10;
+      const totalEmails = validStudents.length;
+      let processedEmails = 0;
+      let sentEmails = [];
+      let failedEmails = [...invalidEmails]; // Start with invalid emails
+
+      // Split into batches
+      const batches = [];
+      for (let i = 0; i < validStudents.length; i += batchSize) {
+        batches.push(validStudents.slice(i, i + batchSize));
+      }
+
+      // Process batches in parallel
+      await Promise.all(
+        batches.map(async (batch) => {
+          for (const student of batch) {
+            try {
+              // Personalize content
+              const personalizedContent = camhistory.previewContent.map((item) => {
                 const personalizedItem = { ...item };
                 if (item.content) {
                   Object.entries(student).forEach(([key, value]) => {
                     const regex = new RegExp(`\\{?${key}\\}?`, "g");
-                    personalizedItem.content = personalizedItem.content.replace(regex, value != null ? String(value).trim() : "");
+                    personalizedItem.content = personalizedItem.content.replace(
+                      regex,
+                      value != null ? String(value).trim() : ""
+                    );
                   });
                 }
                 return personalizedItem;
               });
-      
-              const emailData = {
-                recipientEmail: email,
-                subject: personalizedSubject,
-                aliasName: camhistory.aliasName,
-                replyTo:camhistory.replyTo,
-                body: JSON.stringify(personalizedContent),
-                bgColor: camhistory.bgColor,
-                previewtext: camhistory.previewtext,
-                attachments: camhistory.attachments,
-                userId: camhistory.user,
-                groupId: camhistory.groupname,
-                campaignId: camhistory._id,
-              };
-      
-              try {
-                await axios.post(`${apiConfig.baseURL}/api/stud/sendbulkEmail`, emailData);
-                sentEmails.push(email);
-              } catch (error) {
-                console.error(`Failed to send email to ${email}:`, error.message);
-                failedEmails.push(email);
-              }
-            }
-          })
-        );
-      }
-      else {
-  console.warn(`⚠️ Invalid groupId "${groupId}" for campaign ${camhistory._id}`);
-}
 
-      // ✅ Final status & progress calculation
-      const totalEmails = camhistory.totalcount || sentEmails.length + failedEmails.length;
-      const successCount = sentEmails.length;
-      const failureCount = failedEmails.length;
-      const finalStatus = failureCount > 0 ? "Failed" : "Success";
-      const finalProgress = failureCount > 0
-        ? Math.round((failureCount / totalEmails) * 100)
+              // Personalize subject
+              let personalizedSubject = camhistory.subject;
+              Object.entries(student).forEach(([key, value]) => {
+                const regex = new RegExp(`\\{?${key}\\}?`, "g");
+                personalizedSubject = personalizedSubject.replace(
+                  regex,
+                  value != null ? String(value).trim() : ""
+                );
+              });
+
+              // Send email
+              await sendEmailToStudent({
+                student,
+                campaignId: camhistory._id,
+                userId: camhistory.user,
+                subject: personalizedSubject,
+                attachments: camhistory.attachments,
+                previewtext: camhistory.previewtext,
+                aliasName: camhistory.aliasName,
+                replyTo: camhistory.replyTo,
+                previewContent: personalizedContent,
+                bgColor: camhistory.bgColor,
+              });
+              sentEmails.push(student.Email);
+            } catch (error) {
+              console.error(`❌ Error sending to ${student.Email}:`, error);
+              failedEmails.push(student.Email);
+            }
+
+            processedEmails++;
+            const progress = Math.round((processedEmails / totalEmails) * 100);
+
+            // Update progress dynamically
+            await Camhistory.findByIdAndUpdate(camhistory._id, {
+              progress,
+              sendcount: sentEmails.length,
+              failedcount: failedEmails.length,
+              sentEmails,
+              failedEmails,
+              status:
+                progress === 100
+                  ? failedEmails.length > 0
+                    ? "Partial Success"
+                    : "Success"
+                  : "Processing",
+            });
+
+            // Optional throttling: delay between emails
+            await new Promise((resolve) => setTimeout(resolve, 1000));
+          }
+        })
+      );
+
+      // Final update
+      const finalStatus = failedEmails.length === 0 ? "Success" : "Failed";
+      const finalProgress = failedEmails.length > 0
+        ? Math.round((failedEmails.length / (sentEmails.length + failedEmails.length)) * 100)
         : 100;
 
-      await axios.put(`${apiConfig.baseURL}/api/stud/camhistory/${camhistory._id}`, {
-        sendcount: successCount,
-        failedcount: failureCount,
-        sentEmails,
-        failedEmails,
+      await Camhistory.findByIdAndUpdate(camhistory._id, {
         status: finalStatus,
         progress: finalProgress,
+        recipients: sentEmails.join(", "),
+        sendcount: sentEmails.length,
+        failedcount: failedEmails.length,
+        sentEmails,
+        failedEmails,
       });
 
-      console.log(`Final progress: ${finalProgress}%, Status: ${finalStatus}`);
+      console.log(`Campaign ${camhistory._id} completed with status ${finalStatus}`);
     }
-
   } catch (error) {
     console.error("Error in cron job:", error.message);
   }

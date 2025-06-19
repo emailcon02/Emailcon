@@ -2415,13 +2415,13 @@ const handlebirthDelete = async (templateId) => {
                                                        value={selectedGroup[index] || ""}
                                                        className="select-variable"
                                                      >
-                                                       <option
+                                                       {/* <option
                                                          value=""
                                                          disabled
                                                          className="template-title"
                                                        >
                                                          Add Variable
-                                                       </option>
+                                                       </option> */}
                                                        <option value="" disabled>
                                                          Select Group
                                                        </option>
@@ -3027,13 +3027,13 @@ const handlebirthDelete = async (templateId) => {
                                                        value={selectedGroup[index] || ""}
                                                        className="select-variable"
                                                      >
-                                                       <option
+                                                       {/* <option
                                                          value=""
                                                          disabled
                                                          className="template-title"
                                                        >
                                                          Add Variable
-                                                       </option>
+                                                       </option> */}
                                                        <option value="" disabled>
                                                          Select Group
                                                        </option>
@@ -3641,13 +3641,13 @@ const handlebirthDelete = async (templateId) => {
                                                        value={selectedGroup[index] || ""}
                                                        className="select-variable"
                                                      >
-                                                       <option
+                                                       {/* <option
                                                          value=""
                                                          disabled
                                                          className="template-title"
                                                        >
                                                          Add Variable
-                                                       </option>
+                                                       </option> */}
                                                        <option value="" disabled>
                                                          Select Group
                                                        </option>
