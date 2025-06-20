@@ -608,105 +608,100 @@ router.post('/start-campaign', async (req, res) => {
 
     transporter = createTransporter(user);
 
-    const totalEmails = validStudents.length;
-    let processedEmails = 0;
-    let sentEmails = [];
-    let failedEmails = [...invalidEmails];
-
-    // Process emails sequentially with controlled rate
-    for (const student of validStudents) {
-      try {
-        // Personalize content
-        const personalizedContent = previewContent.map((item) => {
-          const personalizedItem = { ...item };
-          if (item.content) {
-            Object.entries(student).forEach(([key, value]) => {
-              const regex = new RegExp(`\\{?${key}\\}?`, "g");
-              personalizedItem.content = personalizedItem.content.replace(
-                regex,
-                value != null ? String(value).trim() : ""
-              );
-            });
-          }
-          return personalizedItem;
-        });
-
-        // Personalize subject
-        let personalizedSubject = subject;
-        Object.entries(student).forEach(([key, value]) => {
-          const regex = new RegExp(`\\{?${key}\\}?`, "g");
-          personalizedSubject = personalizedSubject.replace(
-            regex,
-            value != null ? String(value).trim() : ""
-          );
-        });
-
-        // Prepare mail options
-        const mailOptions = createMailOptions({
-          student,
-          userId,
-          campaignId,
-          subject: personalizedSubject,
-          attachments,
-          previewtext,
-          aliasName,
-          replyTo,
-          previewContent: personalizedContent,
-          bgColor,
-          userEmail: user.email
-        });
-
-        // Send with retry logic
-        await sendWithRetry(transporter, mailOptions);
-        sentEmails.push(student.Email);
-      } catch (error) {
-        console.error(`❌ Error sending to ${student.Email}:`, error);
-        failedEmails.push(student.Email);
-      }
-
-      processedEmails++;
-
-     // Update progress every 10 emails or when complete
-if (processedEmails % 10 === 0 || processedEmails === totalEmails) {
-  const currentStatus = processedEmails === totalEmails
-    ? failedEmails.length > 0
-      ? "Failed"  // Changed from "Partial Success" to always show "Failed" if any failures
-      : "Success"
-    : "Processing";
-
-  // Calculate progress based on failed percentage if there are failures
-  const currentProgress = failedEmails.length > 0
-    ? Math.round((failedEmails.length / totalEmails) * 100)
-    : Math.round((processedEmails / totalEmails) * 100);
-
-  await Camhistory.findByIdAndUpdate(campaignId, {
-    progress: currentProgress,
-    sendcount: sentEmails.length,
-    failedcount: failedEmails.length,
-    sentEmails,
-    failedEmails,
-    status: currentStatus,
-  });
-}
-// Final update
-const finalStatus = failedEmails.length > 0 ? "Failed" : "Success";
-const finalProgress = failedEmails.length > 0
-  ? Math.round((failedEmails.length / students.length) * 100)
-  : 100;
-
-await Camhistory.findByIdAndUpdate(campaignId, {
-  status: finalStatus,
-  progress: finalProgress,
-  recipients: sentEmails.join(", "),
-  sendcount: sentEmails.length,
-  failedcount: failedEmails.length,
-  sentEmails,
-  failedEmails,
-});
-
-      // Throttle email sending (1 second between emails)
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+ 
+    // Split students into batches of 10
+    const batchSize = 10;
+    const batches = [];
+    for (let i = 0; i < validStudents.length; i += batchSize) {
+      batches.push(validStudents.slice(i, i + batchSize));
     }
+
+    // Process batches in parallel
+    await Promise.all(batches.map(async (batch, batchIndex) => {
+      const batchSent = [];
+      const batchFailed = [];
+
+      // Process emails within batch sequentially
+      for (const student of batch) {
+        try {
+          // Personalize content
+          const personalizedContent = previewContent.map((item) => {
+            const personalizedItem = { ...item };
+            if (item.content) {
+              Object.entries(student).forEach(([key, value]) => {
+                const regex = new RegExp(`\\{?${key}\\}?`, "g");
+                personalizedItem.content = personalizedItem.content.replace(
+                  regex,
+                  value != null ? String(value).trim() : ""
+                );
+              });
+            }
+            return personalizedItem;
+          });
+
+          // Personalize subject
+          let personalizedSubject = subject;
+          Object.entries(student).forEach(([key, value]) => {
+            const regex = new RegExp(`\\{?${key}\\}?`, "g");
+            personalizedSubject = personalizedSubject.replace(
+              regex,
+              value != null ? String(value).trim() : ""
+            );
+          });
+
+          // Prepare mail options
+          const mailOptions = createMailOptions({
+            student,
+            userId,
+            campaignId,
+            subject: personalizedSubject,
+            attachments,
+            previewtext,
+            aliasName,
+            replyTo,
+            previewContent: personalizedContent,
+            bgColor,
+            userEmail: user.email
+          });
+
+          // Send with retry logic
+          await sendWithRetry(transporter, mailOptions);
+          batchSent.push(student.Email);
+        } catch (error) {
+          console.error(`❌ Error sending to ${student.Email}:`, error);
+          batchFailed.push(student.Email);
+        }
+      }
+      // Update sent and failed emails
+      sentEmails = [...sentEmails, ...batchSent];
+      failedEmails = [...failedEmails, ...batchFailed];
+
+      // Update progress after each batch
+      const currentProgress = Math.round(((batchIndex + 1) / batches.length) * 100);
+      await Camhistory.findByIdAndUpdate(campaignId, {
+        progress: currentProgress,
+        sendcount: sentEmails.length,
+        failedcount: failedEmails.length,
+        sentEmails,
+        failedEmails,
+        status: "Processing",
+      });
+    }));
+
+    // Final update after all batches are processed
+    const finalStatus = failedEmails.length > 0 ? "Failed" : "Success";
+    const finalProgress = failedEmails.length > 0
+        ? Math.round((failedEmails.length / (sentEmails.length + failedEmails.length)) * 100)
+        : 100;
+    await Camhistory.findByIdAndUpdate(campaignId, {
+      status: finalStatus,
+      progress: finalProgress,
+      recipients: sentEmails.join(", "),
+      sendcount: sentEmails.length,
+      failedcount: failedEmails.length,
+      sentEmails,
+      failedEmails,
+    });
 
     res.status(200).json({
       message: "Campaign processed successfully",
@@ -746,7 +741,7 @@ function createTransporter(user) {
     },
     pool: true,
     maxConnections: 3,
-    rateDelta: 1000, // 1 second window
+    // rateDelta: 1000, // 1 second window
     socketTimeout: 30000,
     connectionTimeout: 30000,
     tls: {

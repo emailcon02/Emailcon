@@ -196,8 +196,8 @@ cron.schedule('*/10 * * * *', async () => {
         sentEmails,
         failedEmails,
       });
-
-      console.log(`Campaign ${camhistory._id} completed with status ${finalStatus}`);
+      
+    console.log(`Campaign ${camhistory._id} completed with status ${finalStatus}`);
     }
   } catch (error) {
     console.error("Error in cron job:", error.message);
