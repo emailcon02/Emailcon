@@ -99,7 +99,7 @@ function RoutesPage() {
         <Route path="/click-editor/:userId/:campaignId" element={<Clickmainpage />} />
         <Route path="/clicksingle-editor/:userId/:campaignId" element={<Clicksinglemainpage />} />
         <Route path="/home" element={<Home />} />
-        <Route path="/campaigntable" element={<CampaignTable />} />
+        <Route path="/campaigntable" element={<CampaignTable key={location.key} />} />
         <Route path="/campaign" element={<Campaign />} />
         <Route path="/TemMainpage" element={<TemMainpage />} />
         <Route path="/birthdayedit" element={<Birthdayeditor />} />

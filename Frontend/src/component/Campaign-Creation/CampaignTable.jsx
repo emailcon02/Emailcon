@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import "./CampaignTable.css";
 import { FaArrowLeft, FaSearch,FaSync,FaTrash } from "react-icons/fa";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import apiConfig from "../../apiconfig/apiConfig";
@@ -29,6 +29,8 @@ function CampaignTable() {
       const [currentPage, setCurrentPage] = useState(1);
     
     const navigate = useNavigate();
+    const location = useLocation();
+
   
 
  // Remove this function
@@ -192,7 +194,7 @@ useEffect(() => {
 
   fetchCampaigns();
   
-}, [user?.id, navigate]);
+}, [user?.id, navigate, location.pathname]);
 
 
   const handleBackCampaign = () => {

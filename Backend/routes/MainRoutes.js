@@ -612,6 +612,8 @@ router.post('/start-campaign', async (req, res) => {
     // Split students into batches of 10
     const batchSize = 10;
     const batches = [];
+    let sentEmails = [];
+    let failedEmails = [...invalidEmails]; // Start with invalid emails
     for (let i = 0; i < validStudents.length; i += batchSize) {
       batches.push(validStudents.slice(i, i + batchSize));
     }
