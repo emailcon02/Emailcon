@@ -28,22 +28,19 @@ const GroupfilesingleModal = ({ onClose }) => {
 
     if (user?.id) fetchGroups();
   }, [user?.id]);
+
 const handleGroupSelect = async (selectedId) => {
   setSelectedGroupForUpload(selectedId);
   try {
     const { data: groupStudents } = await axios.get(
       `${apiConfig.baseURL}/api/stud/groups/${selectedId}/students`
     );
-
     setStudents(groupStudents);
-
     const studentInGroup = groupStudents[0];
-
     if (studentInGroup) {
       const keys = Object.keys(studentInGroup).filter(
         (key) => !["_id", "group", "groupId", "lastSentYear", "__v"].includes(key)
       );
-
       const form = {};
       keys.forEach((key) => (form[key] = ""));
       setContactKeys(keys);

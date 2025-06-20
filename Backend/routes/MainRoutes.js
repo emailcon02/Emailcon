@@ -608,22 +608,27 @@ router.post('/start-campaign', async (req, res) => {
 
     transporter = createTransporter(user);
 
- 
-    // Split students into batches of 10
-    const batchSize = 10;
+    // Configure delay settings (in milliseconds)
+    const DELAY_BETWEEN_EMAILS = 2000; // 2 seconds between each email
+    const DELAY_BETWEEN_BATCHES = 10000; // 10 seconds between batches
+    const BATCH_SIZE = 5; // Reduced batch size for better rate control
+
+    // Split students into batches
     const batches = [];
     let sentEmails = [];
-    let failedEmails = [...invalidEmails]; // Start with invalid emails
-    for (let i = 0; i < validStudents.length; i += batchSize) {
-      batches.push(validStudents.slice(i, i + batchSize));
+    let failedEmails = [...invalidEmails];
+    
+    for (let i = 0; i < validStudents.length; i += BATCH_SIZE) {
+      batches.push(validStudents.slice(i, i + BATCH_SIZE));
     }
 
-    // Process batches in parallel
-    await Promise.all(batches.map(async (batch, batchIndex) => {
+    // Process batches sequentially with delay
+    for (let batchIndex = 0; batchIndex < batches.length; batchIndex++) {
+      const batch = batches[batchIndex];
       const batchSent = [];
       const batchFailed = [];
 
-      // Process emails within batch sequentially
+      // Process emails within batch sequentially with delay
       for (const student of batch) {
         try {
           // Personalize content
@@ -669,11 +674,18 @@ router.post('/start-campaign', async (req, res) => {
           // Send with retry logic
           await sendWithRetry(transporter, mailOptions);
           batchSent.push(student.Email);
+          
+          // Add delay between individual emails
+          if (student !== batch[batch.length - 1]) {
+            await new Promise(resolve => setTimeout(resolve, DELAY_BETWEEN_EMAILS));
+          }
+          
         } catch (error) {
           console.error(`❌ Error sending to ${student.Email}:`, error);
           batchFailed.push(student.Email);
         }
       }
+
       // Update sent and failed emails
       sentEmails = [...sentEmails, ...batchSent];
       failedEmails = [...failedEmails, ...batchFailed];
@@ -688,8 +700,12 @@ router.post('/start-campaign', async (req, res) => {
         failedEmails,
         status: "Processing",
       });
-    }));
 
+      // Add delay between batches (except after last batch)
+      if (batchIndex < batches.length - 1) {
+        await new Promise(resolve => setTimeout(resolve, DELAY_BETWEEN_BATCHES));
+      }
+    }
     // Final update after all batches are processed
     const finalStatus = failedEmails.length > 0 ? "Failed" : "Success";
     const finalProgress = failedEmails.length > 0

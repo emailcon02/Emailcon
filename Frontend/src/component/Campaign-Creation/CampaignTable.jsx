@@ -306,6 +306,11 @@ useEffect(() => {
       console.error("Error updating campaign status:", error);
     }
   };
+  // Email validation function
+const isValidEmail = (email) => {
+  const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return re.test(String(email).toLowerCase());
+};
 
   const handleResend = async (campaignId) => {
     try {
@@ -322,9 +327,22 @@ useEffect(() => {
         setProcessingCampaigns((prev) => ({ ...prev, [campaignId]: false })); // Reset
         return;
       }
-  
+   // Validate and filter emails before processing
+      const validFailedEmails = campaign.failedEmails.filter(email => 
+        email && isValidEmail(email) && email !== 'missing'
+      );
+      const invalidEmails = campaign.failedEmails.filter(email => 
+        !email || !isValidEmail(email) || email === 'missing'
+      );
+
+      if (validFailedEmails.length === 0) {
+        toast.warning("No valid failed emails to resend.");
+        setProcessingCampaigns((prev) => ({ ...prev, [campaignId]: false }));
+        return;
+      }
+
       let sentEmails = [];
-      let failedEmails = [];
+      let failedEmails = [...invalidEmails]; // Start with invalid emails
       
       // If groupId is a string (e.g., "no group"), send only to failedEmails and return early
       if (!campaign.groupId || campaign.groupId === "no group") {
