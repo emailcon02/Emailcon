@@ -608,27 +608,26 @@ router.post('/start-campaign', async (req, res) => {
 
     transporter = createTransporter(user);
 
-    // Configure delay settings (in milliseconds)
-    const DELAY_BETWEEN_EMAILS = 2000; // 2 seconds between each email
-    const DELAY_BETWEEN_BATCHES = 10000; // 10 seconds between batches
-    const BATCH_SIZE = 5; // Reduced batch size for better rate control
+    // Configure processing settings
+    const DELAY_BETWEEN_EMAILS = 500; // 0.5 seconds between each email within a batch
+    const PARALLEL_BATCHES = 5; // Number of batches to process in parallel
+    const BATCH_SIZE = 10; // Number of emails per batch
 
     // Split students into batches
-    const batches = [];
+    const allBatches = [];
     let sentEmails = [];
     let failedEmails = [...invalidEmails];
     
     for (let i = 0; i < validStudents.length; i += BATCH_SIZE) {
-      batches.push(validStudents.slice(i, i + BATCH_SIZE));
+      allBatches.push(validStudents.slice(i, i + BATCH_SIZE));
     }
 
-    // Process batches sequentially with delay
-    for (let batchIndex = 0; batchIndex < batches.length; batchIndex++) {
-      const batch = batches[batchIndex];
+    // Function to process a single batch sequentially
+    const processBatch = async (batch, batchIndex) => {
       const batchSent = [];
       const batchFailed = [];
 
-      // Process emails within batch sequentially with delay
+      // Process emails within batch sequentially
       for (const student of batch) {
         try {
           // Personalize content
@@ -679,38 +678,51 @@ router.post('/start-campaign', async (req, res) => {
           if (student !== batch[batch.length - 1]) {
             await new Promise(resolve => setTimeout(resolve, DELAY_BETWEEN_EMAILS));
           }
-          
         } catch (error) {
           console.error(`❌ Error sending to ${student.Email}:`, error);
           batchFailed.push(student.Email);
         }
       }
 
-      // Update sent and failed emails
-      sentEmails = [...sentEmails, ...batchSent];
-      failedEmails = [...failedEmails, ...batchFailed];
+      return { batchSent, batchFailed, batchIndex };
+    };
 
-      // Update progress after each batch
-      const currentProgress = Math.round(((batchIndex + 1) / batches.length) * 100);
-      await Camhistory.findByIdAndUpdate(campaignId, {
-        progress: currentProgress,
-        sendcount: sentEmails.length,
-        failedcount: failedEmails.length,
-        sentEmails,
-        failedEmails,
-        status: "Processing",
-      });
+    // Process multiple batches in parallel
+    let currentBatchIndex = 0;
+    while (currentBatchIndex < allBatches.length) {
+      // Get the next set of batches to process in parallel
+      const parallelBatches = allBatches
+        .slice(currentBatchIndex, currentBatchIndex + PARALLEL_BATCHES)
+        .map((batch, i) => processBatch(batch, currentBatchIndex + i));
 
-      // Add delay between batches (except after last batch)
-      if (batchIndex < batches.length - 1) {
-        await new Promise(resolve => setTimeout(resolve, DELAY_BETWEEN_BATCHES));
+      // Wait for all parallel batches to complete
+      const results = await Promise.all(parallelBatches);
+
+      // Update campaign status with results from all parallel batches
+      for (const result of results) {
+        sentEmails = [...sentEmails, ...result.batchSent];
+        failedEmails = [...failedEmails, ...result.batchFailed];
+
+        // Update progress after each batch completes
+        const currentProgress = Math.round(((result.batchIndex + 1) / allBatches.length) * 100);
+        await Camhistory.findByIdAndUpdate(campaignId, {
+          progress: currentProgress,
+          sendcount: sentEmails.length,
+          failedcount: failedEmails.length,
+          sentEmails,
+          failedEmails,
+          status: "Processing",
+        });
       }
+
+      currentBatchIndex += PARALLEL_BATCHES;
     }
+
     // Final update after all batches are processed
     const finalStatus = failedEmails.length > 0 ? "Failed" : "Success";
     const finalProgress = failedEmails.length > 0
-        ? Math.round((failedEmails.length / (sentEmails.length + failedEmails.length)) * 100)
-        : 100;
+      ? Math.round((failedEmails.length / (sentEmails.length + failedEmails.length)) * 100)
+      : 100;
     await Camhistory.findByIdAndUpdate(campaignId, {
       status: finalStatus,
       progress: finalProgress,
