@@ -555,6 +555,9 @@ button[data-tooltip]:hover::after {
 .style-controls {
     margin-top: 20px;
 }
+.style-controls h3{
+    margin-bottom: 20px;
+}
 
 .style-item {
     margin-bottom: 15px;
@@ -996,23 +999,7 @@ button[data-tooltip]:hover::after {
     margin-top: 5px;
 }
 
-.edit-con-btn {
-    display: none;
-    background-color: rgb(247, 244, 244);
-    color: red;
-    border: none;
-    padding: 5px;
-    cursor: pointer;
-    border-radius: 5px;
-    font-size: 15px;
-    width: 35px;
-    height: 35px;
-    margin-top: 10px;
-}
 
-.edit-con-btn:hover {
-    background-color: rgb(226, 226, 226);
-}
 
 
 .edit-desktop-btn{
@@ -1471,9 +1458,7 @@ input:checked+.slider-send:before {
         height: 100vh;
         width: 100%;
     }
-    .edit-desktop-btn{
-        display: none !important;    
-     }
+   
 
 
     .mobile-head {
@@ -1557,6 +1542,7 @@ input:checked+.slider-send:before {
     .app-navbar {
         color: #fff;
         background-color: #faeedf;
+        padding: 15px 0px;
     }
 
     /* Style for the nav list */
@@ -1663,9 +1649,7 @@ input:checked+.slider-send:before {
         overflow: hidden;
     }
 
-    .edit-con-btn {
-        display: block;
-    }
+ 
 
     .editor {
         width: 90%;
@@ -2041,10 +2025,7 @@ input:checked+.slider-send:before {
         width: 100%;
     }
 
-    .edit-desktop-btn {
-        display: none !important;
-    }
-
+  
 
     .mobile-head {
         font-size: 20px;

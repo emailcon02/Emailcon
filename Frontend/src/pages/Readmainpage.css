@@ -1745,9 +1745,7 @@ input:checked+.slider-send:before {
         margin-right: 5px;
         width: 180px !important;
     }
-      .edit-desktop-btn{
-        display: none !important;    
-     }
+     
 
 
     .navbar-button-send {
@@ -2010,9 +2008,7 @@ input:checked+.slider-send:before {
         width: 100%;
     }
 
-    .edit-desktop-btn {
-        display: none !important;
-    }
+  
 
 
     .mobile-head {

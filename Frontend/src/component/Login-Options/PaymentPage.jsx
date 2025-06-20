@@ -148,7 +148,7 @@ function PaymentPage() {
   return (
     
     <div className="advanced-card">
-      <div className="card-image">
+      <div className="card-image-payment">
         <img src={payment} className="pay-img" alt="Payment Illustration" />
       </div>
       <div className="card-content">

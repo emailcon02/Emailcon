@@ -534,6 +534,7 @@ else if (item.type === 'multi-image-card') {
 // New route for starting campaigns
 router.post('/start-campaign', async (req, res) => {
   let campaignId = null;
+  let transporter = null;
 
   try {
     const {
@@ -577,7 +578,7 @@ router.post('/start-campaign', async (req, res) => {
       totalcount: students.length,
       recipients: "no mail",
       sendcount: 0,
-      failedcount: invalidEmails.length, // Count invalid emails as initial failures
+      failedcount: invalidEmails.length,
       failedEmails: invalidEmails,
       sentEmails: [],
       subject,
@@ -599,106 +600,113 @@ router.post('/start-campaign', async (req, res) => {
     const newCampaign = await Camhistory.create(campaignData);
     campaignId = newCampaign._id;
 
-    const batchSize = 10;
+    // Create common transporter
+    const user = await User.findById(userId);
+    if (!user) {
+      throw new Error('User not found');
+    }
+
+    transporter = createTransporter(user);
+
     const totalEmails = validStudents.length;
     let processedEmails = 0;
     let sentEmails = [];
-    let failedEmails = [...invalidEmails]; // Start with invalid emails
+    let failedEmails = [...invalidEmails];
 
-    // Split into batches
-    const batches = [];
-    for (let i = 0; i < validStudents.length; i += batchSize) {
-      batches.push(validStudents.slice(i, i + batchSize));
-    }
-
-    // Process batches in parallel
-    await Promise.all(
-      batches.map(async (batch) => {
-        for (const student of batch) {
-          try {
-            // Personalize content
-            const personalizedContent = previewContent.map((item) => {
-              const personalizedItem = { ...item };
-              if (item.content) {
-                Object.entries(student).forEach(([key, value]) => {
-                  const regex = new RegExp(`\\{?${key}\\}?`, "g");
-                  personalizedItem.content = personalizedItem.content.replace(
-                    regex,
-                    value != null ? String(value).trim() : ""
-                  );
-                });
-              }
-              return personalizedItem;
-            });
-
-            // Personalize subject
-            let personalizedSubject = subject;
+    // Process emails sequentially with controlled rate
+    for (const student of validStudents) {
+      try {
+        // Personalize content
+        const personalizedContent = previewContent.map((item) => {
+          const personalizedItem = { ...item };
+          if (item.content) {
             Object.entries(student).forEach(([key, value]) => {
               const regex = new RegExp(`\\{?${key}\\}?`, "g");
-              personalizedSubject = personalizedSubject.replace(
+              personalizedItem.content = personalizedItem.content.replace(
                 regex,
                 value != null ? String(value).trim() : ""
               );
             });
-
-            // Send email
-            await sendEmailToStudent({
-              student,
-              campaignId,
-              userId,
-              subject: personalizedSubject,
-              attachments,
-              previewtext,
-              aliasName,
-              replyTo,
-              previewContent: personalizedContent,
-              bgColor,
-            });
-            sentEmails.push(student.Email);
-          } catch (error) {
-            console.error(`❌ Error sending to ${student.Email}:`, error);
-            failedEmails.push(student.Email);
           }
+          return personalizedItem;
+        });
 
-          processedEmails++;
-          const progress = Math.round((processedEmails / totalEmails) * 100);
+        // Personalize subject
+        let personalizedSubject = subject;
+        Object.entries(student).forEach(([key, value]) => {
+          const regex = new RegExp(`\\{?${key}\\}?`, "g");
+          personalizedSubject = personalizedSubject.replace(
+            regex,
+            value != null ? String(value).trim() : ""
+          );
+        });
 
-          // Update progress dynamically
-          await Camhistory.findByIdAndUpdate(campaignId, {
-            progress,
-            sendcount: sentEmails.length,
-            failedcount: failedEmails.length,
-            sentEmails,
-            failedEmails,
-            status:
-              progress === 100
-                ? failedEmails.length > 0
-                  ? "Partial Success"
-                  : "Success"
-                : "Processing",
-          });
+        // Prepare mail options
+        const mailOptions = createMailOptions({
+          student,
+          userId,
+          campaignId,
+          subject: personalizedSubject,
+          attachments,
+          previewtext,
+          aliasName,
+          replyTo,
+          previewContent: personalizedContent,
+          bgColor,
+          userEmail: user.email
+        });
 
-          // Optional throttling: delay between emails
-          await new Promise((resolve) => setTimeout(resolve, 1000));
-        }
-      })
-    );
+        // Send with retry logic
+        await sendWithRetry(transporter, mailOptions);
+        sentEmails.push(student.Email);
+      } catch (error) {
+        console.error(`❌ Error sending to ${student.Email}:`, error);
+        failedEmails.push(student.Email);
+      }
 
-    // Final update
-    const finalStatus = failedEmails.length > 0 ? "Failed" : "Success";
-      const finalProgress = failedEmails.length > 0
-        ? Math.round((failedEmails.length / students.length) * 100)
-        : 100;
+      processedEmails++;
 
-    await Camhistory.findByIdAndUpdate(campaignId, {
-      status: finalStatus,
-      progress: finalProgress,
-      recipients: sentEmails.join(", "),
-      sendcount: sentEmails.length,
-      failedcount: failedEmails.length,
-      sentEmails,
-      failedEmails,
-    });
+     // Update progress every 10 emails or when complete
+if (processedEmails % 10 === 0 || processedEmails === totalEmails) {
+  const currentStatus = processedEmails === totalEmails
+    ? failedEmails.length > 0
+      ? "Failed"  // Changed from "Partial Success" to always show "Failed" if any failures
+      : "Success"
+    : "Processing";
+
+  // Calculate progress based on failed percentage if there are failures
+  const currentProgress = failedEmails.length > 0
+    ? Math.round((failedEmails.length / totalEmails) * 100)
+    : Math.round((processedEmails / totalEmails) * 100);
+
+  await Camhistory.findByIdAndUpdate(campaignId, {
+    progress: currentProgress,
+    sendcount: sentEmails.length,
+    failedcount: failedEmails.length,
+    sentEmails,
+    failedEmails,
+    status: currentStatus,
+  });
+}
+// Final update
+const finalStatus = failedEmails.length > 0 ? "Failed" : "Success";
+const finalProgress = failedEmails.length > 0
+  ? Math.round((failedEmails.length / students.length) * 100)
+  : 100;
+
+await Camhistory.findByIdAndUpdate(campaignId, {
+  status: finalStatus,
+  progress: finalProgress,
+  recipients: sentEmails.join(", "),
+  sendcount: sentEmails.length,
+  failedcount: failedEmails.length,
+  sentEmails,
+  failedEmails,
+});
+
+      // Throttle email sending (1 second between emails)
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+    }
 
     res.status(200).json({
       message: "Campaign processed successfully",
@@ -721,103 +729,80 @@ router.post('/start-campaign', async (req, res) => {
       error: "Failed to process campaign",
       details: error.message,
     });
+  } finally {
+    // Close the transporter when done
+    if (transporter) {
+      transporter.close();
+    }
   }
 });
 
-// Email validation helper
-function isValidEmail(email) {
-  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+// Helper function to create transporter
+function createTransporter(user) {
+  const config = {
+    auth: {
+      user: user.email,
+      pass: decryptPassword(user.smtppassword),
+    },
+    pool: true,
+    maxConnections: 3,
+    rateDelta: 1000, // 1 second window
+    socketTimeout: 30000,
+    connectionTimeout: 30000,
+    tls: {
+      rejectUnauthorized: false,
+    }
+  };
+
+  return user.email.includes("gmail")
+    ? nodemailer.createTransport({
+        service: "gmail",
+        ...config
+      })
+    : nodemailer.createTransport({
+        host: "smtp.hostinger.com",
+        port: 465,
+        secure: true,
+        ...config
+      });
 }
-// Helper function to send email to a single student
-async function sendEmailToStudent({
+
+// Helper function to create mail options
+function createMailOptions({
   student,
-  campaignId,
   userId,
+  campaignId,
   subject,
   attachments,
   previewtext,
   aliasName,
   replyTo,
   previewContent,
-  bgColor
+  bgColor,
+  userEmail
 }) {
-  try {
-    const user = await User.findById(userId);
-    if (!user) {
-      console.error('User not found');
-      return;
-    }
+  const dynamicHtml = previewContent.map(item => 
+    generateHtml(item, userId, campaignId, student.Email)
+  ).join('');
 
-    // Validate student object and email format first
-  if (!student || typeof student !== 'object') {
-    const error = new Error('Invalid student object');
-    error.invalidStudent = true;
-    throw error;
-  }
+  const emailAttachments = attachments.map(file => ({
+    filename: file.originalName,
+    path: file.fileUrl,
+    contentType: file.mimetype
+  }));
 
-  if (!student.Email) {
-    const error = new Error('Missing email address');
-    error.missingEmail = true;
-    error.studentData = student; // Include the student data for debugging
-    throw error;
-  }
+  const trackingPixel = `<img src="${apiConfig.baseURL}/api/stud/track-email-open?emailId=${encodeURIComponent(student.Email)}&userId=${userId}&campaignId=${campaignId}&t=${Date.now()}" width="1" height="1" style="display:none;" />`;
 
-  if (!isValidEmail(student.Email)) {
-    const error = new Error(`Invalid email address: ${student.Email}`);
-    error.invalidEmail = true;
-    error.email = student.Email;
-    throw error;
-  }
-
-    // Determine the transporter based on email provider
-    let transporter;
-    if (user.email.includes("gmail")) {
-      transporter = nodemailer.createTransport({
-        service: "gmail",
-        auth: {
-          user: user.email,
-          pass: decryptPassword(user.smtppassword),
-        },
-      });
-    } else {
-      transporter = nodemailer.createTransport({
-        host: "smtp.hostinger.com",
-        port: 465,
-        secure: true,
-        auth: {
-          user: user.email,
-          pass: decryptPassword(user.smtppassword),
-        },
-        tls: {
-          rejectUnauthorized: false,
-        },
-      });
-    }
-
-// Modify the generateHtml call
-const dynamicHtml = previewContent.map(item => 
-  generateHtml(item, userId, campaignId, student.Email)
-).join('');
-
-    // Prepare attachments
-    const emailAttachments = attachments.map(file => ({
-      filename: file.originalName,
-      path: file.fileUrl,
-      contentType: file.mimetype
-    }));
-    // Add tracking pixel
-    const trackingPixel = `<img src="${apiConfig.baseURL}/api/stud/track-email-open?emailId=${encodeURIComponent(student.Email)}&userId=${userId}&campaignId=${campaignId}&t=${Date.now()}" width="1" height="1" style="display:none;" />`;
-
-    const mailOptions = {
-      from: `"${aliasName}" <${user.email}>`,
-      to: student.Email,
-      subject: subject,
-      replyTo: replyTo,
-      attachments: emailAttachments,
-      html: `
-        <html>
-          <head>
-            <style>
+  return {
+    from: `"${aliasName}" <${userEmail}>`,
+    to: student.Email,
+    subject: subject,
+    replyTo: replyTo,
+    attachments: emailAttachments,
+    html: `
+      <html>
+        <head>
+     <style>
               body { font-family: Arial, sans-serif; margin: 0; padding: 0; }
               
              .img-case {
@@ -890,27 +875,41 @@ const dynamicHtml = previewContent.map(item =>
                 }
               }
             </style>
-          </head>
-          <body>
-            <div style="display:none !important; max-height:0px; max-width:0px; opacity:0; overflow:hidden;">
-              ${previewtext}
-            </div>
-              <div class="main" style="background-color:${bgColor || "white"}; box-shadow:0 4px 8px rgba(0, 0, 0, 0.2); border:1px solid rgb(255, 245, 245); padding:20px;width:700px;height:auto;border-radius:10px;margin:0 auto;">
-                ${dynamicHtml}
-                 ${trackingPixel}
-              </div>
-          </body>
-        </html>
-      `
-    };
+        </head>
+        <body>
+          <div style="display:none !important; max-height:0px; max-width:0px; opacity:0; overflow:hidden;">
+            ${previewtext}
+          </div>
+          <div class="main" style="background-color:${bgColor || "white"}; box-shadow:0 4px 8px rgba(0, 0, 0, 0.2); border:1px solid rgb(255, 245, 245); padding:20px;width:700px;height:auto;border-radius:10px;margin:0 auto;">
+            ${dynamicHtml}
+            ${trackingPixel}
+          </div>
+        </body>
+      </html>
+    `
+  };
+}
 
-    await transporter.sendMail(mailOptions);
-    console.log(`Email sent to: ${student.Email}`);
+// Email validation helper
+function isValidEmail(email) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+}
 
-
-  } catch (error) {
-    console.error(`Error sending email to ${student.email}:`, error);
-    
+// Retry logic for email sending
+async function sendWithRetry(transporter, mailOptions, retries = 3) {
+  for (let i = 0; i < retries; i++) {
+    try {
+      await transporter.sendMail(mailOptions);
+      console.log(`Email sent to: ${mailOptions.to}`);
+      return;
+    } catch (error) {
+      console.error(`Attempt ${i + 1} failed for ${mailOptions.to}:`, error);
+      if (i === retries - 1) throw error;
+      
+      // Exponential backoff
+      const delay = 5000 * (i + 1); // 5s, 10s, 15s
+      await new Promise(resolve => setTimeout(resolve, delay));
+    }
   }
 }
 
@@ -3227,7 +3226,7 @@ router.post('/send-alert', async (req, res) => {
     `;
 
     await accounttransporter.sendMail({
-      from: `"Emailcon Support" <account-noreply@account.emailcon.in>`,
+      from: `"Emailcon Support" <user-noreply@account.emailcon.in>`,
       to: user.email,
       subject: "⚠️ Action Required: Renew Your Emailcon Account",
       replyTo: "support@emailcon.in",

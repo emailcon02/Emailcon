@@ -352,7 +352,8 @@ li {
   }
 
   .maincontent-main {
-    margin-top: 10%;
+    height: 75vh;
+    
   }
   .home-modal {
     width: 300px !important;

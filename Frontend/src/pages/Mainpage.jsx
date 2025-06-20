@@ -76,7 +76,7 @@ const Mainpage = () => {
   const [isOpen, setIsOpen] = useState(false);
   const modalRef = useRef(null);
   const [isNavOpen, setIsNavOpen] = useState(false);
-  const [isMobilestyle, setIsMobilestyle] = useState(window.innerWidth <= 600);
+  const [isMobilestyle, setIsMobilestyle] = useState(window.innerWidth <= 250);
   const [isModalOpenstyle, setIsModalOpenstyle] = useState(false);
   const [isOpentemplate, setIsOpentemplate] = useState(false); // Manage dropdown visibility
   const [templates, setTemplates] = useState([]); // Store fetched templates
@@ -1039,9 +1039,18 @@ setTimeout(() => {
     updated[index] = { ...updated[index], ...newContent };
     setPreviewContent(updated);
   };
-
   const handleItemClick = (index) => {
     setSelectedIndex(index); // Set the selected index when an item is clicked
+    // Scroll to style controls after a short delay to ensure rendering
+    setTimeout(() => {
+      const styleControlsElement = document.querySelector('.style-controls');
+      if (styleControlsElement) {
+        styleControlsElement.scrollIntoView({ 
+          behavior: 'smooth', 
+          block: 'center' 
+        });
+      }
+    }, 100);
   };
   const handleItemClickdesktop = (index) => {
     setSelectedIndex(index); // Set the selected index when an item is clicked
@@ -6030,12 +6039,7 @@ setTimeout(() => {
                         >
                           <FiEdit />
                         </button>
-                        <button
-                          className="edit-con-btn"
-                          onClick={() => setIsModalOpenstyle(true)}
-                        >
-                          <FiEdit />
-                        </button>
+                      
                       </div>
                     </div>
                   );
