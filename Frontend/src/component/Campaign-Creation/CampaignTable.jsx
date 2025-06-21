@@ -142,6 +142,7 @@ const totalPages = Math.ceil(filteredCampaign.length / rowsPerPage);
       toast.error("Failed to delete selected campaigns.");
     }
   };
+  
 const refreshCampaigns = async () => {
   try {
     const response = await axios.get(`${apiConfig.baseURL}/api/stud/campaigns/${user.id}`);
@@ -194,7 +195,7 @@ useEffect(() => {
 
   fetchCampaigns();
   
-}, [user?.id, navigate, location.pathname]);
+}, [user?.id, navigate]);
 
 
   const handleBackCampaign = () => {
