@@ -162,7 +162,6 @@ const refreshCampaigns = async () => {
   }
 };
 
-// In your fetchCampaigns function:
 useEffect(() => {
   const fetchCampaigns = async () => {
     if (!user?.id) {
@@ -171,19 +170,18 @@ useEffect(() => {
     }
     try {
       const response = await axios.get(`${apiConfig.baseURL}/api/stud/campaigns/${user.id}`);
-      // Sort by senddate in descending order (newest first)
+
       const sortedCampaigns = response.data.sort(
-        (a, b) => new Date(b.senddate) - new Date(a.senddate) // Changed from createdAt to senddate
+        (a, b) => new Date(b.senddate) - new Date(a.senddate)
       );
 
       const filteredCampaigns = sortedCampaigns.filter(campaign => {
         const campaignName = campaign.campaignname?.toLowerCase() || "";
-        const exclude = campaignName.includes("birthday campaign");
-        return !exclude;
+        return !campaignName.includes("birthday campaign");
       });
 
       setCampaigns(filteredCampaigns);
-      setFilteredCampaign(filteredCampaigns); // Initialize filteredCampaign with sorted data
+      setFilteredCampaign(filteredCampaigns);
     } catch (error) {
       console.error("Error fetching campaigns", {
         message: error.message,
@@ -193,9 +191,18 @@ useEffect(() => {
     }
   };
 
-  fetchCampaigns();
-  
+  const shouldRefresh = localStorage.getItem("refreshCampaigns");
+
+  if (shouldRefresh === "true") {
+    localStorage.removeItem("refreshCampaigns");
+    fetchCampaigns(); // Refresh only
+  } else {
+    fetchCampaigns(); // Initial load
+  }
+
 }, [user?.id, navigate]);
+
+
 
 
   const handleBackCampaign = () => {

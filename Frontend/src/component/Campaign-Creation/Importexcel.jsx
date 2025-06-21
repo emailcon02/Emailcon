@@ -355,9 +355,12 @@ const ExcelModal = ({ isOpen, onClose, previewContent = [], bgColor }) => {
   }
 
   setIsLoading(true);
-  navigate("/campaigntable");
-  sessionStorage.removeItem("firstVisit");
-  sessionStorage.removeItem("toggled");
+ // Set refresh flag and navigate AFTER all operations complete
+    localStorage.setItem("refreshCampaigns", "true");
+    sessionStorage.removeItem("firstVisit");
+    sessionStorage.removeItem("toggled");
+    
+    navigate("/campaigntable");
 
   let attachments = [];
 
