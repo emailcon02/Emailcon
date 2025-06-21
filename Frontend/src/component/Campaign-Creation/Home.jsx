@@ -2410,18 +2410,18 @@ const handlebirthDelete = async (templateId) => {
                                                    {/* Local state for each heading */}
                                                    <div className="select-group-container">
                                                      {/* Select Group */}
-                                                     <select
+                                                     {/* <select
                                                        onChange={(e) => handleGroupChange(e, index)}
                                                        value={selectedGroup[index] || ""}
                                                        className="select-variable"
                                                      >
-                                                       {/* <option
+                                                       <option
                                                          value=""
                                                          disabled
                                                          className="template-title"
                                                        >
                                                          Add Variable
-                                                       </option> */}
+                                                       </option>
                                                        <option value="" disabled>
                                                          Select Group
                                                        </option>
@@ -2430,7 +2430,7 @@ const handlebirthDelete = async (templateId) => {
                                                            {group.name}
                                                          </option>
                                                        ))}
-                                                     </select>
+                                                     </select> */}
                          
                                                      {/* Show fields only for the selected heading */}
                                                      {selectedGroup[index] && openedGroups[index] && (
@@ -3022,18 +3022,18 @@ const handlebirthDelete = async (templateId) => {
                                                    {/* Local state for each heading */}
                                                    <div className="select-group-container">
                                                      {/* Select Group */}
-                                                     <select
+                                                     {/* <select
                                                        onChange={(e) => handleGroupChange(e, index)}
                                                        value={selectedGroup[index] || ""}
                                                        className="select-variable"
                                                      >
-                                                       {/* <option
+                                                        <option
                                                          value=""
                                                          disabled
                                                          className="template-title"
                                                        >
                                                          Add Variable
-                                                       </option> */}
+                                                       </option> 
                                                        <option value="" disabled>
                                                          Select Group
                                                        </option>
@@ -3043,7 +3043,7 @@ const handlebirthDelete = async (templateId) => {
                                                          </option>
                                                        ))}
                                                      </select>
-                         
+                          */}
                                                      {/* Show fields only for the selected heading */}
                                                      {selectedGroup[index] && openedGroups[index] && (
                                                        <div className="dropdown-container">
@@ -3636,18 +3636,18 @@ const handlebirthDelete = async (templateId) => {
                                                    {/* Local state for each heading */}
                                                    <div className="select-group-container">
                                                      {/* Select Group */}
-                                                     <select
+                                                     {/* <select
                                                        onChange={(e) => handleGroupChange(e, index)}
                                                        value={selectedGroup[index] || ""}
                                                        className="select-variable"
                                                      >
-                                                       {/* <option
+                                                       <option
                                                          value=""
                                                          disabled
                                                          className="template-title"
                                                        >
                                                          Add Variable
-                                                       </option> */}
+                                                       </option> 
                                                        <option value="" disabled>
                                                          Select Group
                                                        </option>
@@ -3656,7 +3656,7 @@ const handlebirthDelete = async (templateId) => {
                                                            {group.name}
                                                          </option>
                                                        ))}
-                                                     </select>
+                                                     </select> */}
                          
                                                      {/* Show fields only for the selected heading */}
                                                      {selectedGroup[index] && openedGroups[index] && (
