@@ -9,6 +9,10 @@
   top:13px;
   right:27%;
 }
+/* .logo_img{
+  width:300px;
+  margin-left: 30px;
+} */
 .upgrade-btn-home{
   cursor: pointer;
   background-color: #fde3c1;
@@ -312,12 +316,26 @@ li {
     margin-top: 20%;
     padding: 50px !important;
   }
+  
+}
+.logo_img-mobile {
+  display:none;
 }
 
 @media (max-width: 767px) {
   .sidebar {
     display: none;
   }
+
+  .logo_img-mobile{
+    width:150px;
+    height:45px;
+    margin-top: 15px;
+    display:block;
+  }
+  .logo_img-mobile img{
+    width:100%;
+   }
 
   .card {
     width: 100px;

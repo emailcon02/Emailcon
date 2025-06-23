@@ -1,11 +1,12 @@
-import React, { useState, useEffect, } from "react";
+import React, { useState, useEffect } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faArrowRight } from "@fortawesome/free-solid-svg-icons";
 import "./NavbarBanner.css";
 import { useNavigate } from "react-router-dom";
 import BannerImg from "../../Images/banner.png";
+import logo from "../../Images/emailcon_logo.png"
 
-const NavbarBanner = ({onOpenModal }) => {
+const NavbarBanner = ({ onOpenModal }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isSticky, setIsSticky] = useState(false);
   const navigate = useNavigate();
@@ -23,16 +24,15 @@ const NavbarBanner = ({onOpenModal }) => {
     event.preventDefault();
     const element = document.getElementById(sectionId);
     if (element) {
-      element.scrollIntoView({ behavior: 'smooth' });
+      element.scrollIntoView({ behavior: "smooth" });
       setIsMenuOpen(false); // Close mobile menu after clicking
     }
   };
 
-  const hadlenavigate = () => { 
+  const hadlenavigate = () => {
     navigate("/user-login");
-  }
-  
- 
+  };
+
   // Attach scroll listener
   useEffect(() => {
     window.addEventListener("scroll", handleScroll);
@@ -45,10 +45,7 @@ const NavbarBanner = ({onOpenModal }) => {
       <div className="navmain">
         <div className={`navbarfront ${isSticky ? "sticky" : ""}`}>
           <div className="navbar-container">
-            <p className="logoContent">
-              <span style={{ fontSize: "34px" }}>E</span>mail
-              <span style={{ color: "#f48c06" }}>con</span>
-            </p>
+            <img src={logo} alt="imagehomenav" className="logo_img"/>
             {/* Hamburger Toggle */}
             <div
               className="menu-toggle"
@@ -60,16 +57,30 @@ const NavbarBanner = ({onOpenModal }) => {
             {/* Menu Items */}
             <ul className={`menu ${isMenuOpen ? "active" : ""}`}>
               <li>
-                <a href="#home" onClick={(e) => scrollToSection('home', e)}>Home</a>
+                <a href="#home" onClick={(e) => scrollToSection("home", e)}>
+                  Home
+                </a>
               </li>
               <li>
-                <a href="#feature" onClick={(e) => scrollToSection('feature', e)}>Features</a>
+                <a
+                  href="#feature"
+                  onClick={(e) => scrollToSection("feature", e)}
+                >
+                  Features
+                </a>
               </li>
               <li>
-                <a href="#Price" onClick={(e) => scrollToSection('Price', e)}>Prices</a>
+                <a href="#Price" onClick={(e) => scrollToSection("Price", e)}>
+                  Prices
+                </a>
               </li>
               <li>
-                <a href="#contact" onClick={(e) => scrollToSection('contact', e)}>Contact</a>
+                <a
+                  href="#contact"
+                  onClick={(e) => scrollToSection("contact", e)}
+                >
+                  Contact
+                </a>
               </li>
               <li>
                 <button className="demo-btn" onClick={hadlenavigate}>
@@ -92,7 +103,9 @@ const NavbarBanner = ({onOpenModal }) => {
             Transform Your Email Campaigns With EmailCon - Your All-In-One Email
             Sending Solution.
           </p>
-          <button className="schedule-btn slide-up" onClick={onOpenModal }>Schedule A Demo</button>
+          <button className="schedule-btn slide-up" onClick={onOpenModal}>
+            Schedule A Demo
+          </button>
         </div>
         <div className="Banner-Image">
           <img className="ban-img" src={BannerImg} alt="ban-img" />

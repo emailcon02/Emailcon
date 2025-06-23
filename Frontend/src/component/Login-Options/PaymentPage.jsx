@@ -153,7 +153,14 @@ function PaymentPage() {
       </div>
       <div className="card-content">
         <h2>
-          Emailcon <span style={{ color: "#f48c06" }}>Payment</span>
+          <div style={{display:"flex",justifyContent:"center"}}>
+                      <span>
+                        <img src={logo} alt="imagesignnav" className="logo_img_sign" />{" "}
+                      </span>
+                      <span style={{marginTop:"5px",fontWeight:"600",fontSize:"26px"}}>
+                        pay<span style={{ color: "#f48c06" }}>ment</span>
+                      </span>
+                      </div>
         </h2>
         <p>
           Proceed with payment for <strong>{user?.username}</strong>
