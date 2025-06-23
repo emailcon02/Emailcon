@@ -6,6 +6,7 @@ import "react-toastify/dist/ReactToastify.css";
 import {
   FaBars,
   FaCheckCircle,
+  FaFileExport,
   FaFolderOpen,
   FaTimes,
   FaTrash,
@@ -536,34 +537,61 @@ setTimeout(() => {
     };
   }, []);
 
-  useEffect(() => {
-    const fetchAllStudentData = async () => {
-      if (!user?.id) {
-        console.warn("User ID is missing. Skipping data fetch.");
-        return;
-      }
+ // Fetch groups and students only
+useEffect(() => {
+  const fetchGroupsAndStudents = async () => {
+    if (!user?.id) {
+      console.warn("User ID is missing. Skipping groups/students fetch.");
+      return;
+    }
 
-      try {
-        const [groupsRes, studentsRes, templatesRes] = await Promise.all([
-          axios.get(`${apiConfig.baseURL}/api/stud/groups/${user.id}`),
-          axios.get(`${apiConfig.baseURL}/api/stud/students`),
-          axios.get(`${apiConfig.baseURL}/api/stud/templates/${user.id}`),
-        ]);
-        // console.log("Fetched data:", userdata.data);
-        setGroups(groupsRes.data);
-        setStudents(studentsRes.data);
-        setTemplates(templatesRes.data);
-      } catch (error) {
-        console.error("Error fetching student dashboard data:", {
-          message: error.message,
-          stack: error.stack,
-          response: error.response?.data,
-        });
-      }
-    };
+    try {
+      const [groupsRes, studentsRes] = await Promise.all([
+        axios.get(`${apiConfig.baseURL}/api/stud/groups/${user.id}`),
+        axios.get(`${apiConfig.baseURL}/api/stud/students`),
+      ]);
+      setGroups(groupsRes.data);
+      setStudents(studentsRes.data);
+    } catch (error) {
+      console.error("Error fetching groups/students:", {
+        message: error.message,
+        stack: error.stack,
+        response: error.response?.data,
+      });
+    }
+  };
 
-    fetchAllStudentData();
-  }, [user?.id]);
+  fetchGroupsAndStudents();
+}, [user?.id]);
+
+// Separate useEffect just for templates
+useEffect(() => {
+    if (!user?.id) {
+      console.warn("User ID is missing. Skipping template fetch.");
+      return;
+    }
+  fetchTemplates();
+}, [user?.id]);
+ 
+const fetchTemplates = async () => {
+    if (!user?.id) {
+      console.warn("User ID is missing. Skipping template fetch.");
+      return;
+    }
+
+    try {
+      const templatesRes = await axios.get(`${apiConfig.baseURL}/api/stud/templates/${user.id}`);
+      setTemplates(templatesRes.data);
+    } catch (error) {
+      console.error("Error fetching templates:", {
+        message: error.message,
+        stack: error.stack,
+        response: error.response?.data,
+      });
+    }
+  };
+
+
 
   useEffect(() => {
     const handleResize = () => {
@@ -591,6 +619,7 @@ setTimeout(() => {
     setIsNavOpen(false);
     setIsOpentemplate(false); // Close the dropdown
     setSelectedTemplate(template);
+    setTemplateName(template.temname || "");
     setBgColor(template.bgColor || "#ffffff"); // Update background color
     setPreviewContent(template.previewContent || []); // Update previewContent
   };
@@ -1090,7 +1119,7 @@ setTimeout(() => {
     }
   };
 
-  const handleSaveButton = () => {
+  const handleSaveasButton = () => {
     if (!user || !user.id) {
       toast.error("Please ensure the user is valid");
       return; // Stop further execution if user is invalid
@@ -1121,6 +1150,7 @@ setTimeout(() => {
             setTemplateName("");
             setIsLoading(false);
           }, 2000);
+          fetchTemplates(); // Refresh templates after saving
         })
         .catch((error) => {
           setIsLoading(false);
@@ -1141,6 +1171,49 @@ setTimeout(() => {
       toast.error("Please ensure all fields are filled and user is valid");
     }
   };
+ const handleSaveButton = async () => {
+  if (!user || !user.id) {
+    toast.error("Please ensure the user is valid");
+    return;
+  }
+  if (!templateName) {
+    toast.error("Please enter a Template name");
+    return;
+  }
+  if (!previewContent || previewContent.length === 0) {
+    toast.warning("No preview content available.");
+    return;
+  }
+
+  try {
+    const checkRes = await axios.get(
+      `${apiConfig.baseURL}/api/stud/template/check?temname=${encodeURIComponent(templateName)}&userId=${user.id}`
+    );
+
+    const existingTemplate = checkRes.data;
+    console.log("Existing Template:", existingTemplate);
+
+    if (existingTemplate) {
+      // Update template
+      await axios.put(`${apiConfig.baseURL}/api/stud/template/${existingTemplate._id}`, {
+        previewContent,
+        bgColor,
+        camname: campaign?.camname || "",
+      });
+      toast.success("Template Updated Successfully");
+    }
+    fetchTemplates();
+  } catch (error) {
+    setIsLoading(false);
+    toast.dismiss();
+    toast.error(
+      error?.response?.data?.message || "Failed to Save or Update Template",
+      { autoClose: 3000 }
+    );
+  }
+};
+
+
   const sendscheduleEmail = async () => {
     if (!previewContent || previewContent.length === 0) {
       toast.warning("No preview content available.");
@@ -1492,15 +1565,25 @@ setTimeout(() => {
                 </span>{" "}
                 {/* <span className="nav-names">Mobile</span> */}
               </button>
-
+              
               <button
-                onClick={() => setShowTemplateModal(true)}
+                onClick={handleSaveButton}
                 className="navbar-button-send"
               >
                 <span className="Nav-icons">
                   <FaSave />
                 </span>{" "}
                 <span className="nav-names">Save</span>
+              </button>
+
+              <button
+                onClick={() => setShowTemplateModal(true)}
+                className="navbar-button-send"
+              >
+                <span className="Nav-icons">
+                  <FaFileExport />
+                </span>{" "}
+                <span className="nav-names">Save As</span>
               </button>
 
               <button
@@ -6634,7 +6717,7 @@ setTimeout(() => {
                 />
                 <button
                   className="modal-create-button"
-                  onClick={handleSaveButton}
+                  onClick={handleSaveasButton}
                   disabled={isLoading}
                 >
                   {isLoading ? (

@@ -611,7 +611,7 @@ router.post('/start-campaign', async (req, res) => {
     // Configure delay settings (in milliseconds)
     const DELAY_BETWEEN_EMAILS = 500; // 0.5 seconds between each email
     const DELAY_BETWEEN_BATCHES = 2000; // 2 seconds between batches
-    const BATCH_SIZE = 10; // Number of emails to send in each batch
+    const BATCH_SIZE = 20; // Number of emails to send in each batch
 
     // Split students into batches
     const batches = [];
@@ -2508,6 +2508,42 @@ router.post('/campaign', async (req, res) => {
     });
   }
 });
+router.get('/template/check', async (req, res) => {
+  const { temname, userId } = req.query;
+
+  if (!temname || !userId) {
+    return res.status(400).json({ message: "Template name and user ID required" });
+  }
+
+  const template = await Template.findOne({ temname, userId });
+  if (template) {
+    return res.json(template);
+  } else {
+    return res.json(null);
+  }
+});
+router.put('/template/:id', async (req, res) => {
+  const { id } = req.params;
+  const { previewContent, bgColor, camname } = req.body;
+
+  try {
+    const updated = await Template.findByIdAndUpdate(
+      id,
+      { previewContent, bgColor, camname, updatedAt: new Date() },
+      { new: true }
+    );
+
+    if (!updated) {
+      return res.status(404).json({ message: "Template not found" });
+    }
+
+    res.json(updated);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Error updating template" });
+  }
+});
+
 //Save template
 router.post('/template', async (req, res) => {
   const {
