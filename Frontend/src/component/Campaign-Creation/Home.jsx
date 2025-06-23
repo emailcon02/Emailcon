@@ -2,10 +2,17 @@ import React, { useState, useEffect, useRef } from "react";
 import {
   FaFileAlt,
   FaUserPlus,
-  FaEye,FaBell,FaHistory,FaListAlt,FaRegFileAlt,
+  FaEye,
+  FaBell,
+  FaHistory,
+  FaListAlt,
+  FaRegFileAlt,
   FaUser,
   FaUsers,
   FaBirthdayCake,
+  FaFolderOpen,
+  FaCheckCircle,
+  FaTrash,
 } from "react-icons/fa";
 import "./Home.css";
 import { useNavigate } from "react-router-dom";
@@ -18,7 +25,7 @@ import GroupfileModal from "./GroupfileModal";
 import GroupModalnew from "./GroupModalnew.jsx";
 import ListPage from "./ListPage.jsx";
 import { FaRegClipboard, FaTimes } from "react-icons/fa";
-import { FaAddressBook} from "react-icons/fa";
+import { FaAddressBook } from "react-icons/fa";
 import { MdWavingHand } from "react-icons/md";
 import imghome from "../../Images/home-sidebar.jpg";
 import welcomeimg from "../../Images/welcome.png";
@@ -29,8 +36,8 @@ import sampleexcel from "../../Images/excelsheet.png";
 import CustomHourSelect from "./CustomHourSelect.jsx";
 import EditProfile from "./EditProfile.jsx";
 import ParaEditor from "./ParaEditor.jsx";
-import Logo from "../../Images/emailcon_logo.png"
-
+import Logo from "../../Images/emailcon_logo.png";
+import FileManagerModal from "../../pages/FilemanagerModal.jsx";
 
 const Home = () => {
   const [view, setView] = useState("main");
@@ -39,7 +46,8 @@ const Home = () => {
   const [showCampaignModalauto, setShowCampaignModalauto] = useState(false);
   const [campaignName, setCampaignName] = useState("");
   const [showfileGroupModal, setShowfileGroupModal] = useState(false);
-  const [showfilesingleGroupModal, setShowfilesingleGroupModal] =useState(false);
+  const [showfilesingleGroupModal, setShowfilesingleGroupModal] =
+    useState(false);
   const [showNewGroupModal, setShowNewGroupModal] = useState(false);
   const [showListPageModal, setShowListPageModal] = useState(false);
   const [showPopup, setShowPopup] = useState(false);
@@ -57,9 +65,7 @@ const Home = () => {
   const [isBirthPreviewOpen, setIsBirthPreviewOpen] = useState(false);
   const [isPreviewOpenauto, setIsPreviewOpenauto] = useState(false);
   const [bdycampaignname, setBdyCampaignname] = useState("");
-    const [modalIndex, setModalIndex] = useState(null);
-  
-
+  const [modalIndex, setModalIndex] = useState(null);
 
   const navigate = useNavigate();
   const user = JSON.parse(localStorage.getItem("user"));
@@ -72,16 +78,16 @@ const Home = () => {
   const [emailData, setEmailData] = useState({ attachments: [] }); // Email data object
   const [previewtext, setPreviewtext] = useState("");
   const [aliasName, setAliasName] = useState("");
-        const [replyTo,setReplyTo] = useState("");
-       const [isLoadingreply, setIsLoadingreply] = useState(false); // State for loader
-          const [aliasOptions, setAliasOptions] = useState([]);
-          const [showModal, setShowModal] = useState(false);
-          const [replyOptions, setReplyOptions] = useState([]);
-          const [showModalreply, setShowModalreply] = useState(false);
+  const [replyTo, setReplyTo] = useState("");
+  const [isLoadingreply, setIsLoadingreply] = useState(false); // State for loader
+  const [aliasOptions, setAliasOptions] = useState([]);
+  const [showModal, setShowModal] = useState(false);
+  const [replyOptions, setReplyOptions] = useState([]);
+  const [showModalreply, setShowModalreply] = useState(false);
   const [selectedGroupsub, setSelectedGroupsub] = useState(false);
   const [fieldNames, setFieldNames] = useState({});
   const [students, setStudents] = useState([]); // Stores all students
-  const [users,setUsers]=useState([]);
+  const [users, setUsers] = useState([]);
   const [scheduledTime, setScheduledTime] = useState(""); // Stores the selected time
   const [excelData, setExcelData] = useState([]);
   const [fileName, setFileName] = useState("");
@@ -90,53 +96,256 @@ const Home = () => {
   const [showautoModal, setShowautoModal] = useState(false);
   const [step, setStep] = useState(1);
   const [isDeleting, setIsDeleting] = useState(false);
-  const [paymentdetails,setPaymentdetails] = useState([]);
+  const [paymentdetails, setPaymentdetails] = useState([]);
   const [hours, minutes] = scheduledTime.split(":").map(Number); // scheduledTime is "HH:MM"
   const [showDeleteModal, setShowDeleteModal] = useState(false);
-const [deleteTemplateId, setDeleteTemplateId] = useState(null);
-const [showBirthDeleteModal, setShowBirthDeleteModal] = useState(false);
-const [deleteBirthTemplateId, setDeleteBirthTemplateId] = useState(null);
+  const [deleteTemplateId, setDeleteTemplateId] = useState(null);
+  const [showBirthDeleteModal, setShowBirthDeleteModal] = useState(false);
+  const [deleteBirthTemplateId, setDeleteBirthTemplateId] = useState(null);
+  const [activeTablayout, setActiveTablayout] = useState(false);
+  const [galleryImages, setGalleryImages] = useState([]);
+  const [selectedImageIndex, setSelectedImageIndex] = useState(null);
+  const [selectedImageNumber, setSelectedImageNumber] = useState(null);
+  const [showFolderModal, setShowFolderModal] = useState(false);
+  const [newFolderName, setNewFolderName] = useState("");
+  const [folderList, setFolderList] = useState([]);
+  const [currentFolder, setCurrentFolder] = useState(null);
+  const [hoveredId, setHoveredId] = useState(null);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [folderToDelete, setFolderToDelete] = useState(null);
+
+  const handleDeleteFolder = async () => {
+    try {
+      const response = await axios.delete(
+        `${apiConfig.baseURL}/api/stud/folder/${folderToDelete.name}`
+      );
+      if (response.data.success) {
+        setFolderList((prev) =>
+          prev.filter((f) => f.name !== folderToDelete.name)
+        );
+        toast.success("Deleted Successfully");
+        setTimeout(() => {
+          setModalVisible(false);
+          setFolderToDelete(null);
+        }, 2000);
+      } else {
+        toast.error("Failed to delete folder.");
+      }
+    } catch (err) {
+      console.error("Error deleting folder:", err);
+      toast.error("Error deleting folder.");
+    }
+  };
+
+  const fetchFolders = async () => {
+    try {
+      const res = await axios.get(
+        `${apiConfig.baseURL}/api/stud/folders/${user.id}`
+      );
+
+      // Sort by createdAt in descending order (latest first)
+      const sortedFolders = res.data.sort(
+        (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+      );
+
+      setFolderList(sortedFolders);
+    } catch (err) {
+      console.error("Error fetching folders", err);
+    }
+  };
+
+  const createFolder = async () => {
+    if (!newFolderName.trim()) return;
+    try {
+      const res = await axios.post(
+        `${apiConfig.baseURL}/api/stud/create-folder`,
+        {
+          userId: user.id,
+          folderName: newFolderName,
+        }
+      );
+
+      toast.success("Folder Created");
+      setNewFolderName("");
+      setShowFolderModal(false);
+
+      // Add newly created folder to the list without refetching
+      setFolderList((prev) => [...prev, res.data.folder]);
+
+      // Optionally still call fetchFolders() to sync with DB
+      setTimeout(() => {
+        fetchFolders();
+      }, 100); // slight delay to ensure re-render
+    } catch (err) {
+      toast.error("Failed to create folder");
+    }
+  };
+
+  const uploadImagefile = async () => {
+    const input = document.createElement("input");
+    input.type = "file";
+    input.accept = "image/*";
+    input.multiple = true;
+
+    input.onchange = async (e) => {
+      const files = Array.from(e.target.files);
+      if (files.length > 10) {
+        toast.error("Maximum 10 files allowed.");
+        return;
+      }
+
+      const formData = new FormData();
+      for (const file of files) {
+        formData.append("image", file); // append each file under same key
+      }
+      formData.append("userId", user.id);
+      formData.append("folderName", currentFolder || "Sample");
+
+      try {
+        const uploadRes = await axios.post(
+          `${apiConfig.baseURL}/api/stud/upload`,
+          formData,
+          { headers: { "Content-Type": "multipart/form-data" } }
+        );
+
+        const imageUrls = uploadRes?.data?.imageUrls || [];
+
+        // ✅ Save all images to DB
+        await Promise.all(
+          imageUrls.map((imageUrl) =>
+            axios.post(`${apiConfig.baseURL}/api/stud/save-image`, {
+              userId: user.id,
+              imageUrl,
+              folderName: currentFolder || "Sample",
+            })
+          )
+        );
+        fetchImages();
+      } catch (err) {
+        console.error(err);
+        toast.error("Upload failed");
+      }
+    };
+
+    input.click();
+  };
+  const fetchImages = async () => {
+    try {
+      const res = await axios.get(
+        `${apiConfig.baseURL}/api/stud/images/${user.id}`,
+        { params: { folderName: currentFolder || "Sample" } }
+      );
+
+      const sortedImages = res.data.sort(
+        (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+      );
+      setGalleryImages(sortedImages);
+    } catch (err) {
+      console.error("Error fetching images", err);
+    }
+  };
+
+  const deleteImage = async (id) => {
+    try {
+      // Find image in previewContent by id
+      const imageToDelete = galleryImages.find((img) => img._id === id);
+      if (!imageToDelete || !imageToDelete.imageUrl) {
+        toast.error("Image not found");
+        return;
+      }
+
+      // Extract the S3 key from the URL
+      const s3Key = decodeURIComponent(
+        imageToDelete.imageUrl.split(".amazonaws.com/")[1]
+      );
+      if (!s3Key) {
+        toast.error("Invalid image URL");
+        return;
+      }
+
+      // Step 1: Delete file from S3 using backend API
+      const s3DeleteResponse = await fetch(
+        `${apiConfig.baseURL}/api/stud/file?key=${encodeURIComponent(s3Key)}`,
+        { method: "DELETE" }
+      );
+
+      if (!s3DeleteResponse.ok) {
+        const err = await s3DeleteResponse.json();
+        throw new Error(err?.error || "Error deleting file from S3");
+      }
+
+      // Step 2: Delete DB record by id
+      const dbDeleteResponse = await axios.delete(
+        `${apiConfig.baseURL}/api/stud/images/${id}`
+      );
+      if (dbDeleteResponse.status !== 200) {
+        throw new Error("Failed to delete image record from DB");
+      }
+
+      toast.success("Image deleted successfully");
+      fetchImages(); // Refresh gallery
+    } catch (err) {
+      toast.error("Delete failed");
+      console.error(err);
+    }
+  };
+  useEffect(() => {
+    fetchFolders();
+  }, []); // Only once on mount
+
+  useEffect(() => {
+    fetchImages();
+  }, [currentFolder]); // Only images need folderName
 
   let daysRemaining = null;
 
   if (paymentdetails?.expiryDate) {
     const expiryDate = new Date(paymentdetails.expiryDate);
     const today = new Date();
-  
-    const expiryMidnight = new Date(expiryDate.getFullYear(), expiryDate.getMonth(), expiryDate.getDate());
-    const todayMidnight = new Date(today.getFullYear(), today.getMonth(), today.getDate());
-  
+
+    const expiryMidnight = new Date(
+      expiryDate.getFullYear(),
+      expiryDate.getMonth(),
+      expiryDate.getDate()
+    );
+    const todayMidnight = new Date(
+      today.getFullYear(),
+      today.getMonth(),
+      today.getDate()
+    );
+
     const timeDiff = expiryMidnight.getTime() - todayMidnight.getTime();
     daysRemaining = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
   }
-  
+
   useEffect(() => {
     const interval = setInterval(async () => {
       const token = localStorage.getItem("token");
-  
+
       if (!token) return;
-  
+
       try {
         const res = await axios.get(`${apiConfig.baseURL}/api/stud/validate`, {
-          headers: { Authorization: `Bearer ${token}` }
+          headers: { Authorization: `Bearer ${token}` },
         });
-  
+
         if (!res.data.user.isActive) {
           localStorage.removeItem("token");
           localStorage.removeItem("user");
-          toast.error("Your account is expired. Please renew your subscription.");
+          toast.error(
+            "Your account is expired. Please renew your subscription."
+          );
           setTimeout(() => {
             window.location.href = "/user-login";
-          }, 5000); // 5 second delay        
-          }
+          }, 5000); // 5 second delay
+        }
       } catch (err) {
         console.log("Validation failed:", err.message);
       }
     }, 30000); // Every 30 sec
-  
+
     return () => clearInterval(interval);
   }, []);
-  
 
   useEffect(() => {
     const fetchAllStudentData = async () => {
@@ -144,17 +353,26 @@ const [deleteBirthTemplateId, setDeleteBirthTemplateId] = useState(null);
         console.warn("User ID is missing. Skipping data fetch.");
         return;
       }
-  
+
       try {
-        const [campaignsRes, groupsRes, studentsRes, templatesRes,birthtemplatesRes,userdata,paymentdetails] = await Promise.all([
+        const [
+          campaignsRes,
+          groupsRes,
+          studentsRes,
+          templatesRes,
+          birthtemplatesRes,
+          userdata,
+          paymentdetails,
+        ] = await Promise.all([
           axios.get(`${apiConfig.baseURL}/api/stud/campaigns/${user.id}`),
           axios.get(`${apiConfig.baseURL}/api/stud/groups/${user.id}`),
           axios.get(`${apiConfig.baseURL}/api/stud/students`),
           axios.get(`${apiConfig.baseURL}/api/stud/templates/${user.id}`),
           axios.get(`${apiConfig.baseURL}/api/stud/birthtemplates/${user.id}`),
           axios.get(`${apiConfig.baseURL}/api/stud/userdata/${user.id}`),
-          axios.get(`${apiConfig.baseURL}/api/stud/payment-history-latest/${user.id}`),
-
+          axios.get(
+            `${apiConfig.baseURL}/api/stud/payment-history-latest/${user.id}`
+          ),
         ]);
         setUsers(userdata.data);
         setCampaigns(campaignsRes.data);
@@ -171,10 +389,9 @@ const [deleteBirthTemplateId, setDeleteBirthTemplateId] = useState(null);
         });
       }
     };
-  
+
     fetchAllStudentData();
   }, [user?.id]);
-  
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -190,143 +407,141 @@ const [deleteBirthTemplateId, setDeleteBirthTemplateId] = useState(null);
     };
   }, []);
 
-    useEffect(() => {
-        const fetchaliasname = async () => {
-          if (!user?.id) {
-            navigate("/user-login"); // Redirect to login if user is not found
-            return;
+  useEffect(() => {
+    const fetchaliasname = async () => {
+      if (!user?.id) {
+        navigate("/user-login"); // Redirect to login if user is not found
+        return;
+      }
+
+      try {
+        const res = await axios.get(
+          `${apiConfig.baseURL}/api/stud/aliasname/${user.id}`
+        );
+        setAliasOptions(res.data);
+      } catch (err) {
+        console.error(err);
+        console.log("Failed to fetch aliasname");
+      }
+    };
+
+    fetchaliasname();
+  }, [user?.id, navigate]); // Ensure useEffect is dependent on `user` and `navigate`
+
+  const handleAddAlias = () => {
+    if (!user || !user.id) {
+      toast.error("Please ensure the user is valid");
+      return; // Stop further execution if user is invalid
+    }
+    if (!aliasName) {
+      toast.error("Aliasname cannot be empty");
+      return; // Stop further execution if aliasname is empty
+    }
+
+    // Proceed with aliasname creation
+    setIsLoading(true); // Start loading
+    if (aliasName && user && user.id) {
+      axios
+        .post(`${apiConfig.baseURL}/api/stud/aliasname`, {
+          aliasname: aliasName,
+          userId: user.id,
+        })
+        .then((response) => {
+          setAliasOptions([...aliasOptions, response.data]);
+          toast.success("Aliasname created");
+          setShowModal(false);
+          setAliasName("");
+          setIsLoading(false);
+        })
+        .catch((error) => {
+          setIsLoading(false); // Stop loading
+          // Handle error response
+          console.error("Error:", error);
+          // Dismiss previous toasts before showing a new one
+          toast.dismiss();
+
+          if (
+            error.response &&
+            error.response.data &&
+            error.response.data.message
+          ) {
+            toast.warning(error.response.data.message, { autoClose: 3000 });
+          } else {
+            toast.error("Failed to create aliasname", { autoClose: 3000 });
           }
-    
-          try {
-            const res = await axios.get(
-              `${apiConfig.baseURL}/api/stud/aliasname/${user.id}`
-            );
-            setAliasOptions(res.data);
-          } catch (err) {
-            console.error(err);
-            console.log("Failed to fetch aliasname");
+        });
+    } else {
+      toast.error("Please ensure all fields are filled and user is valid");
+    }
+  };
+
+  useEffect(() => {
+    const fetchreplyto = async () => {
+      if (!user?.id) {
+        navigate("/user-login"); // Redirect to login if user is not found
+        return;
+      }
+
+      try {
+        const res = await axios.get(
+          `${apiConfig.baseURL}/api/stud/replyTo/${user.id}`
+        );
+        setReplyOptions(res.data);
+      } catch (err) {
+        console.error(err);
+        console.log("Failed to fetch replyto mail");
+      }
+    };
+
+    fetchreplyto();
+  }, [user?.id, navigate]); // Ensure useEffect is dependent on `user` and `navigate`
+
+  const handleAddReply = () => {
+    if (!user || !user.id) {
+      toast.error("Please ensure the user is valid");
+      return; // Stop further execution if user is invalid
+    }
+    if (!replyTo) {
+      toast.error("Reply to mail cannot be empty");
+      return; // Stop further execution if replyto is empty
+    }
+
+    // Proceed with replyto creation
+    setIsLoadingreply(true); // Start loading
+    if (replyTo && user && user.id) {
+      axios
+        .post(`${apiConfig.baseURL}/api/stud/replyTo`, {
+          replyTo,
+          userId: user.id,
+        })
+        .then((response) => {
+          setReplyOptions([...replyOptions, response.data]);
+          toast.success("Replyto mail created");
+          setShowModalreply(false);
+          setReplyTo("");
+          setIsLoadingreply(false);
+        })
+        .catch((error) => {
+          setIsLoadingreply(false); // Stop loading
+          // Handle error response
+          console.error("Error:", error);
+          // Dismiss previous toasts before showing a new one
+          toast.dismiss();
+
+          if (
+            error.response &&
+            error.response.data &&
+            error.response.data.message
+          ) {
+            toast.warning(error.response.data.message, { autoClose: 3000 });
+          } else {
+            toast.error("Failed to create reply to mail", { autoClose: 3000 });
           }
-        };
-    
-        fetchaliasname();
-      }, [user?.id, navigate]); // Ensure useEffect is dependent on `user` and `navigate`
-    
-      const handleAddAlias = () => {
-        if (!user || !user.id) {
-          toast.error("Please ensure the user is valid");
-          return; // Stop further execution if user is invalid
-        }
-        if (!aliasName) {
-          toast.error("Aliasname cannot be empty");
-          return; // Stop further execution if aliasname is empty
-        }
-    
-        // Proceed with aliasname creation
-        setIsLoading(true); // Start loading
-        if (aliasName && user && user.id) {
-          axios
-            .post(`${apiConfig.baseURL}/api/stud/aliasname`, {
-              aliasname:aliasName,
-              userId: user.id,
-            })
-            .then((response) => {
-              setAliasOptions([...aliasOptions, response.data]);
-              toast.success("Aliasname created");
-              setShowModal(false);
-              setAliasName("");
-              setIsLoading(false);
-            })
-            .catch((error) => {
-              setIsLoading(false); // Stop loading
-              // Handle error response
-              console.error("Error:", error);
-              // Dismiss previous toasts before showing a new one
-              toast.dismiss();
-    
-              if (
-                error.response &&
-                error.response.data &&
-                error.response.data.message
-              ) {
-                toast.warning(error.response.data.message, { autoClose: 3000 });
-              } else {
-                toast.error("Failed to create aliasname", { autoClose: 3000 });
-              }
-            });
-        } else {
-          toast.error("Please ensure all fields are filled and user is valid");
-        }
-      };
-    
-    
-      useEffect(() => {
-        const fetchreplyto = async () => {
-          if (!user?.id) {
-            navigate("/user-login"); // Redirect to login if user is not found
-            return;
-          }
-    
-          try {
-            const res = await axios.get(
-              `${apiConfig.baseURL}/api/stud/replyTo/${user.id}`
-            );
-            setReplyOptions(res.data);
-          } catch (err) {
-            console.error(err);
-            console.log("Failed to fetch replyto mail");
-          }
-        };
-    
-        fetchreplyto();
-      }, [user?.id, navigate]); // Ensure useEffect is dependent on `user` and `navigate`
-    
-      const handleAddReply = () => {
-        if (!user || !user.id) {
-          toast.error("Please ensure the user is valid");
-          return; // Stop further execution if user is invalid
-        }
-        if (!replyTo) {
-          toast.error("Reply to mail cannot be empty");
-          return; // Stop further execution if replyto is empty
-        }
-    
-        // Proceed with replyto creation
-        setIsLoadingreply(true); // Start loading
-        if (replyTo && user && user.id) {
-          axios
-            .post(`${apiConfig.baseURL}/api/stud/replyTo`, {
-              replyTo,
-              userId: user.id,
-            })
-            .then((response) => {
-              setReplyOptions([...replyOptions, response.data]);
-              toast.success("Replyto mail created");
-              setShowModalreply(false);
-              setReplyTo("");
-              setIsLoadingreply(false);
-            })
-            .catch((error) => {
-              setIsLoadingreply(false); // Stop loading
-              // Handle error response
-              console.error("Error:", error);
-              // Dismiss previous toasts before showing a new one
-              toast.dismiss();
-    
-              if (
-                error.response &&
-                error.response.data &&
-                error.response.data.message
-              ) {
-                toast.warning(error.response.data.message, { autoClose: 3000 });
-              } else {
-                toast.error("Failed to create reply to mail", { autoClose: 3000 });
-              }
-            });
-        } else {
-          toast.error("Please ensure all fields are filled and user is valid");
-        }
-      };
-    
+        });
+    } else {
+      toast.error("Please ensure all fields are filled and user is valid");
+    }
+  };
 
   const handleDelete = async (templateId) => {
     setIsDeleting(true);
@@ -334,20 +549,22 @@ const [deleteBirthTemplateId, setDeleteBirthTemplateId] = useState(null);
       const response = await axios.delete(
         `${apiConfig.baseURL}/api/stud/templates/${templateId}`
       );
-  
+
       if (response.status === 200) {
         toast.success("Template deleted successfully!");
-        setIsDeleting(false); 
-        setIsPreviewOpen(false); 
+        setIsDeleting(false);
+        setIsPreviewOpen(false);
         setShowtemModal(true); // Reset loading state
         setTemplates((prevTemplates) =>
           prevTemplates.filter((template) => template._id !== templateId)
-        ); 
+        );
       }
     } catch (error) {
       console.error("Error deleting template:", error);
       if (error.response && error.response.data) {
-        console.log(`Failed to delete template: ${error.response.data.message}`);
+        console.log(
+          `Failed to delete template: ${error.response.data.message}`
+        );
       } else {
         console.log("Failed to delete template.");
       }
@@ -355,32 +572,34 @@ const [deleteBirthTemplateId, setDeleteBirthTemplateId] = useState(null);
       setIsDeleting(false);
     }
   };
-  
-const handlebirthDelete = async (templateId) => {
-  try {
-    const response = await axios.delete(
-      `${apiConfig.baseURL}/api/stud/birthtemplates/${templateId}`
-    );
 
-    if (response.status === 200) {
-      toast.success("Template deleted successfully!");
-      setIsBirthPreviewOpen(false);
-      setShowbirthtemModal(true); // Reset loading state
-      setBirthTemplates((prevTemplates) =>
-        prevTemplates.filter((template) => template._id !== templateId)
-      ); 
+  const handlebirthDelete = async (templateId) => {
+    try {
+      const response = await axios.delete(
+        `${apiConfig.baseURL}/api/stud/birthtemplates/${templateId}`
+      );
+
+      if (response.status === 200) {
+        toast.success("Template deleted successfully!");
+        setIsBirthPreviewOpen(false);
+        setShowbirthtemModal(true); // Reset loading state
+        setBirthTemplates((prevTemplates) =>
+          prevTemplates.filter((template) => template._id !== templateId)
+        );
       }
-  } catch (error) {
-    console.error("Error deleting template:", error);
-    if (error.response && error.response.data) {
-      console.log(`Failed to delete template: ${error.response.data.message}`);
-    } else {
-      console.log("Failed to delete template.");
+    } catch (error) {
+      console.error("Error deleting template:", error);
+      if (error.response && error.response.data) {
+        console.log(
+          `Failed to delete template: ${error.response.data.message}`
+        );
+      } else {
+        console.log("Failed to delete template.");
+      }
+    } finally {
+      setIsDeleting(false);
     }
-  } finally {
-    setIsDeleting(false);
-  }
-};
+  };
 
   const handleGroupChangesubject = (e) => {
     const groupName = e.target.value;
@@ -415,7 +634,6 @@ const handlebirthDelete = async (templateId) => {
     // Reset selected group dropdown properly
     setSelectedGroupsub(false);
   };
-  
 
   const handleFileUpload = (event) => {
     const file = event.target.files[0];
@@ -463,7 +681,6 @@ const handlebirthDelete = async (templateId) => {
   const toggleDropdown = () => {
     setIsEditingProfile(true);
   };
-  
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -566,8 +783,8 @@ const handlebirthDelete = async (templateId) => {
   const handleprevcampaignname = () => {
     setShowCampaignModalTem(true);
   };
-   // Open modal
-   const openModal = () => {
+  // Open modal
+  const openModal = () => {
     setShowautoModal(true);
     setStep(0); // Reset steps on open
   };
@@ -581,7 +798,7 @@ const handlebirthDelete = async (templateId) => {
   const handlebirthtemclose = () => {
     setShowbirthtemModal(false);
   };
-    const handletemclose = () => {
+  const handletemclose = () => {
     setShowtemModal(false);
   };
 
@@ -599,8 +816,6 @@ const handlebirthDelete = async (templateId) => {
   const handleaddsinglefilecontacts = () => {
     setShowfilesingleGroupModal(true);
   };
-
-
 
   const handleCreateButton = () => {
     if (!user || !user.id) {
@@ -652,9 +867,9 @@ const handlebirthDelete = async (templateId) => {
         }
       });
   };
-  const handlecreatebirthdayname = () => {  
+  const handlecreatebirthdayname = () => {
     setShowCampaignModalauto(true);
-  }
+  };
 
   const handleCreateButtonauto = () => {
     if (!user || !user.id) {
@@ -684,7 +899,6 @@ const handlebirthDelete = async (templateId) => {
         setShowCampaignModalauto(false);
         setCampaignName("");
         navigate("/birthdayedit");
-      
       })
       .catch((error) => {
         setIsLoading(false);
@@ -734,7 +948,7 @@ const handlebirthDelete = async (templateId) => {
           navigate("/campaign"); // Mobile
         } else {
           navigate("/TemMainpage", {
-            state: { previewContenttem, bgColortem , selectedTemplatepre },
+            state: { previewContenttem, bgColortem, selectedTemplatepre },
           }); // PC
         }
       })
@@ -968,10 +1182,10 @@ const handlebirthDelete = async (templateId) => {
 
       // This gives you a Date object with today's date + selected time
       const finalDateTime = now.toISOString(); // or just `now` if you want to send a Date object
-    
+
       // Store initial campaign history with "Pending" status
       const campaignHistoryData = {
-        campaignname:bdycampaignname,
+        campaignname: bdycampaignname,
         groupname: groups.find((group) => group._id === selectedGroup)?.name, // Get the group name from the groups array
         totalcount: students.length,
         recipients: "no mail",
@@ -1049,6 +1263,13 @@ const handlebirthDelete = async (templateId) => {
             >
               Automation
             </button>
+            <button
+              onClick={() => setActiveTablayout(true)}
+              className="sidebar-button contact-button"
+            >
+              File Manager
+            </button>
+
             {/* <button
               className="sidebar-button contact-button"
               onClick={handlepayment}
@@ -1056,6 +1277,319 @@ const handlebirthDelete = async (templateId) => {
               Upgrade Plan
             </button> */}
           </div>
+
+          {/* file manager modal */}
+          <FileManagerModal activeTablayout={activeTablayout}>
+            {activeTablayout && (
+              <div className="modal-overlay-file-editor">
+                <div
+                  className="modal-content-file"
+                  style={{
+                    width: "90%",
+                    maxWidth: "700px",
+                    background: "#fff",
+                    padding: "20px",
+                    borderRadius: "10px",
+                    position: "relative",
+                    maxHeight: "90vh",
+                    overflowY: "auto",
+                  }}
+                >
+                  <div
+                    className="modal-header-file"
+                    style={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                      marginBottom: "10px",
+                    }}
+                  >
+                    <h2>File Manager</h2>
+                    <button
+                      onClick={() => {
+                        setCurrentFolder(null);
+                        setActiveTablayout(false);
+                      }}
+                      style={{
+                        background: "transparent",
+                        border: "none",
+                        fontSize: "20px",
+                        cursor: "pointer",
+                        fontWeight: "bold",
+                      }}
+                    >
+                      &times;
+                    </button>
+                  </div>
+
+                  <div
+                    style={{
+                      display: "flex",
+                      gap: "10px",
+                      marginBottom: "15px",
+                    }}
+                  >
+                    <button
+                      onClick={uploadImagefile}
+                      style={{
+                        padding: "8px 16px",
+                        background: "#007bff",
+                        color: "#fff",
+                        border: "none",
+                        borderRadius: "4px",
+                        cursor: "pointer",
+                      }}
+                    >
+                      + Upload
+                    </button>
+                    <button
+                      onClick={() => setShowFolderModal(true)}
+                      style={{
+                        padding: "8px 16px",
+                        background: "#28a745",
+                        color: "#fff",
+                        border: "none",
+                        borderRadius: "4px",
+                        cursor: "pointer",
+                      }}
+                    >
+                      + Folder
+                    </button>
+                    {currentFolder && (
+                      <button
+                        onClick={() => setCurrentFolder(null)}
+                        style={{
+                          padding: "8px 16px",
+                          background: "#ffc107",
+                          color: "#000",
+                          border: "none",
+                          borderRadius: "4px",
+                          cursor: "pointer",
+                        }}
+                      >
+                        ← Back
+                      </button>
+                    )}
+                  </div>
+                  {/* Folder display (only at root level) */}
+                  {!currentFolder && (
+                    <div
+                      style={{
+                        display: "flex",
+                        flexWrap: "wrap",
+                        gap: "12px",
+                        marginBottom: "15px",
+                      }}
+                    >
+                      {folderList.map((folder) => (
+                        <div
+                          key={folder._id}
+                          style={{
+                            position: "relative",
+                            cursor: "pointer",
+                            color: "#007bff",
+                            background: "#f1f1f1",
+                            padding: "8px 12px",
+                            borderRadius: "6px",
+                            display: "flex",
+                            alignItems: "center",
+                            whiteSpace: "nowrap",
+                          }}
+                          onMouseEnter={() => setHoveredId(folder._id)}
+                          onMouseLeave={() => setHoveredId(null)}
+                        >
+                          <span onClick={() => setCurrentFolder(folder.name)}>
+                            📁 {folder.name}
+                          </span>
+
+                          {/* Delete icon on hover */}
+                          {hoveredId === folder._id && (
+                            <span
+                              style={{
+                                color: "#f48c06",
+                                marginLeft: "5px",
+                                fontSize: "12px",
+                              }}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setFolderToDelete(folder);
+                                setModalVisible(true);
+                              }}
+                            >
+                              <FaTrash />
+                            </span>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Confirmation Modal */}
+                  {modalVisible && (
+                    <div
+                      style={{
+                        position: "fixed",
+                        top: 0,
+                        left: 0,
+                        width: "100%",
+                        height: "100%",
+                        background: "rgba(0,0,0,0.5)",
+                        display: "flex",
+                        alignItems: "center",
+                        zIndex: "99999",
+                        justifyContent: "center",
+                      }}
+                    >
+                      <div
+                        style={{
+                          background: "#fff",
+                          padding: "20px",
+                          borderRadius: "10px",
+                          width: "300px",
+                          textAlign: "center",
+                        }}
+                      >
+                        <p>
+                          Are you sure you want to delete folder{" "}
+                          <strong>{folderToDelete?.name}</strong>?
+                        </p>
+                        <div style={{ marginTop: "15px" }}>
+                          <button
+                            style={{
+                              marginRight: "10px",
+                              padding: "6px 12px",
+                              backgroundColor: "#ccc",
+                              border: "none",
+                              borderRadius: "4px",
+                              cursor: "pointer",
+                            }}
+                            onClick={() => setModalVisible(false)}
+                          >
+                            Cancel
+                          </button>
+                          <button
+                            style={{
+                              padding: "6px 12px",
+                              backgroundColor: "red",
+                              color: "white",
+                              border: "none",
+                              borderRadius: "4px",
+                              cursor: "pointer",
+                            }}
+                            onClick={handleDeleteFolder}
+                          >
+                            Delete
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Folder title */}
+                  {currentFolder && (
+                    <div style={{ marginBottom: "10px" }}>
+                      📂 {currentFolder}
+                    </div>
+                  )}
+
+                  {/* Images */}
+                  <div className="gallery-scroll-container">
+                    {galleryImages.length === 0 && (
+                      <div className="no-images">No images found</div>
+                    )}
+
+                    {galleryImages.map((item) => (
+                      <div key={item._id} className="gallery-item">
+                        <img src={item.imageUrl} alt="Uploaded" />
+                        <div className="gallery-actions">
+                          <button
+                            onClick={() =>
+                              uploadImage(
+                                selectedImageIndex,
+                                selectedImageNumber,
+                                item.imageUrl
+                              )
+                            }
+                          >
+                            <FaCheckCircle />
+                          </button>
+                          <button onClick={() => deleteImage(item._id)}>
+                            <FaTrash />
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Folder creation modal */}
+                {showFolderModal && (
+                  <div
+                    style={{
+                      position: "fixed",
+                      background: "rgba(0,0,0,0.7)",
+                      top: 0,
+                      zIndex: 99999,
+                      left: 0,
+                      width: "100%",
+                      height: "100%",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                    }}
+                  >
+                    <div
+                      style={{
+                        background: "#fff",
+                        padding: "20px",
+                        borderRadius: "8px",
+                        width: "300px",
+                      }}
+                    >
+                      <h3>Create Folder</h3>
+                      <input
+                        type="text"
+                        value={newFolderName}
+                        onChange={(e) => setNewFolderName(e.target.value)}
+                        placeholder="Folder Name"
+                        style={{
+                          width: "95%",
+                          padding: "8px",
+                          marginBottom: "10px",
+                        }}
+                      />
+                      <button
+                        onClick={createFolder}
+                        style={{
+                          padding: "8px 12px",
+                          background: "#2f327D",
+                          color: "#fff",
+                          border: "none",
+                          borderRadius: "4px",
+                        }}
+                      >
+                        Save
+                      </button>
+                      <button
+                        onClick={() => setShowFolderModal(false)}
+                        style={{
+                          marginLeft: "10px",
+                          padding: "8px 12px",
+                          background: "#f48c06",
+                          color: "#fff",
+                          border: "none",
+                          borderRadius: "4px",
+                        }}
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+          </FileManagerModal>
+
           <div className="side-img">
             <img src={imghome} alt="Home img" className="home-image" />
           </div>
@@ -2195,563 +2729,610 @@ const handlebirthDelete = async (templateId) => {
                           style={item.style}
                           key={index}
                         >
-                           {item.type === "para" && (
-                                                 <>
-                                                   <p
-                                                     className="border"
-                                                     contentEditable
-                                                     suppressContentEditableWarning
-                                                     onClick={() => {
-                                                       setSelectedIndex(index);
-                                                       setSelectedContent(item.content); // Store the correct content
-                                                       setIsModalOpen(true); // Open the modal
-                                                     }}
-                                                     style={item.style}
-                                                     dangerouslySetInnerHTML={{ __html: item.content }}
-                                                   />
-                                                   {isModalOpen && selectedIndex === index && (
-                                                     <ParaEditor
-                                                       isOpen={isModalOpen}
-                                                       content={selectedContent} // Pass the correct content
-                                                       style={item.style}
-                                                       onSave={(newContent) => {
-                                                         updateContent(index, { content: newContent }); // Save the new content
-                                                         setIsModalOpen(false);
-                                                       }}
-                                                       onClose={() => setIsModalOpen(false)}
-                                                     />
-                                                   )}
-                                                 </>
-                                               )}
-                         
-                                               {item.type === "multi-image-card" ? (
-                                                 <div className="Layout-img">
-                                                   <div className="Layout">
-                                                     <img
-                                                       src={
-                                                         item.src1 || "https://via.placeholder.com/200"
-                                                       }
-                                                       alt="Editable"
-                                                       className="multiimgcard"
-                                                       title="Upload Image"
-                                                       style={item.style}
-                                                       onClick={() => handleopenFiles(index, 1)}
-                                                     />
-                                                     <h3 className="card-text-image">
-                                                       {item.title1 || " "}
-                                                     </h3>
-                                                     <p>
-                                                       <s>
-                                                         {item.originalPrice1
-                                                           ? `$${item.originalPrice1}`
-                                                           : " "}
-                                                       </s>
-                                                     </p>
-                                                     <p>
-                                                       {item.offerPrice1
-                                                         ? `Off Price $${item.offerPrice1}`
-                                                         : " "}
-                                                     </p>
-                                                     <a
-                                                       href={item.link1}
-                                                       target="_blank"
-                                                       rel="noopener noreferrer"
-                                                       className="button-preview"
-                                                       style={item.buttonStyle1}
-                                                     >
-                                                       {item.content1}
-                                                     </a>
-                                                   </div>
-                         
-                                                   <div className="Layout">
-                                                     <img
-                                                       src={
-                                                         item.src2 || "https://via.placeholder.com/200"
-                                                       }
-                                                       alt="Editable"
-                                                       className="multiimgcard"
-                                                       title="Upload Image"
-                                                       style={item.style}
-                                                       onClick={() => handleopenFiles(index, 2)}
-                                                     />
-                                                     <h3 className="card-text-image">
-                                                       {item.title2 || " "}
-                                                     </h3>
-                                                     <p>
-                                                       <s>
-                                                         {item.originalPrice2
-                                                           ? `$${item.originalPrice2}`
-                                                           : " "}
-                                                       </s>
-                                                     </p>
-                                                     <p>
-                                                       {item.offerPrice2
-                                                         ? `Off Price $${item.offerPrice2}`
-                                                         : " "}
-                                                     </p>
-                                                     <a
-                                                       href={item.link2}
-                                                       target="_blank"
-                                                       rel="noopener noreferrer"
-                                                       className="button-preview"
-                                                       style={item.buttonStyle2}
-                                                     >
-                                                       {item.content2}
-                                                     </a>
-                                                   </div>
-                                                 </div>
-                                               ) : null}
-                         
-                                               {item.type === "multipleimage" ? (
-                                                 <div className="Layout-img">
-                                                   <div className="Layout">
-                                                     <img
-                                                       src={
-                                                         item.src1 || "https://via.placeholder.com/200"
-                                                       }
-                                                       alt="Editable"
-                                                       className="multiple-img"
-                                                       title="Upload Image"
-                                                       style={item.style}
-                                                       onClick={() => handleopenFiles(index, 1)}
-                                                     />
-                                                   </div>
-                         
-                                                   <div className="Layout">
-                                                     <img
-                                                       src={
-                                                         item.src2 || "https://via.placeholder.com/200"
-                                                       }
-                                                       alt="Editable"
-                                                       className="multiple-img"
-                                                       title="Upload Image"
-                                                       style={item.style}
-                                                       onClick={() => handleopenFiles(index, 2)}
-                                                     />
-                                                   </div>
-                                                 </div>
-                                               ) : null}
-                         
-                                               {item.type === "multi-image" ? (
-                                                 <div className="Layout-img">
-                                                   <div className="Layout">
-                                                     <img
-                                                       src={
-                                                         item.src1 || "https://via.placeholder.com/200"
-                                                       }
-                                                       alt="Editable"
-                                                       className="multiimg"
-                                                       title="Upload Image"
-                                                       style={item.style}
-                                                       onClick={() => handleopenFiles(index, 1)}
-                                                     />
-                                                     <a
-                                                       href={item.link1}
-                                                       target="_blank"
-                                                       className="button-preview"
-                                                       rel="noopener noreferrer"
-                                                       style={item.buttonStyle1}
-                                                     >
-                                                       {item.content1}
-                                                     </a>
-                                                   </div>
-                         
-                                                   <div className="Layout">
-                                                     <img
-                                                       src={
-                                                         item.src2 || "https://via.placeholder.com/200"
-                                                       }
-                                                       alt="Editable"
-                                                       className="multiimg"
-                                                       title="Upload Image"
-                                                       style={item.style}
-                                                       onClick={() => handleopenFiles(index, 2)}
-                                                     />
-                                                     <a
-                                                       href={item.link2}
-                                                       target="_blank"
-                                                       rel="noopener noreferrer"
-                                                       className="button-preview"
-                                                       style={item.buttonStyle2}
-                                                     >
-                                                       {item.content2}
-                                                     </a>
-                                                   </div>
-                                                 </div>
-                                               ) : null}
-                         
-                                               {item.type === "video-icon" ? (
-                                                 <div className="video-icon">
-                                                   <img
-                                                     src={item.src1 || "https://via.placeholder.com/200"}
-                                                     alt="Editable"
-                                                     className="videoimg"
-                                                     title="Upload Thumbnail Image"
-                                                     style={item.style}
-                                                     onClick={() => handleopenFiles(index, 1)}
-                                                   />
-                                                   <a
-                                                     href={item.link}
-                                                     target="_blank"
-                                                     rel="noopener noreferrer"
-                                                   >
-                                                     <img
-                                                       src={item.src2}
-                                                       className="video-btn"
-                                                       alt="icon"
-                                                     />
-                                                   </a>
-                                                 </div>
-                                               ) : null}
-                         
-                                               {item.type === "cardimage" ? (
-                                                 <div
-                                                   className="card-image-container"
-                                                   style={item.style1}
-                                                 >
-                                                   <img
-                                                     src={item.src1 || "https://via.placeholder.com/200"}
-                                                     style={item.style}
-                                                     alt="Editable"
-                                                     className="card-image"
-                                                     title="Upload Image"
-                                                     onClick={() => handleopenFiles(index, 1)}
-                                                   />
-                                                   <p
-                                                     className="card-text"
-                                                     contentEditable
-                                                     suppressContentEditableWarning
-                                                    //  onClick={() => setModalIndex(index)} // Open modal for this index
-                                                     style={item.style}
-                                                     dangerouslySetInnerHTML={{
-                                                       __html: item.content1,
-                                                     }}
-                                                   />
-                         
-                                                   {modalIndex === index && ( // Open only for the selected index
-                                                     <ParaEditor
-                                                       isOpen={true}
-                                                       content={item.content1}
-                                                       onSave={(newContent) => {
-                                                         updateContent(index, { content1: newContent });
-                                                         setModalIndex(null); // Close modal after save
-                                                       }}
-                                                       onClose={() => setModalIndex(null)}
-                                                     />
-                                                   )}
-                                                 </div>
-                                               ) : null}
-                         
-                                               {item.type === "head" && (
-                                                 <div ref={dropdownRef}>
-                                                   <p
-                                                     className="border"
-                                                     contentEditable
-                                                     suppressContentEditableWarning
-                                                     onBlur={(e) =>
-                                                       updateContent(index, {
-                                                         content: e.target.textContent,
-                                                       })
-                                                     }
-                                                     onMouseUp={(e) => handleCursorPosition(e, index)}
-                                                     onSelect={(e) => handleCursorPosition(e, index)}
-                                                     style={item.style}
-                                                   >
-                                                     {item.content}
-                                                   </p>
-                         
-                                                   {/* Local state for each heading */}
-                                                   <div className="select-group-container">
-                                                     {/* Select Group */}
-                                                     <select
-                                                       onChange={(e) => handleGroupChange(e, index)}
-                                                       value={selectedGroup[index] || ""}
-                                                       className="select-variable"
-                                                     >
-                                                       {/* <option
+                          {item.type === "para" && (
+                            <>
+                              <p
+                                className="border"
+                                contentEditable
+                                suppressContentEditableWarning
+                                onClick={() => {
+                                  setSelectedIndex(index);
+                                  setSelectedContent(item.content); // Store the correct content
+                                  setIsModalOpen(true); // Open the modal
+                                }}
+                                style={item.style}
+                                dangerouslySetInnerHTML={{
+                                  __html: item.content,
+                                }}
+                              />
+                              {isModalOpen && selectedIndex === index && (
+                                <ParaEditor
+                                  isOpen={isModalOpen}
+                                  content={selectedContent} // Pass the correct content
+                                  style={item.style}
+                                  onSave={(newContent) => {
+                                    updateContent(index, {
+                                      content: newContent,
+                                    }); // Save the new content
+                                    setIsModalOpen(false);
+                                  }}
+                                  onClose={() => setIsModalOpen(false)}
+                                />
+                              )}
+                            </>
+                          )}
+
+                          {item.type === "multi-image-card" ? (
+                            <div className="Layout-img">
+                              <div className="Layout">
+                                <img
+                                  src={
+                                    item.src1 ||
+                                    "https://via.placeholder.com/200"
+                                  }
+                                  alt="Editable"
+                                  className="multiimgcard"
+                                  title="Upload Image"
+                                  style={item.style}
+                                  onClick={() => handleopenFiles(index, 1)}
+                                />
+                                <h3 className="card-text-image">
+                                  {item.title1 || " "}
+                                </h3>
+                                <p>
+                                  <s>
+                                    {item.originalPrice1
+                                      ? `$${item.originalPrice1}`
+                                      : " "}
+                                  </s>
+                                </p>
+                                <p>
+                                  {item.offerPrice1
+                                    ? `Off Price $${item.offerPrice1}`
+                                    : " "}
+                                </p>
+                                <a
+                                  href={item.link1}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="button-preview"
+                                  style={item.buttonStyle1}
+                                >
+                                  {item.content1}
+                                </a>
+                              </div>
+
+                              <div className="Layout">
+                                <img
+                                  src={
+                                    item.src2 ||
+                                    "https://via.placeholder.com/200"
+                                  }
+                                  alt="Editable"
+                                  className="multiimgcard"
+                                  title="Upload Image"
+                                  style={item.style}
+                                  onClick={() => handleopenFiles(index, 2)}
+                                />
+                                <h3 className="card-text-image">
+                                  {item.title2 || " "}
+                                </h3>
+                                <p>
+                                  <s>
+                                    {item.originalPrice2
+                                      ? `$${item.originalPrice2}`
+                                      : " "}
+                                  </s>
+                                </p>
+                                <p>
+                                  {item.offerPrice2
+                                    ? `Off Price $${item.offerPrice2}`
+                                    : " "}
+                                </p>
+                                <a
+                                  href={item.link2}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="button-preview"
+                                  style={item.buttonStyle2}
+                                >
+                                  {item.content2}
+                                </a>
+                              </div>
+                            </div>
+                          ) : null}
+
+                          {item.type === "multipleimage" ? (
+                            <div className="Layout-img">
+                              <div className="Layout">
+                                <img
+                                  src={
+                                    item.src1 ||
+                                    "https://via.placeholder.com/200"
+                                  }
+                                  alt="Editable"
+                                  className="multiple-img"
+                                  title="Upload Image"
+                                  style={item.style}
+                                  onClick={() => handleopenFiles(index, 1)}
+                                />
+                              </div>
+
+                              <div className="Layout">
+                                <img
+                                  src={
+                                    item.src2 ||
+                                    "https://via.placeholder.com/200"
+                                  }
+                                  alt="Editable"
+                                  className="multiple-img"
+                                  title="Upload Image"
+                                  style={item.style}
+                                  onClick={() => handleopenFiles(index, 2)}
+                                />
+                              </div>
+                            </div>
+                          ) : null}
+
+                          {item.type === "multi-image" ? (
+                            <div className="Layout-img">
+                              <div className="Layout">
+                                <img
+                                  src={
+                                    item.src1 ||
+                                    "https://via.placeholder.com/200"
+                                  }
+                                  alt="Editable"
+                                  className="multiimg"
+                                  title="Upload Image"
+                                  style={item.style}
+                                  onClick={() => handleopenFiles(index, 1)}
+                                />
+                                <a
+                                  href={item.link1}
+                                  target="_blank"
+                                  className="button-preview"
+                                  rel="noopener noreferrer"
+                                  style={item.buttonStyle1}
+                                >
+                                  {item.content1}
+                                </a>
+                              </div>
+
+                              <div className="Layout">
+                                <img
+                                  src={
+                                    item.src2 ||
+                                    "https://via.placeholder.com/200"
+                                  }
+                                  alt="Editable"
+                                  className="multiimg"
+                                  title="Upload Image"
+                                  style={item.style}
+                                  onClick={() => handleopenFiles(index, 2)}
+                                />
+                                <a
+                                  href={item.link2}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="button-preview"
+                                  style={item.buttonStyle2}
+                                >
+                                  {item.content2}
+                                </a>
+                              </div>
+                            </div>
+                          ) : null}
+
+                          {item.type === "video-icon" ? (
+                            <div className="video-icon">
+                              <img
+                                src={
+                                  item.src1 || "https://via.placeholder.com/200"
+                                }
+                                alt="Editable"
+                                className="videoimg"
+                                title="Upload Thumbnail Image"
+                                style={item.style}
+                                onClick={() => handleopenFiles(index, 1)}
+                              />
+                              <a
+                                href={item.link}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                              >
+                                <img
+                                  src={item.src2}
+                                  className="video-btn"
+                                  alt="icon"
+                                />
+                              </a>
+                            </div>
+                          ) : null}
+
+                          {item.type === "cardimage" ? (
+                            <div
+                              className="card-image-container"
+                              style={item.style1}
+                            >
+                              <img
+                                src={
+                                  item.src1 || "https://via.placeholder.com/200"
+                                }
+                                style={item.style}
+                                alt="Editable"
+                                className="card-image"
+                                title="Upload Image"
+                                onClick={() => handleopenFiles(index, 1)}
+                              />
+                              <p
+                                className="card-text"
+                                contentEditable
+                                suppressContentEditableWarning
+                                //  onClick={() => setModalIndex(index)} // Open modal for this index
+                                style={item.style}
+                                dangerouslySetInnerHTML={{
+                                  __html: item.content1,
+                                }}
+                              />
+
+                              {modalIndex === index && ( // Open only for the selected index
+                                <ParaEditor
+                                  isOpen={true}
+                                  content={item.content1}
+                                  onSave={(newContent) => {
+                                    updateContent(index, {
+                                      content1: newContent,
+                                    });
+                                    setModalIndex(null); // Close modal after save
+                                  }}
+                                  onClose={() => setModalIndex(null)}
+                                />
+                              )}
+                            </div>
+                          ) : null}
+
+                          {item.type === "head" && (
+                            <div ref={dropdownRef}>
+                              <p
+                                className="border"
+                                contentEditable
+                                suppressContentEditableWarning
+                                onBlur={(e) =>
+                                  updateContent(index, {
+                                    content: e.target.textContent,
+                                  })
+                                }
+                                onMouseUp={(e) =>
+                                  handleCursorPosition(e, index)
+                                }
+                                onSelect={(e) => handleCursorPosition(e, index)}
+                                style={item.style}
+                              >
+                                {item.content}
+                              </p>
+
+                              {/* Local state for each heading */}
+                              <div className="select-group-container">
+                                {/* Select Group */}
+                                <select
+                                  onChange={(e) => handleGroupChange(e, index)}
+                                  value={selectedGroup[index] || ""}
+                                  className="select-variable"
+                                >
+                                  {/* <option
                                                          value=""
                                                          disabled
                                                          className="template-title"
                                                        >
                                                          Add Variable
                                                        </option> */}
-                                                       <option value="" disabled>
-                                                         Select Group
-                                                       </option>
-                                                       {groups.map((group, idx) => (
-                                                         <option key={idx} value={group._id}>
-                                                           {group.name}
-                                                         </option>
-                                                       ))}
-                                                     </select>
-                         
-                                                     {/* Show fields only for the selected heading */}
-                                                     {selectedGroup[index] && openedGroups[index] && (
-                                                       <div className="dropdown-container">
-                                                         <p className="template-title">
-                                                           <span>Add</span> Variable
-                                                         </p>
-                                                         {fieldNames[index] &&
-                                                         fieldNames[index].length > 0 ? (
-                                                           <div>
-                                                             {fieldNames[index].map((field, idx) => (
-                                                               <div
-                                                                 className="list-field"
-                                                                 key={idx}
-                                                                 onClick={() =>
-                                                                   handleInsertName(index, `{${field}}`)
-                                                                 }
-                                                               >
-                                                                 {field}
-                                                               </div>
-                                                             ))}
-                                                           </div>
-                                                         ) : (
-                                                           <p className="no-variables">No Variables</p>
-                                                         )}
-                                                       </div>
-                                                     )}
-                                                   </div>
-                                                 </div>
-                                               )}
-                                               {item.type === "link-image" && (
-                                                 <div className="border">
-                                                   <a
-                                                     href={item.link || "#"}
-                                                     onClick={(e) => handleLinkClick(e, index)}
-                                                   >
-                                                     <img
-                                                       src={
-                                                         item.src || "https://via.placeholder.com/200"
-                                                       }
-                                                       alt="Editable"
-                                                       className="img"
-                                                       style={item.style}
-                                                       onClick={() => handleopenFiles(index, 1)}
-                                                       title="Upload Image"
-                                                     />
-                                                   </a>
-                                                 </div>
-                                               )}
-                                               {item.type === "image" && (
-                                                 <div className="border">
-                                                   <img
-                                                     src={item.src || "https://via.placeholder.com/200"}
-                                                     alt="Editable"
-                                                     className="img"
-                                                     style={item.style}
-                                                     onClick={() => handleopenFiles(index, 1)}
-                                                     title="Upload Image"
-                                                   />
-                                                 </div>
-                                               )}
-                         
-                                               {item.type === "icons" && (
-                                                 <div
-                                                   className="border"
-                                                   style={item.ContentStyle}
-                                                   key={index}
-                                                 >
-                                                   <div className="icon-containers">
-                                                     <a
-                                                       href={item.links1 || "#"}
-                                                       target="_blank"
-                                                       rel="noopener noreferrer"
-                                                       onClick={(e) => handleLinksClick2(e, item.links1)}
-                                                     >
-                                                       <img
-                                                         src={item.iconsrc1}
-                                                         alt="Facebook"
-                                                         className="icon"
-                                                         style={item.style1}
-                                                       />
-                                                     </a>
-                         
-                                                     <a
-                                                       href={item.links2 || "#"}
-                                                       target="_blank"
-                                                       rel="noopener noreferrer"
-                                                       onClick={(e) => handleLinksClick2(e, item.links2)}
-                                                     >
-                                                       <img
-                                                         src={item.iconsrc2}
-                                                         alt="Twitter"
-                                                         className="icon"
-                                                         rel="noopener noreferrer"
-                                                         style={item.style2}
-                                                       />
-                                                     </a>
-                         
-                                                     <a
-                                                       href={item.links3 || "#"}
-                                                       target="_blank"
-                                                       rel="noopener noreferrer"
-                                                       onClick={(e) => handleLinksClick2(e, item.links3)}
-                                                     >
-                                                       <img
-                                                         src={item.iconsrc3}
-                                                         alt="Instagram"
-                                                         className="icon"
-                                                         style={item.style3}
-                                                       />
-                                                     </a>
-                         
-                                                     <a
-                                                       href={item.links4 || "#"}
-                                                       target="_blank"
-                                                       rel="noopener noreferrer"
-                                                       onClick={(e) => handleLinksClick2(e, item.links4)}
-                                                     >
-                                                       <img
-                                                         src={item.iconsrc4}
-                                                         alt="Youtube"
-                                                         className="icon"
-                                                         style={item.style4}
-                                                       />
-                                                     </a>
-                                                   </div>
-                                                 </div>
-                                               )}
-                                               {item.type === "break" && (
-                                                 <div className="border-break">
-                                                   <hr style={item.style} />
-                                                 </div>
-                                               )}
-                         
-                                               {item.type === "gap" && (
-                                                 <div className="border-break">
-                                                   {<div style={item.styles}></div>}
-                                                 </div>
-                                               )}
-                         
-                                               {item.type === "imagewithtext" ? (
-                                                 <div className="image-text-container">
-                                                   <div
-                                                     className="image-text-wrapper"
-                                                     style={item.style1}
-                                                   >
-                                                     <img
-                                                       src={
-                                                         item.src1 || "https://via.placeholder.com/200"
-                                                       }
-                                                       alt="Editable"
-                                                       className="image-item"
-                                                       title="Upload Image"
-                                                       onClick={() => handleopenFiles(index, 1)}
-                                                     />
-                                                     <p
-                                                       className="text-item"
-                                                       contentEditable
-                                                       suppressContentEditableWarning
-                                                       onClick={() => setModalIndex(index)} // Open modal for this index
-                                                       style={item.style}
-                                                       dangerouslySetInnerHTML={{
-                                                         __html: item.content1,
-                                                       }}
-                                                     />
-                                                   </div>
-                                                   {modalIndex === index && ( // Open only for the selected index
-                                                     <ParaEditor
-                                                       isOpen={true}
-                                                       content={item.content1}
-                                                       onSave={(newContent) => {
-                                                         updateContent(index, { content1: newContent });
-                                                         setModalIndex(null); // Close modal after save
-                                                       }}
-                                                       onClose={() => setModalIndex(null)}
-                                                     />
-                                                   )}
-                                                 </div>
-                                               ) : null}
-                         
-                                               {item.type === "banner" && (
-                                                 <div className="border">
-                                                   <img
-                                                     src={item.src || "https://via.placeholder.com/200"}
-                                                     alt="Editable"
-                                                     className="img"
-                                                     style={item.style}
-                                                     onClick={() => handleopenFiles(index, 1)}
-                                                   />
-                                                 </div>
-                                               )}
-                         
-                                               {item.type === "textwithimage" ? (
-                                                 <div className="image-text-container">
-                                                   <div
-                                                     className="image-text-wrapper"
-                                                     style={item.style}
-                                                   >
-                                                     <p
-                                                       className="text-item"
-                                                       contentEditable
-                                                       suppressContentEditableWarning
-                                                       onClick={() => setModalIndex(index)} // Open modal for this index
-                                                       style={item.style}
-                                                       dangerouslySetInnerHTML={{
-                                                         __html: item.content2,
-                                                       }}
-                                                     />
-                                                     <img
-                                                       src={
-                                                         item.src2 || "https://via.placeholder.com/200"
-                                                       }
-                                                       alt="Editable"
-                                                       className="image-item"
-                                                       title="Upload Image"
-                                                       onClick={() => handleopenFiles(index, 2)}
-                                                     />
-                                                   </div>
-                                                   {modalIndex === index && ( // Open only for the selected index
-                                                     <ParaEditor
-                                                       isOpen={true}
-                                                       content={item.content2}
-                                                       onSave={(newContent) => {
-                                                         updateContent(index, { content2: newContent });
-                                                         setModalIndex(null); // Close modal after save
-                                                       }}
-                                                       onClose={() => setModalIndex(null)}
-                                                     />
-                                                   )}
-                                                 </div>
-                                               ) : null}
-                         
-                                               {item.type === "logo" && (
-                                                 <div className="border">
-                                                   <img
-                                                     src={item.src || "https://via.placeholder.com/200"}
-                                                     alt="Editable"
-                                                     className="logo"
-                                                     style={item.style}
-                                                     onClick={() => handleopenFiles(index, 1)}
-                                                     title="Upload Image"
-                                                   />
-                                                 </div>
-                                               )}
-                                               {item.type === "button" && (
-                                                 <div className="border-btn">
-                                                   <a
-                                                     href={item.link || "#"}
-                                                     target="_blank"
-                                                     rel="noopener noreferrer"
-                                                     style={item.style}
-                                                     className="button-preview"
-                                                   >
-                                                     {item.content}
-                                                   </a>
-                                                 </div>
-                                               )}
-                                               {item.type === "link" && (
-                                                 <div className="border-btn">
-                                                   <a
-                                                     href={item.href || "#"}
-                                                     onClick={(e) => handleLinkClick(e, index)}
-                                                     style={item.style}
-                                                   >
-                                                     {item.content}
-                                                   </a>
-                                                 </div>
-                                              )}
+                                  <option value="" disabled>
+                                    Select Group
+                                  </option>
+                                  {groups.map((group, idx) => (
+                                    <option key={idx} value={group._id}>
+                                      {group.name}
+                                    </option>
+                                  ))}
+                                </select>
+
+                                {/* Show fields only for the selected heading */}
+                                {selectedGroup[index] &&
+                                  openedGroups[index] && (
+                                    <div className="dropdown-container">
+                                      <p className="template-title">
+                                        <span>Add</span> Variable
+                                      </p>
+                                      {fieldNames[index] &&
+                                      fieldNames[index].length > 0 ? (
+                                        <div>
+                                          {fieldNames[index].map(
+                                            (field, idx) => (
+                                              <div
+                                                className="list-field"
+                                                key={idx}
+                                                onClick={() =>
+                                                  handleInsertName(
+                                                    index,
+                                                    `{${field}}`
+                                                  )
+                                                }
+                                              >
+                                                {field}
+                                              </div>
+                                            )
+                                          )}
+                                        </div>
+                                      ) : (
+                                        <p className="no-variables">
+                                          No Variables
+                                        </p>
+                                      )}
+                                    </div>
+                                  )}
+                              </div>
+                            </div>
+                          )}
+                          {item.type === "link-image" && (
+                            <div className="border">
+                              <a
+                                href={item.link || "#"}
+                                onClick={(e) => handleLinkClick(e, index)}
+                              >
+                                <img
+                                  src={
+                                    item.src ||
+                                    "https://via.placeholder.com/200"
+                                  }
+                                  alt="Editable"
+                                  className="img"
+                                  style={item.style}
+                                  onClick={() => handleopenFiles(index, 1)}
+                                  title="Upload Image"
+                                />
+                              </a>
+                            </div>
+                          )}
+                          {item.type === "image" && (
+                            <div className="border">
+                              <img
+                                src={
+                                  item.src || "https://via.placeholder.com/200"
+                                }
+                                alt="Editable"
+                                className="img"
+                                style={item.style}
+                                onClick={() => handleopenFiles(index, 1)}
+                                title="Upload Image"
+                              />
+                            </div>
+                          )}
+
+                          {item.type === "icons" && (
+                            <div
+                              className="border"
+                              style={item.ContentStyle}
+                              key={index}
+                            >
+                              <div className="icon-containers">
+                                <a
+                                  href={item.links1 || "#"}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  onClick={(e) =>
+                                    handleLinksClick2(e, item.links1)
+                                  }
+                                >
+                                  <img
+                                    src={item.iconsrc1}
+                                    alt="Facebook"
+                                    className="icon"
+                                    style={item.style1}
+                                  />
+                                </a>
+
+                                <a
+                                  href={item.links2 || "#"}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  onClick={(e) =>
+                                    handleLinksClick2(e, item.links2)
+                                  }
+                                >
+                                  <img
+                                    src={item.iconsrc2}
+                                    alt="Twitter"
+                                    className="icon"
+                                    rel="noopener noreferrer"
+                                    style={item.style2}
+                                  />
+                                </a>
+
+                                <a
+                                  href={item.links3 || "#"}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  onClick={(e) =>
+                                    handleLinksClick2(e, item.links3)
+                                  }
+                                >
+                                  <img
+                                    src={item.iconsrc3}
+                                    alt="Instagram"
+                                    className="icon"
+                                    style={item.style3}
+                                  />
+                                </a>
+
+                                <a
+                                  href={item.links4 || "#"}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  onClick={(e) =>
+                                    handleLinksClick2(e, item.links4)
+                                  }
+                                >
+                                  <img
+                                    src={item.iconsrc4}
+                                    alt="Youtube"
+                                    className="icon"
+                                    style={item.style4}
+                                  />
+                                </a>
+                              </div>
+                            </div>
+                          )}
+                          {item.type === "break" && (
+                            <div className="border-break">
+                              <hr style={item.style} />
+                            </div>
+                          )}
+
+                          {item.type === "gap" && (
+                            <div className="border-break">
+                              {<div style={item.styles}></div>}
+                            </div>
+                          )}
+
+                          {item.type === "imagewithtext" ? (
+                            <div className="image-text-container">
+                              <div
+                                className="image-text-wrapper"
+                                style={item.style1}
+                              >
+                                <img
+                                  src={
+                                    item.src1 ||
+                                    "https://via.placeholder.com/200"
+                                  }
+                                  alt="Editable"
+                                  className="image-item"
+                                  title="Upload Image"
+                                  onClick={() => handleopenFiles(index, 1)}
+                                />
+                                <p
+                                  className="text-item"
+                                  contentEditable
+                                  suppressContentEditableWarning
+                                  onClick={() => setModalIndex(index)} // Open modal for this index
+                                  style={item.style}
+                                  dangerouslySetInnerHTML={{
+                                    __html: item.content1,
+                                  }}
+                                />
+                              </div>
+                              {modalIndex === index && ( // Open only for the selected index
+                                <ParaEditor
+                                  isOpen={true}
+                                  content={item.content1}
+                                  onSave={(newContent) => {
+                                    updateContent(index, {
+                                      content1: newContent,
+                                    });
+                                    setModalIndex(null); // Close modal after save
+                                  }}
+                                  onClose={() => setModalIndex(null)}
+                                />
+                              )}
+                            </div>
+                          ) : null}
+
+                          {item.type === "banner" && (
+                            <div className="border">
+                              <img
+                                src={
+                                  item.src || "https://via.placeholder.com/200"
+                                }
+                                alt="Editable"
+                                className="img"
+                                style={item.style}
+                                onClick={() => handleopenFiles(index, 1)}
+                              />
+                            </div>
+                          )}
+
+                          {item.type === "textwithimage" ? (
+                            <div className="image-text-container">
+                              <div
+                                className="image-text-wrapper"
+                                style={item.style}
+                              >
+                                <p
+                                  className="text-item"
+                                  contentEditable
+                                  suppressContentEditableWarning
+                                  onClick={() => setModalIndex(index)} // Open modal for this index
+                                  style={item.style}
+                                  dangerouslySetInnerHTML={{
+                                    __html: item.content2,
+                                  }}
+                                />
+                                <img
+                                  src={
+                                    item.src2 ||
+                                    "https://via.placeholder.com/200"
+                                  }
+                                  alt="Editable"
+                                  className="image-item"
+                                  title="Upload Image"
+                                  onClick={() => handleopenFiles(index, 2)}
+                                />
+                              </div>
+                              {modalIndex === index && ( // Open only for the selected index
+                                <ParaEditor
+                                  isOpen={true}
+                                  content={item.content2}
+                                  onSave={(newContent) => {
+                                    updateContent(index, {
+                                      content2: newContent,
+                                    });
+                                    setModalIndex(null); // Close modal after save
+                                  }}
+                                  onClose={() => setModalIndex(null)}
+                                />
+                              )}
+                            </div>
+                          ) : null}
+
+                          {item.type === "logo" && (
+                            <div className="border">
+                              <img
+                                src={
+                                  item.src || "https://via.placeholder.com/200"
+                                }
+                                alt="Editable"
+                                className="logo"
+                                style={item.style}
+                                onClick={() => handleopenFiles(index, 1)}
+                                title="Upload Image"
+                              />
+                            </div>
+                          )}
+                          {item.type === "button" && (
+                            <div className="border-btn">
+                              <a
+                                href={item.link || "#"}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                style={item.style}
+                                className="button-preview"
+                              >
+                                {item.content}
+                              </a>
+                            </div>
+                          )}
+                          {item.type === "link" && (
+                            <div className="border-btn">
+                              <a
+                                href={item.href || "#"}
+                                onClick={(e) => handleLinkClick(e, index)}
+                                style={item.style}
+                              >
+                                {item.content}
+                              </a>
+                            </div>
+                          )}
                         </div>
                       );
                     })}
@@ -2807,563 +3388,610 @@ const handlebirthDelete = async (templateId) => {
                           style={item.style}
                           key={index}
                         >
-                           {item.type === "para" && (
-                                                 <>
-                                                   <p
-                                                     className="border"
-                                                     contentEditable
-                                                     suppressContentEditableWarning
-                                                     onClick={() => {
-                                                       setSelectedIndex(index);
-                                                       setSelectedContent(item.content); // Store the correct content
-                                                       setIsModalOpen(true); // Open the modal
-                                                     }}
-                                                     style={item.style}
-                                                     dangerouslySetInnerHTML={{ __html: item.content }}
-                                                   />
-                                                   {isModalOpen && selectedIndex === index && (
-                                                     <ParaEditor
-                                                       isOpen={isModalOpen}
-                                                       content={selectedContent} // Pass the correct content
-                                                       style={item.style}
-                                                       onSave={(newContent) => {
-                                                         updateContent(index, { content: newContent }); // Save the new content
-                                                         setIsModalOpen(false);
-                                                       }}
-                                                       onClose={() => setIsModalOpen(false)}
-                                                     />
-                                                   )}
-                                                 </>
-                                               )}
-                         
-                                               {item.type === "multi-image-card" ? (
-                                                 <div className="Layout-img">
-                                                   <div className="Layout">
-                                                     <img
-                                                       src={
-                                                         item.src1 || "https://via.placeholder.com/200"
-                                                       }
-                                                       alt="Editable"
-                                                       className="multiimgcard"
-                                                       title="Upload Image"
-                                                       style={item.style}
-                                                       onClick={() => handleopenFiles(index, 1)}
-                                                     />
-                                                     <h3 className="card-text-image">
-                                                       {item.title1 || " "}
-                                                     </h3>
-                                                     <p>
-                                                       <s>
-                                                         {item.originalPrice1
-                                                           ? `$${item.originalPrice1}`
-                                                           : " "}
-                                                       </s>
-                                                     </p>
-                                                     <p>
-                                                       {item.offerPrice1
-                                                         ? `Off Price $${item.offerPrice1}`
-                                                         : " "}
-                                                     </p>
-                                                     <a
-                                                       href={item.link1}
-                                                       target="_blank"
-                                                       rel="noopener noreferrer"
-                                                       className="button-preview"
-                                                       style={item.buttonStyle1}
-                                                     >
-                                                       {item.content1}
-                                                     </a>
-                                                   </div>
-                         
-                                                   <div className="Layout">
-                                                     <img
-                                                       src={
-                                                         item.src2 || "https://via.placeholder.com/200"
-                                                       }
-                                                       alt="Editable"
-                                                       className="multiimgcard"
-                                                       title="Upload Image"
-                                                       style={item.style}
-                                                       onClick={() => handleopenFiles(index, 2)}
-                                                     />
-                                                     <h3 className="card-text-image">
-                                                       {item.title2 || " "}
-                                                     </h3>
-                                                     <p>
-                                                       <s>
-                                                         {item.originalPrice2
-                                                           ? `$${item.originalPrice2}`
-                                                           : " "}
-                                                       </s>
-                                                     </p>
-                                                     <p>
-                                                       {item.offerPrice2
-                                                         ? `Off Price $${item.offerPrice2}`
-                                                         : " "}
-                                                     </p>
-                                                     <a
-                                                       href={item.link2}
-                                                       target="_blank"
-                                                       rel="noopener noreferrer"
-                                                       className="button-preview"
-                                                       style={item.buttonStyle2}
-                                                     >
-                                                       {item.content2}
-                                                     </a>
-                                                   </div>
-                                                 </div>
-                                               ) : null}
-                         
-                                               {item.type === "multipleimage" ? (
-                                                 <div className="Layout-img">
-                                                   <div className="Layout">
-                                                     <img
-                                                       src={
-                                                         item.src1 || "https://via.placeholder.com/200"
-                                                       }
-                                                       alt="Editable"
-                                                       className="multiple-img"
-                                                       title="Upload Image"
-                                                       style={item.style}
-                                                       onClick={() => handleopenFiles(index, 1)}
-                                                     />
-                                                   </div>
-                         
-                                                   <div className="Layout">
-                                                     <img
-                                                       src={
-                                                         item.src2 || "https://via.placeholder.com/200"
-                                                       }
-                                                       alt="Editable"
-                                                       className="multiple-img"
-                                                       title="Upload Image"
-                                                       style={item.style}
-                                                       onClick={() => handleopenFiles(index, 2)}
-                                                     />
-                                                   </div>
-                                                 </div>
-                                               ) : null}
-                         
-                                               {item.type === "multi-image" ? (
-                                                 <div className="Layout-img">
-                                                   <div className="Layout">
-                                                     <img
-                                                       src={
-                                                         item.src1 || "https://via.placeholder.com/200"
-                                                       }
-                                                       alt="Editable"
-                                                       className="multiimg"
-                                                       title="Upload Image"
-                                                       style={item.style}
-                                                       onClick={() => handleopenFiles(index, 1)}
-                                                     />
-                                                     <a
-                                                       href={item.link1}
-                                                       target="_blank"
-                                                       className="button-preview"
-                                                       rel="noopener noreferrer"
-                                                       style={item.buttonStyle1}
-                                                     >
-                                                       {item.content1}
-                                                     </a>
-                                                   </div>
-                         
-                                                   <div className="Layout">
-                                                     <img
-                                                       src={
-                                                         item.src2 || "https://via.placeholder.com/200"
-                                                       }
-                                                       alt="Editable"
-                                                       className="multiimg"
-                                                       title="Upload Image"
-                                                       style={item.style}
-                                                       onClick={() => handleopenFiles(index, 2)}
-                                                     />
-                                                     <a
-                                                       href={item.link2}
-                                                       target="_blank"
-                                                       rel="noopener noreferrer"
-                                                       className="button-preview"
-                                                       style={item.buttonStyle2}
-                                                     >
-                                                       {item.content2}
-                                                     </a>
-                                                   </div>
-                                                 </div>
-                                               ) : null}
-                         
-                                               {item.type === "video-icon" ? (
-                                                 <div className="video-icon">
-                                                   <img
-                                                     src={item.src1 || "https://via.placeholder.com/200"}
-                                                     alt="Editable"
-                                                     className="videoimg"
-                                                     title="Upload Thumbnail Image"
-                                                     style={item.style}
-                                                     onClick={() => handleopenFiles(index, 1)}
-                                                   />
-                                                   <a
-                                                     href={item.link}
-                                                     target="_blank"
-                                                     rel="noopener noreferrer"
-                                                   >
-                                                     <img
-                                                       src={item.src2}
-                                                       className="video-btn"
-                                                       alt="icon"
-                                                     />
-                                                   </a>
-                                                 </div>
-                                               ) : null}
-                         
-                                               {item.type === "cardimage" ? (
-                                                 <div
-                                                   className="card-image-container"
-                                                   style={item.style1}
-                                                 >
-                                                   <img
-                                                     src={item.src1 || "https://via.placeholder.com/200"}
-                                                     style={item.style}
-                                                     alt="Editable"
-                                                     className="card-image"
-                                                     title="Upload Image"
-                                                     onClick={() => handleopenFiles(index, 1)}
-                                                   />
-                                                   <p
-                                                     className="card-text"
-                                                     contentEditable
-                                                     suppressContentEditableWarning
-                                                     onClick={() => setModalIndex(index)} // Open modal for this index
-                                                     style={item.style}
-                                                     dangerouslySetInnerHTML={{
-                                                       __html: item.content1,
-                                                     }}
-                                                   />
-                         
-                                                   {modalIndex === index && ( // Open only for the selected index
-                                                     <ParaEditor
-                                                       isOpen={true}
-                                                       content={item.content1}
-                                                       onSave={(newContent) => {
-                                                         updateContent(index, { content1: newContent });
-                                                         setModalIndex(null); // Close modal after save
-                                                       }}
-                                                       onClose={() => setModalIndex(null)}
-                                                     />
-                                                   )}
-                                                 </div>
-                                               ) : null}
-                         
-                                               {item.type === "head" && (
-                                                 <div ref={dropdownRef}>
-                                                   <p
-                                                     className="border"
-                                                     contentEditable
-                                                     suppressContentEditableWarning
-                                                     onBlur={(e) =>
-                                                       updateContent(index, {
-                                                         content: e.target.textContent,
-                                                       })
-                                                     }
-                                                     onMouseUp={(e) => handleCursorPosition(e, index)}
-                                                     onSelect={(e) => handleCursorPosition(e, index)}
-                                                     style={item.style}
-                                                   >
-                                                     {item.content}
-                                                   </p>
-                         
-                                                   {/* Local state for each heading */}
-                                                   <div className="select-group-container">
-                                                     {/* Select Group */}
-                                                     <select
-                                                       onChange={(e) => handleGroupChange(e, index)}
-                                                       value={selectedGroup[index] || ""}
-                                                       className="select-variable"
-                                                     >
-                                                       {/* <option
+                          {item.type === "para" && (
+                            <>
+                              <p
+                                className="border"
+                                contentEditable
+                                suppressContentEditableWarning
+                                onClick={() => {
+                                  setSelectedIndex(index);
+                                  setSelectedContent(item.content); // Store the correct content
+                                  setIsModalOpen(true); // Open the modal
+                                }}
+                                style={item.style}
+                                dangerouslySetInnerHTML={{
+                                  __html: item.content,
+                                }}
+                              />
+                              {isModalOpen && selectedIndex === index && (
+                                <ParaEditor
+                                  isOpen={isModalOpen}
+                                  content={selectedContent} // Pass the correct content
+                                  style={item.style}
+                                  onSave={(newContent) => {
+                                    updateContent(index, {
+                                      content: newContent,
+                                    }); // Save the new content
+                                    setIsModalOpen(false);
+                                  }}
+                                  onClose={() => setIsModalOpen(false)}
+                                />
+                              )}
+                            </>
+                          )}
+
+                          {item.type === "multi-image-card" ? (
+                            <div className="Layout-img">
+                              <div className="Layout">
+                                <img
+                                  src={
+                                    item.src1 ||
+                                    "https://via.placeholder.com/200"
+                                  }
+                                  alt="Editable"
+                                  className="multiimgcard"
+                                  title="Upload Image"
+                                  style={item.style}
+                                  onClick={() => handleopenFiles(index, 1)}
+                                />
+                                <h3 className="card-text-image">
+                                  {item.title1 || " "}
+                                </h3>
+                                <p>
+                                  <s>
+                                    {item.originalPrice1
+                                      ? `$${item.originalPrice1}`
+                                      : " "}
+                                  </s>
+                                </p>
+                                <p>
+                                  {item.offerPrice1
+                                    ? `Off Price $${item.offerPrice1}`
+                                    : " "}
+                                </p>
+                                <a
+                                  href={item.link1}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="button-preview"
+                                  style={item.buttonStyle1}
+                                >
+                                  {item.content1}
+                                </a>
+                              </div>
+
+                              <div className="Layout">
+                                <img
+                                  src={
+                                    item.src2 ||
+                                    "https://via.placeholder.com/200"
+                                  }
+                                  alt="Editable"
+                                  className="multiimgcard"
+                                  title="Upload Image"
+                                  style={item.style}
+                                  onClick={() => handleopenFiles(index, 2)}
+                                />
+                                <h3 className="card-text-image">
+                                  {item.title2 || " "}
+                                </h3>
+                                <p>
+                                  <s>
+                                    {item.originalPrice2
+                                      ? `$${item.originalPrice2}`
+                                      : " "}
+                                  </s>
+                                </p>
+                                <p>
+                                  {item.offerPrice2
+                                    ? `Off Price $${item.offerPrice2}`
+                                    : " "}
+                                </p>
+                                <a
+                                  href={item.link2}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="button-preview"
+                                  style={item.buttonStyle2}
+                                >
+                                  {item.content2}
+                                </a>
+                              </div>
+                            </div>
+                          ) : null}
+
+                          {item.type === "multipleimage" ? (
+                            <div className="Layout-img">
+                              <div className="Layout">
+                                <img
+                                  src={
+                                    item.src1 ||
+                                    "https://via.placeholder.com/200"
+                                  }
+                                  alt="Editable"
+                                  className="multiple-img"
+                                  title="Upload Image"
+                                  style={item.style}
+                                  onClick={() => handleopenFiles(index, 1)}
+                                />
+                              </div>
+
+                              <div className="Layout">
+                                <img
+                                  src={
+                                    item.src2 ||
+                                    "https://via.placeholder.com/200"
+                                  }
+                                  alt="Editable"
+                                  className="multiple-img"
+                                  title="Upload Image"
+                                  style={item.style}
+                                  onClick={() => handleopenFiles(index, 2)}
+                                />
+                              </div>
+                            </div>
+                          ) : null}
+
+                          {item.type === "multi-image" ? (
+                            <div className="Layout-img">
+                              <div className="Layout">
+                                <img
+                                  src={
+                                    item.src1 ||
+                                    "https://via.placeholder.com/200"
+                                  }
+                                  alt="Editable"
+                                  className="multiimg"
+                                  title="Upload Image"
+                                  style={item.style}
+                                  onClick={() => handleopenFiles(index, 1)}
+                                />
+                                <a
+                                  href={item.link1}
+                                  target="_blank"
+                                  className="button-preview"
+                                  rel="noopener noreferrer"
+                                  style={item.buttonStyle1}
+                                >
+                                  {item.content1}
+                                </a>
+                              </div>
+
+                              <div className="Layout">
+                                <img
+                                  src={
+                                    item.src2 ||
+                                    "https://via.placeholder.com/200"
+                                  }
+                                  alt="Editable"
+                                  className="multiimg"
+                                  title="Upload Image"
+                                  style={item.style}
+                                  onClick={() => handleopenFiles(index, 2)}
+                                />
+                                <a
+                                  href={item.link2}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="button-preview"
+                                  style={item.buttonStyle2}
+                                >
+                                  {item.content2}
+                                </a>
+                              </div>
+                            </div>
+                          ) : null}
+
+                          {item.type === "video-icon" ? (
+                            <div className="video-icon">
+                              <img
+                                src={
+                                  item.src1 || "https://via.placeholder.com/200"
+                                }
+                                alt="Editable"
+                                className="videoimg"
+                                title="Upload Thumbnail Image"
+                                style={item.style}
+                                onClick={() => handleopenFiles(index, 1)}
+                              />
+                              <a
+                                href={item.link}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                              >
+                                <img
+                                  src={item.src2}
+                                  className="video-btn"
+                                  alt="icon"
+                                />
+                              </a>
+                            </div>
+                          ) : null}
+
+                          {item.type === "cardimage" ? (
+                            <div
+                              className="card-image-container"
+                              style={item.style1}
+                            >
+                              <img
+                                src={
+                                  item.src1 || "https://via.placeholder.com/200"
+                                }
+                                style={item.style}
+                                alt="Editable"
+                                className="card-image"
+                                title="Upload Image"
+                                onClick={() => handleopenFiles(index, 1)}
+                              />
+                              <p
+                                className="card-text"
+                                contentEditable
+                                suppressContentEditableWarning
+                                onClick={() => setModalIndex(index)} // Open modal for this index
+                                style={item.style}
+                                dangerouslySetInnerHTML={{
+                                  __html: item.content1,
+                                }}
+                              />
+
+                              {modalIndex === index && ( // Open only for the selected index
+                                <ParaEditor
+                                  isOpen={true}
+                                  content={item.content1}
+                                  onSave={(newContent) => {
+                                    updateContent(index, {
+                                      content1: newContent,
+                                    });
+                                    setModalIndex(null); // Close modal after save
+                                  }}
+                                  onClose={() => setModalIndex(null)}
+                                />
+                              )}
+                            </div>
+                          ) : null}
+
+                          {item.type === "head" && (
+                            <div ref={dropdownRef}>
+                              <p
+                                className="border"
+                                contentEditable
+                                suppressContentEditableWarning
+                                onBlur={(e) =>
+                                  updateContent(index, {
+                                    content: e.target.textContent,
+                                  })
+                                }
+                                onMouseUp={(e) =>
+                                  handleCursorPosition(e, index)
+                                }
+                                onSelect={(e) => handleCursorPosition(e, index)}
+                                style={item.style}
+                              >
+                                {item.content}
+                              </p>
+
+                              {/* Local state for each heading */}
+                              <div className="select-group-container">
+                                {/* Select Group */}
+                                <select
+                                  onChange={(e) => handleGroupChange(e, index)}
+                                  value={selectedGroup[index] || ""}
+                                  className="select-variable"
+                                >
+                                  {/* <option
                                                          value=""
                                                          disabled
                                                          className="template-title"
                                                        >
                                                          Add Variable
                                                        </option> */}
-                                                       <option value="" disabled>
-                                                         Select Group
-                                                       </option>
-                                                       {groups.map((group, idx) => (
-                                                         <option key={idx} value={group._id}>
-                                                           {group.name}
-                                                         </option>
-                                                       ))}
-                                                     </select>
-                         
-                                                     {/* Show fields only for the selected heading */}
-                                                     {selectedGroup[index] && openedGroups[index] && (
-                                                       <div className="dropdown-container">
-                                                         <p className="template-title">
-                                                           <span>Add</span> Variable
-                                                         </p>
-                                                         {fieldNames[index] &&
-                                                         fieldNames[index].length > 0 ? (
-                                                           <div>
-                                                             {fieldNames[index].map((field, idx) => (
-                                                               <div
-                                                                 className="list-field"
-                                                                 key={idx}
-                                                                 onClick={() =>
-                                                                   handleInsertName(index, `{${field}}`)
-                                                                 }
-                                                               >
-                                                                 {field}
-                                                               </div>
-                                                             ))}
-                                                           </div>
-                                                         ) : (
-                                                           <p className="no-variables">No Variables</p>
-                                                         )}
-                                                       </div>
-                                                     )}
-                                                   </div>
-                                                 </div>
-                                               )}
-                                               {item.type === "link-image" && (
-                                                 <div className="border">
-                                                   <a
-                                                     href={item.link || "#"}
-                                                     onClick={(e) => handleLinkClick(e, index)}
-                                                   >
-                                                     <img
-                                                       src={
-                                                         item.src || "https://via.placeholder.com/200"
-                                                       }
-                                                       alt="Editable"
-                                                       className="img"
-                                                       style={item.style}
-                                                       onClick={() => handleopenFiles(index, 1)}
-                                                       title="Upload Image"
-                                                     />
-                                                   </a>
-                                                 </div>
-                                               )}
-                                               {item.type === "image" && (
-                                                 <div className="border">
-                                                   <img
-                                                     src={item.src || "https://via.placeholder.com/200"}
-                                                     alt="Editable"
-                                                     className="img"
-                                                     style={item.style}
-                                                     onClick={() => handleopenFiles(index, 1)}
-                                                     title="Upload Image"
-                                                   />
-                                                 </div>
-                                               )}
-                         
-                                               {item.type === "icons" && (
-                                                 <div
-                                                   className="border"
-                                                   style={item.ContentStyle}
-                                                   key={index}
-                                                 >
-                                                   <div className="icon-containers">
-                                                     <a
-                                                       href={item.links1 || "#"}
-                                                       target="_blank"
-                                                       rel="noopener noreferrer"
-                                                       onClick={(e) => handleLinksClick2(e, item.links1)}
-                                                     >
-                                                       <img
-                                                         src={item.iconsrc1}
-                                                         alt="Facebook"
-                                                         className="icon"
-                                                         style={item.style1}
-                                                       />
-                                                     </a>
-                         
-                                                     <a
-                                                       href={item.links2 || "#"}
-                                                       target="_blank"
-                                                       rel="noopener noreferrer"
-                                                       onClick={(e) => handleLinksClick2(e, item.links2)}
-                                                     >
-                                                       <img
-                                                         src={item.iconsrc2}
-                                                         alt="Twitter"
-                                                         className="icon"
-                                                         rel="noopener noreferrer"
-                                                         style={item.style2}
-                                                       />
-                                                     </a>
-                         
-                                                     <a
-                                                       href={item.links3 || "#"}
-                                                       target="_blank"
-                                                       rel="noopener noreferrer"
-                                                       onClick={(e) => handleLinksClick2(e, item.links3)}
-                                                     >
-                                                       <img
-                                                         src={item.iconsrc3}
-                                                         alt="Instagram"
-                                                         className="icon"
-                                                         style={item.style3}
-                                                       />
-                                                     </a>
-                         
-                                                     <a
-                                                       href={item.links4 || "#"}
-                                                       target="_blank"
-                                                       rel="noopener noreferrer"
-                                                       onClick={(e) => handleLinksClick2(e, item.links4)}
-                                                     >
-                                                       <img
-                                                         src={item.iconsrc4}
-                                                         alt="Youtube"
-                                                         className="icon"
-                                                         style={item.style4}
-                                                       />
-                                                     </a>
-                                                   </div>
-                                                 </div>
-                                               )}
-                                               {item.type === "break" && (
-                                                 <div className="border-break">
-                                                   <hr style={item.style} />
-                                                 </div>
-                                               )}
-                         
-                                               {item.type === "gap" && (
-                                                 <div className="border-break">
-                                                   {<div style={item.styles}></div>}
-                                                 </div>
-                                               )}
-                         
-                                               {item.type === "imagewithtext" ? (
-                                                 <div className="image-text-container">
-                                                   <div
-                                                     className="image-text-wrapper"
-                                                     style={item.style1}
-                                                   >
-                                                     <img
-                                                       src={
-                                                         item.src1 || "https://via.placeholder.com/200"
-                                                       }
-                                                       alt="Editable"
-                                                       className="image-item"
-                                                       title="Upload Image"
-                                                       onClick={() => handleopenFiles(index, 1)}
-                                                     />
-                                                     <p
-                                                       className="text-item"
-                                                       contentEditable
-                                                       suppressContentEditableWarning
-                                                       onClick={() => setModalIndex(index)} // Open modal for this index
-                                                       style={item.style}
-                                                       dangerouslySetInnerHTML={{
-                                                         __html: item.content1,
-                                                       }}
-                                                     />
-                                                   </div>
-                                                   {modalIndex === index && ( // Open only for the selected index
-                                                     <ParaEditor
-                                                       isOpen={true}
-                                                       content={item.content1}
-                                                       onSave={(newContent) => {
-                                                         updateContent(index, { content1: newContent });
-                                                         setModalIndex(null); // Close modal after save
-                                                       }}
-                                                       onClose={() => setModalIndex(null)}
-                                                     />
-                                                   )}
-                                                 </div>
-                                               ) : null}
-                         
-                                               {item.type === "banner" && (
-                                                 <div className="border">
-                                                   <img
-                                                     src={item.src || "https://via.placeholder.com/200"}
-                                                     alt="Editable"
-                                                     className="img"
-                                                     style={item.style}
-                                                     onClick={() => handleopenFiles(index, 1)}
-                                                   />
-                                                 </div>
-                                               )}
-                         
-                                               {item.type === "textwithimage" ? (
-                                                 <div className="image-text-container">
-                                                   <div
-                                                     className="image-text-wrapper"
-                                                     style={item.style}
-                                                   >
-                                                     <p
-                                                       className="text-item"
-                                                       contentEditable
-                                                       suppressContentEditableWarning
-                                                       onClick={() => setModalIndex(index)} // Open modal for this index
-                                                       style={item.style}
-                                                       dangerouslySetInnerHTML={{
-                                                         __html: item.content2,
-                                                       }}
-                                                     />
-                                                     <img
-                                                       src={
-                                                         item.src2 || "https://via.placeholder.com/200"
-                                                       }
-                                                       alt="Editable"
-                                                       className="image-item"
-                                                       title="Upload Image"
-                                                       onClick={() => handleopenFiles(index, 2)}
-                                                     />
-                                                   </div>
-                                                   {modalIndex === index && ( // Open only for the selected index
-                                                     <ParaEditor
-                                                       isOpen={true}
-                                                       content={item.content2}
-                                                       onSave={(newContent) => {
-                                                         updateContent(index, { content2: newContent });
-                                                         setModalIndex(null); // Close modal after save
-                                                       }}
-                                                       onClose={() => setModalIndex(null)}
-                                                     />
-                                                   )}
-                                                 </div>
-                                               ) : null}
-                         
-                                               {item.type === "logo" && (
-                                                 <div className="border">
-                                                   <img
-                                                     src={item.src || "https://via.placeholder.com/200"}
-                                                     alt="Editable"
-                                                     className="logo"
-                                                     style={item.style}
-                                                     onClick={() => handleopenFiles(index, 1)}
-                                                     title="Upload Image"
-                                                   />
-                                                 </div>
-                                               )}
-                                               {item.type === "button" && (
-                                                 <div className="border-btn">
-                                                   <a
-                                                     href={item.link || "#"}
-                                                     target="_blank"
-                                                     rel="noopener noreferrer"
-                                                     style={item.style}
-                                                     className="button-preview"
-                                                   >
-                                                     {item.content}
-                                                   </a>
-                                                 </div>
-                                               )}
-                                               {item.type === "link" && (
-                                                 <div className="border-btn">
-                                                   <a
-                                                     href={item.href || "#"}
-                                                     onClick={(e) => handleLinkClick(e, index)}
-                                                     style={item.style}
-                                                   >
-                                                     {item.content}
-                                                   </a>
-                                                 </div>
-                                               )}
+                                  <option value="" disabled>
+                                    Select Group
+                                  </option>
+                                  {groups.map((group, idx) => (
+                                    <option key={idx} value={group._id}>
+                                      {group.name}
+                                    </option>
+                                  ))}
+                                </select>
+
+                                {/* Show fields only for the selected heading */}
+                                {selectedGroup[index] &&
+                                  openedGroups[index] && (
+                                    <div className="dropdown-container">
+                                      <p className="template-title">
+                                        <span>Add</span> Variable
+                                      </p>
+                                      {fieldNames[index] &&
+                                      fieldNames[index].length > 0 ? (
+                                        <div>
+                                          {fieldNames[index].map(
+                                            (field, idx) => (
+                                              <div
+                                                className="list-field"
+                                                key={idx}
+                                                onClick={() =>
+                                                  handleInsertName(
+                                                    index,
+                                                    `{${field}}`
+                                                  )
+                                                }
+                                              >
+                                                {field}
+                                              </div>
+                                            )
+                                          )}
+                                        </div>
+                                      ) : (
+                                        <p className="no-variables">
+                                          No Variables
+                                        </p>
+                                      )}
+                                    </div>
+                                  )}
+                              </div>
+                            </div>
+                          )}
+                          {item.type === "link-image" && (
+                            <div className="border">
+                              <a
+                                href={item.link || "#"}
+                                onClick={(e) => handleLinkClick(e, index)}
+                              >
+                                <img
+                                  src={
+                                    item.src ||
+                                    "https://via.placeholder.com/200"
+                                  }
+                                  alt="Editable"
+                                  className="img"
+                                  style={item.style}
+                                  onClick={() => handleopenFiles(index, 1)}
+                                  title="Upload Image"
+                                />
+                              </a>
+                            </div>
+                          )}
+                          {item.type === "image" && (
+                            <div className="border">
+                              <img
+                                src={
+                                  item.src || "https://via.placeholder.com/200"
+                                }
+                                alt="Editable"
+                                className="img"
+                                style={item.style}
+                                onClick={() => handleopenFiles(index, 1)}
+                                title="Upload Image"
+                              />
+                            </div>
+                          )}
+
+                          {item.type === "icons" && (
+                            <div
+                              className="border"
+                              style={item.ContentStyle}
+                              key={index}
+                            >
+                              <div className="icon-containers">
+                                <a
+                                  href={item.links1 || "#"}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  onClick={(e) =>
+                                    handleLinksClick2(e, item.links1)
+                                  }
+                                >
+                                  <img
+                                    src={item.iconsrc1}
+                                    alt="Facebook"
+                                    className="icon"
+                                    style={item.style1}
+                                  />
+                                </a>
+
+                                <a
+                                  href={item.links2 || "#"}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  onClick={(e) =>
+                                    handleLinksClick2(e, item.links2)
+                                  }
+                                >
+                                  <img
+                                    src={item.iconsrc2}
+                                    alt="Twitter"
+                                    className="icon"
+                                    rel="noopener noreferrer"
+                                    style={item.style2}
+                                  />
+                                </a>
+
+                                <a
+                                  href={item.links3 || "#"}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  onClick={(e) =>
+                                    handleLinksClick2(e, item.links3)
+                                  }
+                                >
+                                  <img
+                                    src={item.iconsrc3}
+                                    alt="Instagram"
+                                    className="icon"
+                                    style={item.style3}
+                                  />
+                                </a>
+
+                                <a
+                                  href={item.links4 || "#"}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  onClick={(e) =>
+                                    handleLinksClick2(e, item.links4)
+                                  }
+                                >
+                                  <img
+                                    src={item.iconsrc4}
+                                    alt="Youtube"
+                                    className="icon"
+                                    style={item.style4}
+                                  />
+                                </a>
+                              </div>
+                            </div>
+                          )}
+                          {item.type === "break" && (
+                            <div className="border-break">
+                              <hr style={item.style} />
+                            </div>
+                          )}
+
+                          {item.type === "gap" && (
+                            <div className="border-break">
+                              {<div style={item.styles}></div>}
+                            </div>
+                          )}
+
+                          {item.type === "imagewithtext" ? (
+                            <div className="image-text-container">
+                              <div
+                                className="image-text-wrapper"
+                                style={item.style1}
+                              >
+                                <img
+                                  src={
+                                    item.src1 ||
+                                    "https://via.placeholder.com/200"
+                                  }
+                                  alt="Editable"
+                                  className="image-item"
+                                  title="Upload Image"
+                                  onClick={() => handleopenFiles(index, 1)}
+                                />
+                                <p
+                                  className="text-item"
+                                  contentEditable
+                                  suppressContentEditableWarning
+                                  onClick={() => setModalIndex(index)} // Open modal for this index
+                                  style={item.style}
+                                  dangerouslySetInnerHTML={{
+                                    __html: item.content1,
+                                  }}
+                                />
+                              </div>
+                              {modalIndex === index && ( // Open only for the selected index
+                                <ParaEditor
+                                  isOpen={true}
+                                  content={item.content1}
+                                  onSave={(newContent) => {
+                                    updateContent(index, {
+                                      content1: newContent,
+                                    });
+                                    setModalIndex(null); // Close modal after save
+                                  }}
+                                  onClose={() => setModalIndex(null)}
+                                />
+                              )}
+                            </div>
+                          ) : null}
+
+                          {item.type === "banner" && (
+                            <div className="border">
+                              <img
+                                src={
+                                  item.src || "https://via.placeholder.com/200"
+                                }
+                                alt="Editable"
+                                className="img"
+                                style={item.style}
+                                onClick={() => handleopenFiles(index, 1)}
+                              />
+                            </div>
+                          )}
+
+                          {item.type === "textwithimage" ? (
+                            <div className="image-text-container">
+                              <div
+                                className="image-text-wrapper"
+                                style={item.style}
+                              >
+                                <p
+                                  className="text-item"
+                                  contentEditable
+                                  suppressContentEditableWarning
+                                  onClick={() => setModalIndex(index)} // Open modal for this index
+                                  style={item.style}
+                                  dangerouslySetInnerHTML={{
+                                    __html: item.content2,
+                                  }}
+                                />
+                                <img
+                                  src={
+                                    item.src2 ||
+                                    "https://via.placeholder.com/200"
+                                  }
+                                  alt="Editable"
+                                  className="image-item"
+                                  title="Upload Image"
+                                  onClick={() => handleopenFiles(index, 2)}
+                                />
+                              </div>
+                              {modalIndex === index && ( // Open only for the selected index
+                                <ParaEditor
+                                  isOpen={true}
+                                  content={item.content2}
+                                  onSave={(newContent) => {
+                                    updateContent(index, {
+                                      content2: newContent,
+                                    });
+                                    setModalIndex(null); // Close modal after save
+                                  }}
+                                  onClose={() => setModalIndex(null)}
+                                />
+                              )}
+                            </div>
+                          ) : null}
+
+                          {item.type === "logo" && (
+                            <div className="border">
+                              <img
+                                src={
+                                  item.src || "https://via.placeholder.com/200"
+                                }
+                                alt="Editable"
+                                className="logo"
+                                style={item.style}
+                                onClick={() => handleopenFiles(index, 1)}
+                                title="Upload Image"
+                              />
+                            </div>
+                          )}
+                          {item.type === "button" && (
+                            <div className="border-btn">
+                              <a
+                                href={item.link || "#"}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                style={item.style}
+                                className="button-preview"
+                              >
+                                {item.content}
+                              </a>
+                            </div>
+                          )}
+                          {item.type === "link" && (
+                            <div className="border-btn">
+                              <a
+                                href={item.href || "#"}
+                                onClick={(e) => handleLinkClick(e, index)}
+                                style={item.style}
+                              >
+                                {item.content}
+                              </a>
+                            </div>
+                          )}
                         </div>
                       );
                     })}
@@ -3486,563 +4114,610 @@ const handlebirthDelete = async (templateId) => {
                           style={item.style}
                           key={index}
                         >
-                           {item.type === "para" && (
-                                                 <>
-                                                   <p
-                                                     className="border"
-                                                     contentEditable
-                                                     suppressContentEditableWarning
-                                                     onClick={() => {
-                                                       setSelectedIndex(index);
-                                                       setSelectedContent(item.content); // Store the correct content
-                                                       setIsModalOpen(true); // Open the modal
-                                                     }}
-                                                     style={item.style}
-                                                     dangerouslySetInnerHTML={{ __html: item.content }}
-                                                   />
-                                                   {isModalOpen && selectedIndex === index && (
-                                                     <ParaEditor
-                                                       isOpen={isModalOpen}
-                                                       content={selectedContent} // Pass the correct content
-                                                       style={item.style}
-                                                       onSave={(newContent) => {
-                                                         updateContent(index, { content: newContent }); // Save the new content
-                                                         setIsModalOpen(false);
-                                                       }}
-                                                       onClose={() => setIsModalOpen(false)}
-                                                     />
-                                                   )}
-                                                 </>
-                                               )}
-                         
-                                               {item.type === "multi-image-card" ? (
-                                                 <div className="Layout-img">
-                                                   <div className="Layout">
-                                                     <img
-                                                       src={
-                                                         item.src1 || "https://via.placeholder.com/200"
-                                                       }
-                                                       alt="Editable"
-                                                       className="multiimgcard"
-                                                       title="Upload Image"
-                                                       style={item.style}
-                                                       onClick={() => handleopenFiles(index, 1)}
-                                                     />
-                                                     <h3 className="card-text-image">
-                                                       {item.title1 || " "}
-                                                     </h3>
-                                                     <p>
-                                                       <s>
-                                                         {item.originalPrice1
-                                                           ? `$${item.originalPrice1}`
-                                                           : " "}
-                                                       </s>
-                                                     </p>
-                                                     <p>
-                                                       {item.offerPrice1
-                                                         ? `Off Price $${item.offerPrice1}`
-                                                         : " "}
-                                                     </p>
-                                                     <a
-                                                       href={item.link1}
-                                                       target="_blank"
-                                                       rel="noopener noreferrer"
-                                                       className="button-preview"
-                                                       style={item.buttonStyle1}
-                                                     >
-                                                       {item.content1}
-                                                     </a>
-                                                   </div>
-                         
-                                                   <div className="Layout">
-                                                     <img
-                                                       src={
-                                                         item.src2 || "https://via.placeholder.com/200"
-                                                       }
-                                                       alt="Editable"
-                                                       className="multiimgcard"
-                                                       title="Upload Image"
-                                                       style={item.style}
-                                                       onClick={() => handleopenFiles(index, 2)}
-                                                     />
-                                                     <h3 className="card-text-image">
-                                                       {item.title2 || " "}
-                                                     </h3>
-                                                     <p>
-                                                       <s>
-                                                         {item.originalPrice2
-                                                           ? `$${item.originalPrice2}`
-                                                           : " "}
-                                                       </s>
-                                                     </p>
-                                                     <p>
-                                                       {item.offerPrice2
-                                                         ? `Off Price $${item.offerPrice2}`
-                                                         : " "}
-                                                     </p>
-                                                     <a
-                                                       href={item.link2}
-                                                       target="_blank"
-                                                       rel="noopener noreferrer"
-                                                       className="button-preview"
-                                                       style={item.buttonStyle2}
-                                                     >
-                                                       {item.content2}
-                                                     </a>
-                                                   </div>
-                                                 </div>
-                                               ) : null}
-                         
-                                               {item.type === "multipleimage" ? (
-                                                 <div className="Layout-img">
-                                                   <div className="Layout">
-                                                     <img
-                                                       src={
-                                                         item.src1 || "https://via.placeholder.com/200"
-                                                       }
-                                                       alt="Editable"
-                                                       className="multiple-img"
-                                                       title="Upload Image"
-                                                       style={item.style}
-                                                       onClick={() => handleopenFiles(index, 1)}
-                                                     />
-                                                   </div>
-                         
-                                                   <div className="Layout">
-                                                     <img
-                                                       src={
-                                                         item.src2 || "https://via.placeholder.com/200"
-                                                       }
-                                                       alt="Editable"
-                                                       className="multiple-img"
-                                                       title="Upload Image"
-                                                       style={item.style}
-                                                       onClick={() => handleopenFiles(index, 2)}
-                                                     />
-                                                   </div>
-                                                 </div>
-                                               ) : null}
-                         
-                                               {item.type === "multi-image" ? (
-                                                 <div className="Layout-img">
-                                                   <div className="Layout">
-                                                     <img
-                                                       src={
-                                                         item.src1 || "https://via.placeholder.com/200"
-                                                       }
-                                                       alt="Editable"
-                                                       className="multiimg"
-                                                       title="Upload Image"
-                                                       style={item.style}
-                                                       onClick={() => handleopenFiles(index, 1)}
-                                                     />
-                                                     <a
-                                                       href={item.link1}
-                                                       target="_blank"
-                                                       className="button-preview"
-                                                       rel="noopener noreferrer"
-                                                       style={item.buttonStyle1}
-                                                     >
-                                                       {item.content1}
-                                                     </a>
-                                                   </div>
-                         
-                                                   <div className="Layout">
-                                                     <img
-                                                       src={
-                                                         item.src2 || "https://via.placeholder.com/200"
-                                                       }
-                                                       alt="Editable"
-                                                       className="multiimg"
-                                                       title="Upload Image"
-                                                       style={item.style}
-                                                       onClick={() => handleopenFiles(index, 2)}
-                                                     />
-                                                     <a
-                                                       href={item.link2}
-                                                       target="_blank"
-                                                       rel="noopener noreferrer"
-                                                       className="button-preview"
-                                                       style={item.buttonStyle2}
-                                                     >
-                                                       {item.content2}
-                                                     </a>
-                                                   </div>
-                                                 </div>
-                                               ) : null}
-                         
-                                               {item.type === "video-icon" ? (
-                                                 <div className="video-icon">
-                                                   <img
-                                                     src={item.src1 || "https://via.placeholder.com/200"}
-                                                     alt="Editable"
-                                                     className="videoimg"
-                                                     title="Upload Thumbnail Image"
-                                                     style={item.style}
-                                                     onClick={() => handleopenFiles(index, 1)}
-                                                   />
-                                                   <a
-                                                     href={item.link}
-                                                     target="_blank"
-                                                     rel="noopener noreferrer"
-                                                   >
-                                                     <img
-                                                       src={item.src2}
-                                                       className="video-btn"
-                                                       alt="icon"
-                                                     />
-                                                   </a>
-                                                 </div>
-                                               ) : null}
-                         
-                                               {item.type === "cardimage" ? (
-                                                 <div
-                                                   className="card-image-container"
-                                                   style={item.style1}
-                                                 >
-                                                   <img
-                                                     src={item.src1 || "https://via.placeholder.com/200"}
-                                                     style={item.style}
-                                                     alt="Editable"
-                                                     className="card-image"
-                                                     title="Upload Image"
-                                                     onClick={() => handleopenFiles(index, 1)}
-                                                   />
-                                                   <p
-                                                     className="card-text"
-                                                     contentEditable
-                                                     suppressContentEditableWarning
-                                                     onClick={() => setModalIndex(index)} // Open modal for this index
-                                                     style={item.style}
-                                                     dangerouslySetInnerHTML={{
-                                                       __html: item.content1,
-                                                     }}
-                                                   />
-                         
-                                                   {modalIndex === index && ( // Open only for the selected index
-                                                     <ParaEditor
-                                                       isOpen={true}
-                                                       content={item.content1}
-                                                       onSave={(newContent) => {
-                                                         updateContent(index, { content1: newContent });
-                                                         setModalIndex(null); // Close modal after save
-                                                       }}
-                                                       onClose={() => setModalIndex(null)}
-                                                     />
-                                                   )}
-                                                 </div>
-                                               ) : null}
-                         
-                                               {item.type === "head" && (
-                                                 <div ref={dropdownRef}>
-                                                   <p
-                                                     className="border"
-                                                     contentEditable
-                                                     suppressContentEditableWarning
-                                                     onBlur={(e) =>
-                                                       updateContent(index, {
-                                                         content: e.target.textContent,
-                                                       })
-                                                     }
-                                                     onMouseUp={(e) => handleCursorPosition(e, index)}
-                                                     onSelect={(e) => handleCursorPosition(e, index)}
-                                                     style={item.style}
-                                                   >
-                                                     {item.content}
-                                                   </p>
-                         
-                                                   {/* Local state for each heading */}
-                                                   <div className="select-group-container">
-                                                     {/* Select Group */}
-                                                     <select
-                                                       onChange={(e) => handleGroupChange(e, index)}
-                                                       value={selectedGroup[index] || ""}
-                                                       className="select-variable"
-                                                     >
-                                                       {/* <option
+                          {item.type === "para" && (
+                            <>
+                              <p
+                                className="border"
+                                contentEditable
+                                suppressContentEditableWarning
+                                onClick={() => {
+                                  setSelectedIndex(index);
+                                  setSelectedContent(item.content); // Store the correct content
+                                  setIsModalOpen(true); // Open the modal
+                                }}
+                                style={item.style}
+                                dangerouslySetInnerHTML={{
+                                  __html: item.content,
+                                }}
+                              />
+                              {isModalOpen && selectedIndex === index && (
+                                <ParaEditor
+                                  isOpen={isModalOpen}
+                                  content={selectedContent} // Pass the correct content
+                                  style={item.style}
+                                  onSave={(newContent) => {
+                                    updateContent(index, {
+                                      content: newContent,
+                                    }); // Save the new content
+                                    setIsModalOpen(false);
+                                  }}
+                                  onClose={() => setIsModalOpen(false)}
+                                />
+                              )}
+                            </>
+                          )}
+
+                          {item.type === "multi-image-card" ? (
+                            <div className="Layout-img">
+                              <div className="Layout">
+                                <img
+                                  src={
+                                    item.src1 ||
+                                    "https://via.placeholder.com/200"
+                                  }
+                                  alt="Editable"
+                                  className="multiimgcard"
+                                  title="Upload Image"
+                                  style={item.style}
+                                  onClick={() => handleopenFiles(index, 1)}
+                                />
+                                <h3 className="card-text-image">
+                                  {item.title1 || " "}
+                                </h3>
+                                <p>
+                                  <s>
+                                    {item.originalPrice1
+                                      ? `$${item.originalPrice1}`
+                                      : " "}
+                                  </s>
+                                </p>
+                                <p>
+                                  {item.offerPrice1
+                                    ? `Off Price $${item.offerPrice1}`
+                                    : " "}
+                                </p>
+                                <a
+                                  href={item.link1}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="button-preview"
+                                  style={item.buttonStyle1}
+                                >
+                                  {item.content1}
+                                </a>
+                              </div>
+
+                              <div className="Layout">
+                                <img
+                                  src={
+                                    item.src2 ||
+                                    "https://via.placeholder.com/200"
+                                  }
+                                  alt="Editable"
+                                  className="multiimgcard"
+                                  title="Upload Image"
+                                  style={item.style}
+                                  onClick={() => handleopenFiles(index, 2)}
+                                />
+                                <h3 className="card-text-image">
+                                  {item.title2 || " "}
+                                </h3>
+                                <p>
+                                  <s>
+                                    {item.originalPrice2
+                                      ? `$${item.originalPrice2}`
+                                      : " "}
+                                  </s>
+                                </p>
+                                <p>
+                                  {item.offerPrice2
+                                    ? `Off Price $${item.offerPrice2}`
+                                    : " "}
+                                </p>
+                                <a
+                                  href={item.link2}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="button-preview"
+                                  style={item.buttonStyle2}
+                                >
+                                  {item.content2}
+                                </a>
+                              </div>
+                            </div>
+                          ) : null}
+
+                          {item.type === "multipleimage" ? (
+                            <div className="Layout-img">
+                              <div className="Layout">
+                                <img
+                                  src={
+                                    item.src1 ||
+                                    "https://via.placeholder.com/200"
+                                  }
+                                  alt="Editable"
+                                  className="multiple-img"
+                                  title="Upload Image"
+                                  style={item.style}
+                                  onClick={() => handleopenFiles(index, 1)}
+                                />
+                              </div>
+
+                              <div className="Layout">
+                                <img
+                                  src={
+                                    item.src2 ||
+                                    "https://via.placeholder.com/200"
+                                  }
+                                  alt="Editable"
+                                  className="multiple-img"
+                                  title="Upload Image"
+                                  style={item.style}
+                                  onClick={() => handleopenFiles(index, 2)}
+                                />
+                              </div>
+                            </div>
+                          ) : null}
+
+                          {item.type === "multi-image" ? (
+                            <div className="Layout-img">
+                              <div className="Layout">
+                                <img
+                                  src={
+                                    item.src1 ||
+                                    "https://via.placeholder.com/200"
+                                  }
+                                  alt="Editable"
+                                  className="multiimg"
+                                  title="Upload Image"
+                                  style={item.style}
+                                  onClick={() => handleopenFiles(index, 1)}
+                                />
+                                <a
+                                  href={item.link1}
+                                  target="_blank"
+                                  className="button-preview"
+                                  rel="noopener noreferrer"
+                                  style={item.buttonStyle1}
+                                >
+                                  {item.content1}
+                                </a>
+                              </div>
+
+                              <div className="Layout">
+                                <img
+                                  src={
+                                    item.src2 ||
+                                    "https://via.placeholder.com/200"
+                                  }
+                                  alt="Editable"
+                                  className="multiimg"
+                                  title="Upload Image"
+                                  style={item.style}
+                                  onClick={() => handleopenFiles(index, 2)}
+                                />
+                                <a
+                                  href={item.link2}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="button-preview"
+                                  style={item.buttonStyle2}
+                                >
+                                  {item.content2}
+                                </a>
+                              </div>
+                            </div>
+                          ) : null}
+
+                          {item.type === "video-icon" ? (
+                            <div className="video-icon">
+                              <img
+                                src={
+                                  item.src1 || "https://via.placeholder.com/200"
+                                }
+                                alt="Editable"
+                                className="videoimg"
+                                title="Upload Thumbnail Image"
+                                style={item.style}
+                                onClick={() => handleopenFiles(index, 1)}
+                              />
+                              <a
+                                href={item.link}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                              >
+                                <img
+                                  src={item.src2}
+                                  className="video-btn"
+                                  alt="icon"
+                                />
+                              </a>
+                            </div>
+                          ) : null}
+
+                          {item.type === "cardimage" ? (
+                            <div
+                              className="card-image-container"
+                              style={item.style1}
+                            >
+                              <img
+                                src={
+                                  item.src1 || "https://via.placeholder.com/200"
+                                }
+                                style={item.style}
+                                alt="Editable"
+                                className="card-image"
+                                title="Upload Image"
+                                onClick={() => handleopenFiles(index, 1)}
+                              />
+                              <p
+                                className="card-text"
+                                contentEditable
+                                suppressContentEditableWarning
+                                onClick={() => setModalIndex(index)} // Open modal for this index
+                                style={item.style}
+                                dangerouslySetInnerHTML={{
+                                  __html: item.content1,
+                                }}
+                              />
+
+                              {modalIndex === index && ( // Open only for the selected index
+                                <ParaEditor
+                                  isOpen={true}
+                                  content={item.content1}
+                                  onSave={(newContent) => {
+                                    updateContent(index, {
+                                      content1: newContent,
+                                    });
+                                    setModalIndex(null); // Close modal after save
+                                  }}
+                                  onClose={() => setModalIndex(null)}
+                                />
+                              )}
+                            </div>
+                          ) : null}
+
+                          {item.type === "head" && (
+                            <div ref={dropdownRef}>
+                              <p
+                                className="border"
+                                contentEditable
+                                suppressContentEditableWarning
+                                onBlur={(e) =>
+                                  updateContent(index, {
+                                    content: e.target.textContent,
+                                  })
+                                }
+                                onMouseUp={(e) =>
+                                  handleCursorPosition(e, index)
+                                }
+                                onSelect={(e) => handleCursorPosition(e, index)}
+                                style={item.style}
+                              >
+                                {item.content}
+                              </p>
+
+                              {/* Local state for each heading */}
+                              <div className="select-group-container">
+                                {/* Select Group */}
+                                <select
+                                  onChange={(e) => handleGroupChange(e, index)}
+                                  value={selectedGroup[index] || ""}
+                                  className="select-variable"
+                                >
+                                  {/* <option
                                                          value=""
                                                          disabled
                                                          className="template-title"
                                                        >
                                                          Add Variable
                                                        </option> */}
-                                                       <option value="" disabled>
-                                                         Select Group
-                                                       </option>
-                                                       {groups.map((group, idx) => (
-                                                         <option key={idx} value={group._id}>
-                                                           {group.name}
-                                                         </option>
-                                                       ))}
-                                                     </select>
-                         
-                                                     {/* Show fields only for the selected heading */}
-                                                     {selectedGroup[index] && openedGroups[index] && (
-                                                       <div className="dropdown-container">
-                                                         <p className="template-title">
-                                                           <span>Add</span> Variable
-                                                         </p>
-                                                         {fieldNames[index] &&
-                                                         fieldNames[index].length > 0 ? (
-                                                           <div>
-                                                             {fieldNames[index].map((field, idx) => (
-                                                               <div
-                                                                 className="list-field"
-                                                                 key={idx}
-                                                                 onClick={() =>
-                                                                   handleInsertName(index, `{${field}}`)
-                                                                 }
-                                                               >
-                                                                 {field}
-                                                               </div>
-                                                             ))}
-                                                           </div>
-                                                         ) : (
-                                                           <p className="no-variables">No Variables</p>
-                                                         )}
-                                                       </div>
-                                                     )}
-                                                   </div>
-                                                 </div>
-                                               )}
-                                               {item.type === "link-image" && (
-                                                 <div className="border">
-                                                   <a
-                                                     href={item.link || "#"}
-                                                     onClick={(e) => handleLinkClick(e, index)}
-                                                   >
-                                                     <img
-                                                       src={
-                                                         item.src || "https://via.placeholder.com/200"
-                                                       }
-                                                       alt="Editable"
-                                                       className="img"
-                                                       style={item.style}
-                                                       onClick={() => handleopenFiles(index, 1)}
-                                                       title="Upload Image"
-                                                     />
-                                                   </a>
-                                                 </div>
-                                               )}
-                                               {item.type === "image" && (
-                                                 <div className="border">
-                                                   <img
-                                                     src={item.src || "https://via.placeholder.com/200"}
-                                                     alt="Editable"
-                                                     className="img"
-                                                     style={item.style}
-                                                     onClick={() => handleopenFiles(index, 1)}
-                                                     title="Upload Image"
-                                                   />
-                                                 </div>
-                                               )}
-                         
-                                               {item.type === "icons" && (
-                                                 <div
-                                                   className="border"
-                                                   style={item.ContentStyle}
-                                                   key={index}
-                                                 >
-                                                   <div className="icon-containers">
-                                                     <a
-                                                       href={item.links1 || "#"}
-                                                       target="_blank"
-                                                       rel="noopener noreferrer"
-                                                       onClick={(e) => handleLinksClick2(e, item.links1)}
-                                                     >
-                                                       <img
-                                                         src={item.iconsrc1}
-                                                         alt="Facebook"
-                                                         className="icon"
-                                                         style={item.style1}
-                                                       />
-                                                     </a>
-                         
-                                                     <a
-                                                       href={item.links2 || "#"}
-                                                       target="_blank"
-                                                       rel="noopener noreferrer"
-                                                       onClick={(e) => handleLinksClick2(e, item.links2)}
-                                                     >
-                                                       <img
-                                                         src={item.iconsrc2}
-                                                         alt="Twitter"
-                                                         className="icon"
-                                                         rel="noopener noreferrer"
-                                                         style={item.style2}
-                                                       />
-                                                     </a>
-                         
-                                                     <a
-                                                       href={item.links3 || "#"}
-                                                       target="_blank"
-                                                       rel="noopener noreferrer"
-                                                       onClick={(e) => handleLinksClick2(e, item.links3)}
-                                                     >
-                                                       <img
-                                                         src={item.iconsrc3}
-                                                         alt="Instagram"
-                                                         className="icon"
-                                                         style={item.style3}
-                                                       />
-                                                     </a>
-                         
-                                                     <a
-                                                       href={item.links4 || "#"}
-                                                       target="_blank"
-                                                       rel="noopener noreferrer"
-                                                       onClick={(e) => handleLinksClick2(e, item.links4)}
-                                                     >
-                                                       <img
-                                                         src={item.iconsrc4}
-                                                         alt="Youtube"
-                                                         className="icon"
-                                                         style={item.style4}
-                                                       />
-                                                     </a>
-                                                   </div>
-                                                 </div>
-                                               )}
-                                               {item.type === "break" && (
-                                                 <div className="border-break">
-                                                   <hr style={item.style} />
-                                                 </div>
-                                               )}
-                         
-                                               {item.type === "gap" && (
-                                                 <div className="border-break">
-                                                   {<div style={item.styles}></div>}
-                                                 </div>
-                                               )}
-                         
-                                               {item.type === "imagewithtext" ? (
-                                                 <div className="image-text-container">
-                                                   <div
-                                                     className="image-text-wrapper"
-                                                     style={item.style1}
-                                                   >
-                                                     <img
-                                                       src={
-                                                         item.src1 || "https://via.placeholder.com/200"
-                                                       }
-                                                       alt="Editable"
-                                                       className="image-item"
-                                                       title="Upload Image"
-                                                       onClick={() => handleopenFiles(index, 1)}
-                                                     />
-                                                     <p
-                                                       className="text-item"
-                                                       contentEditable
-                                                       suppressContentEditableWarning
-                                                       onClick={() => setModalIndex(index)} // Open modal for this index
-                                                       style={item.style}
-                                                       dangerouslySetInnerHTML={{
-                                                         __html: item.content1,
-                                                       }}
-                                                     />
-                                                   </div>
-                                                   {modalIndex === index && ( // Open only for the selected index
-                                                     <ParaEditor
-                                                       isOpen={true}
-                                                       content={item.content1}
-                                                       onSave={(newContent) => {
-                                                         updateContent(index, { content1: newContent });
-                                                         setModalIndex(null); // Close modal after save
-                                                       }}
-                                                       onClose={() => setModalIndex(null)}
-                                                     />
-                                                   )}
-                                                 </div>
-                                               ) : null}
-                         
-                                               {item.type === "banner" && (
-                                                 <div className="border">
-                                                   <img
-                                                     src={item.src || "https://via.placeholder.com/200"}
-                                                     alt="Editable"
-                                                     className="img"
-                                                     style={item.style}
-                                                     onClick={() => handleopenFiles(index, 1)}
-                                                   />
-                                                 </div>
-                                               )}
-                         
-                                               {item.type === "textwithimage" ? (
-                                                 <div className="image-text-container">
-                                                   <div
-                                                     className="image-text-wrapper"
-                                                     style={item.style}
-                                                   >
-                                                     <p
-                                                       className="text-item"
-                                                       contentEditable
-                                                       suppressContentEditableWarning
-                                                       onClick={() => setModalIndex(index)} // Open modal for this index
-                                                       style={item.style}
-                                                       dangerouslySetInnerHTML={{
-                                                         __html: item.content2,
-                                                       }}
-                                                     />
-                                                     <img
-                                                       src={
-                                                         item.src2 || "https://via.placeholder.com/200"
-                                                       }
-                                                       alt="Editable"
-                                                       className="image-item"
-                                                       title="Upload Image"
-                                                       onClick={() => handleopenFiles(index, 2)}
-                                                     />
-                                                   </div>
-                                                   {modalIndex === index && ( // Open only for the selected index
-                                                     <ParaEditor
-                                                       isOpen={true}
-                                                       content={item.content2}
-                                                       onSave={(newContent) => {
-                                                         updateContent(index, { content2: newContent });
-                                                         setModalIndex(null); // Close modal after save
-                                                       }}
-                                                       onClose={() => setModalIndex(null)}
-                                                     />
-                                                   )}
-                                                 </div>
-                                               ) : null}
-                         
-                                               {item.type === "logo" && (
-                                                 <div className="border">
-                                                   <img
-                                                     src={item.src || "https://via.placeholder.com/200"}
-                                                     alt="Editable"
-                                                     className="logo"
-                                                     style={item.style}
-                                                     onClick={() => handleopenFiles(index, 1)}
-                                                     title="Upload Image"
-                                                   />
-                                                 </div>
-                                               )}
-                                               {item.type === "button" && (
-                                                 <div className="border-btn">
-                                                   <a
-                                                     href={item.link || "#"}
-                                                     target="_blank"
-                                                     rel="noopener noreferrer"
-                                                     style={item.style}
-                                                     className="button-preview"
-                                                   >
-                                                     {item.content}
-                                                   </a>
-                                                 </div>
-                                               )}
-                                               {item.type === "link" && (
-                                                 <div className="border-btn">
-                                                   <a
-                                                     href={item.href || "#"}
-                                                     onClick={(e) => handleLinkClick(e, index)}
-                                                     style={item.style}
-                                                   >
-                                                     {item.content}
-                                                   </a>
-                                                 </div>
-                                               )}
+                                  <option value="" disabled>
+                                    Select Group
+                                  </option>
+                                  {groups.map((group, idx) => (
+                                    <option key={idx} value={group._id}>
+                                      {group.name}
+                                    </option>
+                                  ))}
+                                </select>
+
+                                {/* Show fields only for the selected heading */}
+                                {selectedGroup[index] &&
+                                  openedGroups[index] && (
+                                    <div className="dropdown-container">
+                                      <p className="template-title">
+                                        <span>Add</span> Variable
+                                      </p>
+                                      {fieldNames[index] &&
+                                      fieldNames[index].length > 0 ? (
+                                        <div>
+                                          {fieldNames[index].map(
+                                            (field, idx) => (
+                                              <div
+                                                className="list-field"
+                                                key={idx}
+                                                onClick={() =>
+                                                  handleInsertName(
+                                                    index,
+                                                    `{${field}}`
+                                                  )
+                                                }
+                                              >
+                                                {field}
+                                              </div>
+                                            )
+                                          )}
+                                        </div>
+                                      ) : (
+                                        <p className="no-variables">
+                                          No Variables
+                                        </p>
+                                      )}
+                                    </div>
+                                  )}
+                              </div>
+                            </div>
+                          )}
+                          {item.type === "link-image" && (
+                            <div className="border">
+                              <a
+                                href={item.link || "#"}
+                                onClick={(e) => handleLinkClick(e, index)}
+                              >
+                                <img
+                                  src={
+                                    item.src ||
+                                    "https://via.placeholder.com/200"
+                                  }
+                                  alt="Editable"
+                                  className="img"
+                                  style={item.style}
+                                  onClick={() => handleopenFiles(index, 1)}
+                                  title="Upload Image"
+                                />
+                              </a>
+                            </div>
+                          )}
+                          {item.type === "image" && (
+                            <div className="border">
+                              <img
+                                src={
+                                  item.src || "https://via.placeholder.com/200"
+                                }
+                                alt="Editable"
+                                className="img"
+                                style={item.style}
+                                onClick={() => handleopenFiles(index, 1)}
+                                title="Upload Image"
+                              />
+                            </div>
+                          )}
+
+                          {item.type === "icons" && (
+                            <div
+                              className="border"
+                              style={item.ContentStyle}
+                              key={index}
+                            >
+                              <div className="icon-containers">
+                                <a
+                                  href={item.links1 || "#"}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  onClick={(e) =>
+                                    handleLinksClick2(e, item.links1)
+                                  }
+                                >
+                                  <img
+                                    src={item.iconsrc1}
+                                    alt="Facebook"
+                                    className="icon"
+                                    style={item.style1}
+                                  />
+                                </a>
+
+                                <a
+                                  href={item.links2 || "#"}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  onClick={(e) =>
+                                    handleLinksClick2(e, item.links2)
+                                  }
+                                >
+                                  <img
+                                    src={item.iconsrc2}
+                                    alt="Twitter"
+                                    className="icon"
+                                    rel="noopener noreferrer"
+                                    style={item.style2}
+                                  />
+                                </a>
+
+                                <a
+                                  href={item.links3 || "#"}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  onClick={(e) =>
+                                    handleLinksClick2(e, item.links3)
+                                  }
+                                >
+                                  <img
+                                    src={item.iconsrc3}
+                                    alt="Instagram"
+                                    className="icon"
+                                    style={item.style3}
+                                  />
+                                </a>
+
+                                <a
+                                  href={item.links4 || "#"}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  onClick={(e) =>
+                                    handleLinksClick2(e, item.links4)
+                                  }
+                                >
+                                  <img
+                                    src={item.iconsrc4}
+                                    alt="Youtube"
+                                    className="icon"
+                                    style={item.style4}
+                                  />
+                                </a>
+                              </div>
+                            </div>
+                          )}
+                          {item.type === "break" && (
+                            <div className="border-break">
+                              <hr style={item.style} />
+                            </div>
+                          )}
+
+                          {item.type === "gap" && (
+                            <div className="border-break">
+                              {<div style={item.styles}></div>}
+                            </div>
+                          )}
+
+                          {item.type === "imagewithtext" ? (
+                            <div className="image-text-container">
+                              <div
+                                className="image-text-wrapper"
+                                style={item.style1}
+                              >
+                                <img
+                                  src={
+                                    item.src1 ||
+                                    "https://via.placeholder.com/200"
+                                  }
+                                  alt="Editable"
+                                  className="image-item"
+                                  title="Upload Image"
+                                  onClick={() => handleopenFiles(index, 1)}
+                                />
+                                <p
+                                  className="text-item"
+                                  contentEditable
+                                  suppressContentEditableWarning
+                                  onClick={() => setModalIndex(index)} // Open modal for this index
+                                  style={item.style}
+                                  dangerouslySetInnerHTML={{
+                                    __html: item.content1,
+                                  }}
+                                />
+                              </div>
+                              {modalIndex === index && ( // Open only for the selected index
+                                <ParaEditor
+                                  isOpen={true}
+                                  content={item.content1}
+                                  onSave={(newContent) => {
+                                    updateContent(index, {
+                                      content1: newContent,
+                                    });
+                                    setModalIndex(null); // Close modal after save
+                                  }}
+                                  onClose={() => setModalIndex(null)}
+                                />
+                              )}
+                            </div>
+                          ) : null}
+
+                          {item.type === "banner" && (
+                            <div className="border">
+                              <img
+                                src={
+                                  item.src || "https://via.placeholder.com/200"
+                                }
+                                alt="Editable"
+                                className="img"
+                                style={item.style}
+                                onClick={() => handleopenFiles(index, 1)}
+                              />
+                            </div>
+                          )}
+
+                          {item.type === "textwithimage" ? (
+                            <div className="image-text-container">
+                              <div
+                                className="image-text-wrapper"
+                                style={item.style}
+                              >
+                                <p
+                                  className="text-item"
+                                  contentEditable
+                                  suppressContentEditableWarning
+                                  onClick={() => setModalIndex(index)} // Open modal for this index
+                                  style={item.style}
+                                  dangerouslySetInnerHTML={{
+                                    __html: item.content2,
+                                  }}
+                                />
+                                <img
+                                  src={
+                                    item.src2 ||
+                                    "https://via.placeholder.com/200"
+                                  }
+                                  alt="Editable"
+                                  className="image-item"
+                                  title="Upload Image"
+                                  onClick={() => handleopenFiles(index, 2)}
+                                />
+                              </div>
+                              {modalIndex === index && ( // Open only for the selected index
+                                <ParaEditor
+                                  isOpen={true}
+                                  content={item.content2}
+                                  onSave={(newContent) => {
+                                    updateContent(index, {
+                                      content2: newContent,
+                                    });
+                                    setModalIndex(null); // Close modal after save
+                                  }}
+                                  onClose={() => setModalIndex(null)}
+                                />
+                              )}
+                            </div>
+                          ) : null}
+
+                          {item.type === "logo" && (
+                            <div className="border">
+                              <img
+                                src={
+                                  item.src || "https://via.placeholder.com/200"
+                                }
+                                alt="Editable"
+                                className="logo"
+                                style={item.style}
+                                onClick={() => handleopenFiles(index, 1)}
+                                title="Upload Image"
+                              />
+                            </div>
+                          )}
+                          {item.type === "button" && (
+                            <div className="border-btn">
+                              <a
+                                href={item.link || "#"}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                style={item.style}
+                                className="button-preview"
+                              >
+                                {item.content}
+                              </a>
+                            </div>
+                          )}
+                          {item.type === "link" && (
+                            <div className="border-btn">
+                              <a
+                                href={item.href || "#"}
+                                onClick={(e) => handleLinkClick(e, index)}
+                                style={item.style}
+                              >
+                                {item.content}
+                              </a>
+                            </div>
+                          )}
                         </div>
                       );
                     })}

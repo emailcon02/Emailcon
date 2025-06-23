@@ -198,7 +198,7 @@ router.post('/sendtestmail', async (req, res) => {
 
     const emailContent = previewContent.map((item) => {
       if (item.type === 'para') {
-        return `<div style="border-radius:${item.style.borderRadius};font-size:${item.style.fontSize};padding:10px; color:${item.style.color}; margin-top:20px; background-color:${item.style.backgroundColor}">${item.content}</div>`;
+        return `<div style="border-radius:${item.style.borderRadius};font-size:${item.style.fontSize};padding:10px 40px; color:${item.style.color}; margin-top:20px; background-color:${item.style.backgroundColor}">${item.content}</div>`;
       } else if (item.type === 'head') {
         return `<p style="font-size:${item.style.fontSize};border-radius:10px;margin-top:10px;padding:10px;font-weight:bold;color:${item.style.color};text-align:${item.style.textAlign};background-color:${item.style.backgroundColor}">${item.content}</p>`;
       } else if (item.type === 'logo') {
@@ -1167,7 +1167,7 @@ case 'break':
         case 'head':
           return `<p class="head" style="${styleString};border-radius:10px;margin-top:10px;padding:10px;font-weight:bold;">${content}</p>`;
         case 'para':
-          return `<div style="${styleString};margin-top:20px;padding:10px;">${content}</div>`;
+          return `<div style="${styleString};margin-top:20px;padding:10px 40px;">${content}</div>`;
         case 'button':
           return `<div style="margin:20px auto 0 auto;text-align:center;">
                   <a href = "${generateTrackingLink(link, userId, campaignId, recipientEmail)}"
@@ -1480,7 +1480,7 @@ case 'break':
         case 'head':
           return `<p class="head" style="${styleString};border-radius:10px;margin-top:10px;padding:10px;font-weight:bold;">${content}</p>`;
         case 'para':
-          return `<div style="${styleString};margin-top:20px;padding:10px;">${content}</div>`;
+          return `<div style="${styleString};margin-top:20px;padding:10px 40px;">${content}</div>`;
         case 'button':
           return `<div style="margin:20px auto 0 auto;text-align:center;">
                   <a href = "${generateTrackingLink(link, userId, campaignId, recipientEmail)}"
@@ -1913,7 +1913,7 @@ case 'break':
         case 'head':
           return `<p class="head" style="${styleString};border-radius:10px;margin-top:10px;padding:10px;font-weight:bold;">${content}</p>`;
         case 'para':
-          return `<div style="${styleString};margin-top:20px;padding:10px;">${content}</div>`;
+          return `<div style="${styleString};margin-top:20px;padding:10px 40px;">${content}</div>`;
         case 'button':
           return `<div style="margin:20px auto 0 auto;text-align:center;">
                   <a href = "${generateTrackingLink(link, userId, campaignId, recipientEmail)}"
