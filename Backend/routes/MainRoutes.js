@@ -609,9 +609,9 @@ router.post('/start-campaign', async (req, res) => {
     transporter = createTransporter(user);
 
     // Configure delay settings (in milliseconds)
-    const DELAY_BETWEEN_EMAILS = 1000; // 1 second between each email
-    const DELAY_BETWEEN_BATCHES = 3000; // 3 seconds between batches
-    const BATCH_SIZE = 5; // Number of emails to send in each batch
+    const DELAY_BETWEEN_EMAILS = 500; // 0.5 seconds between each email
+    const DELAY_BETWEEN_BATCHES = 2000; // 2 seconds between batches
+    const BATCH_SIZE = 10; // Number of emails to send in each batch
 
     // Split students into batches
     const batches = [];
