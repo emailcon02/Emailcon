@@ -77,7 +77,11 @@ function AdminLogin() {
     <div className="admin-login-page">
       <div className="admin-cover">
         <div className="admin-aside">
-          <img src={adminimg} alt="Sample Excel Format" className="signup-image" />
+          <img
+            src={adminimg}
+            alt="Sample Excel Format"
+            className="signup-image"
+          />
           <h2 style={{ fontWeight: "550", color: "#2f327d" }}>
             Admin <span style={{ color: "#f48c06" }}> Access</span>
           </h2>
@@ -94,11 +98,25 @@ function AdminLogin() {
           </p>
         </div>
         <div className="admin-login-container">
-          <h2 className="admin-login-header" style={{ fontWeight: "550", color: "#2f327d" }}>
-            <span>
-              Email<span style={{ color: "#f48c06" }}>con </span> Admin
-              <span style={{ color: "#f48c06" }}> Login</span>
-            </span>
+          <h2
+            className="admin-login-header"
+            style={{ fontWeight: "550", color: "#2f327d" }}
+          >
+            <div style={{ display: "flex", justifyContent: "center" }}>
+              <span>
+                <img src={logo} alt="imagesignnav" className="logo_img_sign" />{" "}
+              </span>
+              <span
+                style={{
+                  marginTop: "5px",
+                  fontWeight: "600",
+                  fontSize: "26px",
+                }}
+              >
+                Adm<span style={{ color: "#f48c06" }}>in</span>
+                Log<span style={{ color: "#f48c06" }}>in</span>
+              </span>
+            </div>
           </h2>
           <form onSubmit={handleSubmit}>
             <div className="lab">
@@ -129,7 +147,9 @@ function AdminLogin() {
                 className="toggle-password"
                 onClick={() => setShowPassword(!showPassword)}
               >
-                <i className={`fas ${showPassword ? "fa-eye-slash" : "fa-eye"}`}></i>
+                <i
+                  className={`fas ${showPassword ? "fa-eye-slash" : "fa-eye"}`}
+                ></i>
               </span>
             </div>
 

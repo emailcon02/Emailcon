@@ -8,6 +8,7 @@ import apiConfig from "../../apiconfig/apiConfig";
 import { useLocation, useNavigate } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import logo from "../../Images/emailcon_logo.png"
 
 const Smtppage = () => {
   const [authMethod, setAuthMethod] = useState("Gmail");
@@ -68,9 +69,19 @@ const Smtppage = () => {
     <div className="smtp-page-container">
       {/* Left Side Input Form */}
       <div className="smtp-left-side">
-        <h1 className="smpt-header">
-          Email<span style={{ color: "#f48c06" }}>con</span> Smtp Setup
-        </h1>
+        <h2 className="smpt-header">
+          <div style={{ display: "flex", justifyContent: "center" }}>
+            <span>
+              <img src={logo} alt="imagesignnav" className="logo_img_sign" />{" "}
+            </span>
+            <span
+              style={{ marginTop: "5px", fontWeight: "600", fontSize: "26px" }}
+            >
+              Sm<span style={{ color: "#f48c06" }}>tp</span> Set
+              <span style={{ color: "#f48c06" }}>up</span>
+            </span>
+          </div>
+        </h2>
         <div className="smtp-content-container">
           <div className="smtp-label-container">
             <label>
@@ -97,14 +108,16 @@ const Smtppage = () => {
           </div>
         </div>
         <div className="smtp-button-group">
-          <button className="smtp-save-button" onClick={handlesave}
-       disabled={isLoading}
-       >
-         {isLoading ? (
-           <span className="loader-signup smtp-loader"></span> // Spinner
-         ) : (
-           "Save"
-         )}
+          <button
+            className="smtp-save-button"
+            onClick={handlesave}
+            disabled={isLoading}
+          >
+            {isLoading ? (
+              <span className="loader-signup smtp-loader"></span> // Spinner
+            ) : (
+              "Save"
+            )}
           </button>
           <button className="smtp-cancel-button" onClick={handleCancel}>
             Cancel
@@ -144,14 +157,13 @@ const Smtppage = () => {
                 </li>
               </ol>
               <div className="smtp-close-btn">
-              <button
-                className="smtp-modal-close-button"
-                onClick={() => setIsModalOpen(false)}
-              >
-                Close
-              </button>
+                <button
+                  className="smtp-modal-close-button"
+                  onClick={() => setIsModalOpen(false)}
+                >
+                  Close
+                </button>
               </div>
-            
             </div>
             <div className="smtp-custom-modal-right">
               <img
@@ -163,17 +175,17 @@ const Smtppage = () => {
           </div>
         </div>
       )}
-        <ToastContainer
-              className="custom-toast"
-              position="bottom-center"
-              autoClose={3000}
-              hideProgressBar={true}
-              closeOnClick={false}
-              closeButton={false}
-              pauseOnHover={true}
-              draggable={true}
-              theme="light"
-            />
+      <ToastContainer
+        className="custom-toast"
+        position="bottom-center"
+        autoClose={3000}
+        hideProgressBar={true}
+        closeOnClick={false}
+        closeButton={false}
+        pauseOnHover={true}
+        draggable={true}
+        theme="light"
+      />
     </div>
   );
 };

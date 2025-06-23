@@ -11,6 +11,9 @@
     margin: 0 auto;
     border-radius:10px;
 }
+.logo_img{
+    width:160px;
+}
 .navmain{
     background: linear-gradient(to right, #fff7e8, #fad584);
 }

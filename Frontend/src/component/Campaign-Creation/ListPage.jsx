@@ -42,6 +42,7 @@ const ListPage = ({ onClose }) => {
   const [groupToDelete, setGroupToDelete] = useState(null);
   // const [showDeletingToast, setShowDeletingToast] = useState(false);
   const [showEditingToast, setShowEditingToast] = useState(false);
+  const [showDeleteContactsModal, setShowDeleteContactsModal] = useState(false);
 
   const user = JSON.parse(localStorage.getItem("user"));
 
@@ -362,10 +363,13 @@ const ListPage = ({ onClose }) => {
               <p>No Contacts available</p>
             ) : (
               <>
-                <button className="btn" onClick={handleDeleteSelectedStudents}>
+                <button
+                  className="btn"
+                  onClick={() => setShowDeleteContactsModal(true)}
+                >
                   Delete Selected Contacts
                 </button>
-            
+
                 <div className="student-list">
                   <table>
                     <thead>
@@ -389,9 +393,8 @@ const ListPage = ({ onClose }) => {
                               (key) =>
                                 key !== "_id" &&
                                 key !== "group" &&
-                                key !== "lastSentYear" && 
+                                key !== "lastSentYear" &&
                                 key !== "__v" // Exclude unwanted fields
-                                
                             )
                             .map((key, index) => <th key={index}>{key}</th>)}
                         <th>Action</th>
@@ -418,7 +421,7 @@ const ListPage = ({ onClose }) => {
                               (key) =>
                                 key !== "_id" &&
                                 key !== "group" &&
-                                key !== "lastSentYear" && 
+                                key !== "lastSentYear" &&
                                 key !== "__v"
                             )
                             .map((key, index) => (
@@ -445,87 +448,99 @@ const ListPage = ({ onClose }) => {
                 </div>
               </>
             )}
+            <ConfirmationModal
+              isOpen={showDeleteContactsModal}
+              onClose={() => setShowDeleteContactsModal(false)}
+              onConfirm={() => {
+                setShowDeleteContactsModal(false);
+                handleDeleteSelectedStudents();
+              }}
+              message="Are you sure you want to delete the selected contacts?"
+            />
             {editingStudent && (
-  <div className="edit-student-modal-overlay">
-    <div className="edit-student-modal-content">
-      <h3>Edit Student</h3>
-      <form
-        onSubmit={(e) => {
-          e.preventDefault();
-          handleSaveStudent();
-        }}
-      >
-       {/* Render input fields dynamically (excluding `_id` and `lastSentYear`) */}
-{Object.keys(editFormData).map(
-  (key) =>
-    key !== "_id" && key !== "lastSentYear" && key !== "group" && (
-      <div key={key} className="input-group">
-        <label htmlFor={key} className="input-label">
-          {key.charAt(0).toUpperCase() + key.slice(1)}
-        </label>
-        <input
-          type="text"
-          id={key}
-          name={key}
-          value={editFormData[key] || ""}
-          onChange={(e) =>
-            setEditFormData({
-              ...editFormData,
-              [key]: e.target.value,
-            })
-          }
-          placeholder={`Enter ${key}`}
-          className="edit-student-input"
-        />
-      </div>
-    )
-)}
+              <div className="edit-student-modal-overlay">
+                <div className="edit-student-modal-content">
+                  <h3>Edit Student</h3>
+                  <form
+                    onSubmit={(e) => {
+                      e.preventDefault();
+                      handleSaveStudent();
+                    }}
+                  >
+                    {/* Render input fields dynamically (excluding `_id` and `lastSentYear`) */}
+                    {Object.keys(editFormData).map(
+                      (key) =>
+                        key !== "_id" &&
+                        key !== "lastSentYear" &&
+                        key !== "group" && (
+                          <div key={key} className="input-group">
+                            <label htmlFor={key} className="input-label">
+                              {key.charAt(0).toUpperCase() + key.slice(1)}
+                            </label>
+                            <input
+                              type="text"
+                              id={key}
+                              name={key}
+                              value={editFormData[key] || ""}
+                              onChange={(e) =>
+                                setEditFormData({
+                                  ...editFormData,
+                                  [key]: e.target.value,
+                                })
+                              }
+                              placeholder={`Enter ${key}`}
+                              className="edit-student-input"
+                            />
+                          </div>
+                        )
+                    )}
 
-        {/* Group Dropdown */}
-        <div className="input-group">
-          <label htmlFor="group" className="input-label">Group</label>
-          <select
-            id="group"
-            name="group"
-            value={editFormData.group || ""}
-            onChange={(e) => {
-              const selectedGroup = groups.find(
-                (group) => group._id === e.target.value
-              );
-              setEditFormData({
-                ...editFormData,
-                group: selectedGroup?._id || "",
-              });
-            }}
-            className="edit-student-select"
-          >
-            <option value="">Select Group</option>
-            {groups.map((group) => (
-              <option key={group._id} value={group._id}>
-                {group.name}
-              </option>
-            ))}
-          </select>
-        </div>
+                    {/* Group Dropdown */}
+                    <div className="input-group">
+                      <label htmlFor="group" className="input-label">
+                        Group
+                      </label>
+                      <select
+                        id="group"
+                        name="group"
+                        value={editFormData.group || ""}
+                        onChange={(e) => {
+                          const selectedGroup = groups.find(
+                            (group) => group._id === e.target.value
+                          );
+                          setEditFormData({
+                            ...editFormData,
+                            group: selectedGroup?._id || "",
+                          });
+                        }}
+                        className="edit-student-select"
+                      >
+                        <option value="">Select Group</option>
+                        {groups.map((group) => (
+                          <option key={group._id} value={group._id}>
+                            {group.name}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
 
-        {/* Buttons */}
-        <div className="edit-student-modal-buttons">
-          <button className="editbtn" type="submit">
-            Save
-          </button>
-          <button
-            className="cancelbtn"
-            type="button"
-            onClick={() => setEditingStudent(null)}
-          >
-            Cancel
-          </button>
-        </div>
-      </form>
-    </div>
-  </div>
-)}
-
+                    {/* Buttons */}
+                    <div className="edit-student-modal-buttons">
+                      <button className="editbtn" type="submit">
+                        Save
+                      </button>
+                      <button
+                        className="cancelbtn"
+                        type="button"
+                        onClick={() => setEditingStudent(null)}
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  </form>
+                </div>
+              </div>
+            )}
           </div>
         )}
 

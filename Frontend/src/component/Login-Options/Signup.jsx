@@ -7,6 +7,7 @@ import "react-toastify/dist/ReactToastify.css";
 import sign from "../../Images/ex1.png";
 import axios from "axios";
 import apiConfig from "../../apiconfig/apiConfig";
+import logo from "../../Images/emailcon_logo.png";
 
 function Signup() {
   const [email, setEmail] = useState("");
@@ -88,9 +89,15 @@ function Signup() {
         </div>
         <div className="signup-container">
           <h2 className="signup-header">
-          <span> Email<span style={{ color: "#f48c06" }}>con</span></span>
-          <span style={{marginLeft:"5px"}}>Sign<span style={{ color: "#f48c06" }}>up</span></span>  
-              </h2>
+            <div style={{display:"flex",justifyContent:"center"}}>
+            <span>
+              <img src={logo} alt="imagesignnav" className="logo_img_sign" />{" "}
+            </span>
+            <span style={{marginTop:"5px",fontWeight:"600",fontSize:"26px"}}>
+              Sign<span style={{ color: "#f48c06" }}>up</span>
+            </span>
+            </div>
+          </h2>
           {/* <div>
             <div className="label">
               <label>Select Mail Service</label>
@@ -139,90 +146,91 @@ function Signup() {
               <label>Contact Number</label>
             </div>
             <div className="input-container-sign">
-            <input
-  type="text"
-  value={phone}
-  onChange={(e) => {
-    const numericValue = e.target.value.replace(/\D/g, ''); // Remove all non-digits
-    setPhone(numericValue);
-  }}
-  required
-  className="signup-input"
-  placeholder="Enter the contact number"
-/>
+              <input
+                type="text"
+                value={phone}
+                onChange={(e) => {
+                  const numericValue = e.target.value.replace(/\D/g, ""); // Remove all non-digits
+                  setPhone(numericValue);
+                }}
+                required
+                className="signup-input"
+                placeholder="Enter the contact number"
+              />
             </div>
             <div className="label">
-  <label>Gender</label>
-</div>
-<div className="input-container-sign gender-options">
-  <label>
-    <input
-      type="radio"
-      name="gender"
-      value="Male"
-      checked={gender === "Male"}
-      onChange={(e) => setGender(e.target.value)}
-    />
-    Male
-  </label>
-  <label>
-    <input
-      type="radio"
-      name="gender"
-      value="Female"
-      checked={gender === "Female"}
-      onChange={(e) => setGender(e.target.value)}
-    />
-    Female
-  </label>
-  <label>
-    <input
-      type="radio"
-      name="gender"
-      value="Other"
-      checked={gender === "Other"}
-      onChange={(e) => setGender(e.target.value)}
-    />
-    Other
-  </label>
-</div>
-
-          <div className="label">
-              <label label > User Password < FaInfoCircle
-              className = "info-icon"
-              onClick = {
-                () => {
-                  console.log("Info icon clicked!");
-                  setIsModalOpenpassword(true);
-                }
-              }
-              style = {
-                {
-                  cursor: "pointer",
-                  marginLeft: "5px"
-                }
-              }
-              />
+              <label>Gender</label>
+            </div>
+            <div className="input-container-sign gender-options">
+              <label>
+                <input
+                  type="radio"
+                  name="gender"
+                  value="Male"
+                  checked={gender === "Male"}
+                  onChange={(e) => setGender(e.target.value)}
+                />
+                Male
+              </label>
+              <label>
+                <input
+                  type="radio"
+                  name="gender"
+                  value="Female"
+                  checked={gender === "Female"}
+                  onChange={(e) => setGender(e.target.value)}
+                />
+                Female
+              </label>
+              <label>
+                <input
+                  type="radio"
+                  name="gender"
+                  value="Other"
+                  checked={gender === "Other"}
+                  onChange={(e) => setGender(e.target.value)}
+                />
+                Other
               </label>
             </div>
-    
-<div className="input-container-sign password-container">
-  <input
-    type={showPassword ? "text" : "password"}
-    value={password}
-    placeholder="Enter the user password"
-    onChange={(e) => setPassword(e.target.value)}
-    required
-    className="signup-input"
-  />
-  <span
-    className="toggle-password"
-    onClick={() => setShowPassword(!showPassword)}
-  >
-    <i className={`fas ${showPassword ? "fa-eye-slash" : "fa-eye"}`}></i>
-  </span>
-</div>
-        
+
+            <div className="label">
+              <label label>
+                {" "}
+                User Password{" "}
+                <FaInfoCircle
+                  className="info-icon"
+                  onClick={() => {
+                    console.log("Info icon clicked!");
+                    setIsModalOpenpassword(true);
+                  }}
+                  style={{
+                    cursor: "pointer",
+                    marginLeft: "5px",
+                  }}
+                />
+              </label>
+            </div>
+
+            <div className="input-container-sign password-container">
+              <input
+                type={showPassword ? "text" : "password"}
+                value={password}
+                placeholder="Enter the user password"
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                className="signup-input"
+              />
+              <span
+                className="toggle-password"
+                onClick={() => setShowPassword(!showPassword)}
+              >
+                <i
+                  className={`fas ${showPassword ? "fa-eye-slash" : "fa-eye"}`}
+                ></i>
+              </span>
+            </div>
+
             <div className="sub-btn">
               <button
                 type="submit"
@@ -249,20 +257,31 @@ function Signup() {
         </div>
       </div>
 
-   
-
       {isModalOpenpassword && (
         <div className="custom-modal-overlay">
           <div className="custom-modal-container">
             <h3>Password Setup</h3>
             <ol>
-        <li>Passwords are <strong>case-sensitive</strong>.</li>
-      <li>Password must have One <strong>uppercase</strong> letter (A–Z)</li>
-      <li>Password must have One <strong>lowercase</strong> letter (a–z)</li >
-      <li>Password must have One <strong>number</strong>(0–9)</li >
-      <li>Password must have One <strong> special character</strong> (e.g., !, @, #, $, %, ^, &, *)</li >
-      <li>Minimum length: <strong>8 characters</strong>.</li>
-      <li>Eg : Template_001 or Template@008</li>
+              <li>
+                Passwords are <strong>case-sensitive</strong>.
+              </li>
+              <li>
+                Password must have One <strong>uppercase</strong> letter (A–Z)
+              </li>
+              <li>
+                Password must have One <strong>lowercase</strong> letter (a–z)
+              </li>
+              <li>
+                Password must have One <strong>number</strong>(0–9)
+              </li>
+              <li>
+                Password must have One <strong> special character</strong>{" "}
+                (e.g., !, @, #, $, %, ^, &, *)
+              </li>
+              <li>
+                Minimum length: <strong>8 characters</strong>.
+              </li>
+              <li>Eg : Template_001 or Template@008</li>
             </ol>
             <button
               onClick={() => setIsModalOpenpassword(false)}
@@ -273,7 +292,6 @@ function Signup() {
           </div>
         </div>
       )}
-
 
       <ToastContainer
         className="custom-toast"

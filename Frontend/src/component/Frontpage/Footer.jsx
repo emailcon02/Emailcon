@@ -3,6 +3,7 @@ import "./Footer.css";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPhone, faEnvelope } from '@fortawesome/free-solid-svg-icons';
 import { Link } from "react-router-dom";
+import logo from "../../Images/emailcon_logo.png";
 
 const Footer = ({onOpenModal }) => {
 
@@ -34,8 +35,9 @@ const Footer = ({onOpenModal }) => {
         {/* Left Column */}
         <div className="footer-section">
         <p className="logoContentfoot">
-              <span style={{ fontSize: "34px" }}>E</span>mail
-              <span style={{ color: "#f48c06" }}>con</span>
+              {/* <span style={{ fontSize: "34px" }}>E</span>mail
+              <span style={{ color: "#f48c06" }}>con</span> */}
+         <img src={logo} alt="imagehomenav" className="logo_img"/>
           </p>
           <p>
           Transform Your Email Campaigns With EmailCon - Your All-In-One Email Sending Solution.
