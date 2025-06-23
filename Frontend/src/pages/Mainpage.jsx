@@ -117,12 +117,11 @@ const Mainpage = () => {
         setFolderList((prev) =>
           prev.filter((f) => f.name !== folderToDelete.name)
         );
-  toast.success("Deleted Successfully");
-setTimeout(() => {
-  setModalVisible(false);
-  setFolderToDelete(null);
-}, 2000);
-
+        toast.success("Deleted Successfully");
+        setTimeout(() => {
+          setModalVisible(false);
+          setFolderToDelete(null);
+        }, 2000);
       } else {
         toast.error("Failed to delete folder.");
       }
@@ -176,59 +175,59 @@ setTimeout(() => {
     }
   };
 
- const uploadImagefile = async () => {
-  const input = document.createElement("input");
-  input.type = "file";
-  input.accept = "image/*";
-  input.multiple = true;
+  const uploadImagefile = async () => {
+    const input = document.createElement("input");
+    input.type = "file";
+    input.accept = "image/*";
+    input.multiple = true;
 
-  input.onchange = async (e) => {
-    const files = Array.from(e.target.files);
-    if (files.length > 10) {
-      toast.error("Maximum 10 files allowed.");
-      return;
-    }
+    input.onchange = async (e) => {
+      const files = Array.from(e.target.files);
+      if (files.length > 10) {
+        toast.error("Maximum 10 files allowed.");
+        return;
+      }
 
-    const formData = new FormData();
-    for (const file of files) {
-      formData.append("image", file); // append each file under same key
-    }
-    formData.append("userId", user.id);
-    formData.append("folderName", currentFolder || "Sample");
+      const formData = new FormData();
+      for (const file of files) {
+        formData.append("image", file); // append each file under same key
+      }
+      formData.append("userId", user.id);
+      formData.append("folderName", currentFolder || "Sample");
 
-    try {
-      const uploadRes = await axios.post(
-        `${apiConfig.baseURL}/api/stud/upload`,
-        formData,
-        { headers: { "Content-Type": "multipart/form-data" } }
-      );
+      try {
+        const uploadRes = await axios.post(
+          `${apiConfig.baseURL}/api/stud/upload`,
+          formData,
+          { headers: { "Content-Type": "multipart/form-data" } }
+        );
 
-      const imageUrls = uploadRes?.data?.imageUrls || [];
+        const imageUrls = uploadRes?.data?.imageUrls || [];
 
-      // ✅ Save all images to DB
-      await Promise.all(
-        imageUrls.map((imageUrl) =>
-          axios.post(`${apiConfig.baseURL}/api/stud/save-image`, {
-            userId: user.id,
-            imageUrl,
-            folderName: currentFolder || "Sample"
-          })
-        )
-      );
-      fetchImages(); 
-    } catch (err) {
-      console.error(err);
-      toast.error("Upload failed");
-    }
+        // ✅ Save all images to DB
+        await Promise.all(
+          imageUrls.map((imageUrl) =>
+            axios.post(`${apiConfig.baseURL}/api/stud/save-image`, {
+              userId: user.id,
+              imageUrl,
+              folderName: currentFolder || "Sample",
+            })
+          )
+        );
+        fetchImages();
+      } catch (err) {
+        console.error(err);
+        toast.error("Upload failed");
+      }
+    };
+
+    input.click();
   };
-
-  input.click();
-};
   const fetchImages = async () => {
     try {
       const res = await axios.get(
         `${apiConfig.baseURL}/api/stud/images/${user.id}`,
-        { params: { folderName: currentFolder || "Sample"  } }
+        { params: { folderName: currentFolder || "Sample" } }
       );
 
       const sortedImages = res.data.sort(
@@ -537,50 +536,51 @@ setTimeout(() => {
     };
   }, []);
 
- // Fetch groups and students only
-useEffect(() => {
-  const fetchGroupsAndStudents = async () => {
-    if (!user?.id) {
-      console.warn("User ID is missing. Skipping groups/students fetch.");
-      return;
-    }
+  // Fetch groups and students only
+  useEffect(() => {
+    const fetchGroupsAndStudents = async () => {
+      if (!user?.id) {
+        console.warn("User ID is missing. Skipping groups/students fetch.");
+        return;
+      }
 
-    try {
-      const [groupsRes, studentsRes] = await Promise.all([
-        axios.get(`${apiConfig.baseURL}/api/stud/groups/${user.id}`),
-        axios.get(`${apiConfig.baseURL}/api/stud/students`),
-      ]);
-      setGroups(groupsRes.data);
-      setStudents(studentsRes.data);
-    } catch (error) {
-      console.error("Error fetching groups/students:", {
-        message: error.message,
-        stack: error.stack,
-        response: error.response?.data,
-      });
-    }
-  };
+      try {
+        const [groupsRes, studentsRes] = await Promise.all([
+          axios.get(`${apiConfig.baseURL}/api/stud/groups/${user.id}`),
+          axios.get(`${apiConfig.baseURL}/api/stud/students`),
+        ]);
+        setGroups(groupsRes.data);
+        setStudents(studentsRes.data);
+      } catch (error) {
+        console.error("Error fetching groups/students:", {
+          message: error.message,
+          stack: error.stack,
+          response: error.response?.data,
+        });
+      }
+    };
 
-  fetchGroupsAndStudents();
-}, [user?.id]);
+    fetchGroupsAndStudents();
+  }, [user?.id]);
 
-// Separate useEffect just for templates
-useEffect(() => {
-    if (!user?.id) {
-      console.warn("User ID is missing. Skipping template fetch.");
-      return;
-    }
-  fetchTemplates();
-}, [user?.id]);
- 
-const fetchTemplates = async () => {
+  useEffect(() => {
     if (!user?.id) {
       console.warn("User ID is missing. Skipping template fetch.");
       return;
     }
+    fetchTemplates();
+  }, [user?.id]);
+
+  const fetchTemplates = async () => {
+    if (!user?.id) {
+      console.warn("User ID is missing. Skipping template fetch.");
+      return;
+    }
 
     try {
-      const templatesRes = await axios.get(`${apiConfig.baseURL}/api/stud/templates/${user.id}`);
+      const templatesRes = await axios.get(
+        `${apiConfig.baseURL}/api/stud/templates/${user.id}`
+      );
       setTemplates(templatesRes.data);
     } catch (error) {
       console.error("Error fetching templates:", {
@@ -590,8 +590,6 @@ const fetchTemplates = async () => {
       });
     }
   };
-
-
 
   useEffect(() => {
     const handleResize = () => {
@@ -1072,11 +1070,11 @@ const fetchTemplates = async () => {
     setSelectedIndex(index); // Set the selected index when an item is clicked
     // Scroll to style controls after a short delay to ensure rendering
     setTimeout(() => {
-      const styleControlsElement = document.querySelector('.style-controls');
+      const styleControlsElement = document.querySelector(".style-controls");
       if (styleControlsElement) {
-        styleControlsElement.scrollIntoView({ 
-          behavior: 'smooth', 
-          block: 'center' 
+        styleControlsElement.scrollIntoView({
+          behavior: "smooth",
+          block: "center",
         });
       }
     }, 100);
@@ -1131,6 +1129,19 @@ const fetchTemplates = async () => {
       toast.warning("No preview content available.");
       return;
     }
+    const hasInvalidLink = previewContent.some((item, index) => {
+  if (item.type === "multi-image" || item.type === "multi-image-card") {
+    return !item.link1?.trim() || !item.link2?.trim();
+  } else if (item.type === "video-icon" || item.type === "button") {
+    return !item.link?.trim();
+  }
+  return false;
+});
+
+if (hasInvalidLink) {
+  toast.warning("Please fill in all required link(Url) fields in the template.");
+  return;
+}
 
     setIsLoading(true);
     if (templateName && user && user.id && previewContent) {
@@ -1171,54 +1182,94 @@ const fetchTemplates = async () => {
       toast.error("Please ensure all fields are filled and user is valid");
     }
   };
- const handleSaveButton = async () => {
-  if (!user || !user.id) {
-    toast.error("Please ensure the user is valid");
-    return;
-  }
-  if (!templateName) {
-    toast.error("Please enter a Template name");
-    return;
-  }
-  if (!previewContent || previewContent.length === 0) {
-    toast.warning("No preview content available.");
-    return;
-  }
-
-  try {
-    const checkRes = await axios.get(
-      `${apiConfig.baseURL}/api/stud/template/check?temname=${encodeURIComponent(templateName)}&userId=${user.id}`
-    );
-
-    const existingTemplate = checkRes.data;
-    console.log("Existing Template:", existingTemplate);
-
-    if (existingTemplate) {
-      // Update template
-      await axios.put(`${apiConfig.baseURL}/api/stud/template/${existingTemplate._id}`, {
-        previewContent,
-        bgColor,
-        camname: campaign?.camname || "",
-      });
-      toast.success("Template Updated Successfully");
+  const handleSaveButton = async () => {
+    if (!user || !user.id) {
+      toast.error("User not found. Please log in again.");
+      return;
     }
-    fetchTemplates();
-  } catch (error) {
-    setIsLoading(false);
-    toast.dismiss();
-    toast.error(
-      error?.response?.data?.message || "Failed to Save or Update Template",
-      { autoClose: 3000 }
-    );
+    if (!previewContent || previewContent.length === 0) {
+      toast.warning("No content to save. Please create or edit the template.");
+      return;
+    }
+        const hasInvalidLink = previewContent.some((item, index) => {
+  if (item.type === "multi-image" || item.type === "multi-image-card") {
+    return !item.link1?.trim() || !item.link2?.trim();
+  } else if (item.type === "video-icon" || item.type === "button") {
+    return !item.link?.trim();
   }
-};
+  return false;
+});
 
+if (hasInvalidLink) {
+  toast.warning("Please fill in all required link(Url) fields in the template.");
+  return;
+}
+
+    if (!templateName || templateName.trim() === "") {
+      toast.warning(
+        "Please use 'Save As' to enter a template name before saving."
+      );
+      return;
+    }
+
+    try {
+      const checkRes = await axios.get(
+        `${
+          apiConfig.baseURL
+        }/api/stud/template/check?temname=${encodeURIComponent(
+          templateName
+        )}&userId=${user.id}`
+      );
+
+      const existingTemplate = checkRes.data;
+
+      if (existingTemplate) {
+        // Update existing template
+        await axios.put(
+          `${apiConfig.baseURL}/api/stud/template/${existingTemplate._id}`,
+          {
+            previewContent,
+            bgColor,
+            camname: campaign?.camname || "",
+          }
+        );
+        toast.success("Template updated successfully.");
+      } else {
+        // Template doesn't exist, tell user to use Save As
+        toast.info(
+          "Template not found. Please use 'Save As' to save it the first time."
+        );
+      }
+
+      fetchTemplates();
+    } catch (error) {
+      setIsLoading(false);
+      toast.dismiss();
+      toast.error(
+        error?.response?.data?.message || "Failed to update template.",
+        { autoClose: 3000 }
+      );
+    }
+  };
 
   const sendscheduleEmail = async () => {
     if (!previewContent || previewContent.length === 0) {
       toast.warning("No preview content available.");
       return;
     }
+    const hasInvalidLink = previewContent.some((item, index) => {
+  if (item.type === "multi-image" || item.type === "multi-image-card") {
+    return !item.link1?.trim() || !item.link2?.trim();
+  } else if (item.type === "video-icon" || item.type === "button") {
+    return !item.link?.trim();
+  }
+  return false;
+});
+
+if (hasInvalidLink) {
+  toast.warning("Please fill in all required link(Url) fields in the template.");
+  return;
+}
     if (
       !emailData ||
       !emailData.recipient ||
@@ -1244,8 +1295,7 @@ const fetchTemplates = async () => {
         emailData.attachments.forEach((file) => {
           formData.append("attachments", file);
         });
-          formData.append("userId",user.id)
-
+        formData.append("userId", user.id);
 
         const uploadResponse = await axios.post(
           `${apiConfig.baseURL}/api/stud/uploadfile`,
@@ -1306,7 +1356,20 @@ const fetchTemplates = async () => {
       toast.warning("No preview content available.");
       return;
     }
-    if (
+const hasInvalidLink = previewContent.some((item, index) => {
+  if (item.type === "multi-image" || item.type === "multi-image-card") {
+    return !item.link1?.trim() || !item.link2?.trim();
+  } else if (item.type === "video-icon" || item.type === "button") {
+    return !item.link?.trim();
+  }
+  return false;
+});
+
+if (hasInvalidLink) {
+  toast.warning("Please fill in all required link(Url) fields in the template.");
+  return;
+}    
+if (
       !emailData ||
       !emailData.recipient ||
       !emailData.subject ||
@@ -1335,11 +1398,10 @@ const fetchTemplates = async () => {
       // Upload attachments
       if (emailData.attachments?.length > 0) {
         const formData = new FormData();
-        emailData.attachments.forEach((file) =>{
+        emailData.attachments.forEach((file) => {
           formData.append("attachments", file);
-      });
-          formData.append("userId",user.id)
-
+        });
+        formData.append("userId", user.id);
 
         const uploadResponse = await axios.post(
           `${apiConfig.baseURL}/api/stud/uploadfile`,
@@ -1565,11 +1627,8 @@ const fetchTemplates = async () => {
                 </span>{" "}
                 {/* <span className="nav-names">Mobile</span> */}
               </button>
-              
-              <button
-                onClick={handleSaveButton}
-                className="navbar-button-send"
-              >
+
+              <button onClick={handleSaveButton} className="navbar-button-send">
                 <span className="Nav-icons">
                   <FaSave />
                 </span>{" "}
@@ -1681,6 +1740,16 @@ const fetchTemplates = async () => {
             {isNavOpen && (
               <div className="navbar-content">
                 <button
+                  onClick={handleSaveButton}
+                  className="navbar-button-send"
+                >
+                  <span className="Nav-icons">
+                    <FaSave />
+                  </span>{" "}
+                  <span className="nav-names">Save</span>
+                </button>
+
+                <button
                   onClick={() => {
                     setShowTemplateModal(true);
                     if (window.innerWidth < 768) {
@@ -1690,10 +1759,11 @@ const fetchTemplates = async () => {
                   className="navbar-button-sends"
                 >
                   <span className="Nav-icons">
-                    <FaSave />
+                    <FaFileExport />
                   </span>{" "}
-                  <span className="nav-names">Save</span>
+                  <span className="nav-names">Save As</span>
                 </button>
+
                 <button
                   onClick={(e) => toggletemplate(e)}
                   className="navbar-button-send"
@@ -1970,7 +2040,7 @@ const fetchTemplates = async () => {
                           border: "none",
                           fontSize: "20px",
                           cursor: "pointer",
-                          fontWeight:"bold",
+                          fontWeight: "bold",
                         }}
                       >
                         &times;
@@ -2140,13 +2210,12 @@ const fetchTemplates = async () => {
                       </div>
                     )}
 
-                   {/* Folder title */}
-{currentFolder && (
-  <div style={{ marginBottom: "10px" }}>
-    📂 {currentFolder}
-  </div>
-)}
-
+                    {/* Folder title */}
+                    {currentFolder && (
+                      <div style={{ marginBottom: "10px" }}>
+                        📂 {currentFolder}
+                      </div>
+                    )}
 
                     {/* Images */}
                     <div className="gallery-scroll-container">
@@ -2300,15 +2369,14 @@ const fetchTemplates = async () => {
                                       })
                                     }
                                   />
-                                    <span>
-                              {parseInt(
-                                previewContent[
-                                  selectedIndex
-                                ].style.borderRadius.replace("%", "")
-                              )}
-                              %
-                            </span>
-                                  
+                                  <span>
+                                    {parseInt(
+                                      previewContent[
+                                        selectedIndex
+                                      ].style.borderRadius.replace("%", "")
+                                    )}
+                                    %
+                                  </span>
                                 </>
                               )}
                               {previewContent[selectedIndex].type ===
@@ -2553,14 +2621,17 @@ const fetchTemplates = async () => {
                                           })
                                         }
                                       />
-                                         <span>
-                              {parseInt(
-                                previewContent[
-                                  selectedIndex
-                                ].buttonStyle1.borderRadius.replace("%", "")
-                              )}
-                              %
-                            </span>
+                                      <span>
+                                        {parseInt(
+                                          previewContent[
+                                            selectedIndex
+                                          ].buttonStyle1.borderRadius.replace(
+                                            "%",
+                                            ""
+                                          )
+                                        )}
+                                        %
+                                      </span>
                                     </div>
                                   )}
 
@@ -2777,14 +2848,17 @@ const fetchTemplates = async () => {
                                           })
                                         }
                                       />
-                                        <span>
-                              {parseInt(
-                                previewContent[
-                                  selectedIndex
-                                ].buttonStyle2.borderRadius.replace("%", "")
-                              )}
-                              %
-                            </span>
+                                      <span>
+                                        {parseInt(
+                                          previewContent[
+                                            selectedIndex
+                                          ].buttonStyle2.borderRadius.replace(
+                                            "%",
+                                            ""
+                                          )
+                                        )}
+                                        %
+                                      </span>
                                     </div>
                                   )}
                                 </div>
@@ -2890,14 +2964,14 @@ const fetchTemplates = async () => {
                                       })
                                     }
                                   />
-                                   <span>
-                              {parseInt(
-                                previewContent[
-                                  selectedIndex
-                                ].style.borderRadius.replace("%", "")
-                              )}
-                              %
-                            </span>
+                                  <span>
+                                    {parseInt(
+                                      previewContent[
+                                        selectedIndex
+                                      ].style.borderRadius.replace("%", "")
+                                    )}
+                                    %
+                                  </span>
 
                                   <div className="editor-bg">
                                     Image Background
@@ -3041,14 +3115,14 @@ const fetchTemplates = async () => {
                                       })
                                     }
                                   />
-                                    <span>
-                              {parseInt(
-                                previewContent[
-                                  selectedIndex
-                                ].style.borderRadius.replace("%", "")
-                              )}
-                              %
-                            </span>
+                                  <span>
+                                    {parseInt(
+                                      previewContent[
+                                        selectedIndex
+                                      ].style.borderRadius.replace("%", "")
+                                    )}
+                                    %
+                                  </span>
                                   <label>Button Text Size:</label>
                                   <input
                                     type="range"
@@ -3221,14 +3295,17 @@ const fetchTemplates = async () => {
                                         })
                                       }
                                     />
-                                      <span>
-                              {parseInt(
-                                previewContent[
-                                  selectedIndex
-                                ].buttonStyle1.borderRadius.replace("%", "")
-                              )}
-                              %
-                            </span>
+                                    <span>
+                                      {parseInt(
+                                        previewContent[
+                                          selectedIndex
+                                        ].buttonStyle1.borderRadius.replace(
+                                          "%",
+                                          ""
+                                        )
+                                      )}
+                                      %
+                                    </span>
                                   </div>
                                   <h4>Button-2 Style</h4>
                                   <div>
@@ -3365,14 +3442,17 @@ const fetchTemplates = async () => {
                                         })
                                       }
                                     />
-                                      <span>
-                              {parseInt(
-                                previewContent[
-                                  selectedIndex
-                                ].buttonStyle2.borderRadius.replace("%", "")
-                              )}
-                              %
-                            </span>
+                                    <span>
+                                      {parseInt(
+                                        previewContent[
+                                          selectedIndex
+                                        ].buttonStyle2.borderRadius.replace(
+                                          "%",
+                                          ""
+                                        )
+                                      )}
+                                      %
+                                    </span>
                                   </div>
                                 </>
                               )}
@@ -3499,14 +3579,14 @@ const fetchTemplates = async () => {
                                       })
                                     }
                                   />
-                                    <span>
-                              {parseInt(
-                                previewContent[
-                                  selectedIndex
-                                ].style.borderRadius.replace("%", "")
-                              )}
-                              %
-                            </span>
+                                  <span>
+                                    {parseInt(
+                                      previewContent[
+                                        selectedIndex
+                                      ].style.borderRadius.replace("%", "")
+                                    )}
+                                    %
+                                  </span>
 
                                   <ColorPicker
                                     label="Image Background"
@@ -3588,14 +3668,14 @@ const fetchTemplates = async () => {
                                       })
                                     }
                                   />
-                                    <span>
-                              {parseInt(
-                                previewContent[
-                                  selectedIndex
-                                ].style.borderRadius.replace("%", "")
-                              )}
-                              %
-                            </span>
+                                  <span>
+                                    {parseInt(
+                                      previewContent[
+                                        selectedIndex
+                                      ].style.borderRadius.replace("%", "")
+                                    )}
+                                    %
+                                  </span>
                                   <ColorPicker
                                     label="Image Background"
                                     objectKey="style.backgroundColor"
@@ -3749,14 +3829,14 @@ const fetchTemplates = async () => {
                                       })
                                     }
                                   />
-                                    <span>
-                              {parseInt(
-                                previewContent[
-                                  selectedIndex
-                                ].style.borderRadius.replace("%", "")
-                              )}
-                              %
-                            </span>
+                                  <span>
+                                    {parseInt(
+                                      previewContent[
+                                        selectedIndex
+                                      ].style.borderRadius.replace("%", "")
+                                    )}
+                                    %
+                                  </span>
 
                                   <ColorPicker
                                     label="Image Background"
@@ -3833,7 +3913,7 @@ const fetchTemplates = async () => {
                                 })
                               }
                             />
-                              <span>
+                            <span>
                               {parseInt(
                                 previewContent[
                                   selectedIndex
@@ -4052,7 +4132,7 @@ const fetchTemplates = async () => {
                                 })
                               }
                             />
-                              <span>
+                            <span>
                               {parseInt(
                                 previewContent[
                                   selectedIndex
@@ -4249,7 +4329,7 @@ const fetchTemplates = async () => {
                                     Large
                                   </button>
                                 </div>
-                                
+
                                 <label>Border Radius (%):</label>
                                 <input
                                   type="range"
@@ -4273,14 +4353,14 @@ const fetchTemplates = async () => {
                                     })
                                   }
                                 />
-                                  <span>
-                              {parseInt(
-                                previewContent[
-                                  selectedIndex
-                                ].buttonStyle1.borderRadius.replace("%", "")
-                              )}
-                              %
-                            </span>
+                                <span>
+                                  {parseInt(
+                                    previewContent[
+                                      selectedIndex
+                                    ].buttonStyle1.borderRadius.replace("%", "")
+                                  )}
+                                  %
+                                </span>
                               </div>
                             )}
 
@@ -4441,14 +4521,14 @@ const fetchTemplates = async () => {
                                     })
                                   }
                                 />
-                                  <span>
-                              {parseInt(
-                                previewContent[
-                                  selectedIndex
-                                ].buttonStyle2.borderRadius.replace("%", "")
-                              )}
-                              %
-                            </span>
+                                <span>
+                                  {parseInt(
+                                    previewContent[
+                                      selectedIndex
+                                    ].buttonStyle2.borderRadius.replace("%", "")
+                                  )}
+                                  %
+                                </span>
                               </div>
                             )}
                           </div>
@@ -4683,14 +4763,14 @@ const fetchTemplates = async () => {
                                     })
                                   }
                                 />
-                                  <span>
-                              {parseInt(
-                                previewContent[
-                                  selectedIndex
-                                ].buttonStyle1.borderRadius.replace("%", "")
-                              )}
-                              %
-                            </span>
+                                <span>
+                                  {parseInt(
+                                    previewContent[
+                                      selectedIndex
+                                    ].buttonStyle1.borderRadius.replace("%", "")
+                                  )}
+                                  %
+                                </span>
                               </div>
                             )}
 
@@ -4901,14 +4981,14 @@ const fetchTemplates = async () => {
                                     })
                                   }
                                 />
-                                  <span>
-                              {parseInt(
-                                previewContent[
-                                  selectedIndex
-                                ].buttonStyle2.borderRadius.replace("%", "")
-                              )}
-                              %
-                            </span>
+                                <span>
+                                  {parseInt(
+                                    previewContent[
+                                      selectedIndex
+                                    ].buttonStyle2.borderRadius.replace("%", "")
+                                  )}
+                                  %
+                                </span>
                               </div>
                             )}
                           </div>
@@ -5037,7 +5117,7 @@ const fetchTemplates = async () => {
                                 })
                               }
                             />
-                              <span>
+                            <span>
                               {parseInt(
                                 previewContent[
                                   selectedIndex
@@ -5132,7 +5212,7 @@ const fetchTemplates = async () => {
                                 })
                               }
                             />
-                             <span>
+                            <span>
                               {parseInt(
                                 previewContent[
                                   selectedIndex
@@ -5384,7 +5464,7 @@ const fetchTemplates = async () => {
                                 })
                               }
                             />
-                              <span>
+                            <span>
                               {parseInt(
                                 previewContent[
                                   selectedIndex
@@ -5464,7 +5544,7 @@ const fetchTemplates = async () => {
                                 })
                               }
                             />
-                              <span>
+                            <span>
                               {parseInt(
                                 previewContent[
                                   selectedIndex
@@ -5650,7 +5730,7 @@ const fetchTemplates = async () => {
                               }
                               alt="Editable"
                               className="multiple-img"
-                             title="Upload Image 240 x 240"
+                              title="Upload Image 240 x 240"
                               style={item.style}
                               onClick={() => handleopenFiles(index, 1)}
                             />
@@ -6122,7 +6202,6 @@ const fetchTemplates = async () => {
                         >
                           <FiEdit />
                         </button>
-                      
                       </div>
                     </div>
                   );
@@ -6899,7 +6978,7 @@ const fetchTemplates = async () => {
                       className="alias-container-select"
                     >
                       <option value="">Select ReplyTo</option>
-                        <option value={user.email}>{user.email}</option>
+                      <option value={user.email}>{user.email}</option>
                       {replyOptions.map((reply) => (
                         <option key={reply._id} value={reply.replyTo}>
                           {reply.replyTo}

@@ -2515,7 +2515,7 @@ router.get('/template/check', async (req, res) => {
     return res.status(400).json({ message: "Template name and user ID required" });
   }
 
-  const template = await Template.findOne({ temname, userId });
+  const template = await Template.findOne({ temname, user: userId });
   if (template) {
     return res.json(template);
   } else {

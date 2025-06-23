@@ -212,6 +212,23 @@ const ExcelModal = ({ isOpen, onClose, previewContent = [], bgColor }) => {
     reader.readAsArrayBuffer(file);
   };
   const sendscheduleExcel = async () => {
+     if (!previewContent || previewContent.length === 0) {
+          toast.warning("No preview content available.");
+          return;
+        }
+        const hasInvalidLink = previewContent.some((item, index) => {
+          if (item.type === "multi-image" || item.type === "multi-image-card") {
+            return !item.link1?.trim() || !item.link2?.trim();
+          } else if (item.type === "video-icon" || item.type === "button") {
+            return !item.link?.trim();
+          }
+          return false;
+        });
+        
+        if (hasInvalidLink) {
+          toast.warning("Please fill in all required link(Url) fields in the template.");
+          return;
+        }
     if (excelData.length === 0) {
       toast.error("Please upload an Excel file first.");
       return;
@@ -231,10 +248,7 @@ const ExcelModal = ({ isOpen, onClose, previewContent = [], bgColor }) => {
 
     const emailIndex = headers.indexOf("Email");
 
-    if (!previewContent || previewContent.length === 0) {
-      toast.error("No Preview Content provided.");
-      return;
-    }
+   
 
     if (!previewtext) {
       toast.error("Please Enter Previewtext.");
@@ -333,6 +347,23 @@ const ExcelModal = ({ isOpen, onClose, previewContent = [], bgColor }) => {
     }
   };
   const handleSend = async () => {
+     if (!previewContent || previewContent.length === 0) {
+          toast.warning("No preview content available.");
+          return;
+        }
+        const hasInvalidLink = previewContent.some((item, index) => {
+          if (item.type === "multi-image" || item.type === "multi-image-card") {
+            return !item.link1?.trim() || !item.link2?.trim();
+          } else if (item.type === "video-icon" || item.type === "button") {
+            return !item.link?.trim();
+          }
+          return false;
+        });
+        
+        if (hasInvalidLink) {
+          toast.warning("Please fill in all required link(Url) fields in the template.");
+          return;
+        }
   if (excelData.length === 0 || excelData.length <= 1) {
     toast.error("Please upload a valid Excel file.");
     return;
@@ -344,10 +375,7 @@ const ExcelModal = ({ isOpen, onClose, previewContent = [], bgColor }) => {
     return;
   }
 
-  if (!previewContent || previewContent.length === 0) {
-    toast.error("No Preview Content provided.");
-    return;
-  }
+
 
   if (!previewtext || !aliasName || !message || !replyTo) {
     toast.error("Please fill all required fields: Previewtext, Alias Name, ReplyTo, Subject.");

@@ -54,7 +54,9 @@ const ReadReport = () => {
     if (!userId || !campaignId) return;
 
     const fetchClickData = () => {
-      axios.get(`${apiConfig.baseURL}/api/stud/get-click?userId=${userId}&campaignId=${campaignId}`
+      axios
+        .get(
+          `${apiConfig.baseURL}/api/stud/get-click?userId=${userId}&campaignId=${campaignId}`
         )
         .then((response) => {
           setUrlCount(response.data.count);
@@ -174,6 +176,21 @@ const ReadReport = () => {
   const handleClosefailModal = () => {
     setShowfailModal(false);
   };
+
+  // ...inside ReadReport component...
+
+  const handleRefreshAndCloseModals = (e) => {
+    if (e) e.stopPropagation(); // Prevent parent onClick
+    setShowModal(false);
+    setShowallClickModal(false);
+    setShowdelModal(false);
+    setShowfailModal(false);
+    setShowClickModal(false);
+    setShowOverallClickModal(false);
+    setShowAnalysisModal(false);
+    window.location.reload();
+  };
+  
   // Calculate Read Rate Percentage
   const readRate =
     campaigns.sendcount > 0
@@ -212,58 +229,147 @@ const ReadReport = () => {
       </nav>
       <div className="readreport-main">
         <div className="Report-heading-2">
-          <div style={{ display: "flex", gap: "10px",marginBottom:"25px" }}>
-          <p className="Report-heading-head">Email Template</p>        
-          <button
+          <div style={{ display: "flex", gap: "10px", marginBottom: "25px" }}>
+            <p className="Report-heading-head">Email Template</p>
+            <button
               onClick={() => window.location.reload()}
               className="refresh-btn"
               title="Refresh Page"
             >
               <FaSyncAlt />
             </button>
-            </div>
+          </div>
           <p className="send-date">{campaigns.senddate}</p>
           <hr />
         </div>
 
-       <div className="email-report-dashboard">
-  <div className="report-card read" onClick={fetchEmailDetails}>
-    <div className="report-icon">
-      <i className="fas fa-envelope-open-text"></i>
-    </div>
-    <p className="report-title">Read Rate</p>
-    <p className="report-value">{readRate} %</p>
-    <span className="report-badge  read">{openCount} Opened mail</span>
-  </div>
+        <div className="email-report-dashboard">
+          <div className="report-card read" onClick={fetchEmailDetails}>
+            <div className="report-icon">
+              <i className="fas fa-envelope-open-text"></i>
+            </div>
+            <p className="report-title">Read Rate</p>
+            <p className="report-value">{readRate} %</p>
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <div>
+                <span className="report-badge read">
+                  {openCount} Opened mail
+                </span>
+              </div>
+              <button
+                onClick={handleRefreshAndCloseModals}
+                className="refresh-btn-card"
+                title="Refresh Page"
+              >
+                <FaSyncAlt />
+              </button>
+            </div>
+            <div>
+              <p style={{ fontSize: "13px", color: "#888", marginTop: "15px" }}>
+                For real-time update, click refresh
+              </p>
+            </div>
+          </div>
 
-  <div className="report-card click" onClick={fetchEmailClickDetails}>
-    <div className="report-icon">
-      <i className="fas fa-mouse-pointer"></i>
-    </div>
-    <p className="report-title">Click Rate</p>
-    <p className="report-value">{clickRate} %</p>
-    <span className="report-badge click">{urlCount} Clicked mail</span>
-  </div>
+          <div className="report-card click" onClick={fetchEmailClickDetails}>
+            <div className="report-icon">
+              <i className="fas fa-mouse-pointer"></i>
+            </div>
+            <p className="report-title">Click Rate</p>
+            <p className="report-value">{clickRate} %</p>
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <span className="report-badge click">
+                {urlCount} Clicked mail
+              </span>
+              <button
+                onClick={handleRefreshAndCloseModals}
+                className="refresh-btn-card"
+                title="Refresh Page"
+              >
+                <FaSyncAlt />
+              </button>
+            </div>
+            <div>
+              <p style={{ fontSize: "13px", color: "#888", marginTop: "15px" }}>
+                For real-time update, click refresh
+              </p>
+            </div>
+          </div>
 
-  <div className="report-card delivered" onClick={handleopendelmodal}>
-    <div className="report-icon">
-      <i className="fas fa-paper-plane"></i>
-    </div>
-    <p className="report-title">Delivered Rate</p>
-    <p className="report-value">{deliveredRate} %</p>
-    <span className="report-badge deliver">{campaigns.sendcount} Delivered</span>
-  </div>
+          <div className="report-card delivered" onClick={handleopendelmodal}>
+            <div className="report-icon">
+              <i className="fas fa-paper-plane"></i>
+            </div>
+            <p className="report-title">Delivered Rate</p>
+            <p className="report-value">{deliveredRate} %</p>
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <span className="report-badge deliver">
+                {campaigns.sendcount} Delivered
+              </span>
+              <button
+                onClick={handleRefreshAndCloseModals}
+                className="refresh-btn-card"
+                title="Refresh Page"
+              >
+                <FaSyncAlt />
+              </button>
+            </div>
+            <div>
+              <p style={{ fontSize: "13px", color: "#888", marginTop: "15px" }}>
+                For real-time update, click refresh
+              </p>
+            </div>
+          </div>
 
-  <div className="report-card failed" onClick={handleopenfailmodal}>
-    <div className="report-icon">
-      <i className="fas fa-times-circle"></i>
-    </div>
-    <p className="report-title">Failed Rate</p>
-    <p className="report-value">{failedRate} %</p>
-    <span className="report-badge failed">{campaigns.failedcount} Failed</span>
-  </div>
-</div>
-
+          <div className="report-card failed" onClick={handleopenfailmodal}>
+            <div className="report-icon">
+              <i className="fas fa-times-circle"></i>
+            </div>
+            <p className="report-title">Failed Rate</p>
+            <p className="report-value">{failedRate} %</p>
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <span className="report-badge failed">
+                {campaigns.failedcount} Failed
+              </span>
+              <button
+                onClick={handleRefreshAndCloseModals}
+                className="refresh-btn-card"
+                title="Refresh Page"
+              >
+                <FaSyncAlt />
+              </button>
+            </div>
+            <div>
+              <p style={{ fontSize: "13px", color: "#888", marginTop: "15px" }}>
+                For real-time update, click refresh
+              </p>
+            </div>
+          </div>
+        </div>
       </div>
       {/* Modal for Delevered Details */}
       {showdelModal && (
@@ -274,26 +380,26 @@ const ReadReport = () => {
           >
             <h2 className="modal-heading-read">Delivered Rate</h2>
             <div className="modal-content-read-table">
-            <table className="email-table-read">
-              <thead>
-                <tr>
-                  <th>Mail ID-{campaigns.sendcount}</th>
-                </tr>
-              </thead>
-              <tbody>
-                {campaigns.sentEmails && campaigns.sentEmails.length > 0 ? (
-                  campaigns.sentEmails.map((email, index) => (
-                    <tr key={index}>
-                      <td>{email}</td>
-                    </tr>
-                  ))
-                ) : (
+              <table className="email-table-read">
+                <thead>
                   <tr>
-                    <td colSpan="2">No Data Available</td>
+                    <th>Mail ID-{campaigns.sendcount}</th>
                   </tr>
-                )}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {campaigns.sentEmails && campaigns.sentEmails.length > 0 ? (
+                    campaigns.sentEmails.map((email, index) => (
+                      <tr key={index}>
+                        <td>{email}</td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan="2">No Data Available</td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
             </div>
             <button className="target-modal-read" onClick={handleClosedelModal}>
               Close
@@ -313,35 +419,35 @@ const ReadReport = () => {
           >
             <h2 className="modal-heading-read">Clicked Rate</h2>
             <div className="modal-content-read-table">
-            <table className="email-table-read">
-              <thead>
-                <tr>
-                  <th>Links</th>
-                  <th>Action</th>
-                </tr>
-              </thead>
-              <tbody>
-                {clickedUrls.length > 0 ? (
-                  clickedUrls.map((urlData, index) => (
-                    <tr key={index}>
-                      <td>{urlData.clickedUrl}</td>
-                      <td>
-                        <button
-                          className="resend-btn"
-                          onClick={() => handleViewClick(urlData.clicks)}
-                        >
-                          View
-                        </button>
-                      </td>
-                    </tr>
-                  ))
-                ) : (
+              <table className="email-table-read">
+                <thead>
                   <tr>
-                    <td colSpan="2">No Clicks Recorded</td>
+                    <th>Links</th>
+                    <th>Action</th>
                   </tr>
-                )}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {clickedUrls.length > 0 ? (
+                    clickedUrls.map((urlData, index) => (
+                      <tr key={index}>
+                        <td>{urlData.clickedUrl}</td>
+                        <td>
+                          <button
+                            className="resend-btn"
+                            onClick={() => handleViewClick(urlData.clicks)}
+                          >
+                            View
+                          </button>
+                        </td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan="2">No Clicks Recorded</td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
             </div>
             <div className="overall-btn">
               <button
@@ -376,31 +482,30 @@ const ReadReport = () => {
           >
             <h2 className="modal-heading-read">Click Details</h2>
             <div className="modal-content-read-table">
-
-            <table className="email-table-read">
-              <thead>
-                <tr>
-                  <th>Mail ID</th>
-                  <th>Clicked Time</th>
-                </tr>
-              </thead>
-              <tbody>
-                {emailClickData.length > 0 ? (
-                  emailClickData.map((singleemail, index) => (
-                    <tr key={index}>
-                      <td>{singleemail.emailId}</td>
-                      <td>
-                        {new Date(singleemail.timestamp).toLocaleString()}
-                      </td>
-                    </tr>
-                  ))
-                ) : (
+              <table className="email-table-read">
+                <thead>
                   <tr>
-                    <td colSpan="2">No Data Available</td>
+                    <th>Mail ID</th>
+                    <th>Clicked Time</th>
                   </tr>
-                )}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {emailClickData.length > 0 ? (
+                    emailClickData.map((singleemail, index) => (
+                      <tr key={index}>
+                        <td>{singleemail.emailId}</td>
+                        <td>
+                          {new Date(singleemail.timestamp).toLocaleString()}
+                        </td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan="2">No Data Available</td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
             </div>
             <button
               className="target-modal-read"
@@ -434,26 +539,27 @@ const ReadReport = () => {
           >
             <h2 className="modal-heading-read">Failed Rate</h2>
             <div className="modal-content-read-table">
-            <table className="email-table-read">
-              <thead>
-                <tr>
-                  <th>Mail ID-{campaigns.failedcount}</th>
-                </tr>
-              </thead>
-              <tbody>
-                {campaigns.failedEmails && campaigns.failedEmails.length > 0 ? (
-                  campaigns.failedEmails.map((email, index) => (
-                    <tr key={index}>
-                      <td>{email}</td>
-                    </tr>
-                  ))
-                ) : (
+              <table className="email-table-read">
+                <thead>
                   <tr>
-                    <td colSpan="2">No Data Available</td>
+                    <th>Mail ID-{campaigns.failedcount}</th>
                   </tr>
-                )}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {campaigns.failedEmails &&
+                  campaigns.failedEmails.length > 0 ? (
+                    campaigns.failedEmails.map((email, index) => (
+                      <tr key={index}>
+                        <td>{email}</td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan="2">No Data Available</td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
             </div>
             <button
               className="target-modal-read"
@@ -476,30 +582,29 @@ const ReadReport = () => {
           >
             <h2 className="modal-heading-read">Read Rate</h2>
             <div className="modal-content-read-table">
-
-            <table className="email-table-read">
-              <thead>
-                <tr>
-                  <th>Mail ID</th>
-                  <th>Opened Time</th>
-                </tr>
-              </thead>
-
-              <tbody>
-                {Array.isArray(emailData) && emailData.length > 0 ? (
-                  emailData.map((email, index) => (
-                    <tr key={index}>
-                      <td>{email.emailId}</td>
-                      <td>{new Date(email.timestamp).toLocaleString()}</td>
-                    </tr>
-                  ))
-                ) : (
+              <table className="email-table-read">
+                <thead>
                   <tr>
-                    <td colSpan="3">No Data Available</td>
+                    <th>Mail ID</th>
+                    <th>Opened Time</th>
                   </tr>
-                )}
-              </tbody>
-            </table>
+                </thead>
+
+                <tbody>
+                  {Array.isArray(emailData) && emailData.length > 0 ? (
+                    emailData.map((email, index) => (
+                      <tr key={index}>
+                        <td>{email.emailId}</td>
+                        <td>{new Date(email.timestamp).toLocaleString()}</td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan="3">No Data Available</td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
             </div>
             <div className="overall-btn">
               <button
@@ -561,28 +666,27 @@ const ReadReport = () => {
           >
             <h2 className="modal-heading-read">Overall Click Details</h2>
             <div className="modal-content-read-table">
-
-            <table className="email-table-read">
-              <thead>
-                <tr>
-                  <th>Mail ID</th>
-                </tr>
-              </thead>
-
-              <tbody>
-                {Array.isArray(urlEmails) && urlEmails.length > 0 ? (
-                  urlEmails.map((email, index) => (
-                    <tr key={index}>
-                      <td>{email._id}</td> {/* Extract _id property */}
-                    </tr>
-                  ))
-                ) : (
+              <table className="email-table-read">
+                <thead>
                   <tr>
-                    <td colSpan="3">No Data Available</td>
+                    <th>Mail ID</th>
                   </tr>
-                )}
-              </tbody>
-            </table>
+                </thead>
+
+                <tbody>
+                  {Array.isArray(urlEmails) && urlEmails.length > 0 ? (
+                    urlEmails.map((email, index) => (
+                      <tr key={index}>
+                        <td>{email._id}</td> {/* Extract _id property */}
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan="3">No Data Available</td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
             </div>
             <button
               className="target-modal-read"
@@ -604,3 +708,4 @@ const ReadReport = () => {
 };
 
 export default ReadReport;
+

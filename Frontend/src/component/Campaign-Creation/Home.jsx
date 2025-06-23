@@ -729,7 +729,7 @@ const handlebirthDelete = async (templateId) => {
           navigate("/campaign"); // Mobile
         } else {
           navigate("/TemMainpage", {
-            state: { previewContenttem, bgColortem },
+            state: { previewContenttem, bgColortem , selectedTemplatepre },
           }); // PC
         }
       })
