@@ -27,38 +27,34 @@ const GroupfilesingleModal = ({ onClose }) => {
     };
 
     if (user?.id) fetchGroups();
-  }, [user]);
+  }, [user?.id]);
 
-  // Handle group selection and lazy-load students for that group
-  const handleGroupSelect = async (selectedId) => {
-    setSelectedGroupForUpload(selectedId);
-    try {
-      const { data: groupStudents } = await axios.get(
-        `${apiConfig.baseURL}/api/stud/students?groupId=${selectedId}`
+const handleGroupSelect = async (selectedId) => {
+  setSelectedGroupForUpload(selectedId);
+  try {
+    const { data: groupStudents } = await axios.get(
+      `${apiConfig.baseURL}/api/stud/groups/${selectedId}/students`
+    );
+    setStudents(groupStudents);
+    const studentInGroup = groupStudents[0];
+    if (studentInGroup) {
+      const keys = Object.keys(studentInGroup).filter(
+        (key) => !["_id", "group", "groupId", "lastSentYear", "__v"].includes(key)
       );
-
-      setStudents(groupStudents);
-      const studentInGroup = groupStudents[0];
-
-      if (studentInGroup) {
-        const keys = Object.keys(studentInGroup).filter(
-          (key) => !["_id", "group", "groupId", "lastSentYear", "__v"].includes(key)
-        );
-
-        const form = {};
-        keys.forEach((key) => (form[key] = ""));
-        setContactKeys(keys);
-        setContactForm(form);
-      } else {
-        setContactKeys([]);
-        setContactForm({});
-        toast.info("No students found in this group.");
-      }
-    } catch (err) {
-      console.error("Error fetching students:", err);
-      toast.error("Failed to load students for group.");
+      const form = {};
+      keys.forEach((key) => (form[key] = ""));
+      setContactKeys(keys);
+      setContactForm(form);
+    } else {
+      setContactKeys([]);
+      setContactForm({});
+      toast.info("No students found in this group.");
     }
-  };
+  } catch (err) {
+    console.error("Error fetching students:", err);
+    toast.error("Failed to load students for group.");
+  }
+};
 
   const handleSaveUploadedData = async () => {
     setIsLoadingsave(true);

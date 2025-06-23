@@ -198,9 +198,9 @@ router.post('/sendtestmail', async (req, res) => {
 
     const emailContent = previewContent.map((item) => {
       if (item.type === 'para') {
-        return `<div class="para" style="border-radius:${item.style.borderRadius};font-size:${item.style.fontSize};padding:10px; color:${item.style.color}; margin-top:20px; background-color:${item.style.backgroundColor}">${item.content}</div>`;
+        return `<div style="border-radius:${item.style.borderRadius};font-size:${item.style.fontSize};padding:10px; color:${item.style.color}; margin-top:20px; background-color:${item.style.backgroundColor}">${item.content}</div>`;
       } else if (item.type === 'head') {
-        return `<p class="head" style="font-size:${item.style.fontSize};border-radius:10px;margin-top:10px;padding:10px;font-weight:bold;color:${item.style.color};text-align:${item.style.textAlign};background-color:${item.style.backgroundColor}">${item.content}</p>`;
+        return `<p style="font-size:${item.style.fontSize};border-radius:10px;margin-top:10px;padding:10px;font-weight:bold;color:${item.style.color};text-align:${item.style.textAlign};background-color:${item.style.backgroundColor}">${item.content}</p>`;
       } else if (item.type === 'logo') {
         return `<div style="text-align:${item.style.textAlign};margin:10px auto !important">
         <img src="${item.src}" style="width:${item.style.width};height:${item.style.height};border-radius:${item.style.borderRadius};pointer-events:none;margin:${item.style.margin};background-color:${item.style.backgroundColor};"/>
@@ -608,105 +608,118 @@ router.post('/start-campaign', async (req, res) => {
 
     transporter = createTransporter(user);
 
-    const totalEmails = validStudents.length;
-    let processedEmails = 0;
+    // Configure delay settings (in milliseconds)
+    const DELAY_BETWEEN_EMAILS = 500; // 0.5 seconds between each email
+    const DELAY_BETWEEN_BATCHES = 2000; // 2 seconds between batches
+    const BATCH_SIZE = 10; // Number of emails to send in each batch
+
+    // Split students into batches
+    const batches = [];
     let sentEmails = [];
     let failedEmails = [...invalidEmails];
+    
+    for (let i = 0; i < validStudents.length; i += BATCH_SIZE) {
+      batches.push(validStudents.slice(i, i + BATCH_SIZE));
+    }
 
-    // Process emails sequentially with controlled rate
-    for (const student of validStudents) {
-      try {
-        // Personalize content
-        const personalizedContent = previewContent.map((item) => {
-          const personalizedItem = { ...item };
-          if (item.content) {
-            Object.entries(student).forEach(([key, value]) => {
-              const regex = new RegExp(`\\{?${key}\\}?`, "g");
-              personalizedItem.content = personalizedItem.content.replace(
-                regex,
-                value != null ? String(value).trim() : ""
-              );
-            });
+    // Process batches sequentially with delay
+    for (let batchIndex = 0; batchIndex < batches.length; batchIndex++) {
+      const batch = batches[batchIndex];
+      const batchSent = [];
+      const batchFailed = [];
+
+      // Process emails within batch sequentially with delay
+      for (const student of batch) {
+        try {
+          // Personalize content
+          const personalizedContent = previewContent.map((item) => {
+            const personalizedItem = { ...item };
+            if (item.content) {
+              Object.entries(student).forEach(([key, value]) => {
+                const regex = new RegExp(`\\{?${key}\\}?`, "g");
+                personalizedItem.content = personalizedItem.content.replace(
+                  regex,
+                  value != null ? String(value).trim() : ""
+                );
+              });
+            }
+            return personalizedItem;
+          });
+
+          // Personalize subject
+          let personalizedSubject = subject;
+          Object.entries(student).forEach(([key, value]) => {
+            const regex = new RegExp(`\\{?${key}\\}?`, "g");
+            personalizedSubject = personalizedSubject.replace(
+              regex,
+              value != null ? String(value).trim() : ""
+            );
+          });
+
+          // Prepare mail options
+          const mailOptions = createMailOptions({
+            student,
+            userId,
+            campaignId,
+            subject: personalizedSubject,
+            attachments,
+            previewtext,
+            aliasName,
+            replyTo,
+            previewContent: personalizedContent,
+            bgColor,
+            userEmail: user.email
+          });
+
+          // Send with retry logic
+          await sendWithRetry(transporter, mailOptions);
+          batchSent.push(student.Email);
+          
+          // Add delay between individual emails
+          if (student !== batch[batch.length - 1]) {
+            await new Promise(resolve => setTimeout(resolve, DELAY_BETWEEN_EMAILS));
           }
-          return personalizedItem;
-        });
-
-        // Personalize subject
-        let personalizedSubject = subject;
-        Object.entries(student).forEach(([key, value]) => {
-          const regex = new RegExp(`\\{?${key}\\}?`, "g");
-          personalizedSubject = personalizedSubject.replace(
-            regex,
-            value != null ? String(value).trim() : ""
-          );
-        });
-
-        // Prepare mail options
-        const mailOptions = createMailOptions({
-          student,
-          userId,
-          campaignId,
-          subject: personalizedSubject,
-          attachments,
-          previewtext,
-          aliasName,
-          replyTo,
-          previewContent: personalizedContent,
-          bgColor,
-          userEmail: user.email
-        });
-
-        // Send with retry logic
-        await sendWithRetry(transporter, mailOptions);
-        sentEmails.push(student.Email);
-      } catch (error) {
-        console.error(`❌ Error sending to ${student.Email}:`, error);
-        failedEmails.push(student.Email);
+          
+        } catch (error) {
+          console.error(`❌ Error sending to ${student.Email}:`, error);
+          batchFailed.push(student.Email);
+        }
       }
 
-      processedEmails++;
+      // Update sent and failed emails
+      sentEmails = [...sentEmails, ...batchSent];
+      failedEmails = [...failedEmails, ...batchFailed];
 
-     // Update progress every 10 emails or when complete
-if (processedEmails % 10 === 0 || processedEmails === totalEmails) {
-  const currentStatus = processedEmails === totalEmails
-    ? failedEmails.length > 0
-      ? "Failed"  // Changed from "Partial Success" to always show "Failed" if any failures
-      : "Success"
-    : "Processing";
+      // Update progress after each batch
+      const currentProgress = Math.round(((batchIndex + 1) / batches.length) * 100);
+      await Camhistory.findByIdAndUpdate(campaignId, {
+        progress: currentProgress,
+        sendcount: sentEmails.length,
+        failedcount: failedEmails.length,
+        sentEmails,
+        failedEmails,
+        status: "Processing",
+      });
 
-  // Calculate progress based on failed percentage if there are failures
-  const currentProgress = failedEmails.length > 0
-    ? Math.round((failedEmails.length / totalEmails) * 100)
-    : Math.round((processedEmails / totalEmails) * 100);
-
-  await Camhistory.findByIdAndUpdate(campaignId, {
-    progress: currentProgress,
-    sendcount: sentEmails.length,
-    failedcount: failedEmails.length,
-    sentEmails,
-    failedEmails,
-    status: currentStatus,
-  });
-}
-// Final update
-const finalStatus = failedEmails.length > 0 ? "Failed" : "Success";
-const finalProgress = failedEmails.length > 0
-  ? Math.round((failedEmails.length / students.length) * 100)
-  : 100;
-
-await Camhistory.findByIdAndUpdate(campaignId, {
-  status: finalStatus,
-  progress: finalProgress,
-  recipients: sentEmails.join(", "),
-  sendcount: sentEmails.length,
-  failedcount: failedEmails.length,
-  sentEmails,
-  failedEmails,
-});
-
-      // Throttle email sending (1 second between emails)
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      // Add delay between batches (except after last batch)
+      if (batchIndex < batches.length - 1) {
+        await new Promise(resolve => setTimeout(resolve, DELAY_BETWEEN_BATCHES));
+      }
     }
+    // Final update after all batches are processed
+    const finalStatus = failedEmails.length > 0 ? "Failed" : "Success";
+    const finalProgress = failedEmails.length > 0
+        ? Math.round((failedEmails.length / (sentEmails.length + failedEmails.length)) * 100)
+        : 100;
+    await Camhistory.findByIdAndUpdate(campaignId, {
+      status: finalStatus,
+      progress: finalProgress,
+      recipients: sentEmails.join(", "),
+      sendcount: sentEmails.length,
+      failedcount: failedEmails.length,
+      sentEmails,
+      failedEmails,
+    });
 
     res.status(200).json({
       message: "Campaign processed successfully",
@@ -746,7 +759,7 @@ function createTransporter(user) {
     },
     pool: true,
     maxConnections: 3,
-    rateDelta: 1000, // 1 second window
+    // rateDelta: 1000, // 1 second window
     socketTimeout: 30000,
     connectionTimeout: 30000,
     tls: {
@@ -824,10 +837,6 @@ function createMailOptions({
               @media(max-width:768px) {
                 .main { width: 330px !important; }
                 .img-case { width: 330px !important; }
-
-                .para{
-                  font-size:15px !important;
-                }
                 .img-para{
                   font-size:12px !important;
                 }
@@ -1158,7 +1167,7 @@ case 'break':
         case 'head':
           return `<p class="head" style="${styleString};border-radius:10px;margin-top:10px;padding:10px;font-weight:bold;">${content}</p>`;
         case 'para':
-          return `<div class="para" style="${styleString};margin-top:20px;padding:10px;">${content}</div>`;
+          return `<div style="${styleString};margin-top:20px;padding:10px;">${content}</div>`;
         case 'button':
           return `<div style="margin:20px auto 0 auto;text-align:center;">
                   <a href = "${generateTrackingLink(link, userId, campaignId, recipientEmail)}"
@@ -1471,7 +1480,7 @@ case 'break':
         case 'head':
           return `<p class="head" style="${styleString};border-radius:10px;margin-top:10px;padding:10px;font-weight:bold;">${content}</p>`;
         case 'para':
-          return `<div class="para" style="${styleString};margin-top:20px;padding:10px;">${content}</div>`;
+          return `<div style="${styleString};margin-top:20px;padding:10px;">${content}</div>`;
         case 'button':
           return `<div style="margin:20px auto 0 auto;text-align:center;">
                   <a href = "${generateTrackingLink(link, userId, campaignId, recipientEmail)}"
@@ -1904,7 +1913,7 @@ case 'break':
         case 'head':
           return `<p class="head" style="${styleString};border-radius:10px;margin-top:10px;padding:10px;font-weight:bold;">${content}</p>`;
         case 'para':
-          return `<div class="para" style="${styleString};margin-top:20px;padding:10px;">${content}</div>`;
+          return `<div style="${styleString};margin-top:20px;padding:10px;">${content}</div>`;
         case 'button':
           return `<div style="margin:20px auto 0 auto;text-align:center;">
                   <a href = "${generateTrackingLink(link, userId, campaignId, recipientEmail)}"

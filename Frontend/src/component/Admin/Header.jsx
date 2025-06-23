@@ -1,16 +1,15 @@
 import React from 'react'
 import avatarimg from "../../Images/admin-avatar.png";
+import logo from "../../Images/emailcon_logo.png";
 function Header() {
   return (
     <div>
          {/* Header Bar */}
       <div className="header-bar">
-        <div className="brand-container">
-          <div className="brand-logo">E</div>
           <div className="brand-name">
-            Email<span style={{ color: "#f48c06" }}>con</span>
+            <img src={logo} alt="imagehomenav" className="logo_img"/>
           </div>
-        </div>
+       
 
         <div className="header-actions">
           <div className="search-bar-header">

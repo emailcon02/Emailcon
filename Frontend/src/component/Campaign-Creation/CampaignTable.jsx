@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import "./CampaignTable.css";
 import { FaArrowLeft, FaSearch,FaSync,FaTrash } from "react-icons/fa";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import apiConfig from "../../apiconfig/apiConfig";
@@ -29,6 +29,8 @@ function CampaignTable() {
       const [currentPage, setCurrentPage] = useState(1);
     
     const navigate = useNavigate();
+    const location = useLocation();
+
   
 
  // Remove this function
@@ -140,6 +142,7 @@ const totalPages = Math.ceil(filteredCampaign.length / rowsPerPage);
       toast.error("Failed to delete selected campaigns.");
     }
   };
+  
 const refreshCampaigns = async () => {
   try {
     const response = await axios.get(`${apiConfig.baseURL}/api/stud/campaigns/${user.id}`);
@@ -159,7 +162,6 @@ const refreshCampaigns = async () => {
   }
 };
 
-// In your fetchCampaigns function:
 useEffect(() => {
   const fetchCampaigns = async () => {
     if (!user?.id) {
@@ -168,19 +170,18 @@ useEffect(() => {
     }
     try {
       const response = await axios.get(`${apiConfig.baseURL}/api/stud/campaigns/${user.id}`);
-      // Sort by senddate in descending order (newest first)
+
       const sortedCampaigns = response.data.sort(
-        (a, b) => new Date(b.senddate) - new Date(a.senddate) // Changed from createdAt to senddate
+        (a, b) => new Date(b.senddate) - new Date(a.senddate)
       );
 
       const filteredCampaigns = sortedCampaigns.filter(campaign => {
         const campaignName = campaign.campaignname?.toLowerCase() || "";
-        const exclude = campaignName.includes("birthday campaign");
-        return !exclude;
+        return !campaignName.includes("birthday campaign");
       });
 
       setCampaigns(filteredCampaigns);
-      setFilteredCampaign(filteredCampaigns); // Initialize filteredCampaign with sorted data
+      setFilteredCampaign(filteredCampaigns);
     } catch (error) {
       console.error("Error fetching campaigns", {
         message: error.message,
@@ -190,9 +191,18 @@ useEffect(() => {
     }
   };
 
-  fetchCampaigns();
-  
+  const shouldRefresh = localStorage.getItem("refreshCampaigns");
+
+  if (shouldRefresh === "true") {
+    localStorage.removeItem("refreshCampaigns");
+    fetchCampaigns(); // Refresh only
+  } else {
+    fetchCampaigns(); // Initial load
+  }
+
 }, [user?.id, navigate]);
+
+
 
 
   const handleBackCampaign = () => {
@@ -304,6 +314,11 @@ useEffect(() => {
       console.error("Error updating campaign status:", error);
     }
   };
+  // Email validation function
+const isValidEmail = (email) => {
+  const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return re.test(String(email).toLowerCase());
+};
 
   const handleResend = async (campaignId) => {
     try {
@@ -320,9 +335,22 @@ useEffect(() => {
         setProcessingCampaigns((prev) => ({ ...prev, [campaignId]: false })); // Reset
         return;
       }
-  
+   // Validate and filter emails before processing
+      const validFailedEmails = campaign.failedEmails.filter(email => 
+        email && isValidEmail(email) && email !== 'missing'
+      );
+      const invalidEmails = campaign.failedEmails.filter(email => 
+        !email || !isValidEmail(email) || email === 'missing'
+      );
+
+      if (validFailedEmails.length === 0) {
+        toast.warning("No valid failed emails to resend.");
+        setProcessingCampaigns((prev) => ({ ...prev, [campaignId]: false }));
+        return;
+      }
+
       let sentEmails = [];
-      let failedEmails = [];
+      let failedEmails = [...invalidEmails]; // Start with invalid emails
       
       // If groupId is a string (e.g., "no group"), send only to failedEmails and return early
       if (!campaign.groupId || campaign.groupId === "no group") {

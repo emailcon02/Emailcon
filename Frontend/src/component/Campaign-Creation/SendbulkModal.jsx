@@ -357,34 +357,30 @@ const handleSend = async () => {
   }
 
   setIsProcessing(true);
-  navigate("/campaigntable");
-  sessionStorage.removeItem("firstVisit");
-  sessionStorage.removeItem("toggled");
-
-  let attachments = [];
 
   try {
-    if (emailData.attachments && emailData.attachments.length > 0) {
-        const formData = new FormData();
+    let attachments = [];
 
-        emailData.attachments.forEach((file) => {
-          formData.append("attachments", file);
-        });
+    // File upload logic
+    if (emailData.attachments?.length > 0) {
+      const formData = new FormData();
+      emailData.attachments.forEach((file) => {
+        formData.append("attachments", file);
+      });
 
-        const uploadResponse = await axios.post(
-          `${apiConfig.baseURL}/api/stud/uploadfile`,
-          formData,
-          { headers: { "Content-Type": "multipart/form-data" } }
-        );
+      const uploadResponse = await axios.post(
+        `${apiConfig.baseURL}/api/stud/uploadfile`,
+        formData,
+        { headers: { "Content-Type": "multipart/form-data" } }
+      );
 
-        // Structure the uploaded files with original name and URL
-        attachments = uploadResponse.data.fileUrls.map((file, index) => ({
-          originalName: emailData.attachments[index].name, // Get original file name
-          fileUrl: file, // Cloudinary URL
-        }));
-      }
+      attachments = uploadResponse.data.fileUrls.map((file, index) => ({
+        originalName: emailData.attachments[index].name,
+        fileUrl: file,
+      }));
+    }
 
-    // Get students from group
+    // Get students
     const studentsResponse = await axios.get(
       `${apiConfig.baseURL}/api/stud/groups/${selectedGroup}/students`
     );
@@ -395,8 +391,13 @@ const handleSend = async () => {
       setIsProcessing(false);
       return;
     }
-
-    // Prepare campaign data
+ // Set refresh flag and navigate AFTER all operations complete
+    localStorage.setItem("refreshCampaigns", "true");
+    sessionStorage.removeItem("firstVisit");
+    sessionStorage.removeItem("toggled");
+    
+    navigate("/campaigntable");
+    // Prepare payload
     const payload = {
       campaignname: campaign.camname,
       groupname: groups.find((group) => group._id === selectedGroup)?.name,
@@ -414,11 +415,14 @@ const handleSend = async () => {
       groupId: selectedGroup,
       students
     };
-    // Start campaign - backend will handle all email sending
+
+    // Start campaign
     await axios.post(`${apiConfig.baseURL}/api/stud/start-campaign`, payload);
-    // toast.success("📨 Campaign initiated successfully!");
+    
+   
+
   } catch (error) {
-    console.error("🔥 Campaign initiation failed:", error.response?.data || error.message);
+    console.error("Campaign initiation failed:", error);
     toast.error("Failed to start campaign.");
   } finally {
     setIsProcessing(false);

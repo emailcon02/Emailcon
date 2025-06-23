@@ -5,4 +5,4 @@ const apiconfigfrontend = {
     baseURL:"https://emailcon.in"
 };
 
-export default apiconfigfrontend;
+export default apiconfigfronten
