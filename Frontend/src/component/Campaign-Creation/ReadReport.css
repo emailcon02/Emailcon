@@ -14,6 +14,16 @@
   border-radius: 8px;
 }
 
+.refresh-btn-card{
+  background: none;
+  border: none;
+  font-size: 0.8em;
+  cursor: pointer;
+  color: #333;
+  margin-left: 8px;
+}
+
+
 .refresh-btn {
   background: none;
   border: none;
@@ -249,7 +259,7 @@
 }
 .target-modal-read {
   display: block;
-  margin: 15px auto 0;
+  /* margin: 15px auto 0; */
   padding: 8px 16px;
   background: #f48c06;
   color: white;

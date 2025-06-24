@@ -25,10 +25,10 @@ app.use(express.urlencoded({ limit: '100mb', extended: true })); // For URL-enco
 
 
 // Routes
-app.use('/stud', studentRoutes);
-app.use('/auth', authRoutes);
-app.use('/admin', adminRoutes);
-app.use("/order", createOrderRoute);
+app.use('/api/stud', studentRoutes);
+app.use('/api/auth', authRoutes);
+app.use('/api/admin', adminRoutes);
+app.use("/api/order", createOrderRoute);
 
 app.get('/', (req, res) => {
     res.json('Hello');

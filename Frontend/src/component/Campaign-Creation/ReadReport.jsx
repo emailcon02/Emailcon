@@ -54,7 +54,9 @@ const ReadReport = () => {
     if (!userId || !campaignId) return;
 
     const fetchClickData = () => {
-      axios.get(`${apiConfig.baseURL}/api/stud/get-click?userId=${userId}&campaignId=${campaignId}`
+      axios
+        .get(
+          `${apiConfig.baseURL}/api/stud/get-click?userId=${userId}&campaignId=${campaignId}`
         )
         .then((response) => {
           setUrlCount(response.data.count);
@@ -174,6 +176,21 @@ const ReadReport = () => {
   const handleClosefailModal = () => {
     setShowfailModal(false);
   };
+
+  // ...inside ReadReport component...
+
+  const handleRefreshAndCloseModals = (e) => {
+    if (e) e.stopPropagation(); // Prevent parent onClick
+    setShowModal(false);
+    setShowallClickModal(false);
+    setShowdelModal(false);
+    setShowfailModal(false);
+    setShowClickModal(false);
+    setShowOverallClickModal(false);
+    setShowAnalysisModal(false);
+    window.location.reload();
+  };
+
   // Calculate Read Rate Percentage
   const readRate =
     campaigns.sendcount > 0
@@ -233,41 +250,30 @@ const ReadReport = () => {
             </div>
             <p className="report-title">Read Rate</p>
             <p className="report-value">{readRate} %</p>
-            <div style={{ display: "flex", width: "100%", alignItems: "center" }}>
-  <div style={{ width: "50%", display: "flex", alignItems: "center" }}>
-    <span className="report-badge read">{openCount} Opened mail</span>
-  </div>
-  <div
-    style={{
-      width: "1px",
-      height: "100px",
-      background: "#e0e0e0",
-      margin: "0 30px",
-      alignSelf: "stretch",
-    }}
-  />
-  <div
-    style={{
-      width: "50%",
-      display: "flex",
-      flexDirection: "column",
-      alignItems: "center",
-    }}
-  >
-    <button
-      onClick={() => window.location.reload()}
-      className="refresh-btn"
-      title="Refresh Page"
-    >
-      <FaSyncAlt />
-    </button>
-    <span
-      style={{ fontSize: "12px", color: "#888", marginTop: "2px" }}
-    >
-      For real-time request, click refresh
-    </span>
-  </div>
-
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <div>
+                <span className="report-badge read">
+                  {openCount} Opened mail
+                </span>
+              </div>
+              <button
+                onClick={handleRefreshAndCloseModals}
+                className="refresh-btn-card"
+                title="Refresh Page"
+              >
+                <FaSyncAlt />
+              </button>
+            </div>
+            <div>
+              <p style={{ fontSize: "13px", color: "#888", marginTop: "15px" }}>
+                For real-time update, click refresh
+              </p>
             </div>
           </div>
 
@@ -277,7 +283,29 @@ const ReadReport = () => {
             </div>
             <p className="report-title">Click Rate</p>
             <p className="report-value">{clickRate} %</p>
-            <span className="report-badge click">{urlCount} Clicked mail</span>
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <span className="report-badge click">
+                {urlCount} Clicked mail
+              </span>
+              <button
+                onClick={handleRefreshAndCloseModals}
+                className="refresh-btn-card"
+                title="Refresh Page"
+              >
+                <FaSyncAlt />
+              </button>
+            </div>
+            <div>
+              <p style={{ fontSize: "13px", color: "#888", marginTop: "15px" }}>
+                For real-time update, click refresh
+              </p>
+            </div>
           </div>
 
           <div className="report-card delivered" onClick={handleopendelmodal}>
@@ -286,9 +314,29 @@ const ReadReport = () => {
             </div>
             <p className="report-title">Delivered Rate</p>
             <p className="report-value">{deliveredRate} %</p>
-            <span className="report-badge deliver">
-              {campaigns.sendcount} Delivered
-            </span>
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <span className="report-badge deliver">
+                {campaigns.sendcount} Delivered
+              </span>
+              <button
+                onClick={handleRefreshAndCloseModals}
+                className="refresh-btn-card"
+                title="Refresh Page"
+              >
+                <FaSyncAlt />
+              </button>
+            </div>
+            <div>
+              <p style={{ fontSize: "13px", color: "#888", marginTop: "15px" }}>
+                For real-time update, click refresh
+              </p>
+            </div>
           </div>
 
           <div className="report-card failed" onClick={handleopenfailmodal}>
@@ -297,9 +345,29 @@ const ReadReport = () => {
             </div>
             <p className="report-title">Failed Rate</p>
             <p className="report-value">{failedRate} %</p>
-            <span className="report-badge failed">
-              {campaigns.failedcount} Failed
-            </span>
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <span className="report-badge failed">
+                {campaigns.failedcount} Failed
+              </span>
+              <button
+                onClick={handleRefreshAndCloseModals}
+                className="refresh-btn-card"
+                title="Refresh Page"
+              >
+                <FaSyncAlt />
+              </button>
+            </div>
+            <div>
+              <p style={{ fontSize: "13px", color: "#888", marginTop: "15px" }}>
+                For real-time update, click refresh
+              </p>
+            </div>
           </div>
         </div>
       </div>
@@ -493,12 +561,27 @@ const ReadReport = () => {
                 </tbody>
               </table>
             </div>
-            <button
-              className="target-modal-read"
-              onClick={handleClosefailModal}
+            <div
+              style={{
+                display: "flex",
+                gap: "10px",
+                justifyContent: "center",
+                marginTop: "20px",
+              }}
             >
-              Close
-            </button>
+              <button
+                className="target-modal-read"
+                onClick={handleClosefailModal}
+              >
+                Close
+              </button>
+              <button
+                onClick={() => handleResend(campaign._id)}
+                className="target-modal-read"
+              >
+                Resend
+              </button>
+            </div>
             <button className="close-modal-read" onClick={handleClosefailModal}>
               x
             </button>

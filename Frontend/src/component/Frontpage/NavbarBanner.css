@@ -12,7 +12,7 @@
     border-radius:10px;
 }
 .logo_img{
-    width:160px;
+    width:220px;
 }
 .navmain{
     background: linear-gradient(to right, #fff7e8, #fad584);
@@ -46,7 +46,7 @@
 .menu {
     list-style: none;
     display: flex;
-    gap:30px;
+    gap:20px;
     align-items: center;
     
 }
