@@ -189,7 +189,7 @@ button[data-tooltip]:hover::after {
     background-color: #2f327D;
     color: white;
     border: none;
-    padding: 12px 20px;
+    padding: 12px;
     cursor: pointer;
     font-size: 15px;
     border-radius: 25px;
@@ -217,7 +217,7 @@ button[data-tooltip]:hover::after {
     color: #2f327D;
     text-align: center;
     border: none;
-    padding: 12px 20px;
+    padding: 12px;
     cursor: pointer;
     font-size: 15px;
     border-radius: 25px;

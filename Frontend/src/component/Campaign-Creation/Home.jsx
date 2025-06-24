@@ -3015,18 +3015,18 @@ const Home = () => {
                               {/* Local state for each heading */}
                               <div className="select-group-container">
                                 {/* Select Group */}
-                                <select
+                                {/* <select
                                   onChange={(e) => handleGroupChange(e, index)}
                                   value={selectedGroup[index] || ""}
                                   className="select-variable"
                                 >
-                                  {/* <option
+                                  <option
                                                          value=""
                                                          disabled
                                                          className="template-title"
                                                        >
                                                          Add Variable
-                                                       </option> */}
+                                                       </option> 
                                   <option value="" disabled>
                                     Select Group
                                   </option>
@@ -3035,7 +3035,7 @@ const Home = () => {
                                       {group.name}
                                     </option>
                                   ))}
-                                </select>
+                                </select> */}
 
                                 {/* Show fields only for the selected heading */}
                                 {selectedGroup[index] &&
@@ -3674,18 +3674,18 @@ const Home = () => {
                               {/* Local state for each heading */}
                               <div className="select-group-container">
                                 {/* Select Group */}
-                                <select
+                                {/* <select
                                   onChange={(e) => handleGroupChange(e, index)}
                                   value={selectedGroup[index] || ""}
                                   className="select-variable"
                                 >
-                                  {/* <option
+                                   <option
                                                          value=""
                                                          disabled
                                                          className="template-title"
                                                        >
                                                          Add Variable
-                                                       </option> */}
+                                                       </option> 
                                   <option value="" disabled>
                                     Select Group
                                   </option>
@@ -3694,7 +3694,7 @@ const Home = () => {
                                       {group.name}
                                     </option>
                                   ))}
-                                </select>
+                                </select> */}
 
                                 {/* Show fields only for the selected heading */}
                                 {selectedGroup[index] &&
@@ -4400,18 +4400,18 @@ const Home = () => {
                               {/* Local state for each heading */}
                               <div className="select-group-container">
                                 {/* Select Group */}
-                                <select
+                                {/* <select
                                   onChange={(e) => handleGroupChange(e, index)}
                                   value={selectedGroup[index] || ""}
                                   className="select-variable"
                                 >
-                                  {/* <option
+                                  <option
                                                          value=""
                                                          disabled
                                                          className="template-title"
                                                        >
                                                          Add Variable
-                                                       </option> */}
+                                                       </option> 
                                   <option value="" disabled>
                                     Select Group
                                   </option>
@@ -4420,7 +4420,7 @@ const Home = () => {
                                       {group.name}
                                     </option>
                                   ))}
-                                </select>
+                                </select> */}
 
                                 {/* Show fields only for the selected heading */}
                                 {selectedGroup[index] &&
@@ -4968,6 +4968,12 @@ const Home = () => {
           >
             Automation
           </button>
+           <button
+              onClick={() => setActiveTablayout(true)}
+              className="sidebar-button contact-button"
+            >
+              File Manager
+            </button>
           {/* <button
               className="sidebar-button contact-button"
               onClick={handlepayment}

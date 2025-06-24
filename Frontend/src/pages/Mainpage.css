@@ -166,10 +166,12 @@ input[type="color"]::-moz-color-swatch {
     color: rgb(14, 13, 13);
     padding: 10px;
     display: flex;
-
-    height: 75px;
     justify-content: space-between;
+    height: 75px;
     box-shadow: 0 0 5px #9d9696;
+}
+button[data-tooltip] {
+  position: relative;
 }
 
 .company-name {
@@ -211,7 +213,7 @@ button[data-tooltip]:hover::after {
     background-color: #2f327D;
     color: white;
     border: none;
-    padding: 12px 20px;
+    padding: 12px;
     cursor: pointer;
     font-size: 15px;
     border-radius: 25px;
@@ -239,7 +241,7 @@ button[data-tooltip]:hover::after {
     color: #2f327D;
     text-align: center;
     border: none;
-    padding: 12px 20px;
+    padding: 12px;
     cursor: pointer;
     font-size: 15px;
     border-radius: 25px;
@@ -2213,4 +2215,8 @@ input:checked+.slider-send:before {
         /* Slightly darker orange */
     }
     
-  } 
+  }
+
+  .tooltip-btn {
+  position: relative;
+}

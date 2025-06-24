@@ -1628,11 +1628,12 @@ if (
                 {/* <span className="nav-names">Mobile</span> */}
               </button>
 
-              <button onClick={handleSaveButton} className="navbar-button-send">
+              <button onClick={handleSaveButton} className="navbar-button-Desktop"
+                              data-tooltip="Save" // Custom tooltip using data attribute
+              >
                 <span className="Nav-icons">
                   <FaSave />
                 </span>{" "}
-                <span className="nav-names">Save</span>
               </button>
 
               <button

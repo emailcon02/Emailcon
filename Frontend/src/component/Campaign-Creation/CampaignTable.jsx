@@ -27,6 +27,8 @@ function CampaignTable() {
       const [toDate, setToDate] = useState("");
       const [rowsPerPage, setRowsPerPage] = useState(20);
       const [currentPage, setCurrentPage] = useState(1);
+      const [showDeleteAllConfirm, setShowDeleteAllConfirm] = useState(false);
+
     
     const navigate = useNavigate();
     const location = useLocation();
@@ -680,9 +682,12 @@ const isValidEmail = (email) => {
                 </div>
 
      <div style={{ display: 'flex', gap: '10px', marginBottom: '10px' }}>
-  <button onClick={handleDeleteAllSelected} className="delete-all-btn">
-    Delete All
-  </button>
+ <button
+  onClick={() => setShowDeleteAllConfirm(true)}
+  className="delete-all-btn"
+>
+  Delete All
+</button>
   <button 
     onClick={refreshCampaigns} 
     className="refresh-btn"
@@ -701,6 +706,70 @@ const isValidEmail = (email) => {
     <FaSync /> 
   </button>
 </div>
+
+
+{showDeleteAllConfirm && (
+  <div
+    style={{
+      position: "fixed",
+      top: 0,
+      left: 0,
+      width: "100%",
+      height: "100%",
+      backgroundColor: "rgba(0,0,0,0.4)",
+      display: "flex",
+      justifyContent: "center",
+      alignItems: "center",
+      zIndex: 9999,
+    }}
+  >
+    <div
+      style={{
+        backgroundColor: "#fff",
+        padding: "20px",
+        borderRadius: "8px",
+        textAlign: "center",
+        minWidth: "300px",
+        boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
+      }}
+    >
+      <h3>Delete All Selected Campaigns</h3>
+      <p>Are you sure you want to delete all selected campaigns?</p>
+      <div style={{ marginTop: "20px" }}>
+        <button
+          onClick={() => {
+            handleDeleteAllSelected();
+            setShowDeleteAllConfirm(false);
+          }}
+          style={{
+            marginRight: "10px",
+            backgroundColor: "#f48c06",
+            color: "#fff",
+            border: "none",
+            padding: "8px 16px",
+            borderRadius: "4px",
+            cursor: "pointer",
+          }}
+        >
+          OK
+        </button>
+        <button
+          onClick={() => setShowDeleteAllConfirm(false)}
+          style={{
+            backgroundColor: "#ccc",
+            border: "none",
+            padding: "8px 16px",
+            borderRadius: "4px",
+            cursor: "pointer",
+          }}
+        >
+          Cancel
+        </button>
+      </div>
+    </div>
+  </div>
+)}
+
       <div className="cam-scroll" style={{ overflowX: "auto" }}>
         <table className="cam-dashboard-table">
           <thead>
