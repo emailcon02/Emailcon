@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useCallback } from "react";
 import axios from "axios";
 import "./Readmainpage.css";
 import { ToastContainer, toast } from "react-toastify";
@@ -750,7 +750,7 @@ const Readmainpage = () => {
         },
         src1: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTjCoUtOal33JWLqals1Wq7p6GGCnr3o-lwpQ&s", // Default image source
         content1:
-          "Artificial intelligence is transforming the way we interact with technology, enabling machines to process data with efficiency.", // Default paragraph text
+          "Artificial intelligence is transforming the way we interact with technology.", // Default paragraph text
         style1: {
           color: "#000000",
           backgroundColor: "#f4f4f4",
@@ -1179,20 +1179,29 @@ const Readmainpage = () => {
       toast.warning("No preview content available.");
       return;
     }
-        const hasInvalidLink = previewContent.some((item, index) => {
-      if (item.type === "multi-image" || item.type === "multi-image-card") {
-        return !item.link1?.trim() || !item.link2?.trim();
-      } else if (item.type === "video-icon" || item.type === "button") {
-        return !item.link?.trim();
-      }
-      return false;
-    });
-    
-    if (hasInvalidLink) {
-      toast.warning("Please fill in all required link(Url) fields in the template.");
-      return;
-    }
-
+      // Check for missing links and show individual toasts
+         let hasInvalidLink = false;
+         previewContent.forEach((item, index) => {
+           if (item.type === "multi-image" || item.type === "multi-image-card") {
+             if (!item.link1?.trim()) {
+               toast.error(`Please fill in Link 1 in ${item.type}`);
+               hasInvalidLink = true;
+             }
+             if (!item.link2?.trim()) {
+               toast.error(`Please fill in Link 2 in ${item.type}`);
+               hasInvalidLink = true;
+             }
+           } else if (item.type === "video-icon" || item.type === "button") {
+             if (!item.link?.trim()) {
+               toast.error(`Please fill in the Link in ${item.type}`);
+               hasInvalidLink = true;
+             }
+           }
+         });
+     
+         if (hasInvalidLink) {
+           return; 
+         }
     setIsLoading(true);
     if (templateName && user && user.id && previewContent) {
       axios
@@ -1232,7 +1241,7 @@ const Readmainpage = () => {
       toast.error("Please ensure all fields are filled and user is valid");
     }
   };
-  const handleSaveButton = async () => {
+const handleSaveButton = useCallback(async () => {
     if (!user || !user.id) {
       toast.error("User not found. Please log in again.");
       return;
@@ -1241,18 +1250,29 @@ const Readmainpage = () => {
       toast.warning("No content to save. Please create or edit the template.");
       return;
     }
-        const hasInvalidLink = previewContent.some((item, index) => {
+
+    // Check for missing links and show individual toasts
+    let hasInvalidLink = false;
+    previewContent.forEach((item, index) => {
       if (item.type === "multi-image" || item.type === "multi-image-card") {
-        return !item.link1?.trim() || !item.link2?.trim();
+        if (!item.link1?.trim()) {
+          toast.error(`Please fill in Link 1 in ${item.type}`);
+          hasInvalidLink = true;
+        }
+        if (!item.link2?.trim()) {
+          toast.error(`Please fill in Link 2 in ${item.type}`);
+          hasInvalidLink = true;
+        }
       } else if (item.type === "video-icon" || item.type === "button") {
-        return !item.link?.trim();
+        if (!item.link?.trim()) {
+          toast.error(`Please fill in the Link in ${item.type}`);
+          hasInvalidLink = true;
+        }
       }
-      return false;
     });
-    
+
     if (hasInvalidLink) {
-      toast.warning("Please fill in all required link(Url) fields in the template.");
-      return;
+      return; // Stop if any links are invalid
     }
 
     if (!templateName || templateName.trim() === "") {
@@ -1300,26 +1320,47 @@ const Readmainpage = () => {
         { autoClose: 3000 }
       );
     }
-  };
+  }, [user, previewContent, templateName, bgColor, campaign?.camname, fetchTemplates]);
+  
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "s") {
+        e.preventDefault();
+        handleSaveButton();
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [handleSaveButton]); 
 
   const sendscheduleEmail = async () => {
     if (!previewContent || previewContent.length === 0) {
       toast.warning("No preview content available.");
       return;
     }
-        const hasInvalidLink = previewContent.some((item, index) => {
-      if (item.type === "multi-image" || item.type === "multi-image-card") {
-        return !item.link1?.trim() || !item.link2?.trim();
-      } else if (item.type === "video-icon" || item.type === "button") {
-        return !item.link?.trim();
+   // Check for missing links and show individual toasts
+      let hasInvalidLink = false;
+      previewContent.forEach((item, index) => {
+        if (item.type === "multi-image" || item.type === "multi-image-card") {
+          if (!item.link1?.trim()) {
+            toast.error(`Please fill in Link 1 in ${item.type}`);
+            hasInvalidLink = true;
+          }
+          if (!item.link2?.trim()) {
+            toast.error(`Please fill in Link 2 in ${item.type}`);
+            hasInvalidLink = true;
+          }
+        } else if (item.type === "video-icon" || item.type === "button") {
+          if (!item.link?.trim()) {
+            toast.error(`Please fill in the Link in ${item.type}`);
+            hasInvalidLink = true;
+          }
+        }
+      });
+  
+      if (hasInvalidLink) {
+        return; 
       }
-      return false;
-    });
-    
-    if (hasInvalidLink) {
-      toast.warning("Please fill in all required link(Url) fields in the template.");
-      return;
-    }
     if (
       !emailData ||
       !emails.length ||
@@ -1422,18 +1463,28 @@ const Readmainpage = () => {
       toast.warning("No preview content available.");
       return;
     }
-        const hasInvalidLink = previewContent.some((item, index) => {
+ // Check for missing links and show individual toasts
+    let hasInvalidLink = false;
+    previewContent.forEach((item, index) => {
       if (item.type === "multi-image" || item.type === "multi-image-card") {
-        return !item.link1?.trim() || !item.link2?.trim();
+        if (!item.link1?.trim()) {
+          toast.error(`Please fill in Link 1 in ${item.type}`);
+          hasInvalidLink = true;
+        }
+        if (!item.link2?.trim()) {
+          toast.error(`Please fill in Link 2 in ${item.type}`);
+          hasInvalidLink = true;
+        }
       } else if (item.type === "video-icon" || item.type === "button") {
-        return !item.link?.trim();
+        if (!item.link?.trim()) {
+          toast.error(`Please fill in the Link in ${item.type}`);
+          hasInvalidLink = true;
+        }
       }
-      return false;
     });
-    
+
     if (hasInvalidLink) {
-      toast.warning("Please fill in all required link(Url) fields in the template.");
-      return;
+      return; 
     }
     if (
       !emailData ||
@@ -1729,12 +1780,13 @@ const Readmainpage = () => {
                 {/* <span className="nav-names">Mobile</span> */}
               </button>
 
-              <button onClick={handleSaveButton} className="navbar-button-send">
-                <span className="Nav-icons">
-                  <FaSave />
-                </span>{" "}
-                <span className="nav-names">Save</span>
-              </button>
+               <button onClick={handleSaveButton} className="navbar-button-Desktop"
+                                            data-tooltip="Save" // Custom tooltip using data attribute
+                            >
+                              <span className="Nav-icons">
+                                <FaSave />
+                              </span>{" "}
+                </button>
 
               <button
                 onClick={() => setShowTemplateModal(true)}
@@ -6159,7 +6211,7 @@ const Readmainpage = () => {
                       {item.type === "para" && (
                         <>
                           <p
-                            className="border"
+                            className="border-para"
                             contentEditable
                             suppressContentEditableWarning
                             onClick={() => {
@@ -6791,7 +6843,7 @@ const Readmainpage = () => {
                             {item.type === "para" && (
                               <>
                                 <p
-                                  className="border"
+                                  className="border-para"
                                   contentEditable
                                   suppressContentEditableWarning
                                   onClick={() => {
