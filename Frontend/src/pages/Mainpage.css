@@ -1417,6 +1417,7 @@ input:checked+.slider-send:before {
  white-space: pre-line;
   word-break: break-word;
   }
+  
   .dropdown-container h4 {
     font-size: 14px;
     color: #333;
@@ -2214,3 +2215,14 @@ input:checked+.slider-send:before {
 .tooltip-btn {
   position: relative;
 }
+
+.whatsapp-preview {
+  border: 1px solid #ddd;
+  padding: 10px;
+  background: #f9f9f9;
+  line-height: 1.5;
+  white-space: normal;
+  word-break: break-word;
+  cursor: pointer;
+}
+

@@ -113,7 +113,50 @@ const Readmainpage = () => {
   const [modalVisible, setModalVisible] = useState(false);
   const [folderToDelete, setFolderToDelete] = useState(null);
   const [editorType, setEditorType] = useState(null);
-  
+  function convertToWhatsAppText(html) {
+  const tempDiv = document.createElement("div");
+  tempDiv.innerHTML = html;
+
+  const processNode = (node) => {
+    if (node.nodeType === 3) return node.textContent; // plain text
+
+    let tag = node.tagName ? node.tagName.toLowerCase() : "";
+    let result = "";
+
+    node.childNodes.forEach((child) => {
+      result += processNode(child);
+    });
+
+    // Use double newline for paragraph-like tags
+    if (["p", "div", "li", "tr"].includes(tag)) {
+      result += "\n\n";
+    } else if (tag === "br") {
+      result += "\n";
+    }
+
+    if (tag === "b" || tag === "strong") {
+      result = `*${result.trim()}*`;
+    }
+
+    if (tag === "i" || tag === "em") {
+      result = `_${result.trim()}_`;
+    }
+
+    return result;
+  };
+
+  const text = processNode(tempDiv)
+    .replace(/\n{3,}/g, "\n\n") // collapse triple+ to double newlines
+    .replace(/[ \t]+\n/g, "\n") // trim line ends
+    .trim();
+
+  return text;
+}
+
+function formatPreviewContent(message) {
+  return message; // Don't strip HTML here
+}
+
 
   const handleDelete = async () => {
     try {
@@ -1725,7 +1768,7 @@ const handleSaveButton = useCallback(async () => {
   return (
     <div>
       <div className="mobile-content">
-        <div className={`desktop-nav ${activeTablayout ? "hide-nav" : ""}`}>
+        <div className={`desktop-nav ${activeTablayout || isModalOpen ? "hide-nav" : ""}`}>
           <nav className="navbar-read">
             <div>
               <h5 className="company-name-read">
@@ -4666,60 +4709,65 @@ const handleSaveButton = useCallback(async () => {
                        </select>
                      </div>
                      
-                     {previewContent[selectedIndex].buttonType === "whatsapp" && (
-                       <div>
-                         <label>WhatsApp Number:</label>
-                         <input
-                           type="text"
-                           placeholder="Number with country code"
-                           value={previewContent[selectedIndex].whatsappNumber || ""}
-                           onChange={(e) => {
-                             const updatedNumber = e.target.value;
-                             const message = previewContent[selectedIndex].whatsappMessage || "Hello, I want to connect with you!";
+                   {previewContent[selectedIndex].buttonType === "whatsapp" && (
+                     <div className="whatsapp-message-container">
+                       <label>WhatsApp Number:</label>
+                       <input
+                         type="text"
+                         placeholder="Number with country code"
+                         value={previewContent[selectedIndex].whatsappNumber || ""}
+                         onChange={(e) => {
+                           const updatedNumber = e.target.value;
+                           const message =
+                             previewContent[selectedIndex].whatsappMessage ||
+                             "Hello, I want to connect with you!";
+                           updateContent(selectedIndex, {
+                             whatsappNumber: updatedNumber,
+                             link: `https://wa.me/${updatedNumber}?text=${encodeURIComponent(
+                               convertToWhatsAppText(message)
+                             )}`,
+                           });
+                         }}
+                       />
+                   
+                       <label>Default Message:</label>
+                       <div
+                         className="whatsapp-preview"
+                         onClick={() => {
+                           setSelectedContent(
+                             previewContent[selectedIndex].whatsappMessage ||
+                               "Hello, I want to connect with you!"
+                           );
+                           setEditorType("whatsappMessage");
+                           setIsModalOpen(true);
+                         }}
+                         dangerouslySetInnerHTML={{
+                           __html: formatPreviewContent(
+                             previewContent[selectedIndex].whatsappMessage ||
+                               "Hello, I want to connect with you!"
+                           ),
+                         }}
+                       />
+                   
+                       {isModalOpen && editorType === "whatsappMessage" && (
+                         <ParaEditorbutton
+                           isOpen={isModalOpen}
+                           content={selectedContent}
+                           onSave={(newMessage) => {
+                             const number = previewContent[selectedIndex].whatsappNumber;
                              updateContent(selectedIndex, {
-                               whatsappNumber: updatedNumber,
-                               link: `https://wa.me/${updatedNumber}?text=${encodeURIComponent(message)}`
+                               whatsappMessage: newMessage,
+                               link: `https://wa.me/${number}?text=${encodeURIComponent(
+                                 convertToWhatsAppText(newMessage)
+                               )}`,
                              });
+                             setIsModalOpen(false);
                            }}
+                           onClose={() => setIsModalOpen(false)}
                          />
-                     
-                         <label>Default Message:</label>
-                         <p
-                           className="border-para"
-                           contentEditable={false}
-                           onClick={() => {
-                             setSelectedContent(previewContent[selectedIndex].whatsappMessage || "Hello, I want to connect with you!");
-                             setEditorType("whatsappMessage");
-                             setIsModalOpen(true);
-                           }}
-                           style={{
-                             cursor: "pointer",
-                             padding: "8px",
-                             border: "1px solid #ccc",
-                             borderRadius: "4px",
-                           }}
-                           dangerouslySetInnerHTML={{
-                             __html: previewContent[selectedIndex].whatsappMessage || "Hello, I want to connect with you!",
-                           }}
-                         />
-                     
-                         {isModalOpen && editorType === "whatsappMessage" && (
-                           <ParaEditorbutton
-                             isOpen={isModalOpen}
-                             content={selectedContent}
-                             onSave={(newMessage) => {
-                               const number = previewContent[selectedIndex].whatsappNumber;
-                               updateContent(selectedIndex, {
-                                 whatsappMessage: newMessage,
-                                 link: `https://wa.me/${number}?text=${encodeURIComponent(newMessage)}`
-                               });
-                               setIsModalOpen(false);
-                             }}
-                             onClose={() => setIsModalOpen(false)}
-                           />
-                         )}
-                       </div>
-                     )}
+                       )}
+                     </div>
+                   )}
                      
                      {previewContent[selectedIndex].buttonType === "contact" && (
                        <div>

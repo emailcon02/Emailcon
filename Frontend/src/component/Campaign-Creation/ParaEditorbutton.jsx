@@ -145,6 +145,7 @@ const ParaEditorbutton = ({ isOpen, content, onSave, onClose }) => {
     menubar: true,
     zIndex: 10000, // Higher than your modal
     branding: false,
+    
     plugins: [
       'lists',
       'link',
