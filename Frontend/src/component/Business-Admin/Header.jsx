@@ -1,6 +1,6 @@
 import React, { useState,useEffect } from 'react'
 import avatarimg from "../../Images/admin-avatar.png";
-import logo from "../../Images/emailcon_logo.png";
+import logo from "../../Images/emailcon_svg_logo.svg";
 import axios from 'axios';
 import apiConfig from '../../apiconfig/apiConfig.js';
 import { useNavigate } from 'react-router-dom';
@@ -34,7 +34,7 @@ function Header() {
          {/* Header Bar */}
       <div className="header-bar">
           <div className="brand-name">
-          <img src={logo} alt="imagehomenav" className="logo_img"/>
+          <img src={logo} alt="imagehomenav" className="logo_img_admin"/>
           </div>
 
 

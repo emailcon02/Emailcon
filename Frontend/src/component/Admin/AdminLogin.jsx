@@ -6,7 +6,7 @@ import "react-toastify/dist/ReactToastify.css";
 import adminimg from "../../Images/signup-img.png";
 import axios from "axios";
 import apiConfig from "../../apiconfig/apiConfig.js";
-import logo from "../../Images/emailcon_logo.png"
+import logo from "../../Images/emailcon_svg_logo.svg"
 
 
 function AdminLogin() {
@@ -103,19 +103,19 @@ function AdminLogin() {
             className="admin-login-header"
             style={{ fontWeight: "550", color: "#2f327d" }}
           >
+            <span>
+              <img src={logo} alt="imagesignnav" className="logo_img_sign" />{" "}
+            </span>
             <div style={{ display: "flex", justifyContent: "center" }}>
-              <span>
-                <img src={logo} alt="imagesignnav" className="logo_img_sign" />{" "}
-              </span>
               <span
                 style={{
                   marginTop: "5px",
                   fontWeight: "600",
-                  fontSize: "26px",
+                  fontSize: "1.5rem",
+                  color: "#2f327d",
                 }}
-              >Adm<span style={{ color: "#f48c06" }}>in</span>
-               {" "}      
-                Log<span style={{ color: "#f48c06" }}>in</span>
+              >
+                Admin Log in to Emailcon
               </span>
             </div>
           </h2>
@@ -130,6 +130,7 @@ function AdminLogin() {
                 onChange={(e) => setEmail(e.target.value)}
                 required
                 className="admin-login-input"
+                placeholder="Enter your email"
               />
             </div>
 
@@ -143,6 +144,7 @@ function AdminLogin() {
                 onChange={(e) => setPassword(e.target.value)}
                 required
                 className="admin-login-input"
+                placeholder="Enter your password"
               />
               <span
                 className="toggle-password"

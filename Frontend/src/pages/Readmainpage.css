@@ -189,7 +189,7 @@ button[data-tooltip]:hover::after {
     background-color: #2f327D;
     color: white;
     border: none;
-    padding: 12px 20px;
+    padding: 12px;
     cursor: pointer;
     font-size: 15px;
     border-radius: 25px;
@@ -217,7 +217,7 @@ button[data-tooltip]:hover::after {
     color: #2f327D;
     text-align: center;
     border: none;
-    padding: 12px 20px;
+    padding: 12px;
     cursor: pointer;
     font-size: 15px;
     border-radius: 25px;
@@ -848,8 +848,8 @@ button[data-tooltip]:hover::after {
     display: flex;
     height: 200px !important;
     align-items: center;
-    gap: 15px;
-    padding: 8px 10px;
+    /* gap: 15px; */
+    padding: 8px 0px;
 }
 .card-image {
     width: 100% !important;
@@ -1530,6 +1530,7 @@ input:checked+.slider-send:before {
     .app-navbar {
         color: #fff;
         background-color: #faeedf;
+        padding: 15px 0px;
     }
 
     /* Style for the nav list */
@@ -1984,16 +1985,8 @@ input:checked+.slider-send:before {
   }
 
     
-@media (min-width: 768px) and (max-width: 1024px) {
-    .editor {
-        width: 32% !important;
-        padding-left:10px !important;
-    }
-
-    .preview-container {
-        width: 68% !important;
-        padding: 30px !important;
-    }
+@media (min-width: 850px) and (max-width: 1024px) {
+    
     .Mobile-nav {
         display: block !important;
     }
@@ -2021,15 +2014,15 @@ input:checked+.slider-send:before {
     }
 
     .image-item {
-        width: 120px !important;
+        width: 140px !important;
         height: auto;
         cursor: pointer;
         border-radius: 3px;
     }
 
     .text-item {
-        width: 90px;
-        height: 120px !important;
+        width: 220px;
+        height: 140px !important;
         font-size: 12px;
         padding: 0px 5px !important;
     }
@@ -2042,10 +2035,7 @@ input:checked+.slider-send:before {
         width: 95% !important;
     }
 
-    .image-text-wrapper {
-        height: 120px !important;
-        border-radius: 3px !important;
-    }
+    
 
     .editor-bg {
         width: 90%;
@@ -2074,6 +2064,11 @@ input:checked+.slider-send:before {
         /* Maximum possible z-index */
         /* Highest priority */
     }
+    .content-item {
+        padding: 3px !important;
+        width: 100% !important;
+        margin-top: 20px !important;
+    }
 
     .navbar-content {
         display: flex !important;
@@ -2098,6 +2093,420 @@ input:checked+.slider-send:before {
     }
 
     
+    .template-list {
+        top: 30% !important;
+        right: 100% !important;
+        margin-right: 5px;
+        width: 180px !important;
+    }
+
+    .navbar-button-send {
+        padding: 8px 10px;
+        font-size: 15px;
+        margin-left: 0px;
+        margin-top: 8px;
+    }
+    .image-text-wrapper {
+        display: flex;
+        justify-content: center;
+        align-content: center !important;
+
+        height: 150px !important;
+        border-radius: 3px !important;
+       
+    }
+
+    .navbar-button-sends {
+        padding: 8px 25px;
+        font-size: 15px;
+        margin-left: 0px;
+        margin-top: 8px;
+        background-color: #f3f5f6;
+        color: #2f327D;
+        text-align: center;
+        border: none;
+        padding: 12px 20px;
+        cursor: pointer;
+        font-size: 15px;
+        border-radius: 25px;
+        align-items: center;
+        transition: 0.3s;
+        position: relative;
+    }
+
+    .navbar-button {
+        padding: 8px 18px;
+        margin-bottom: 5px;
+        margin-left: 0px;
+        margin-top: 8px;
+    }
+
+    .navbar h3 {
+        font-size: 20px;
+        width: 250px !important;
+        margin:10px 0px;
+        /* text-align: center; */
+    }
+
+
+    .border {
+        max-width: 500px;
+        margin: 10px auto;
+    }
+
+
+    /* Styling for the toggle button */
+    .toggle-btn {
+        background: #2f327D;
+        /* Dark blue background */
+        color: #fff;
+        /* White icon color */
+        border: none;
+        font-size: 18px;
+        padding: 5px 8px;
+        cursor: pointer;
+        border-radius: 5px;
+        transition: background 0.3s ease, transform 0.2s ease;
+    }
+
+    .nav-edit {
+        display: flex;
+        gap: 10px;
+        flex-direction: row;
+        position: absolute;
+        top: 2%;
+        right: 3%;
+    }
+
+    .undo-btn,
+    .redo-btn {
+        padding: 10px 10px;
+        border-radius: 8px;
+        background-color: #ebeced;
+        color: #2f327D;
+    }
+
+
+    /* Hover effect */
+    .toggle-btn:hover {
+        background: #f48c06;
+        /* Orange hover effect */
+        transform: scale(1.1);
+    }
+
+    /* Active (when clicked) */
+    .toggle-btn:active {
+        background: #ff6700;
+        /* Slightly darker orange */
+    }
+    
+  } 
+
+  @media (min-width:610px) and (max-width: 850px) {
+    .Mobile-page {
+        position: relative;
+        background-color: #fff;
+        height: 100vh;
+        width: 100%;
+    }
+
+    .mobile-head {
+        font-size: 20px;
+        color: #2f327D;
+        /* letter-spacing: 2px; */
+        font-weight: 550;
+        text-align: center;
+    }
+
+    .image-item {
+        width: 120px !important;
+        height: auto;
+        cursor: pointer;
+        border-radius: 3px;
+    }
+
+    .border-btn{
+        margin-top: 20px !important;
+    }
+
+    .text-item {
+        width: 220px;
+        height: 120px !important;
+        font-size: 12px;
+        padding: 0px 5px !important;
+        background-color: #f4f4f4;
+    }
+
+    .modal {
+        z-index: 9800;
+    }
+
+    .testmail-content {
+        width: 95% !important;
+    }
+
+    .image-text-wrapper {
+        height: 120px !important;
+        border-radius: 3px !important;
+    }
+
+    .editor-bg {
+        width: 90%;
+    }
+
+    .style-item select {
+        width: 95%;
+    }
+
+    .card-image-container {
+        width: 50%;
+        margin: 0 auto;
+    }
+
+
+    .card-text {
+        font-size: 12px !important;
+        width: 95% !important;
+    }
+
+    .modal-overlay-send {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgb(0 0 0 / 87%);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 8888 !important;
+        /* Maximum possible z-index */
+        /* Highest priority */
+    }
+
+    .navbar-content {
+        display: flex !important;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        background-color: #fff;
+        z-index: 9999;
+        /* Below modal */
+        box-shadow: 0 0px 5px rgb(187, 187, 187);
+        position: absolute;
+        top: 12%;
+        right: 2%;
+        border-radius: 8px;
+        padding: 8px;
+    }
+
+
+
+    /* Navigation bar at the top */
+    .app-navbar {
+        color: #fff;
+        background-color: #faeedf;
+        padding: 15px 0px;
+    }
+
+    /* Style for the nav list */
+    .app-navbar-list {
+        display: flex;
+        list-style: none;
+        margin: 0;
+        padding: 0;
+    }
+
+    .app-navbar-item {
+        margin-right: 1em;
+    }
+
+    /* Main content area expands */
+    .app-content {
+        flex: 1;
+        padding: 1em;
+    }
+
+    /* Footer at the bottom */
+
+    .app-footer {
+        background-color: #faeedf;
+        text-align: center;
+        position: relative;
+        padding: 1.8em;
+        /* Added box shadow for depth */
+        box-shadow: 0 0px 20px rgba(223, 222, 222, 0.5);
+    }
+
+    /* Extra space for the half circle */
+    .video-btn {
+        position: absolute;
+        top: 55%;
+        left: 50%;
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        background-color: white;
+        transform: translate(-50%, -50%);
+    }
+
+
+    .multiimg {
+        height: 60% !important;
+
+    }
+
+    .multiple-img {
+        height: 80% !important;
+    }
+
+    /* Creates a small bottom half circle centered at the bottom of the footer */
+    .half-circle {
+        width: 46px;
+        /* Adjust width as needed */
+        height: 23px;
+        /* Half of the width for a proportional semi-circle */
+        background: #ffffff;
+        /* Color of the half circle */
+        border-bottom-left-radius: 30px;
+        border-bottom-right-radius: 30px;
+        position: absolute;
+        bottom: 35px;
+        /* Positions the half circle so only the curved part shows */
+        left: 50%;
+        transform: translateX(-50%);
+
+    }
+
+    .foot-button {
+        border-radius: 50%;
+        border: none;
+        outline: none;
+        background-color: #2f327D;
+        font-size: medium;
+        color: white;
+        position: absolute;
+        bottom: 38px;
+        left: 50%;
+        transform: translateX(-50%);
+
+    }
+
+    .app-content {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+    }
+
+    /* Container setup with flex column */
+    .app-container-mobile {
+        display: flex;
+        flex-direction: column;
+        min-height: 100vh;
+        overflow: hidden;
+    }
+
+    /* Container setup with flex column */
+    .app-container {
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+    }
+
+
+
+    .editor {
+        width: 90%;
+        height: 35vh !important;
+        position: sticky;
+        bottom: 0;
+        padding: 0 20px;
+    }
+
+    .preview-container {
+        height: 50vh;
+        overflow-y: auto;
+    }
+
+    .preview-card {
+        padding: 10px;
+    }
+
+    .content-tab {
+        grid-template-columns: auto auto auto auto auto auto !important;
+        margin-left: 10px;
+
+    }
+
+    .image-text-wrapper {
+        padding: 0px !important;
+        gap: 0px !important;
+        margin-top: 10px !important;
+    }
+
+    .image-text-container {
+        padding: 0px !important;
+        gap: 0px !important;
+        margin-top: 20px!important;
+    }
+
+    .content-item {
+        padding: 3px !important;
+        width: 100% !important;
+        margin-top: 20px !important;
+    }
+
+    .delete-btn {
+        margin-top: 0px;
+    }
+
+    .editor-button {
+        width: 90px;
+        height: 80px
+    }
+
+    .modal-content-file {
+        width: 80%;
+    }
+
+    .preview-container {
+        order: 1;
+        margin-top: 30px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    .tabs {
+        position: sticky;
+        top: 0;
+        z-index: 8888;
+        background-color: rgb(230, 227, 227);
+        padding-top: 10px;
+    }
+
+    .gallery-scroll-container {
+        grid-template-columns: auto auto;
+    }
+
+    .icon-containers {
+        padding: 20px 0px;
+    }
+
+    .item-1 {
+        order: 1;
+    }
+
+    .item-2 {
+        order: 2;
+    }
+
+    .navbar {
+        display: flex;
+        justify-content: space-between;
+        height: 50px;
+    }
+
     .template-list {
         top: 30% !important;
         right: 100% !important;
@@ -2137,18 +2546,52 @@ input:checked+.slider-send:before {
         margin-top: 8px;
     }
 
-    .navbar h3 {
-        font-size: 20px;
-        width: 250px !important;
-        margin:10px 0px;
-        /* text-align: center; */
+    /* .navbar-button-Desktop {
+        padding:8px 40px;
+        border-radius: 15px;
+       
+    } */
+
+    .template-preview {
+        width: 95%;
+        padding: 10px;
     }
 
+    .Layout img {
+        width: 150px !important;
+        height: 150px !important;
+        margin-top: 5px;
+    }
+
+    .navbar h3 {
+        font-size: 20px;
+        width: 300px !important;
+        margin: 0;
+        position: absolute;
+        top: 2%;
+    }
+
+    .Mobile-nav {
+        display: block !important;
+    }
+
+    .desktop-nav {
+        display: none !important;
+    }
 
     .border {
-        overflow: auto;
-        max-width: 330px;
+        max-width: 500px;
+        margin: 10px auto;
+    }
 
+    .editor {
+        width: 98% !important;
+        padding-left: 10px !important;
+    }
+
+    .preview-container {
+        width: 90% !important;
+        padding: 30px !important;
     }
 
 
@@ -2159,8 +2602,11 @@ input:checked+.slider-send:before {
         color: #fff;
         /* White icon color */
         border: none;
-        font-size: 18px;
+        font-size: 20px;
         padding: 5px 8px;
+        /* position: absolute;
+         top: 30%;
+         right: 3%; */
         cursor: pointer;
         border-radius: 5px;
         transition: background 0.3s ease, transform 0.2s ease;
@@ -2168,7 +2614,7 @@ input:checked+.slider-send:before {
 
     .nav-edit {
         display: flex;
-        gap: 0px;
+        gap: 10px;
         flex-direction: row;
         position: absolute;
         top: 2%;
@@ -2184,6 +2630,7 @@ input:checked+.slider-send:before {
     }
 
 
+
     /* Hover effect */
     .toggle-btn:hover {
         background: #f48c06;
@@ -2196,5 +2643,4 @@ input:checked+.slider-send:before {
         background: #ff6700;
         /* Slightly darker orange */
     }
-    
-  } 
+  }

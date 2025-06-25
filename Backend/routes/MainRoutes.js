@@ -1167,7 +1167,7 @@ case 'break':
         case 'head':
           return `<p class="head" style="${styleString};border-radius:10px;margin-top:10px;padding:10px;font-weight:bold;">${content}</p>`;
         case 'para':
-          return `<div style="${styleString};margin-top:20px;padding:30px;">${content}</div>`;
+          return `<div style="${styleString};margin-top:20px;padding:10px;">${content}</div>`;
         case 'button':
           return `<div style="margin:20px auto 0 auto;text-align:center;">
                   <a href = "${generateTrackingLink(link, userId, campaignId, recipientEmail)}"
@@ -1480,7 +1480,7 @@ case 'break':
         case 'head':
           return `<p class="head" style="${styleString};border-radius:10px;margin-top:10px;padding:10px;font-weight:bold;">${content}</p>`;
         case 'para':
-          return `<div style="${styleString};margin-top:20px;padding:10px;">${content}</div>`;
+          return `<div style="${styleString};margin-top:20px;padding:10px 40px;">${content}</div>`;
         case 'button':
           return `<div style="margin:20px auto 0 auto;text-align:center;">
                   <a href = "${generateTrackingLink(link, userId, campaignId, recipientEmail)}"
@@ -1913,7 +1913,7 @@ case 'break':
         case 'head':
           return `<p class="head" style="${styleString};border-radius:10px;margin-top:10px;padding:10px;font-weight:bold;">${content}</p>`;
         case 'para':
-          return `<div style="${styleString};margin-top:20px;padding:10px;">${content}</div>`;
+          return `<div style="${styleString};margin-top:20px;padding:10px 40px;">${content}</div>`;
         case 'button':
           return `<div style="margin:20px auto 0 auto;text-align:center;">
                   <a href = "${generateTrackingLink(link, userId, campaignId, recipientEmail)}"
@@ -2508,6 +2508,42 @@ router.post('/campaign', async (req, res) => {
     });
   }
 });
+router.get('/template/check', async (req, res) => {
+  const { temname, userId } = req.query;
+
+  if (!temname || !userId) {
+    return res.status(400).json({ message: "Template name and user ID required" });
+  }
+
+  const template = await Template.findOne({ temname, user: userId });
+  if (template) {
+    return res.json(template);
+  } else {
+    return res.json(null);
+  }
+});
+router.put('/template/:id', async (req, res) => {
+  const { id } = req.params;
+  const { previewContent, bgColor, camname } = req.body;
+
+  try {
+    const updated = await Template.findByIdAndUpdate(
+      id,
+      { previewContent, bgColor, camname, updatedAt: new Date() },
+      { new: true }
+    );
+
+    if (!updated) {
+      return res.status(404).json({ message: "Template not found" });
+    }
+
+    res.json(updated);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Error updating template" });
+  }
+});
+
 //Save template
 router.post('/template', async (req, res) => {
   const {

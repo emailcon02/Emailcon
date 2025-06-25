@@ -81,6 +81,9 @@
 .footer-section p{
     line-height: 1.6;
 }
+.logo_img_footer{
+    width:150px;
+}
 
 .footer-logo {
     width: 120px;

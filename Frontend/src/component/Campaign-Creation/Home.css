@@ -9,10 +9,12 @@
   top:13px;
   right:27%;
 }
-/* .logo_img{
-  width:300px;
-  margin-left: 30px;
-} */
+
+.logo_img{
+  width:190px;
+  margin-left: 8%;
+  margin-bottom: 5px;
+}
 .upgrade-btn-home{
   cursor: pointer;
   background-color: #fde3c1;
@@ -163,10 +165,14 @@ li {
 .main-content {
   width: 82%;
   background-color: #fff2e1;
+  height: 100vh;
+}
+.campaign-button{
+  margin-top: 30px;
 }
 
 .maincontent-main {
-  margin-top: 8%;
+  margin-top: 5%;
   padding: 20px;
   display: flex;
   flex-direction: column;
@@ -322,16 +328,96 @@ li {
   display:none;
 }
 
-@media (max-width: 767px) {
+@media screen and (min-width: 0px) and (max-width: 740px) {
+  .navbars {
+    justify-content: space-between !important;
+    top: 0;
+    position: fixed;
+    height: 8% !important;
+  }
+
+  .sidebar-title {
+    padding: 15px;
+    font-size: 25px;
+  }
+
+  .profile-icon {
+    font-size: 26px !important;
+    padding: 16px !important;
+    right: 0px !important;
+  }
+
+  .profile-container {
+    right: -2px !important;
+    top: 10px !important;
+  }
+
+  .card-grid,
+  .card-grid-auto {
+    display:flex;
+    justify-content: center;
+    align-content:center;
+    flex-direction: column;
+    width: 40% !important;
+    padding: 20px !important;
+    margin-top: 30px;
+    gap:20px;
+
+    
+  }
+  
+
+  .nav-split h4 {
+    right: 5% !important;
+    width: 150px !important;
+    top: 22px !important;
+    font-size: 1.1rem !important;
+  }
+}
+
+@media screen and (min-width: 768px) and (max-width: 1024px) {
+  .navbars {
+    justify-content: space-between !important;
+    top: 0;
+    position: fixed;
+    height: 6% !important;
+  }
+
+  .sidebar-title {
+    padding: 15px;
+    font-size: 25px;
+  }
+
+  .profile-icon {
+    font-size: 30px !important;
+    /* padding: 14px !important; */
+    right: 2px !important;
+  }
+
+  .profile-container {
+    right: 5px !important;
+    top: 12px !important;
+  }
+
+  .nav-split h4 {
+    right: 5% !important;
+    width: 150px !important;
+    top: 20px !important;
+    font-size: 1.4rem !important;
+  }
+}
+
+@media (max-width:1024px) {
   .sidebar {
     display: none;
   }
 
   .logo_img-mobile{
-    width:150px;
-    height:45px;
-    margin-top: 15px;
-    display:block;
+    width: 140px;
+    height: 45px;
+    margin-top: 18px;
+    display: block;
+    margin-left: 14px;
   }
   .logo_img-mobile img{
     width:100%;
@@ -351,8 +437,8 @@ li {
   }
 
   .card-grid,.card-grid-auto {
-    flex-direction: column;
-    width: 50%;
+    /* flex-direction: column; */
+    width: 40%;
     padding: 20px !important;
     margin-top: 30px;
 
@@ -394,39 +480,11 @@ li {
  
   }
 
-
-
   .desktop-content {
     display: block !important;
   }
 
-  .navbars {
-    justify-content: space-between !important;
-    top: 0;
-    position: fixed;
-    height: 8% !important;
-  }
-
-  .sidebar-title {
-    padding: 15px;
-    font-size: 25px;
-  }
-
-  .profile-icon {
-    font-size: 26px !important;
-    padding: 16px !important;
-    right: 0px !important;
-  }
-  .profile-container {
-    right: -2px !important;
-    top: 10px !important;
-  }
-  .nav-split h4 {
-    right: 5% !important;
-    width: 180px !important;
-    top:20px !important;
-    font-size: 1.1rem !important;
-  }
+  
   .sidebar-container {
     display: flex;
     height: 100vh;
@@ -1114,6 +1172,13 @@ li {
     /* vertical scroll if content overflows */
   }
 
+  .logo_img{
+    width: 250px;
+    /* margin-top: 18px;
+    display: block;
+    margin-left: 14px; */
+  }
+
   .modal-content-automation {
     background: #fffcfc;
     padding: 2%;
@@ -1218,44 +1283,3 @@ li {
   cursor: pointer;
 }
 
-@media (min-width: 768px) and (max-width: 1024px) {
-
-  .card-grid {
-    padding: 20px;
-  }
-
-  .cards {
-    width: 130px;
-    height: 130px;
-  }
-
- .navbars{
-  height: 12% !important;
-}
-
-  .nav-split h4 {
-    right: 10%;
-    font-size: 1.8rem;
-  }
-  .sidebar-button{
-    margin-top: 20px;
-  }
-
-  .profile-container {
-    right: 1%; 
-  }
-  .profile-avatar{
-    width: 40px;
-    height: 40px;
-  }
- 
-
-  .card-grid-auto {
-    display: flex;
-    gap: 40px;
-    flex-wrap: wrap;
-    width: 400px;
-
-}
-  
-}

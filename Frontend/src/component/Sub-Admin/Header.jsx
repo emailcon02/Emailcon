@@ -3,7 +3,7 @@ import avatarimg from "../../Images/admin-avatar.png";
 import axios from 'axios';
 import apiConfig from '../../apiconfig/apiConfig.js';
 import { useNavigate } from 'react-router-dom';
-import logo from "../../Images/emailcon_logo.png"
+import logo from "../../Images/emailcon_svg_logo.svg"
 function Header() {
     const [user, setUser] = useState({});
     const adminuserId = localStorage.getItem("adminuserId");
@@ -34,7 +34,7 @@ function Header() {
          {/* Header Bar */}
       <div className="header-bar">
           <div className="brand-name">
-              <img src={logo} alt="imagehomenav" className="logo_img"/>
+              <img src={logo} alt="imagehomenav" className="logo_img_admin"/>
           </div>
         
 

@@ -11,6 +11,9 @@
 .userstatus.failed {
   color: red;
 }
+.logo_img_admin {
+  width: 180px
+}
 .send-btn {
   background:#2f327d;
   color: #fff;

@@ -4,7 +4,7 @@ import { faArrowRight } from "@fortawesome/free-solid-svg-icons";
 import "./NavbarBanner.css";
 import { useNavigate } from "react-router-dom";
 import BannerImg from "../../Images/banner.png";
-import logo from "../../Images/emailcon_logo.png"
+import logo from "../../Images/emailcon_svg_logo.svg"
 
 const NavbarBanner = ({ onOpenModal }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -45,7 +45,7 @@ const NavbarBanner = ({ onOpenModal }) => {
       <div className="navmain">
         <div className={`navbarfront${isSticky ? "sticky" : ""}`}>
           <div className="navbar-container">
-            <img src={logo} alt="imagehomenav" className="logo_img"/>
+            <img src={logo} alt="imagehomenav" className="logo_img_nav"/>
             {/* Hamburger Toggle */}
             <div
               className="menu-toggle"

@@ -26,6 +26,11 @@
   right: 10px;
 }
 
+.logo_img_sign{
+   width:350px !important;
+   margin-bottom: 20px;
+}
+
 .login-cover {
   display: flex;
   background: #fff;
@@ -97,7 +102,7 @@
   margin: 10px 0px;
   color: gray;
   font-weight: 550;
-  background-color: #fff;
+  /* background-color: #fff; */
   text-align: center;
 }
 
@@ -136,6 +141,11 @@
   .login-container {
     padding: 1.5rem;
     background-color: #faeedf;
+  }
+
+  .logo_img_sign {
+    width:280px !important;
+    margin-bottom: 20px;
   }
 
   .login-header {
@@ -447,4 +457,25 @@
   transform: translateY(-50%);
   cursor: pointer;
   color: #2f327d;
+}
+
+@media (min-width: 768px) and (max-width: 1024px) {
+  .login-aside {
+    display: none;
+  }
+
+  .login-container {
+    width: 100%;
+    background-color: #faeedf;
+  }
+  .input-container-login{
+       width:98%;
+       margin: 10px auto !important;
+       padding:1rem;
+  }
+  .form-content-login label{
+    margin: 0px 0px 10px 2%!important;
+    font-size: 18px !important;
+  }
+
 }

@@ -7,7 +7,7 @@ import "react-toastify/dist/ReactToastify.css";
 import sign from "../../Images/ex1.png";
 import axios from "axios";
 import apiConfig from "../../apiconfig/apiConfig";
-import logo from "../../Images/emailcon_logo.png";
+import logo from "../../Images/emailcon_svg_logo.svg";
 
 function Signup() {
   const [email, setEmail] = useState("");
@@ -89,12 +89,12 @@ function Signup() {
         </div>
         <div className="signup-container">
           <h2 className="signup-header">
-            <div style={{display:"flex",justifyContent:"center"}}>
-            <span>
+          <span>
               <img src={logo} alt="imagesignnav" className="logo_img_sign" />{" "}
             </span>
+            <div>
             <span style={{marginTop:"5px",fontWeight:"600",fontSize:"26px"}}>
-              Sign<span style={{ color: "#f48c06" }}>up</span>
+              Signup in to Emailcon
             </span>
             </div>
           </h2>

@@ -251,6 +251,23 @@ const SendbulkModal = ({ isOpen, onClose, previewContent = [], bgColor }) => {
 
 
   const sendscheduleBulk = async () => {
+       if (!previewContent || previewContent.length === 0) {
+      toast.warning("No preview content available.");
+      return;
+    }
+    const hasInvalidLink = previewContent.some((item, index) => {
+      if (item.type === "multi-image" || item.type === "multi-image-card") {
+        return !item.link1?.trim() || !item.link2?.trim();
+      } else if (item.type === "video-icon" || item.type === "button") {
+        return !item.link?.trim();
+      }
+      return false;
+    });
+    
+    if (hasInvalidLink) {
+      toast.warning("Please fill in all required link(Url) fields in the template.");
+      return;
+    }
     if (!selectedGroup || !message || !previewtext || !aliasName || !replyTo) {
       toast.warning(
         "Please ensure all field are filled"
@@ -258,10 +275,7 @@ const SendbulkModal = ({ isOpen, onClose, previewContent = [], bgColor }) => {
       return;
     }
 
-    if (!previewContent || previewContent.length === 0) {
-      toast.warning("No preview content available.");
-      return;
-    }
+ 
     if (!scheduledTime) {
       toast.error("Please Select Date And Time");
       return;
@@ -346,15 +360,28 @@ const SendbulkModal = ({ isOpen, onClose, previewContent = [], bgColor }) => {
   };
 
 const handleSend = async () => {
+  if (!previewContent || previewContent.length === 0) {
+      toast.warning("No preview content available.");
+      return;
+    }
+    const hasInvalidLink = previewContent.some((item, index) => {
+      if (item.type === "multi-image" || item.type === "multi-image-card") {
+        return !item.link1?.trim() || !item.link2?.trim();
+      } else if (item.type === "video-icon" || item.type === "button") {
+        return !item.link?.trim();
+      }
+      return false;
+    });
+    
+    if (hasInvalidLink) {
+      toast.warning("Please fill in all required link(Url) fields in the template.");
+      return;
+    }
   if (!selectedGroup || !message || !previewtext || !aliasName || !replyTo) {
     toast.warning("Please ensure all fields are selected.");
     return;
   }
 
-  if (!previewContent || previewContent.length === 0) {
-    toast.warning("No preview content available.");
-    return;
-  }
 
   setIsProcessing(true);
 

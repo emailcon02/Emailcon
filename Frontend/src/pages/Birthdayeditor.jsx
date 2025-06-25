@@ -3,7 +3,7 @@ import axios from "axios";
 import "./Mainpage.css";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { FaBars, FaTimes } from "react-icons/fa";
+import { FaBars, FaFileExport, FaTimes } from "react-icons/fa";
 import { FiEdit } from "react-icons/fi"; // Importing icons
 
 import {
@@ -117,10 +117,10 @@ const Birthdayeditor = () => {
           prev.filter((f) => f.name !== folderToDelete.name)
         );
         toast.success("Deleted Successfully");
-        setTimeout(()=>{
-        setModalVisible(false);
-        setFolderToDelete(null);
-        },2000)
+        setTimeout(() => {
+          setModalVisible(false);
+          setFolderToDelete(null);
+        }, 2000);
       } else {
         toast.error("Failed to delete folder.");
       }
@@ -174,55 +174,54 @@ const Birthdayeditor = () => {
     }
   };
   const uploadImagefile = async () => {
-   const input = document.createElement("input");
-   input.type = "file";
-   input.accept = "image/*";
-   input.multiple = true;
- 
-   input.onchange = async (e) => {
-     const files = Array.from(e.target.files);
-     if (files.length > 10) {
-       toast.error("Maximum 10 files allowed.");
-       return;
-     }
- 
-     const formData = new FormData();
-     for (const file of files) {
-       formData.append("image", file); // append each file under same key
-     }
-     formData.append("userId", user.id);
-     formData.append("folderName", currentFolder || "Sample");
- 
-     try {
-       const uploadRes = await axios.post(
-         `${apiConfig.baseURL}/api/stud/upload`,
-         formData,
-         { headers: { "Content-Type": "multipart/form-data" } }
-       );
- 
-       const imageUrls = uploadRes?.data?.imageUrls || [];
- 
-       // ✅ Save all images to DB
-       await Promise.all(
-         imageUrls.map((imageUrl) =>
-           axios.post(`${apiConfig.baseURL}/api/stud/save-image`, {
-             userId: user.id,
-             imageUrl,
-             folderName: currentFolder || "Sample"
-           })
-         )
-       );
-       fetchImages(); 
-     } catch (err) {
-       console.error(err);
-       toast.error("Upload failed");
-     }
-   };
- 
-   input.click();
- };
+    const input = document.createElement("input");
+    input.type = "file";
+    input.accept = "image/*";
+    input.multiple = true;
 
-  
+    input.onchange = async (e) => {
+      const files = Array.from(e.target.files);
+      if (files.length > 10) {
+        toast.error("Maximum 10 files allowed.");
+        return;
+      }
+
+      const formData = new FormData();
+      for (const file of files) {
+        formData.append("image", file); // append each file under same key
+      }
+      formData.append("userId", user.id);
+      formData.append("folderName", currentFolder || "Sample");
+
+      try {
+        const uploadRes = await axios.post(
+          `${apiConfig.baseURL}/api/stud/upload`,
+          formData,
+          { headers: { "Content-Type": "multipart/form-data" } }
+        );
+
+        const imageUrls = uploadRes?.data?.imageUrls || [];
+
+        // ✅ Save all images to DB
+        await Promise.all(
+          imageUrls.map((imageUrl) =>
+            axios.post(`${apiConfig.baseURL}/api/stud/save-image`, {
+              userId: user.id,
+              imageUrl,
+              folderName: currentFolder || "Sample",
+            })
+          )
+        );
+        fetchImages();
+      } catch (err) {
+        console.error(err);
+        toast.error("Upload failed");
+      }
+    };
+
+    input.click();
+  };
+
   const fetchImages = async () => {
     try {
       const res = await axios.get(
@@ -539,24 +538,23 @@ const Birthdayeditor = () => {
     };
   }, []);
 
+  // Fetch groups and students only
   useEffect(() => {
-    const fetchAllStudentData = async () => {
+    const fetchGroupsAndStudents = async () => {
       if (!user?.id) {
-        console.warn("User ID is missing. Skipping data fetch.");
+        console.warn("User ID is missing. Skipping groups/students fetch.");
         return;
       }
 
       try {
-        const [groupsRes, studentsRes, templatesRes] = await Promise.all([
+        const [groupsRes, studentsRes] = await Promise.all([
           axios.get(`${apiConfig.baseURL}/api/stud/groups/${user.id}`),
           axios.get(`${apiConfig.baseURL}/api/stud/students`),
-          axios.get(`${apiConfig.baseURL}/api/stud/templates/${user.id}`),
         ]);
         setGroups(groupsRes.data);
         setStudents(studentsRes.data);
-        setTemplates(templatesRes.data);
       } catch (error) {
-        console.error("Error fetching student dashboard data:", {
+        console.error("Error fetching groups/students:", {
           message: error.message,
           stack: error.stack,
           response: error.response?.data,
@@ -564,8 +562,36 @@ const Birthdayeditor = () => {
       }
     };
 
-    fetchAllStudentData();
+    fetchGroupsAndStudents();
   }, [user?.id]);
+
+  useEffect(() => {
+    if (!user?.id) {
+      console.warn("User ID is missing. Skipping template fetch.");
+      return;
+    }
+    fetchTemplates();
+  }, [user?.id]);
+
+  const fetchTemplates = async () => {
+    if (!user?.id) {
+      console.warn("User ID is missing. Skipping template fetch.");
+      return;
+    }
+
+    try {
+      const templatesRes = await axios.get(
+        `${apiConfig.baseURL}/api/stud/templates/${user.id}`
+      );
+      setTemplates(templatesRes.data);
+    } catch (error) {
+      console.error("Error fetching templates:", {
+        message: error.message,
+        stack: error.stack,
+        response: error.response?.data,
+      });
+    }
+  };
 
   useEffect(() => {
     const handleResize = () => {
@@ -1049,15 +1075,15 @@ const Birthdayeditor = () => {
     setPreviewContent(updated);
   };
 
-   const handleItemClick = (index) => {
+  const handleItemClick = (index) => {
     setSelectedIndex(index); // Set the selected index when an item is clicked
     // Scroll to style controls after a short delay to ensure rendering
     setTimeout(() => {
-      const styleControlsElement = document.querySelector('.style-controls');
+      const styleControlsElement = document.querySelector(".style-controls");
       if (styleControlsElement) {
-        styleControlsElement.scrollIntoView({ 
-          behavior: 'smooth', 
-          block: 'center' 
+        styleControlsElement.scrollIntoView({
+          behavior: "smooth",
+          block: "center",
         });
       }
     }, 100);
@@ -1100,7 +1126,7 @@ const Birthdayeditor = () => {
     }
   };
 
-  const handleSaveButton = () => {
+  const handleSaveasButton = () => {
     if (!user || !user.id) {
       toast.error("Please ensure the user is valid");
       return; // Stop further execution if user is invalid
@@ -1112,26 +1138,39 @@ const Birthdayeditor = () => {
       toast.warning("No preview content available.");
       return;
     }
+        const hasInvalidLink = previewContent.some((item, index) => {
+      if (item.type === "multi-image" || item.type === "multi-image-card") {
+        return !item.link1?.trim() || !item.link2?.trim();
+      } else if (item.type === "video-icon" || item.type === "button") {
+        return !item.link?.trim();
+      }
+      return false;
+    });
+    
+    if (hasInvalidLink) {
+      toast.warning("Please fill in all required link(Url) fields in the template.");
+      return;
+    }
 
     setIsLoading(true);
     if (templateName && user && user.id && previewContent) {
       axios
-        .post(`${apiConfig.baseURL}/api/stud/birthtemplate`, {
+        .post(`${apiConfig.baseURL}/api/stud/template`, {
           temname: templateName,
-          camname: `${campaign.camname} Birthday Campaign`,
           userId: user.id,
           previewContent,
           bgColor,
+          camname: campaign.camname,
         })
         .then((res) => {
           console.log("Template saved successfully:", res.data);
           toast.success("Template Saved Successfully");
-          navigate("/home");
           setTimeout(() => {
             setShowTemplateModal(false);
             setTemplateName("");
             setIsLoading(false);
           }, 2000);
+          fetchTemplates(); // Refresh templates after saving
         })
         .catch((error) => {
           setIsLoading(false);
@@ -1152,9 +1191,92 @@ const Birthdayeditor = () => {
       toast.error("Please ensure all fields are filled and user is valid");
     }
   };
+  const handleSaveButton = async () => {
+    if (!user || !user.id) {
+      toast.error("User not found. Please log in again.");
+      return;
+    }
+    if (!previewContent || previewContent.length === 0) {
+      toast.warning("No content to save. Please create or edit the template.");
+      return;
+    }
+        const hasInvalidLink = previewContent.some((item, index) => {
+      if (item.type === "multi-image" || item.type === "multi-image-card") {
+        return !item.link1?.trim() || !item.link2?.trim();
+      } else if (item.type === "video-icon" || item.type === "button") {
+        return !item.link?.trim();
+      }
+      return false;
+    });
+    
+    if (hasInvalidLink) {
+      toast.warning("Please fill in all required link(Url) fields in the template.");
+      return;
+    }
+
+    if (!templateName || templateName.trim() === "") {
+      toast.warning(
+        "Please use 'Save As' to enter a template name before saving."
+      );
+      return;
+    }
+
+    try {
+      const checkRes = await axios.get(
+        `${
+          apiConfig.baseURL
+        }/api/stud/template/check?temname=${encodeURIComponent(
+          templateName
+        )}&userId=${user.id}`
+      );
+
+      const existingTemplate = checkRes.data;
+
+      if (existingTemplate) {
+        // Update existing template
+        await axios.put(
+          `${apiConfig.baseURL}/api/stud/template/${existingTemplate._id}`,
+          {
+            previewContent,
+            bgColor,
+            camname: campaign?.camname || "",
+          }
+        );
+        toast.success("Template updated successfully.");
+      } else {
+        // Template doesn't exist, tell user to use Save As
+        toast.info(
+          "Template not found. Please use 'Save As' to save it the first time."
+        );
+      }
+
+      fetchTemplates();
+    } catch (error) {
+      setIsLoading(false);
+      toast.dismiss();
+      toast.error(
+        error?.response?.data?.message || "Failed to update template.",
+        { autoClose: 3000 }
+      );
+    }
+  };
+
   const sendscheduleEmail = async () => {
     if (!previewContent || previewContent.length === 0) {
       toast.warning("No preview content available.");
+      return;
+    }
+        const hasInvalidLink = previewContent.some((item, index) => {
+      if (item.type === "multi-image" || item.type === "multi-image-card") {
+        return !item.link1?.trim() || !item.link2?.trim();
+      } else if (item.type === "video-icon" || item.type === "button") {
+        return !item.link?.trim();
+      }
+      return false;
+    });
+    
+    if (hasInvalidLink) {
+      toast.warning("Please fill in all required link(Url) fields in the template.");
       return;
     }
     if (
@@ -1182,7 +1304,7 @@ const Birthdayeditor = () => {
         emailData.attachments.forEach((file) => {
           formData.append("attachments", file);
         });
-          formData.append("userId",user.id)
+        formData.append("userId", user.id);
 
         const uploadResponse = await axios.post(
           `${apiConfig.baseURL}/api/stud/uploadfile`,
@@ -1243,6 +1365,19 @@ const Birthdayeditor = () => {
       toast.warning("No preview content available.");
       return;
     }
+        const hasInvalidLink = previewContent.some((item, index) => {
+      if (item.type === "multi-image" || item.type === "multi-image-card") {
+        return !item.link1?.trim() || !item.link2?.trim();
+      } else if (item.type === "video-icon" || item.type === "button") {
+        return !item.link?.trim();
+      }
+      return false;
+    });
+    
+    if (hasInvalidLink) {
+      toast.warning("Please fill in all required link(Url) fields in the template.");
+      return;
+    }
     if (
       !emailData ||
       !emailData.recipient ||
@@ -1274,7 +1409,7 @@ const Birthdayeditor = () => {
         emailData.attachments.forEach((file) => {
           formData.append("attachments", file);
         });
-          formData.append("userId",user.id)
+        formData.append("userId", user.id);
 
         const uploadResponse = await axios.post(
           `${apiConfig.baseURL}/api/stud/uploadfile`,
@@ -1495,14 +1630,21 @@ const Birthdayeditor = () => {
                 {/* <span className="nav-names">Mobile</span> */}
               </button>
 
+              <button onClick={handleSaveButton} className="navbar-button-send">
+                <span className="Nav-icons">
+                  <FaSave />
+                </span>{" "}
+                <span className="nav-names">Save</span>
+              </button>
+
               <button
                 onClick={() => setShowTemplateModal(true)}
                 className="navbar-button-send"
               >
                 <span className="Nav-icons">
-                  <FaSave />
+                  <FaFileExport />
                 </span>{" "}
-                <span className="nav-names">Save</span>
+                <span className="nav-names">Save As</span>
               </button>
 
               {/* Template List - Shown below View button when isOpen is true */}
@@ -1589,6 +1731,16 @@ const Birthdayeditor = () => {
             {isNavOpen && (
               <div className="navbar-content">
                 <button
+                  onClick={handleSaveButton}
+                  className="navbar-button-send"
+                >
+                  <span className="Nav-icons">
+                    <FaSave />
+                  </span>{" "}
+                  <span className="nav-names">Save</span>
+                </button>
+
+                <button
                   onClick={() => {
                     setShowTemplateModal(true);
                     if (window.innerWidth < 768) {
@@ -1598,10 +1750,11 @@ const Birthdayeditor = () => {
                   className="navbar-button-sends"
                 >
                   <span className="Nav-icons">
-                    <FaSave />
+                    <FaFileExport />
                   </span>{" "}
-                  <span className="nav-names">Save</span>
+                  <span className="nav-names">Save As</span>
                 </button>
+
                 {/* <button
                 onClick={(e) => toggletemplate(e)}
                 className="navbar-button-send"
@@ -1878,7 +2031,7 @@ const Birthdayeditor = () => {
                           border: "none",
                           fontSize: "20px",
                           cursor: "pointer",
-                            fontWeight:"bold",
+                          fontWeight: "bold",
                         }}
                       >
                         &times;
@@ -2049,12 +2202,11 @@ const Birthdayeditor = () => {
                     )}
 
                     {/* Folder title */}
-{currentFolder && (
-  <div style={{ marginBottom: "10px" }}>
-    📂 {currentFolder}
-  </div>
-)}
-
+                    {currentFolder && (
+                      <div style={{ marginBottom: "10px" }}>
+                        📂 {currentFolder}
+                      </div>
+                    )}
 
                     {/* Images */}
                     <div className="gallery-scroll-container">
@@ -2209,14 +2361,14 @@ const Birthdayeditor = () => {
                                       })
                                     }
                                   />
-                                    <span>
-                              {parseInt(
-                                previewContent[
-                                  selectedIndex
-                                ].style.borderRadius.replace("%", "")
-                              )}
-                              %
-                            </span>
+                                  <span>
+                                    {parseInt(
+                                      previewContent[
+                                        selectedIndex
+                                      ].style.borderRadius.replace("%", "")
+                                    )}
+                                    %
+                                  </span>
                                 </>
                               )}
                               {previewContent[selectedIndex].type ===
@@ -2460,14 +2612,17 @@ const Birthdayeditor = () => {
                                           })
                                         }
                                       />
-                                        <span>
-                              {parseInt(
-                                previewContent[
-                                  selectedIndex
-                                ].buttonStyle1.borderRadius.replace("%", "")
-                              )}
-                              %
-                            </span>
+                                      <span>
+                                        {parseInt(
+                                          previewContent[
+                                            selectedIndex
+                                          ].buttonStyle1.borderRadius.replace(
+                                            "%",
+                                            ""
+                                          )
+                                        )}
+                                        %
+                                      </span>
                                     </div>
                                   )}
 
@@ -2684,14 +2839,17 @@ const Birthdayeditor = () => {
                                           })
                                         }
                                       />
-                                        <span>
-                              {parseInt(
-                                previewContent[
-                                  selectedIndex
-                                ].buttonStyle2.borderRadius.replace("%", "")
-                              )}
-                              %
-                            </span>
+                                      <span>
+                                        {parseInt(
+                                          previewContent[
+                                            selectedIndex
+                                          ].buttonStyle2.borderRadius.replace(
+                                            "%",
+                                            ""
+                                          )
+                                        )}
+                                        %
+                                      </span>
                                     </div>
                                   )}
                                 </div>
@@ -2894,14 +3052,14 @@ const Birthdayeditor = () => {
                                       })
                                     }
                                   />
-                                    <span>
-                              {parseInt(
-                                previewContent[
-                                  selectedIndex
-                                ].style.borderRadius.replace("%", "")
-                              )}
-                              %
-                            </span>
+                                  <span>
+                                    {parseInt(
+                                      previewContent[
+                                        selectedIndex
+                                      ].style.borderRadius.replace("%", "")
+                                    )}
+                                    %
+                                  </span>
                                   <label>Button Text Size:</label>
                                   <input
                                     type="range"
@@ -3075,14 +3233,17 @@ const Birthdayeditor = () => {
                                         })
                                       }
                                     />
-                                      <span>
-                              {parseInt(
-                                previewContent[
-                                  selectedIndex
-                                ].buttonStyle1.borderRadius.replace("%", "")
-                              )}
-                              %
-                            </span>
+                                    <span>
+                                      {parseInt(
+                                        previewContent[
+                                          selectedIndex
+                                        ].buttonStyle1.borderRadius.replace(
+                                          "%",
+                                          ""
+                                        )
+                                      )}
+                                      %
+                                    </span>
                                   </div>
                                   <h4>Button-2 Style</h4>
                                   <div>
@@ -3205,10 +3366,7 @@ const Birthdayeditor = () => {
                                       value={parseInt(
                                         previewContent[
                                           selectedIndex
-                                        ].style.borderRadius.replace(
-                                          "px",
-                                          ""
-                                        )
+                                        ].style.borderRadius.replace("px", "")
                                       )}
                                       onChange={(e) =>
                                         updateContent(selectedIndex, {
@@ -3220,14 +3378,17 @@ const Birthdayeditor = () => {
                                         })
                                       }
                                     />
-                                      <span>
-                              {parseInt(
-                                previewContent[
-                                  selectedIndex
-                                ].buttonStyle2.borderRadius.replace("%", "")
-                              )}
-                              %
-                            </span>
+                                    <span>
+                                      {parseInt(
+                                        previewContent[
+                                          selectedIndex
+                                        ].buttonStyle2.borderRadius.replace(
+                                          "%",
+                                          ""
+                                        )
+                                      )}
+                                      %
+                                    </span>
                                   </div>
                                 </>
                               )}
@@ -3480,14 +3641,17 @@ const Birthdayeditor = () => {
                                           })
                                         }
                                       />
-                                        <span>
-                              {parseInt(
-                                previewContent[
-                                  selectedIndex
-                                ].buttonStyle1.borderRadius.replace("%", "")
-                              )}
-                              %
-                            </span>
+                                      <span>
+                                        {parseInt(
+                                          previewContent[
+                                            selectedIndex
+                                          ].buttonStyle1.borderRadius.replace(
+                                            "%",
+                                            ""
+                                          )
+                                        )}
+                                        %
+                                      </span>
                                     </div>
                                   )}
 
@@ -3700,14 +3864,17 @@ const Birthdayeditor = () => {
                                           })
                                         }
                                       />
-                                        <span>
-                              {parseInt(
-                                previewContent[
-                                  selectedIndex
-                                ].buttonStyle2.borderRadius.replace("%", "")
-                              )}
-                              %
-                            </span>
+                                      <span>
+                                        {parseInt(
+                                          previewContent[
+                                            selectedIndex
+                                          ].buttonStyle2.borderRadius.replace(
+                                            "%",
+                                            ""
+                                          )
+                                        )}
+                                        %
+                                      </span>
                                     </div>
                                   )}
                                 </div>
@@ -3881,14 +4048,14 @@ const Birthdayeditor = () => {
                                       })
                                     }
                                   />
-                                    <span>
-                              {parseInt(
-                                previewContent[
-                                  selectedIndex
-                                ].style.borderRadius.replace("%", "")
-                              )}
-                              %
-                            </span>
+                                  <span>
+                                    {parseInt(
+                                      previewContent[
+                                        selectedIndex
+                                      ].style.borderRadius.replace("%", "")
+                                    )}
+                                    %
+                                  </span>
 
                                   <ColorPicker
                                     label="Image Background"
@@ -3970,14 +4137,14 @@ const Birthdayeditor = () => {
                                       })
                                     }
                                   />
-                                    <span>
-                              {parseInt(
-                                previewContent[
-                                  selectedIndex
-                                ].style.borderRadius.replace("%", "")
-                              )}
-                              %
-                            </span>
+                                  <span>
+                                    {parseInt(
+                                      previewContent[
+                                        selectedIndex
+                                      ].style.borderRadius.replace("%", "")
+                                    )}
+                                    %
+                                  </span>
                                   <ColorPicker
                                     label="Image Background"
                                     objectKey="style.backgroundColor"
@@ -4130,14 +4297,14 @@ const Birthdayeditor = () => {
                                       })
                                     }
                                   />
-                                    <span>
-                              {parseInt(
-                                previewContent[
-                                  selectedIndex
-                                ].style.borderRadius.replace("%", "")
-                              )}
-                              %
-                            </span>
+                                  <span>
+                                    {parseInt(
+                                      previewContent[
+                                        selectedIndex
+                                      ].style.borderRadius.replace("%", "")
+                                    )}
+                                    %
+                                  </span>
 
                                   <ColorPicker
                                     label="Image Background"
@@ -4214,7 +4381,7 @@ const Birthdayeditor = () => {
                                 })
                               }
                             />
-                              <span>
+                            <span>
                               {parseInt(
                                 previewContent[
                                   selectedIndex
@@ -4433,7 +4600,7 @@ const Birthdayeditor = () => {
                                 })
                               }
                             />
-                              <span>
+                            <span>
                               {parseInt(
                                 previewContent[
                                   selectedIndex
@@ -4475,7 +4642,7 @@ const Birthdayeditor = () => {
                             />
                           </>
                         )}
-                          {/* New Editor for Multi-Image Links and Button Styling */}
+                        {/* New Editor for Multi-Image Links and Button Styling */}
                         {previewContent[selectedIndex].type ===
                           "multi-image-card" && (
                           <div>
@@ -4703,14 +4870,14 @@ const Birthdayeditor = () => {
                                     })
                                   }
                                 />
-                                  <span>
-                              {parseInt(
-                                previewContent[
-                                  selectedIndex
-                                ].buttonStyle1.borderRadius.replace("%", "")
-                              )}
-                              %
-                            </span>
+                                <span>
+                                  {parseInt(
+                                    previewContent[
+                                      selectedIndex
+                                    ].buttonStyle1.borderRadius.replace("%", "")
+                                  )}
+                                  %
+                                </span>
                               </div>
                             )}
 
@@ -4921,14 +5088,14 @@ const Birthdayeditor = () => {
                                     })
                                   }
                                 />
-                                  <span>
-                              {parseInt(
-                                previewContent[
-                                  selectedIndex
-                                ].buttonStyle2.borderRadius.replace("%", "")
-                              )}
-                              %
-                            </span>
+                                <span>
+                                  {parseInt(
+                                    previewContent[
+                                      selectedIndex
+                                    ].buttonStyle2.borderRadius.replace("%", "")
+                                  )}
+                                  %
+                                </span>
                               </div>
                             )}
                           </div>
@@ -5111,14 +5278,14 @@ const Birthdayeditor = () => {
                                     })
                                   }
                                 />
-                                  <span>
-                              {parseInt(
-                                previewContent[
-                                  selectedIndex
-                                ].buttonStyle1.borderRadius.replace("%", "")
-                              )}
-                              %
-                            </span>
+                                <span>
+                                  {parseInt(
+                                    previewContent[
+                                      selectedIndex
+                                    ].buttonStyle1.borderRadius.replace("%", "")
+                                  )}
+                                  %
+                                </span>
                               </div>
                             )}
 
@@ -5279,14 +5446,14 @@ const Birthdayeditor = () => {
                                     })
                                   }
                                 />
-                                  <span>
-                              {parseInt(
-                                previewContent[
-                                  selectedIndex
-                                ].buttonStyle2.borderRadius.replace("%", "")
-                              )}
-                              %
-                            </span>
+                                <span>
+                                  {parseInt(
+                                    previewContent[
+                                      selectedIndex
+                                    ].buttonStyle2.borderRadius.replace("%", "")
+                                  )}
+                                  %
+                                </span>
                               </div>
                             )}
                           </div>
@@ -5415,7 +5582,7 @@ const Birthdayeditor = () => {
                                 })
                               }
                             />
-                              <span>
+                            <span>
                               {parseInt(
                                 previewContent[
                                   selectedIndex
@@ -5510,7 +5677,7 @@ const Birthdayeditor = () => {
                                 })
                               }
                             />
-                              <span>
+                            <span>
                               {parseInt(
                                 previewContent[
                                   selectedIndex
@@ -5792,7 +5959,7 @@ const Birthdayeditor = () => {
                                 })
                               }
                             />
-                              <span>
+                            <span>
                               {parseInt(
                                 previewContent[
                                   selectedIndex
@@ -5937,7 +6104,7 @@ const Birthdayeditor = () => {
                               }
                               alt="Editable"
                               className="multiimgcard"
-                             title="Upload Image 240 x 240"
+                              title="Upload Image 240 x 240"
                               style={item.style}
                               onClick={() => handleopenFiles(index, 2)}
                             />
@@ -6447,13 +6614,12 @@ const Birthdayeditor = () => {
                         >
                           <FiTrash2 />
                         </button>
-                         <button
-                                                  className="edit-desktop-btn"
-                                                  onClick={() => handleItemClickdesktop(index)}
-                                                >
-                                                  <FiEdit />
-                                </button>
-                      
+                        <button
+                          className="edit-desktop-btn"
+                          onClick={() => handleItemClickdesktop(index)}
+                        >
+                          <FiEdit />
+                        </button>
                       </div>
                     </div>
                   );
@@ -7113,7 +7279,7 @@ const Birthdayeditor = () => {
                 />
                 <button
                   className="modal-create-button"
-                  onClick={handleSaveButton}
+                  onClick={handleSaveasButton}
                   disabled={isLoading}
                 >
                   {isLoading ? (
@@ -7294,7 +7460,7 @@ const Birthdayeditor = () => {
                       className="alias-container-select"
                     >
                       <option value="">Select ReplyTo</option>
-                        <option value={user.email}>{user.email}</option>
+                      <option value={user.email}>{user.email}</option>
                       {replyOptions.map((reply) => (
                         <option key={reply._id} value={reply.replyTo}>
                           {reply.replyTo}

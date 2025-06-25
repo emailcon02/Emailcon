@@ -33,6 +33,10 @@
     margin-right: 12px;
   }
   
+  .logo_img_admin{
+     width:180px
+  }
+  
   .brand-name {
     font-weight: 800;
     font-size: 25px;
@@ -952,7 +956,7 @@
      padding: 0px 10px;
   }
   .revenue-chart-container{
-    grid-column: span 12;
+    grid-column: span 12 !important;
   }
   .performance-container {
     grid-column: span 12 !important;

@@ -176,21 +176,6 @@ const ReadReport = () => {
   const handleClosefailModal = () => {
     setShowfailModal(false);
   };
-
-  // ...inside ReadReport component...
-
-  const handleRefreshAndCloseModals = (e) => {
-    if (e) e.stopPropagation(); // Prevent parent onClick
-    setShowModal(false);
-    setShowallClickModal(false);
-    setShowdelModal(false);
-    setShowfailModal(false);
-    setShowClickModal(false);
-    setShowOverallClickModal(false);
-    setShowAnalysisModal(false);
-    window.location.reload();
-  };
-
   // Calculate Read Rate Percentage
   const readRate =
     campaigns.sendcount > 0
@@ -723,3 +708,4 @@ const ReadReport = () => {
 };
 
 export default ReadReport;
+

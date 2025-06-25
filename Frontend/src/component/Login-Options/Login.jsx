@@ -7,7 +7,7 @@ import "react-toastify/dist/ReactToastify.css";
 import apiConfig from "../../apiconfig/apiConfig.js";
 import logimg from "../../Images/mail.png";
 import { FaEye, FaEyeSlash,FaArrowLeft } from "react-icons/fa";
-import logo from "../../Images/emailcon_logo.png";
+import logo from "../../Images/emailcon_svg_logo.svg";
 
 
 
@@ -156,16 +156,16 @@ function Login() {
                       <span className="nav-names">Home</span>
             </button>
           <h2 className="login-header" style={{ color: "#2f327d" }}>
+          <span>
+              <img src={logo} alt="imagesignnav" className="logo_img_sign" /> {" "}
+          </span>
           <div style={{display:"flex",justifyContent:"center"}}>
-                      <span>
-                        <img src={logo} alt="imagesignnav" className="logo_img_sign" />{" "}
-                      </span>
                       <span style={{marginTop:"5px",fontWeight:"600",fontSize:"26px"}}>
-                        Log<span style={{ color: "#f48c06" }}>in</span>
+                        Log {" "} in to Emailcon
                       </span>
-                      </div>  
+          </div>  
               </h2>
-          <form onSubmit={handleSubmit}>
+          <form onSubmit={handleSubmit} className="form-content-login">
             <div className="labels">
               <label>Email</label>
             </div>

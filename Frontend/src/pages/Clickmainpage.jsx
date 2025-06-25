@@ -6,6 +6,7 @@ import "react-toastify/dist/ReactToastify.css";
 import {
   FaBars,
   FaCheckCircle,
+  FaFileExport,
   FaFolderOpen,
   FaTimes,
   FaTrash,
@@ -120,11 +121,11 @@ const Clickmainpage = () => {
         setFolderList((prev) =>
           prev.filter((f) => f.name !== folderToDelete.name)
         );
-     toast.success("Deleted Successfully");
-        setTimeout(()=>{
-        setModalVisible(false);
-        setFolderToDelete(null);
-        },2000)
+        toast.success("Deleted Successfully");
+        setTimeout(() => {
+          setModalVisible(false);
+          setFolderToDelete(null);
+        }, 2000);
       } else {
         toast.error("Failed to delete folder.");
       }
@@ -178,61 +179,60 @@ const Clickmainpage = () => {
     }
   };
 
- 
   const uploadImagefile = async () => {
-   const input = document.createElement("input");
-   input.type = "file";
-   input.accept = "image/*";
-   input.multiple = true;
- 
-   input.onchange = async (e) => {
-     const files = Array.from(e.target.files);
-     if (files.length > 10) {
-       toast.error("Maximum 10 files allowed.");
-       return;
-     }
- 
-     const formData = new FormData();
-     for (const file of files) {
-       formData.append("image", file); // append each file under same key
-     }
-     formData.append("userId", user.id);
-     formData.append("folderName", currentFolder || "Sample");
- 
-     try {
-       const uploadRes = await axios.post(
-         `${apiConfig.baseURL}/api/stud/upload`,
-         formData,
-         { headers: { "Content-Type": "multipart/form-data" } }
-       );
- 
-       const imageUrls = uploadRes?.data?.imageUrls || [];
- 
-       // ✅ Save all images to DB
-       await Promise.all(
-         imageUrls.map((imageUrl) =>
-           axios.post(`${apiConfig.baseURL}/api/stud/save-image`, {
-             userId: user.id,
-             imageUrl,
-             folderName: currentFolder || "Sample"
-           })
-         )
-       );
-       fetchImages(); 
-     } catch (err) {
-       console.error(err);
-       toast.error("Upload failed");
-     }
-   };
- 
-   input.click();
- };
+    const input = document.createElement("input");
+    input.type = "file";
+    input.accept = "image/*";
+    input.multiple = true;
+
+    input.onchange = async (e) => {
+      const files = Array.from(e.target.files);
+      if (files.length > 10) {
+        toast.error("Maximum 10 files allowed.");
+        return;
+      }
+
+      const formData = new FormData();
+      for (const file of files) {
+        formData.append("image", file); // append each file under same key
+      }
+      formData.append("userId", user.id);
+      formData.append("folderName", currentFolder || "Sample");
+
+      try {
+        const uploadRes = await axios.post(
+          `${apiConfig.baseURL}/api/stud/upload`,
+          formData,
+          { headers: { "Content-Type": "multipart/form-data" } }
+        );
+
+        const imageUrls = uploadRes?.data?.imageUrls || [];
+
+        // ✅ Save all images to DB
+        await Promise.all(
+          imageUrls.map((imageUrl) =>
+            axios.post(`${apiConfig.baseURL}/api/stud/save-image`, {
+              userId: user.id,
+              imageUrl,
+              folderName: currentFolder || "Sample",
+            })
+          )
+        );
+        fetchImages();
+      } catch (err) {
+        console.error(err);
+        toast.error("Upload failed");
+      }
+    };
+
+    input.click();
+  };
 
   const fetchImages = async () => {
     try {
       const res = await axios.get(
         `${apiConfig.baseURL}/api/stud/images/${user.id}`,
-        { params: { folderName: currentFolder || "Sample"} }
+        { params: { folderName: currentFolder || "Sample" } }
       );
 
       const sortedImages = res.data.sort(
@@ -585,24 +585,23 @@ const Clickmainpage = () => {
     };
   }, []);
 
+  // Fetch groups and students only
   useEffect(() => {
-    const fetchAllStudentData = async () => {
+    const fetchGroupsAndStudents = async () => {
       if (!user?.id) {
-        console.warn("User ID is missing. Skipping data fetch.");
+        console.warn("User ID is missing. Skipping groups/students fetch.");
         return;
       }
 
       try {
-        const [groupsRes, studentsRes, templatesRes] = await Promise.all([
+        const [groupsRes, studentsRes] = await Promise.all([
           axios.get(`${apiConfig.baseURL}/api/stud/groups/${user.id}`),
           axios.get(`${apiConfig.baseURL}/api/stud/students`),
-          axios.get(`${apiConfig.baseURL}/api/stud/templates/${user.id}`),
         ]);
         setGroups(groupsRes.data);
         setStudents(studentsRes.data);
-        setTemplates(templatesRes.data);
       } catch (error) {
-        console.error("Error fetching student dashboard data:", {
+        console.error("Error fetching groups/students:", {
           message: error.message,
           stack: error.stack,
           response: error.response?.data,
@@ -610,8 +609,36 @@ const Clickmainpage = () => {
       }
     };
 
-    fetchAllStudentData();
+    fetchGroupsAndStudents();
   }, [user?.id]);
+
+  useEffect(() => {
+    if (!user?.id) {
+      console.warn("User ID is missing. Skipping template fetch.");
+      return;
+    }
+    fetchTemplates();
+  }, [user?.id]);
+
+  const fetchTemplates = async () => {
+    if (!user?.id) {
+      console.warn("User ID is missing. Skipping template fetch.");
+      return;
+    }
+
+    try {
+      const templatesRes = await axios.get(
+        `${apiConfig.baseURL}/api/stud/templates/${user.id}`
+      );
+      setTemplates(templatesRes.data);
+    } catch (error) {
+      console.error("Error fetching templates:", {
+        message: error.message,
+        stack: error.stack,
+        response: error.response?.data,
+      });
+    }
+  };
 
   useEffect(() => {
     const handleResize = () => {
@@ -1099,16 +1126,16 @@ const Clickmainpage = () => {
     setSelectedIndex(index); // Set the selected index when an item is clicked
     // Scroll to style controls after a short delay to ensure rendering
     setTimeout(() => {
-      const styleControlsElement = document.querySelector('.style-controls');
+      const styleControlsElement = document.querySelector(".style-controls");
       if (styleControlsElement) {
-        styleControlsElement.scrollIntoView({ 
-          behavior: 'smooth', 
-          block: 'center' 
+        styleControlsElement.scrollIntoView({
+          behavior: "smooth",
+          block: "center",
         });
       }
     }, 100);
   };
-    const handleItemClickdesktop = (index) => {
+  const handleItemClickdesktop = (index) => {
     setSelectedIndex(index); // Set the selected index when an item is clicked
   };
 
@@ -1147,7 +1174,7 @@ const Clickmainpage = () => {
     }
   };
 
-  const handleSaveButton = () => {
+  const handleSaveasButton = () => {
     if (!user || !user.id) {
       toast.error("Please ensure the user is valid");
       return; // Stop further execution if user is invalid
@@ -1159,6 +1186,19 @@ const Clickmainpage = () => {
       toast.warning("No preview content available.");
       return;
     }
+        const hasInvalidLink = previewContent.some((item, index) => {
+      if (item.type === "multi-image" || item.type === "multi-image-card") {
+        return !item.link1?.trim() || !item.link2?.trim();
+      } else if (item.type === "video-icon" || item.type === "button") {
+        return !item.link?.trim();
+      }
+      return false;
+    });
+    
+    if (hasInvalidLink) {
+      toast.warning("Please fill in all required link(Url) fields in the template.");
+      return;
+    }
 
     setIsLoading(true);
     if (templateName && user && user.id && previewContent) {
@@ -1168,6 +1208,7 @@ const Clickmainpage = () => {
           userId: user.id,
           previewContent,
           bgColor,
+          camname: campaign.camname,
         })
         .then((res) => {
           console.log("Template saved successfully:", res.data);
@@ -1177,6 +1218,7 @@ const Clickmainpage = () => {
             setTemplateName("");
             setIsLoading(false);
           }, 2000);
+          fetchTemplates(); // Refresh templates after saving
         })
         .catch((error) => {
           setIsLoading(false);
@@ -1197,9 +1239,92 @@ const Clickmainpage = () => {
       toast.error("Please ensure all fields are filled and user is valid");
     }
   };
+  const handleSaveButton = async () => {
+    if (!user || !user.id) {
+      toast.error("User not found. Please log in again.");
+      return;
+    }
+    if (!previewContent || previewContent.length === 0) {
+      toast.warning("No content to save. Please create or edit the template.");
+      return;
+    }
+        const hasInvalidLink = previewContent.some((item, index) => {
+      if (item.type === "multi-image" || item.type === "multi-image-card") {
+        return !item.link1?.trim() || !item.link2?.trim();
+      } else if (item.type === "video-icon" || item.type === "button") {
+        return !item.link?.trim();
+      }
+      return false;
+    });
+    
+    if (hasInvalidLink) {
+      toast.warning("Please fill in all required link(Url) fields in the template.");
+      return;
+    }
+
+    if (!templateName || templateName.trim() === "") {
+      toast.warning(
+        "Please use 'Save As' to enter a template name before saving."
+      );
+      return;
+    }
+
+    try {
+      const checkRes = await axios.get(
+        `${
+          apiConfig.baseURL
+        }/api/stud/template/check?temname=${encodeURIComponent(
+          templateName
+        )}&userId=${user.id}`
+      );
+
+      const existingTemplate = checkRes.data;
+
+      if (existingTemplate) {
+        // Update existing template
+        await axios.put(
+          `${apiConfig.baseURL}/api/stud/template/${existingTemplate._id}`,
+          {
+            previewContent,
+            bgColor,
+            camname: campaign?.camname || "",
+          }
+        );
+        toast.success("Template updated successfully.");
+      } else {
+        // Template doesn't exist, tell user to use Save As
+        toast.info(
+          "Template not found. Please use 'Save As' to save it the first time."
+        );
+      }
+
+      fetchTemplates();
+    } catch (error) {
+      setIsLoading(false);
+      toast.dismiss();
+      toast.error(
+        error?.response?.data?.message || "Failed to update template.",
+        { autoClose: 3000 }
+      );
+    }
+  };
+
   const sendscheduleEmail = async () => {
     if (!previewContent || previewContent.length === 0) {
       toast.warning("No preview content available.");
+      return;
+    }
+        const hasInvalidLink = previewContent.some((item, index) => {
+      if (item.type === "multi-image" || item.type === "multi-image-card") {
+        return !item.link1?.trim() || !item.link2?.trim();
+      } else if (item.type === "video-icon" || item.type === "button") {
+        return !item.link?.trim();
+      }
+      return false;
+    });
+    
+    if (hasInvalidLink) {
+      toast.warning("Please fill in all required link(Url) fields in the template.");
       return;
     }
     if (
@@ -1227,7 +1352,7 @@ const Clickmainpage = () => {
         emailData.attachments.forEach((file) => {
           formData.append("attachments", file);
         });
-          formData.append("userId",user.id)
+        formData.append("userId", user.id);
 
         const uploadResponse = await axios.post(
           `${apiConfig.baseURL}/api/stud/uploadfile`,
@@ -1304,6 +1429,19 @@ const Clickmainpage = () => {
       toast.warning("No preview content available.");
       return;
     }
+        const hasInvalidLink = previewContent.some((item, index) => {
+      if (item.type === "multi-image" || item.type === "multi-image-card") {
+        return !item.link1?.trim() || !item.link2?.trim();
+      } else if (item.type === "video-icon" || item.type === "button") {
+        return !item.link?.trim();
+      }
+      return false;
+    });
+    
+    if (hasInvalidLink) {
+      toast.warning("Please fill in all required link(Url) fields in the template.");
+      return;
+    }
     if (
       !emailData ||
       !emails.length ||
@@ -1337,7 +1475,7 @@ const Clickmainpage = () => {
         emailData.attachments.forEach((file) => {
           formData.append("attachments", file);
         });
-          formData.append("userId",user.id)
+        formData.append("userId", user.id);
 
         const uploadResponse = await axios.post(
           `${apiConfig.baseURL}/api/stud/uploadfile`,
@@ -1596,15 +1734,21 @@ const Clickmainpage = () => {
                 </span>{" "}
                 {/* <span className="nav-names">Mobile</span> */}
               </button>
+              <button onClick={handleSaveButton} className="navbar-button-send">
+                <span className="Nav-icons">
+                  <FaSave />
+                </span>{" "}
+                <span className="nav-names">Save</span>
+              </button>
 
               <button
                 onClick={() => setShowTemplateModal(true)}
                 className="navbar-button-send"
               >
                 <span className="Nav-icons">
-                  <FaSave />
+                  <FaFileExport />
                 </span>{" "}
-                <span className="nav-names">Save</span>
+                <span className="nav-names">Save As</span>
               </button>
 
               <button
@@ -1718,6 +1862,16 @@ const Clickmainpage = () => {
             {isNavOpen && (
               <div className="navbar-content">
                 <button
+                  onClick={handleSaveButton}
+                  className="navbar-button-send"
+                >
+                  <span className="Nav-icons">
+                    <FaSave />
+                  </span>{" "}
+                  <span className="nav-names">Save</span>
+                </button>
+
+                <button
                   onClick={() => {
                     setShowTemplateModal(true);
                     if (window.innerWidth < 768) {
@@ -1727,10 +1881,11 @@ const Clickmainpage = () => {
                   className="navbar-button-sends"
                 >
                   <span className="Nav-icons">
-                    <FaSave />
+                    <FaFileExport />
                   </span>{" "}
-                  <span className="nav-names">Save</span>
+                  <span className="nav-names">Save As</span>
                 </button>
+
                 <button
                   onClick={(e) => toggletemplate(e)}
                   className="navbar-button-send"
@@ -1999,7 +2154,7 @@ const Clickmainpage = () => {
                           border: "none",
                           fontSize: "20px",
                           cursor: "pointer",
-                          fontWeight:"bold",
+                          fontWeight: "bold",
                         }}
                       >
                         &times;
@@ -2170,12 +2325,11 @@ const Clickmainpage = () => {
                     )}
 
                     {/* Folder title */}
-{currentFolder && (
-  <div style={{ marginBottom: "10px" }}>
-    📂 {currentFolder}
-  </div>
-)}
-
+                    {currentFolder && (
+                      <div style={{ marginBottom: "10px" }}>
+                        📂 {currentFolder}
+                      </div>
+                    )}
 
                     {/* Images */}
                     <div className="gallery-scroll-container">
@@ -2328,14 +2482,14 @@ const Clickmainpage = () => {
                                       })
                                     }
                                   />
-                                    <span>
-                              {parseInt(
-                                previewContent[
-                                  selectedIndex
-                                ].style.borderRadius.replace("%", "")
-                              )}
-                              %
-                            </span>
+                                  <span>
+                                    {parseInt(
+                                      previewContent[
+                                        selectedIndex
+                                      ].style.borderRadius.replace("%", "")
+                                    )}
+                                    %
+                                  </span>
                                 </>
                               )}
                               {previewContent[selectedIndex].type ===
@@ -2579,14 +2733,17 @@ const Clickmainpage = () => {
                                           })
                                         }
                                       />
-                                        <span>
-                              {parseInt(
-                                previewContent[
-                                  selectedIndex
-                                ].buttonStyle1.borderRadius.replace("%", "")
-                              )}
-                              %
-                            </span>
+                                      <span>
+                                        {parseInt(
+                                          previewContent[
+                                            selectedIndex
+                                          ].buttonStyle1.borderRadius.replace(
+                                            "%",
+                                            ""
+                                          )
+                                        )}
+                                        %
+                                      </span>
                                     </div>
                                   )}
 
@@ -2803,14 +2960,17 @@ const Clickmainpage = () => {
                                           })
                                         }
                                       />
-                                        <span>
-                              {parseInt(
-                                previewContent[
-                                  selectedIndex
-                                ].buttonStyle2.borderRadius.replace("%", "")
-                              )}
-                              %
-                            </span>
+                                      <span>
+                                        {parseInt(
+                                          previewContent[
+                                            selectedIndex
+                                          ].buttonStyle2.borderRadius.replace(
+                                            "%",
+                                            ""
+                                          )
+                                        )}
+                                        %
+                                      </span>
                                     </div>
                                   )}
                                 </div>
@@ -3013,14 +3173,14 @@ const Clickmainpage = () => {
                                       })
                                     }
                                   />
-                                    <span>
-                              {parseInt(
-                                previewContent[
-                                  selectedIndex
-                                ].style.borderRadius.replace("%", "")
-                              )}
-                              %
-                            </span>
+                                  <span>
+                                    {parseInt(
+                                      previewContent[
+                                        selectedIndex
+                                      ].style.borderRadius.replace("%", "")
+                                    )}
+                                    %
+                                  </span>
                                   <label>Button Text Size:</label>
                                   <input
                                     type="range"
@@ -3308,14 +3468,17 @@ const Clickmainpage = () => {
                                           })
                                         }
                                       />
-                                        <span>
-                              {parseInt(
-                                previewContent[
-                                  selectedIndex
-                                ].buttonStyle1.borderRadius.replace("%", "")
-                              )}
-                              %
-                            </span>
+                                      <span>
+                                        {parseInt(
+                                          previewContent[
+                                            selectedIndex
+                                          ].buttonStyle1.borderRadius.replace(
+                                            "%",
+                                            ""
+                                          )
+                                        )}
+                                        %
+                                      </span>
                                     </div>
                                   )}
 
@@ -3528,14 +3691,17 @@ const Clickmainpage = () => {
                                           })
                                         }
                                       />
-                                        <span>
-                              {parseInt(
-                                previewContent[
-                                  selectedIndex
-                                ].buttonStyle2.borderRadius.replace("%", "")
-                              )}
-                              %
-                            </span>
+                                      <span>
+                                        {parseInt(
+                                          previewContent[
+                                            selectedIndex
+                                          ].buttonStyle2.borderRadius.replace(
+                                            "%",
+                                            ""
+                                          )
+                                        )}
+                                        %
+                                      </span>
                                     </div>
                                   )}
                                 </div>
@@ -3564,14 +3730,14 @@ const Clickmainpage = () => {
                                       })
                                     }
                                   />
-                                    <span>
-                              {parseInt(
-                                previewContent[
-                                  selectedIndex
-                                ].style.borderRadius.replace("%", "")
-                              )}
-                              %
-                            </span>
+                                  <span>
+                                    {parseInt(
+                                      previewContent[
+                                        selectedIndex
+                                      ].style.borderRadius.replace("%", "")
+                                    )}
+                                    %
+                                  </span>
 
                                   <div className="editor-bg">
                                     Image Background
@@ -3729,14 +3895,17 @@ const Clickmainpage = () => {
                                         })
                                       }
                                     />
-                                      <span>
-                              {parseInt(
-                                previewContent[
-                                  selectedIndex
-                                ].buttonStyle1.borderRadius.replace("%", "")
-                              )}
-                              %
-                            </span>
+                                    <span>
+                                      {parseInt(
+                                        previewContent[
+                                          selectedIndex
+                                        ].buttonStyle1.borderRadius.replace(
+                                          "%",
+                                          ""
+                                        )
+                                      )}
+                                      %
+                                    </span>
                                   </div>
                                   <h4>Button-2 Style</h4>
                                   <div>
@@ -3873,14 +4042,17 @@ const Clickmainpage = () => {
                                         })
                                       }
                                     />
-                                      <span>
-                              {parseInt(
-                                previewContent[
-                                  selectedIndex
-                                ].buttonStyle2.borderRadius.replace("%", "")
-                              )}
-                              %
-                            </span>
+                                    <span>
+                                      {parseInt(
+                                        previewContent[
+                                          selectedIndex
+                                        ].buttonStyle2.borderRadius.replace(
+                                          "%",
+                                          ""
+                                        )
+                                      )}
+                                      %
+                                    </span>
                                   </div>
                                 </>
                               )}
@@ -4007,14 +4179,14 @@ const Clickmainpage = () => {
                                       })
                                     }
                                   />
-                                    <span>
-                              {parseInt(
-                                previewContent[
-                                  selectedIndex
-                                ].style.borderRadius.replace("%", "")
-                              )}
-                              %
-                            </span>
+                                  <span>
+                                    {parseInt(
+                                      previewContent[
+                                        selectedIndex
+                                      ].style.borderRadius.replace("%", "")
+                                    )}
+                                    %
+                                  </span>
 
                                   <ColorPicker
                                     label="Image Background"
@@ -4096,14 +4268,14 @@ const Clickmainpage = () => {
                                       })
                                     }
                                   />
-                                    <span>
-                              {parseInt(
-                                previewContent[
-                                  selectedIndex
-                                ].style.borderRadius.replace("%", "")
-                              )}
-                              %
-                            </span>
+                                  <span>
+                                    {parseInt(
+                                      previewContent[
+                                        selectedIndex
+                                      ].style.borderRadius.replace("%", "")
+                                    )}
+                                    %
+                                  </span>
                                   <ColorPicker
                                     label="Image Background"
                                     objectKey="style.backgroundColor"
@@ -4256,14 +4428,14 @@ const Clickmainpage = () => {
                                       })
                                     }
                                   />
-                                    <span>
-                              {parseInt(
-                                previewContent[
-                                  selectedIndex
-                                ].style.borderRadius.replace("%", "")
-                              )}
-                              %
-                            </span>
+                                  <span>
+                                    {parseInt(
+                                      previewContent[
+                                        selectedIndex
+                                      ].style.borderRadius.replace("%", "")
+                                    )}
+                                    %
+                                  </span>
 
                                   <ColorPicker
                                     label="Image Background"
@@ -4339,7 +4511,7 @@ const Clickmainpage = () => {
                                 })
                               }
                             />
-                              <span>
+                            <span>
                               {parseInt(
                                 previewContent[
                                   selectedIndex
@@ -4558,7 +4730,7 @@ const Clickmainpage = () => {
                                 })
                               }
                             />
-                              <span>
+                            <span>
                               {parseInt(
                                 previewContent[
                                   selectedIndex
@@ -4600,7 +4772,7 @@ const Clickmainpage = () => {
                             />
                           </>
                         )}
-                          {/* New Editor for Multi-Image Links and Button Styling */}
+                        {/* New Editor for Multi-Image Links and Button Styling */}
                         {previewContent[selectedIndex].type ===
                           "multi-image-card" && (
                           <div>
@@ -4828,14 +5000,14 @@ const Clickmainpage = () => {
                                     })
                                   }
                                 />
-                                  <span>
-                              {parseInt(
-                                previewContent[
-                                  selectedIndex
-                                ].buttonStyle1.borderRadius.replace("%", "")
-                              )}
-                              %
-                            </span>
+                                <span>
+                                  {parseInt(
+                                    previewContent[
+                                      selectedIndex
+                                    ].buttonStyle1.borderRadius.replace("%", "")
+                                  )}
+                                  %
+                                </span>
                               </div>
                             )}
 
@@ -5046,14 +5218,14 @@ const Clickmainpage = () => {
                                     })
                                   }
                                 />
-                                  <span>
-                              {parseInt(
-                                previewContent[
-                                  selectedIndex
-                                ].buttonStyle2.borderRadius.replace("%", "")
-                              )}
-                              %
-                            </span>
+                                <span>
+                                  {parseInt(
+                                    previewContent[
+                                      selectedIndex
+                                    ].buttonStyle2.borderRadius.replace("%", "")
+                                  )}
+                                  %
+                                </span>
                               </div>
                             )}
                           </div>
@@ -5236,14 +5408,14 @@ const Clickmainpage = () => {
                                     })
                                   }
                                 />
-                                  <span>
-                              {parseInt(
-                                previewContent[
-                                  selectedIndex
-                                ].buttonStyle1.borderRadius.replace("%", "")
-                              )}
-                              %
-                            </span>
+                                <span>
+                                  {parseInt(
+                                    previewContent[
+                                      selectedIndex
+                                    ].buttonStyle1.borderRadius.replace("%", "")
+                                  )}
+                                  %
+                                </span>
                               </div>
                             )}
 
@@ -5404,14 +5576,14 @@ const Clickmainpage = () => {
                                     })
                                   }
                                 />
-                                  <span>
-                              {parseInt(
-                                previewContent[
-                                  selectedIndex
-                                ].style.borderRadius.replace("%", "")
-                              )}
-                              %
-                            </span>
+                                <span>
+                                  {parseInt(
+                                    previewContent[
+                                      selectedIndex
+                                    ].style.borderRadius.replace("%", "")
+                                  )}
+                                  %
+                                </span>
                               </div>
                             )}
                           </div>
@@ -5540,7 +5712,7 @@ const Clickmainpage = () => {
                                 })
                               }
                             />
-                              <span>
+                            <span>
                               {parseInt(
                                 previewContent[
                                   selectedIndex
@@ -5635,7 +5807,7 @@ const Clickmainpage = () => {
                                 })
                               }
                             />
-                              <span>
+                            <span>
                               {parseInt(
                                 previewContent[
                                   selectedIndex
@@ -5917,7 +6089,7 @@ const Clickmainpage = () => {
                                 })
                               }
                             />
-                              <span>
+                            <span>
                               {parseInt(
                                 previewContent[
                                   selectedIndex
@@ -6025,7 +6197,7 @@ const Clickmainpage = () => {
                               }
                               alt="Editable"
                               className="multiimgcard"
-                             title="Upload Image 240 x 240"
+                              title="Upload Image 240 x 240"
                               style={item.style}
                               onClick={() => handleopenFiles(index, 1)}
                             />
@@ -6103,7 +6275,7 @@ const Clickmainpage = () => {
                               }
                               alt="Editable"
                               className="multiple-img"
-                             title="Upload Image 240 x 240"
+                              title="Upload Image 240 x 240"
                               style={item.style}
                               onClick={() => handleopenFiles(index, 1)}
                             />
@@ -6572,13 +6744,12 @@ const Clickmainpage = () => {
                         >
                           <FiTrash2 />
                         </button>
-                         <button
-                                                  className="edit-desktop-btn"
-                                                  onClick={() => handleItemClickdesktop(index)}
-                                                >
-                                                  <FiEdit />
-                                </button>
-                      
+                        <button
+                          className="edit-desktop-btn"
+                          onClick={() => handleItemClickdesktop(index)}
+                        >
+                          <FiEdit />
+                        </button>
                       </div>
                     </div>
                   );
@@ -7192,7 +7363,7 @@ const Clickmainpage = () => {
                 />
                 <button
                   className="modal-create-button"
-                  onClick={handleSaveButton}
+                  onClick={handleSaveasButton}
                   disabled={isLoading}
                 >
                   {isLoading ? (
@@ -7392,7 +7563,7 @@ const Clickmainpage = () => {
                       className="alias-container-select"
                     >
                       <option value="">Select ReplyTo</option>
-                        <option value={user.email}>{user.email}</option>
+                      <option value={user.email}>{user.email}</option>
                       {replyOptions.map((reply) => (
                         <option key={reply._id} value={reply.replyTo}>
                           {reply.replyTo}
