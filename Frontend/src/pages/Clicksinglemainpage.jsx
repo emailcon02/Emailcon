@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useCallback } from "react";
 import axios from "axios";
 import "./Readmainpage.css";
 import { ToastContainer, toast } from "react-toastify";
@@ -40,6 +40,7 @@ import ColorPicker from "./ColorPicker.jsx";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import FileManagerModal from "./FilemanagerModal.jsx";
+import ParaEditorbutton from "../component/Campaign-Creation/ParaEditorbutton.jsx";
 
 const Clicksinglemainpage = () => {
   const [activeTab, setActiveTab] = useState("button1");
@@ -112,6 +113,51 @@ const Clicksinglemainpage = () => {
   const [hoveredId, setHoveredId] = useState(null);
   const [modalVisible, setModalVisible] = useState(false);
   const [folderToDelete, setFolderToDelete] = useState(null);
+  const [editorType, setEditorType] = useState(null);
+ function convertToWhatsAppText(html) {
+  const tempDiv = document.createElement("div");
+  tempDiv.innerHTML = html;
+
+  const processNode = (node) => {
+    if (node.nodeType === 3) return node.textContent; // plain text
+
+    let tag = node.tagName ? node.tagName.toLowerCase() : "";
+    let result = "";
+
+    node.childNodes.forEach((child) => {
+      result += processNode(child);
+    });
+
+    // Use double newline for paragraph-like tags
+    if (["p", "div", "li", "tr"].includes(tag)) {
+      result += "\n\n";
+    } else if (tag === "br") {
+      result += "\n";
+    }
+
+    if (tag === "b" || tag === "strong") {
+      result = `*${result.trim()}*`;
+    }
+
+    if (tag === "i" || tag === "em") {
+      result = `_${result.trim()}_`;
+    }
+
+    return result;
+  };
+
+  const text = processNode(tempDiv)
+    .replace(/\n{3,}/g, "\n\n") // collapse triple+ to double newlines
+    .replace(/[ \t]+\n/g, "\n") // trim line ends
+    .trim();
+
+  return text;
+}
+
+function formatPreviewContent(message) {
+  return message; // Don't strip HTML here
+}
+ 
 
   const handleDelete = async () => {
     try {
@@ -730,7 +776,7 @@ const Clicksinglemainpage = () => {
         },
         src1: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTjCoUtOal33JWLqals1Wq7p6GGCnr3o-lwpQ&s", // Default image source
         content1:
-          "Artificial intelligence is transforming the way we interact with technology, enabling machines to process data with efficiency.", // Default paragraph text
+          "Artificial intelligence is transforming the way we interact with technology.", // Default paragraph text
         style1: {
           color: "#000000",
           backgroundColor: "#f4f4f4",
@@ -1065,30 +1111,33 @@ const Clicksinglemainpage = () => {
     ]);
   };
 
-  const addButton = () => {
-    saveToUndoStack(); // Save the current state before deleting
-    setPreviewContent([
-      ...previewContent,
-      {
-        type: "button",
-        content: "Click Me",
-        style: {
-          textAlign: "center",
-          padding: "12px 25px",
-          backgroundColor: "#000000",
-          color: "#ffffff",
-          width: "auto",
-          marginTop: "5px",
-          fontWeight: "bold",
-          fontSize: "15px",
-          alignItem: "center",
-          borderRadius: "5px",
-        },
-        link: "",
+ const addButton = () => {
+  saveToUndoStack();
+  setPreviewContent([
+    ...previewContent,
+    {
+      type: "button",
+      buttonType: "link", // Default to link
+      content: "Click Me",
+      whatsappNumber: "",
+      whatsappMessage: "Hello, I want to connect with you!",
+      contactNumber: "",
+      style: {
+        textAlign: "center",
+        padding: "12px 25px",
+        backgroundColor: "#000000",
+        color: "#ffffff",
+        width: "auto",
+        marginTop: "5px",
+        fontWeight: "bold",
+        fontSize: "15px",
+        alignItem: "center",
+        borderRadius: "5px",
       },
-    ]);
-  };
-
+      link: "",
+    },
+  ]);
+};
   // Handle content editing
   const updateContent = (index, newContent) => {
     saveToUndoStack(); // Save the current state before deleting
@@ -1159,19 +1208,29 @@ const Clicksinglemainpage = () => {
       toast.warning("No preview content available.");
       return;
     }
-        const hasInvalidLink = previewContent.some((item, index) => {
-      if (item.type === "multi-image" || item.type === "multi-image-card") {
-        return !item.link1?.trim() || !item.link2?.trim();
-      } else if (item.type === "video-icon" || item.type === "button") {
-        return !item.link?.trim();
-      }
-      return false;
-    });
+     // Check for missing links and show individual toasts
+        let hasInvalidLink = false;
+        previewContent.forEach((item, index) => {
+          if (item.type === "multi-image" || item.type === "multi-image-card") {
+            if (!item.link1?.trim()) {
+              toast.error(`Please fill in Link 1 in ${item.type}`);
+              hasInvalidLink = true;
+            }
+            if (!item.link2?.trim()) {
+              toast.error(`Please fill in Link 2 in ${item.type}`);
+              hasInvalidLink = true;
+            }
+          } else if (item.type === "video-icon" || item.type === "button") {
+            if (!item.link?.trim()) {
+              toast.error(`Please fill in the Link in ${item.type}`);
+              hasInvalidLink = true;
+            }
+          }
+        });
     
-    if (hasInvalidLink) {
-      toast.warning("Please fill in all required link(Url) fields in the template.");
-      return;
-    }
+        if (hasInvalidLink) {
+          return; 
+        }
 
     setIsLoading(true);
     if (templateName && user && user.id && previewContent) {
@@ -1212,7 +1271,7 @@ const Clicksinglemainpage = () => {
       toast.error("Please ensure all fields are filled and user is valid");
     }
   };
-  const handleSaveButton = async () => {
+const handleSaveButton = useCallback(async () => {
     if (!user || !user.id) {
       toast.error("User not found. Please log in again.");
       return;
@@ -1221,18 +1280,29 @@ const Clicksinglemainpage = () => {
       toast.warning("No content to save. Please create or edit the template.");
       return;
     }
-        const hasInvalidLink = previewContent.some((item, index) => {
+
+    // Check for missing links and show individual toasts
+    let hasInvalidLink = false;
+    previewContent.forEach((item, index) => {
       if (item.type === "multi-image" || item.type === "multi-image-card") {
-        return !item.link1?.trim() || !item.link2?.trim();
+        if (!item.link1?.trim()) {
+          toast.error(`Please fill in Link 1 in ${item.type}`);
+          hasInvalidLink = true;
+        }
+        if (!item.link2?.trim()) {
+          toast.error(`Please fill in Link 2 in ${item.type}`);
+          hasInvalidLink = true;
+        }
       } else if (item.type === "video-icon" || item.type === "button") {
-        return !item.link?.trim();
+        if (!item.link?.trim()) {
+          toast.error(`Please fill in the Link in ${item.type}`);
+          hasInvalidLink = true;
+        }
       }
-      return false;
     });
-    
+
     if (hasInvalidLink) {
-      toast.warning("Please fill in all required link(Url) fields in the template.");
-      return;
+      return; // Stop if any links are invalid
     }
 
     if (!templateName || templateName.trim() === "") {
@@ -1280,26 +1350,47 @@ const Clicksinglemainpage = () => {
         { autoClose: 3000 }
       );
     }
-  };
+  }, [user, previewContent, templateName, bgColor, campaign?.camname, fetchTemplates]);
+  
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "s") {
+        e.preventDefault();
+        handleSaveButton();
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [handleSaveButton]); 
 
   const sendscheduleEmail = async () => {
     if (!previewContent || previewContent.length === 0) {
       toast.warning("No preview content available.");
       return;
     }
-        const hasInvalidLink = previewContent.some((item, index) => {
-      if (item.type === "multi-image" || item.type === "multi-image-card") {
-        return !item.link1?.trim() || !item.link2?.trim();
-      } else if (item.type === "video-icon" || item.type === "button") {
-        return !item.link?.trim();
-      }
-      return false;
-    });
+     // Check for missing links and show individual toasts
+        let hasInvalidLink = false;
+        previewContent.forEach((item, index) => {
+          if (item.type === "multi-image" || item.type === "multi-image-card") {
+            if (!item.link1?.trim()) {
+              toast.error(`Please fill in Link 1 in ${item.type}`);
+              hasInvalidLink = true;
+            }
+            if (!item.link2?.trim()) {
+              toast.error(`Please fill in Link 2 in ${item.type}`);
+              hasInvalidLink = true;
+            }
+          } else if (item.type === "video-icon" || item.type === "button") {
+            if (!item.link?.trim()) {
+              toast.error(`Please fill in the Link in ${item.type}`);
+              hasInvalidLink = true;
+            }
+          }
+        });
     
-    if (hasInvalidLink) {
-      toast.warning("Please fill in all required link(Url) fields in the template.");
-      return;
-    }
+        if (hasInvalidLink) {
+          return; 
+        }
     if (
       !emailData ||
       !singleemails.length ||
@@ -1402,18 +1493,28 @@ const Clicksinglemainpage = () => {
       toast.warning("No preview content available.");
       return;
     }
-        const hasInvalidLink = previewContent.some((item, index) => {
+ // Check for missing links and show individual toasts
+    let hasInvalidLink = false;
+    previewContent.forEach((item, index) => {
       if (item.type === "multi-image" || item.type === "multi-image-card") {
-        return !item.link1?.trim() || !item.link2?.trim();
+        if (!item.link1?.trim()) {
+          toast.error(`Please fill in Link 1 in ${item.type}`);
+          hasInvalidLink = true;
+        }
+        if (!item.link2?.trim()) {
+          toast.error(`Please fill in Link 2 in ${item.type}`);
+          hasInvalidLink = true;
+        }
       } else if (item.type === "video-icon" || item.type === "button") {
-        return !item.link?.trim();
+        if (!item.link?.trim()) {
+          toast.error(`Please fill in the Link in ${item.type}`);
+          hasInvalidLink = true;
+        }
       }
-      return false;
     });
-    
+
     if (hasInvalidLink) {
-      toast.warning("Please fill in all required link(Url) fields in the template.");
-      return;
+      return; 
     }
     if (
       !emailData ||
@@ -1646,7 +1747,7 @@ const Clicksinglemainpage = () => {
   return (
     <div>
       <div className="mobile-content">
-        <div className={`desktop-nav ${activeTablayout ? "hide-nav" : ""}`}>
+        <div className={`desktop-nav ${activeTablayout || isModalOpen ? "hide-nav" : ""}`}>
           <nav className="navbar-read">
             <div>
               <h5 className="company-name-read">
@@ -1710,11 +1811,12 @@ const Clicksinglemainpage = () => {
                 {/* <span className="nav-names">Mobile</span> */}
               </button>
 
-              <button onClick={handleSaveButton} className="navbar-button-send">
-                <span className="Nav-icons">
-                  <FaSave />
-                </span>{" "}
-                <span className="nav-names">Save</span>
+              <button onClick={handleSaveButton} className="navbar-button-Desktop"
+                                           data-tooltip="Save" // Custom tooltip using data attribute
+                           >
+                             <span className="Nav-icons">
+                               <FaSave />
+                             </span>{" "}
               </button>
 
               <button
@@ -4574,21 +4676,136 @@ const Clicksinglemainpage = () => {
                             </select>
                           </>
                         )}
-                        {previewContent[selectedIndex].type === "button" && (
-                          <>
-                            <label>Button name:</label>
-                            <input
-                              type="text"
-                              placeholder="Enter button name"
-                              value={
-                                previewContent[selectedIndex].content || ""
-                              }
-                              onChange={(e) =>
-                                updateContent(selectedIndex, {
-                                  content: e.target.value,
-                                })
-                              }
-                            />
+                       {previewContent[selectedIndex].type === "button" && (
+                        <>
+                          <div className="button-type-selector">
+                            <label>Button Type:</label>
+                        <select
+                          value={previewContent[selectedIndex].buttonType}
+                          onChange={(e) =>
+                            updateContent(selectedIndex, { buttonType: e.target.value })
+                          }
+                        >
+                          <option value="link">Link Button</option>
+                          <option value="whatsapp">WhatsApp</option>
+                          <option value="contact">Phone</option>
+                        </select>
+                      </div>
+                      
+                    {previewContent[selectedIndex].buttonType === "whatsapp" && (
+                      <div className="whatsapp-message-container">
+                        <label>WhatsApp Number:</label>
+                        <input
+                          type="text"
+                          placeholder="Number with country code"
+                          value={previewContent[selectedIndex].whatsappNumber || ""}
+                          onChange={(e) => {
+                            const updatedNumber = e.target.value;
+                            const message =
+                              previewContent[selectedIndex].whatsappMessage ||
+                              "Hello, I want to connect with you!";
+                            updateContent(selectedIndex, {
+                              whatsappNumber: updatedNumber,
+                              link: `https://wa.me/${updatedNumber}?text=${encodeURIComponent(
+                                convertToWhatsAppText(message)
+                              )}`,
+                            });
+                          }}
+                        />
+                    
+                        <label>Default Message:</label>
+                        <div
+                          className="whatsapp-preview"
+                          onClick={() => {
+                            setSelectedContent(
+                              previewContent[selectedIndex].whatsappMessage ||
+                                "Hello, I want to connect with you!"
+                            );
+                            setEditorType("whatsappMessage");
+                            setIsModalOpen(true);
+                          }}
+                          dangerouslySetInnerHTML={{
+                            __html: formatPreviewContent(
+                              previewContent[selectedIndex].whatsappMessage ||
+                                "Hello, I want to connect with you!"
+                            ),
+                          }}
+                        />
+                    
+                        {isModalOpen && editorType === "whatsappMessage" && (
+                          <ParaEditorbutton
+                            isOpen={isModalOpen}
+                            content={selectedContent}
+                            onSave={(newMessage) => {
+                              const number = previewContent[selectedIndex].whatsappNumber;
+                              updateContent(selectedIndex, {
+                                whatsappMessage: newMessage,
+                                link: `https://wa.me/${number}?text=${encodeURIComponent(
+                                  convertToWhatsAppText(newMessage)
+                                )}`,
+                              });
+                              setIsModalOpen(false);
+                            }}
+                            onClose={() => setIsModalOpen(false)}
+                          />
+                        )}
+                      </div>
+                    )}
+                      
+                      {previewContent[selectedIndex].buttonType === "contact" && (
+                        <div>
+                          <label>Phone Number:</label>
+                          <input
+                            type="text"
+                            placeholder="Number with country code"
+                            value={previewContent[selectedIndex].contactNumber || ""}
+                            onChange={(e) => {
+                              const number = e.target.value;
+                              updateContent(selectedIndex, {
+                                contactNumber: number,
+                                link: `tel:${number}`
+                              });
+                            }}
+                          />
+                        </div>
+                      )}
+                                            
+                          {previewContent[selectedIndex].buttonType === 'link' && (
+                            <div>
+                              <label>Link URL:</label>
+                              <input
+                                type="text"
+                                placeholder="Enter URL"
+                                value={previewContent[selectedIndex].link || ""}
+                                onChange={(e) =>
+                                  updateContent(selectedIndex, {
+                                    link: e.target.value,
+                                  })
+                                }
+                              />
+                            </div>
+                          )}
+                          <label>Button name:</label>
+                      <input
+                        type="text"
+                        placeholder="Enter button name"
+                        value={
+                          previewContent[selectedIndex].buttonType === "contact"
+                            ? `📞 ${previewContent[selectedIndex].content?.replace(/^📞\s*/, "") || ""}`
+                            : previewContent[selectedIndex].content || ""
+                        }
+                        onChange={(e) => {
+                          const value = e.target.value;
+                          const buttonType = previewContent[selectedIndex].buttonType;
+                      
+                          updateContent(selectedIndex, {
+                            content:
+                              buttonType === "contact"
+                                ? `📞 ${value.replace(/^📞\s*/, "")}` 
+                                : value,
+                          });
+                        }}
+                      />
                             <div className="editor-bg">
                               Background Color
                               <input
@@ -4737,7 +4954,7 @@ const Clicksinglemainpage = () => {
                               }
                             />
 
-                            <label>Link:</label>
+                            {/* <label>Link:</label>
                             <input
                               type="text"
                               placeholder="Enter URL"
@@ -4747,7 +4964,7 @@ const Clicksinglemainpage = () => {
                                   link: e.target.value,
                                 })
                               }
-                            />
+                            /> */}
                           </>
                         )}
                         {/* New Editor for Multi-Image Links and Button Styling */}
@@ -6140,7 +6357,7 @@ const Clicksinglemainpage = () => {
                       {item.type === "para" && (
                         <>
                           <p
-                            className="border"
+                            className="border-para"
                             contentEditable
                             suppressContentEditableWarning
                             onClick={() => {
@@ -6691,19 +6908,23 @@ const Clicksinglemainpage = () => {
                           />
                         </div>
                       )}
-                      {item.type === "button" && (
-                        <div className="border-btn">
-                          <a
-                            href={item.link || "#"}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            style={item.style}
-                            className="button-preview"
-                          >
-                            {item.content}
-                          </a>
-                        </div>
-                      )}
+                     {item.type === "button" && (
+  <div className="border-btn">
+    <a
+      href={item.link || "#"}
+      target={item.buttonType === 'link' ? "_blank" : undefined}
+      rel="noopener noreferrer"
+      style={item.style}
+      className="button-preview"
+    >
+      {item.content || (
+        item.buttonType === "whatsapp" ? "Connect on WhatsApp" :
+        item.buttonType === "contact" ? "Call Now" :
+        "Visit Link"
+      )}
+    </a>
+  </div>
+)}
                       {item.type === "link" && (
                         <div className="border-btn">
                           <a
@@ -6773,7 +6994,7 @@ const Clicksinglemainpage = () => {
                             {item.type === "para" && (
                               <>
                                 <p
-                                  className="border"
+                                  className="border-para"
                                   contentEditable
                                   suppressContentEditableWarning
                                   onClick={() => {
@@ -7281,19 +7502,24 @@ const Clicksinglemainpage = () => {
                                 />
                               </div>
                             )}
-                            {item.type === "button" && (
-                              <div className="border-btn">
-                                <a
-                                  href={item.link || "#"}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  style={item.style}
-                                  className="button-preview"
-                                >
-                                  {item.content}
-                                </a>
-                              </div>
-                            )}
+                             {item.type === "button" && (
+  <div className="border-btn">
+    <a
+      href={item.link || "#"}
+      target={item.buttonType === 'link' ? "_blank" : undefined}
+      rel="noopener noreferrer"
+      style={item.style}
+      className="button-preview"
+    >
+      {item.content || (
+        item.buttonType === "whatsapp" ? "Connect on WhatsApp" :
+        item.buttonType === "contact" ? "Call Now" :
+        "Visit Link"
+      )}
+    </a>
+  </div>
+)}
+
                             {item.type === "link" && (
                               <div className="border-btn">
                                 <a

@@ -62,7 +62,7 @@ cron.schedule("*/10 * * * *", async () => {
         : `Your Emailcon account will expire on <strong>${expiryDate.toLocaleDateString()}</strong>. Please renew to avoid interruption.`;
 
       const mailOptions = {
-        from: `"Emailcon Support" <account-noreply@account.emailcon.in>`,
+        from: `"Emailcon Support" <user-noreply@account.emailcon.in>`,
         to: user.email,
         replyTo: "support@emailcon.in",
         subject,

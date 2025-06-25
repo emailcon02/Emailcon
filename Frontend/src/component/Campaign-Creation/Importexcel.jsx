@@ -216,19 +216,29 @@ const ExcelModal = ({ isOpen, onClose, previewContent = [], bgColor }) => {
           toast.warning("No preview content available.");
           return;
         }
-        const hasInvalidLink = previewContent.some((item, index) => {
-          if (item.type === "multi-image" || item.type === "multi-image-card") {
-            return !item.link1?.trim() || !item.link2?.trim();
-          } else if (item.type === "video-icon" || item.type === "button") {
-            return !item.link?.trim();
-          }
-          return false;
-        });
-        
-        if (hasInvalidLink) {
-          toast.warning("Please fill in all required link(Url) fields in the template.");
-          return;
-        }
+        // Check for missing links and show individual toasts
+           let hasInvalidLink = false;
+           previewContent.forEach((item, index) => {
+             if (item.type === "multi-image" || item.type === "multi-image-card") {
+               if (!item.link1?.trim()) {
+                 toast.error(`Please fill in Link 1 in ${item.type}`);
+                 hasInvalidLink = true;
+               }
+               if (!item.link2?.trim()) {
+                 toast.error(`Please fill in Link 2 in ${item.type}`);
+                 hasInvalidLink = true;
+               }
+             } else if (item.type === "video-icon" || item.type === "button") {
+               if (!item.link?.trim()) {
+                 toast.error(`Please fill in the Link in ${item.type}`);
+                 hasInvalidLink = true;
+               }
+             }
+           });
+       
+           if (hasInvalidLink) {
+             return; 
+           }
     if (excelData.length === 0) {
       toast.error("Please upload an Excel file first.");
       return;
@@ -351,19 +361,29 @@ const ExcelModal = ({ isOpen, onClose, previewContent = [], bgColor }) => {
           toast.warning("No preview content available.");
           return;
         }
-        const hasInvalidLink = previewContent.some((item, index) => {
-          if (item.type === "multi-image" || item.type === "multi-image-card") {
-            return !item.link1?.trim() || !item.link2?.trim();
-          } else if (item.type === "video-icon" || item.type === "button") {
-            return !item.link?.trim();
-          }
-          return false;
-        });
-        
-        if (hasInvalidLink) {
-          toast.warning("Please fill in all required link(Url) fields in the template.");
-          return;
-        }
+        // Check for missing links and show individual toasts
+           let hasInvalidLink = false;
+           previewContent.forEach((item, index) => {
+             if (item.type === "multi-image" || item.type === "multi-image-card") {
+               if (!item.link1?.trim()) {
+                 toast.error(`Please fill in Link 1 in ${item.type}`);
+                 hasInvalidLink = true;
+               }
+               if (!item.link2?.trim()) {
+                 toast.error(`Please fill in Link 2 in ${item.type}`);
+                 hasInvalidLink = true;
+               }
+             } else if (item.type === "video-icon" || item.type === "button") {
+               if (!item.link?.trim()) {
+                 toast.error(`Please fill in the Link in ${item.type}`);
+                 hasInvalidLink = true;
+               }
+             }
+           });
+       
+           if (hasInvalidLink) {
+             return; 
+           }
   if (excelData.length === 0 || excelData.length <= 1) {
     toast.error("Please upload a valid Excel file.");
     return;
