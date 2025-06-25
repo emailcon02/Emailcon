@@ -178,27 +178,19 @@ button[data-tooltip] {
     color: #2f327D;
 }
 
-
-
 button[data-tooltip]:hover::after {
     content: attr(data-tooltip);
-    /* Tooltip text */
     position: absolute;
-    top: 100%;
-    /* Positioning above the button */
+    top: 110%;
     left: 50%;
     transform: translateX(-50%);
     background-color: black;
-    /* Background color */
     color: white;
-    /* Text color */
     padding: 5px 10px;
     border-radius: 4px;
     font-size: 12px;
     white-space: nowrap;
-    /* Prevent line breaks */
     z-index: 9999;
-    /* Make sure tooltip is above other elements */
     opacity: 0;
     visibility: hidden;
     transition: opacity 0.2s, visibility 0.2s;

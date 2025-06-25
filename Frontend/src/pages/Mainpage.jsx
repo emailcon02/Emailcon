@@ -8,7 +8,6 @@ import {
   FaCheckCircle,
   FaFileExport,
   FaFolderOpen,
-  FaPhone,
   FaTimes,
   FaTrash,
 } from "react-icons/fa";
@@ -6332,9 +6331,6 @@ if(
       style={item.style}
       className="button-preview"
     >
-      {/* {item.buttonType === 'contact' && (
-        <FaPhone style={{ marginRight: "8px", transform: "scaleX(-1)" }} />
-      )} */}
       {item.content || (
         item.buttonType === "whatsapp" ? "Connect on WhatsApp" :
         item.buttonType === "contact" ? "Call Now" :
@@ -6344,19 +6340,6 @@ if(
   </div>
 )}
 
-                      {/* {item.type === "button" && (
-                        <div className="border-btn">
-                          <a
-                            href={item.link || "#"}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            style={item.style}
-                            className="button-preview"
-                          >
-                            {item.content}
-                          </a>
-                        </div>
-                      )} */}
                       {item.type === "link" && (
                         <div className="border-btn">
                           <a
@@ -6915,19 +6898,24 @@ if(
                                 />
                               </div>
                             )}
-                            {item.type === "button" && (
-                              <div className="border-btn">
-                                <a
-                                  href={item.link || "#"}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  style={item.style}
-                                  className="button-preview"
-                                >
-                                  {item.content}
-                                </a>
-                              </div>
-                            )}
+                             {item.type === "button" && (
+  <div className="border-btn">
+    <a
+      href={item.link || "#"}
+      target={item.buttonType === 'link' ? "_blank" : undefined}
+      rel="noopener noreferrer"
+      style={item.style}
+      className="button-preview"
+    >
+      {item.content || (
+        item.buttonType === "whatsapp" ? "Connect on WhatsApp" :
+        item.buttonType === "contact" ? "Call Now" :
+        "Visit Link"
+      )}
+    </a>
+  </div>
+)}
+
                             {item.type === "link" && (
                               <div className="border-btn">
                                 <a

@@ -51,7 +51,6 @@ export const signup = async (req, res) => {
     const encryptedSmtpPassword = encryptPassword(smtppassword);
     const encryptedUserPassword = encryptPassword(password);
 
-
     // Save user to DB
     const user = new User({
       email,

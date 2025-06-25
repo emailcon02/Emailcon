@@ -40,6 +40,7 @@ import ColorPicker from "./ColorPicker.jsx";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import FileManagerModal from "./FilemanagerModal.jsx";
+import ParaEditorbutton from "../component/Campaign-Creation/ParaEditorbutton.jsx";
 
 const Clickmainpage = () => {
   const [activeTab, setActiveTab] = useState("button1");
@@ -111,6 +112,8 @@ const Clickmainpage = () => {
   const [hoveredId, setHoveredId] = useState(null);
   const [modalVisible, setModalVisible] = useState(false);
   const [folderToDelete, setFolderToDelete] = useState(null);
+  const [editorType, setEditorType] = useState(null);
+  
 
   const handleDelete = async () => {
     try {
@@ -1090,29 +1093,33 @@ const Clickmainpage = () => {
     ]);
   };
 
-  const addButton = () => {
-    saveToUndoStack(); // Save the current state before deleting
-    setPreviewContent([
-      ...previewContent,
-      {
-        type: "button",
-        content: "Click Me",
-        style: {
-          textAlign: "center",
-          padding: "12px 25px",
-          backgroundColor: "#000000",
-          color: "#ffffff",
-          width: "auto",
-          marginTop: "5px",
-          fontWeight: "bold",
-          fontSize: "15px",
-          alignItem: "center",
-          borderRadius: "5px",
-        },
-        link: "",
+ const addButton = () => {
+  saveToUndoStack();
+  setPreviewContent([
+    ...previewContent,
+    {
+      type: "button",
+      buttonType: "link", // Default to link
+      content: "Click Me",
+      whatsappNumber: "",
+      whatsappMessage: "Hello, I want to connect with you!",
+      contactNumber: "",
+      style: {
+        textAlign: "center",
+        padding: "12px 25px",
+        backgroundColor: "#000000",
+        color: "#ffffff",
+        width: "auto",
+        marginTop: "5px",
+        fontWeight: "bold",
+        fontSize: "15px",
+        alignItem: "center",
+        borderRadius: "5px",
       },
-    ]);
-  };
+      link: "",
+    },
+  ]);
+};
 
   // Handle content editing
   const updateContent = (index, newContent) => {
@@ -4649,21 +4656,132 @@ const handleSaveButton = useCallback(async () => {
                             </select>
                           </>
                         )}
-                        {previewContent[selectedIndex].type === "button" && (
-                          <>
-                            <label>Button name:</label>
-                            <input
-                              type="text"
-                              placeholder="Enter button name"
-                              value={
-                                previewContent[selectedIndex].content || ""
-                              }
-                              onChange={(e) =>
+                       {previewContent[selectedIndex].type === "button" && (
+                        <>
+                          <div className="button-type-selector">
+                            <label>Button Type:</label>
+                        <select
+                          value={previewContent[selectedIndex].buttonType}
+                          onChange={(e) =>
+                            updateContent(selectedIndex, { buttonType: e.target.value })
+                          }
+                        >
+                          <option value="link">Link Button</option>
+                          <option value="whatsapp">WhatsApp</option>
+                          <option value="contact">Phone</option>
+                        </select>
+                      </div>
+                      
+                      {previewContent[selectedIndex].buttonType === "whatsapp" && (
+                        <div>
+                          <label>WhatsApp Number:</label>
+                          <input
+                            type="text"
+                            placeholder="Number with country code"
+                            value={previewContent[selectedIndex].whatsappNumber || ""}
+                            onChange={(e) => {
+                              const updatedNumber = e.target.value;
+                              const message = previewContent[selectedIndex].whatsappMessage || "Hello, I want to connect with you!";
+                              updateContent(selectedIndex, {
+                                whatsappNumber: updatedNumber,
+                                link: `https://wa.me/${updatedNumber}?text=${encodeURIComponent(message)}`
+                              });
+                            }}
+                          />
+                      
+                          <label>Default Message:</label>
+                          <p
+                            className="border-para"
+                            contentEditable={false}
+                            onClick={() => {
+                              setSelectedContent(previewContent[selectedIndex].whatsappMessage || "Hello, I want to connect with you!");
+                              setEditorType("whatsappMessage");
+                              setIsModalOpen(true);
+                            }}
+                            style={{
+                              cursor: "pointer",
+                              padding: "8px",
+                              border: "1px solid #ccc",
+                              borderRadius: "4px",
+                            }}
+                            dangerouslySetInnerHTML={{
+                              __html: previewContent[selectedIndex].whatsappMessage || "Hello, I want to connect with you!",
+                            }}
+                          />
+                      
+                          {isModalOpen && editorType === "whatsappMessage" && (
+                            <ParaEditorbutton
+                              isOpen={isModalOpen}
+                              content={selectedContent}
+                              onSave={(newMessage) => {
+                                const number = previewContent[selectedIndex].whatsappNumber;
                                 updateContent(selectedIndex, {
-                                  content: e.target.value,
-                                })
-                              }
+                                  whatsappMessage: newMessage,
+                                  link: `https://wa.me/${number}?text=${encodeURIComponent(newMessage)}`
+                                });
+                                setIsModalOpen(false);
+                              }}
+                              onClose={() => setIsModalOpen(false)}
                             />
+                          )}
+                        </div>
+                      )}
+                      
+                      {previewContent[selectedIndex].buttonType === "contact" && (
+                        <div>
+                          <label>Phone Number:</label>
+                          <input
+                            type="text"
+                            placeholder="Number with country code"
+                            value={previewContent[selectedIndex].contactNumber || ""}
+                            onChange={(e) => {
+                              const number = e.target.value;
+                              updateContent(selectedIndex, {
+                                contactNumber: number,
+                                link: `tel:${number}`
+                              });
+                            }}
+                          />
+                        </div>
+                      )}
+                      
+                      
+                          {previewContent[selectedIndex].buttonType === 'link' && (
+                            <div>
+                              <label>Link URL:</label>
+                              <input
+                                type="text"
+                                placeholder="Enter URL"
+                                value={previewContent[selectedIndex].link || ""}
+                                onChange={(e) =>
+                                  updateContent(selectedIndex, {
+                                    link: e.target.value,
+                                  })
+                                }
+                              />
+                            </div>
+                          )}
+                          <label>Button name:</label>
+                      <input
+                        type="text"
+                        placeholder="Enter button name"
+                        value={
+                          previewContent[selectedIndex].buttonType === "contact"
+                            ? `📞 ${previewContent[selectedIndex].content?.replace(/^📞\s*/, "") || ""}`
+                            : previewContent[selectedIndex].content || ""
+                        }
+                        onChange={(e) => {
+                          const value = e.target.value;
+                          const buttonType = previewContent[selectedIndex].buttonType;
+                      
+                          updateContent(selectedIndex, {
+                            content:
+                              buttonType === "contact"
+                                ? `📞 ${value.replace(/^📞\s*/, "")}` 
+                                : value,
+                          });
+                        }}
+                      />
                             <div className="editor-bg">
                               Background Color
                               <input
@@ -4812,7 +4930,7 @@ const handleSaveButton = useCallback(async () => {
                               }
                             />
 
-                            <label>Link:</label>
+                            {/* <label>Link:</label>
                             <input
                               type="text"
                               placeholder="Enter URL"
@@ -4822,7 +4940,7 @@ const handleSaveButton = useCallback(async () => {
                                   link: e.target.value,
                                 })
                               }
-                            />
+                            /> */}
                           </>
                         )}
                         {/* New Editor for Multi-Image Links and Button Styling */}
@@ -6767,18 +6885,23 @@ const handleSaveButton = useCallback(async () => {
                         </div>
                       )}
                       {item.type === "button" && (
-                        <div className="border-btn">
-                          <a
-                            href={item.link || "#"}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            style={item.style}
-                            className="button-preview"
-                          >
-                            {item.content}
-                          </a>
-                        </div>
-                      )}
+  <div className="border-btn">
+    <a
+      href={item.link || "#"}
+      target={item.buttonType === 'link' ? "_blank" : undefined}
+      rel="noopener noreferrer"
+      style={item.style}
+      className="button-preview"
+    >
+      {item.content || (
+        item.buttonType === "whatsapp" ? "Connect on WhatsApp" :
+        item.buttonType === "contact" ? "Call Now" :
+        "Visit Link"
+      )}
+    </a>
+  </div>
+)}
+
                       {item.type === "link" && (
                         <div className="border-btn">
                           <a
@@ -7357,18 +7480,23 @@ const handleSaveButton = useCallback(async () => {
                               </div>
                             )}
                             {item.type === "button" && (
-                              <div className="border-btn">
-                                <a
-                                  href={item.link || "#"}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  style={item.style}
-                                  className="button-preview"
-                                >
-                                  {item.content}
-                                </a>
-                              </div>
-                            )}
+  <div className="border-btn">
+    <a
+      href={item.link || "#"}
+      target={item.buttonType === 'link' ? "_blank" : undefined}
+      rel="noopener noreferrer"
+      style={item.style}
+      className="button-preview"
+    >
+      {item.content || (
+        item.buttonType === "whatsapp" ? "Connect on WhatsApp" :
+        item.buttonType === "contact" ? "Call Now" :
+        "Visit Link"
+      )}
+    </a>
+  </div>
+)}
+
                             {item.type === "link" && (
                               <div className="border-btn">
                                 <a
