@@ -685,7 +685,7 @@ function formatPreviewContent(message) {
         content: "Replace Your Content...",
         style: {
           fontSize: "15px",
-          borderRadius: "10px",
+          borderRadius: "0px",
           textAlign: "left",
           color: "#000000",
           backgroundColor: "#f4f4f4",
@@ -704,7 +704,7 @@ function formatPreviewContent(message) {
         style: {
           width: "100%",
           height: "auto",
-          borderRadius: "10px",
+          borderRadius: "0px",
           textAlign: "center",
         },
       },
@@ -737,7 +737,7 @@ function formatPreviewContent(message) {
           width: "80%", // Full width for buttons
           marginTop: "20px",
           alignItems: "center",
-          borderRadius: "5px",
+          borderRadius: "0px",
           fontWeight: "bold",
           fontSize: "15px",
         },
@@ -749,7 +749,7 @@ function formatPreviewContent(message) {
           width: "80%", // Full width for buttons
           marginTop: "20px",
           alignItems: "center",
-          borderRadius: "5px",
+          borderRadius: "0px",
           fontWeight: "bold",
           fontSize: "15px",
         },
@@ -805,7 +805,7 @@ function formatPreviewContent(message) {
         type: "gap",
         style: {
           width: "100%",
-          height: "60px",
+          height: "40px",
           backgroundColor: "#000000", // optional, usually gaps are transparent or white
           margin: "30px 0", // optional spacing
         },
@@ -829,6 +829,7 @@ function formatPreviewContent(message) {
         style1: {
           color: "#000000",
           backgroundColor: "#f4f4f4",
+          borderRadius: "0px",
         },
       },
     ]);
@@ -844,7 +845,7 @@ function formatPreviewContent(message) {
         content: "Heading",
         style: {
           fontSize: "25px",
-          borderRadius: "10px",
+          borderRadius: "0px",
           textAlign: "center",
           color: "#000000",
           padding: "10px 0px 10px 5px",
@@ -864,7 +865,7 @@ function formatPreviewContent(message) {
         style: {
           width: "100%",
           height: "auto",
-          borderRadius: "10px",
+          borderRadius: "0px",
           textAlign: "center",
           margin: "5px auto",
         },
@@ -930,7 +931,7 @@ function formatPreviewContent(message) {
         style: {
           width: "100%",
           height: "auto",
-          borderRadius: "10px",
+          borderRadius: "0px",
           textAlign: "center",
           margin: "5px auto",
         },
@@ -990,7 +991,7 @@ function formatPreviewContent(message) {
         style: {
           width: "100%",
           height: isMobile ? "230px" : "350px", // Adjust height based on screen size
-          borderRadius: "10px",
+          borderRadius: "0px",
           textAlign: "center",
           margin: "5px auto",
         },
@@ -1025,7 +1026,7 @@ function formatPreviewContent(message) {
         ContentStyle: {
           width: "100%",
           backgroundColor: "white",
-          borderRadius: "10px",
+          borderRadius: "0px",
           textAlign: "center",
         },
       },
@@ -1056,7 +1057,7 @@ function formatPreviewContent(message) {
           width: "auto",
           marginTop: "20px",
           alignItems: "center",
-          borderRadius: "5px",
+          borderRadius: "0px",
           fontWeight: "bold",
           fontSize: "18px",
         },
@@ -1068,7 +1069,7 @@ function formatPreviewContent(message) {
           width: "auto",
           marginTop: "20px",
           alignItems: "center",
-          borderRadius: "5px",
+          borderRadius: "0px",
           fontWeight: "bold",
           fontSize: "18px",
         },
@@ -1105,7 +1106,7 @@ function formatPreviewContent(message) {
         fontWeight: "bold",
         fontSize: "15px",
         alignItem: "center",
-        borderRadius: "5px",
+        borderRadius: "0px",
       },
       link: "",
     },
@@ -1683,7 +1684,11 @@ if(
   return (
     <div>
       <div className="mobile-content">
-        <div className={`desktop-nav ${activeTablayout || isModalOpen ? "hide-nav" : ""}`}>
+        <div
+          className={`desktop-nav ${
+            activeTablayout || isModalOpen ? "hide-nav" : ""
+          }`}
+        >
           <nav className="navbar">
             <div>
               <h3 className="company-name">
@@ -1729,8 +1734,10 @@ if(
                 {/* <span className="nav-names">Mobile</span> */}
               </button>
 
-              <button onClick={handleSaveButton} className="navbar-button-Desktop"
-                              data-tooltip="Save" // Custom tooltip using data attribute
+              <button
+                onClick={handleSaveButton}
+                className="navbar-button-Desktop"
+                data-tooltip="Save" // Custom tooltip using data attribute
               >
                 <span className="Nav-icons">
                   <FaSave />
@@ -3862,6 +3869,35 @@ if(
                                     %
                                   </span>
 
+                                  <label>Border Radius (%):</label>
+                                  <input
+                                    type="range"
+                                    min="0"
+                                    max="50"
+                                    value={parseInt(
+                                      previewContent[
+                                        selectedIndex
+                                      ].style.borderRadius.replace("px", "")
+                                    )}
+                                    onChange={(e) =>
+                                      updateContent(selectedIndex, {
+                                        style: {
+                                          ...previewContent[selectedIndex]
+                                            .style,
+                                          borderRadius: `${e.target.value}px`,
+                                        },
+                                      })
+                                    }
+                                  />
+                                  <span>
+                                    {parseInt(
+                                      previewContent[
+                                        selectedIndex
+                                      ].style.borderRadius.replace("%", "")
+                                    )}
+                                    %
+                                  </span>
+
                                   <label>Link:</label>
                                   <input
                                     type="text"
@@ -4101,135 +4137,159 @@ if(
                           </>
                         )}
                         {previewContent[selectedIndex].type === "button" && (
-  <>
-    <div className="button-type-selector">
-      <label>Button Type:</label>
-  <select
-    value={previewContent[selectedIndex].buttonType}
-    onChange={(e) =>
-      updateContent(selectedIndex, { buttonType: e.target.value })
-    }
-  >
-    <option value="link">Link Button</option>
-    <option value="whatsapp">WhatsApp</option>
-    <option value="contact">Phone</option>
-  </select>
-</div>
-{previewContent[selectedIndex].buttonType === "whatsapp" && (
-  <div className="whatsapp-message-container">
-    <label>WhatsApp Number:</label>
-    <input
-      type="text"
-      placeholder="Number with country code"
-      value={previewContent[selectedIndex].whatsappNumber || ""}
-      onChange={(e) => {
-        const updatedNumber = e.target.value;
-        const message =
-          previewContent[selectedIndex].whatsappMessage ||
-          "Hello, I want to connect with you!";
-        updateContent(selectedIndex, {
-          whatsappNumber: updatedNumber,
-          link: `https://wa.me/${updatedNumber}?text=${encodeURIComponent(
-            convertToWhatsAppText(message)
-          )}`,
-        });
-      }}
-    />
+                          <>
+                            <div className="button-type-selector">
+                              <label>Button Type:</label>
+                              <select
+                                value={previewContent[selectedIndex].buttonType}
+                                onChange={(e) =>
+                                  updateContent(selectedIndex, {
+                                    buttonType: e.target.value,
+                                  })
+                                }
+                              >
+                                <option value="link">Link Button</option>
+                                <option value="whatsapp">WhatsApp</option>
+                                <option value="contact">Phone</option>
+                              </select>
+                            </div>
+                            {previewContent[selectedIndex].buttonType ===
+                              "whatsapp" && (
+                              <div className="whatsapp-message-container">
+                                <label>WhatsApp Number:</label>
+                                <input
+                                  type="text"
+                                  placeholder="Number with country code"
+                                  value={
+                                    previewContent[selectedIndex]
+                                      .whatsappNumber || ""
+                                  }
+                                  onChange={(e) => {
+                                    const updatedNumber = e.target.value;
+                                    const message =
+                                      previewContent[selectedIndex]
+                                        .whatsappMessage ||
+                                      "Hello, I want to connect with you!";
+                                    updateContent(selectedIndex, {
+                                      whatsappNumber: updatedNumber,
+                                      link: `https://wa.me/${updatedNumber}?text=${encodeURIComponent(
+                                        convertToWhatsAppText(message)
+                                      )}`,
+                                    });
+                                  }}
+                                />
 
-    <label>Default Message:</label>
-    <div
-      className="whatsapp-preview"
-      onClick={() => {
-        setSelectedContent(
-          previewContent[selectedIndex].whatsappMessage ||
-            "Hello, I want to connect with you!"
-        );
-        setEditorType("whatsappMessage");
-        setIsModalOpen(true);
-      }}
-      dangerouslySetInnerHTML={{
-        __html: formatPreviewContent(
-          previewContent[selectedIndex].whatsappMessage ||
-            "Hello, I want to connect with you!"
-        ),
-      }}
-    />
+                                <label>Default Message:</label>
+                                <div
+                                  className="whatsapp-preview"
+                                  onClick={() => {
+                                    setSelectedContent(
+                                      previewContent[selectedIndex]
+                                        .whatsappMessage ||
+                                        "Hello, I want to connect with you!"
+                                    );
+                                    setEditorType("whatsappMessage");
+                                    setIsModalOpen(true);
+                                  }}
+                                  dangerouslySetInnerHTML={{
+                                    __html: formatPreviewContent(
+                                      previewContent[selectedIndex]
+                                        .whatsappMessage ||
+                                        "Hello, I want to connect with you!"
+                                    ),
+                                  }}
+                                />
 
-    {isModalOpen && editorType === "whatsappMessage" && (
-      <ParaEditorbutton
-        isOpen={isModalOpen}
-        content={selectedContent}
-        onSave={(newMessage) => {
-          const number = previewContent[selectedIndex].whatsappNumber;
-          updateContent(selectedIndex, {
-            whatsappMessage: newMessage,
-            link: `https://wa.me/${number}?text=${encodeURIComponent(
-              convertToWhatsAppText(newMessage)
-            )}`,
-          });
-          setIsModalOpen(false);
-        }}
-        onClose={() => setIsModalOpen(false)}
-      />
-    )}
-  </div>
-)}
+                                {isModalOpen &&
+                                  editorType === "whatsappMessage" && (
+                                    <ParaEditorbutton
+                                      isOpen={isModalOpen}
+                                      content={selectedContent}
+                                      onSave={(newMessage) => {
+                                        const number =
+                                          previewContent[selectedIndex]
+                                            .whatsappNumber;
+                                        updateContent(selectedIndex, {
+                                          whatsappMessage: newMessage,
+                                          link: `https://wa.me/${number}?text=${encodeURIComponent(
+                                            convertToWhatsAppText(newMessage)
+                                          )}`,
+                                        });
+                                        setIsModalOpen(false);
+                                      }}
+                                      onClose={() => setIsModalOpen(false)}
+                                    />
+                                  )}
+                              </div>
+                            )}
 
-{previewContent[selectedIndex].buttonType === "contact" && (
-  <div>
-    <label>Phone Number:</label>
-    <input
-      type="text"
-      placeholder="Number with country code"
-      value={previewContent[selectedIndex].contactNumber || ""}
-      onChange={(e) => {
-        const number = e.target.value;
-        updateContent(selectedIndex, {
-          contactNumber: number,
-          link: `tel:${number}`
-        });
-      }}
-    />
-  </div>
-)}
+                            {previewContent[selectedIndex].buttonType ===
+                              "contact" && (
+                              <div>
+                                <label>Phone Number:</label>
+                                <input
+                                  type="text"
+                                  placeholder="Number with country code"
+                                  value={
+                                    previewContent[selectedIndex]
+                                      .contactNumber || ""
+                                  }
+                                  onChange={(e) => {
+                                    const number = e.target.value;
+                                    updateContent(selectedIndex, {
+                                      contactNumber: number,
+                                      link: `tel:${number}`,
+                                    });
+                                  }}
+                                />
+                              </div>
+                            )}
 
+                            {previewContent[selectedIndex].buttonType ===
+                              "link" && (
+                              <div>
+                                <label>Link URL:</label>
+                                <input
+                                  type="text"
+                                  placeholder="Enter URL"
+                                  value={
+                                    previewContent[selectedIndex].link || ""
+                                  }
+                                  onChange={(e) =>
+                                    updateContent(selectedIndex, {
+                                      link: e.target.value,
+                                    })
+                                  }
+                                />
+                              </div>
+                            )}
+                            <label>Button name:</label>
+                            <input
+                              type="text"
+                              placeholder="Enter button name"
+                              value={
+                                previewContent[selectedIndex].buttonType ===
+                                "contact"
+                                  ? `📞 ${
+                                      previewContent[
+                                        selectedIndex
+                                      ].content?.replace(/^📞\s*/, "") || ""
+                                    }`
+                                  : previewContent[selectedIndex].content || ""
+                              }
+                              onChange={(e) => {
+                                const value = e.target.value;
+                                const buttonType =
+                                  previewContent[selectedIndex].buttonType;
 
-    {previewContent[selectedIndex].buttonType === 'link' && (
-      <div>
-        <label>Link URL:</label>
-        <input
-          type="text"
-          placeholder="Enter URL"
-          value={previewContent[selectedIndex].link || ""}
-          onChange={(e) =>
-            updateContent(selectedIndex, {
-              link: e.target.value,
-            })
-          }
-        />
-      </div>
-    )}
-    <label>Button name:</label>
-<input
-  type="text"
-  placeholder="Enter button name"
-  value={
-    previewContent[selectedIndex].buttonType === "contact"
-      ? `📞 ${previewContent[selectedIndex].content?.replace(/^📞\s*/, "") || ""}`
-      : previewContent[selectedIndex].content || ""
-  }
-  onChange={(e) => {
-    const value = e.target.value;
-    const buttonType = previewContent[selectedIndex].buttonType;
-
-    updateContent(selectedIndex, {
-      content:
-        buttonType === "contact"
-          ? `📞 ${value.replace(/^📞\s*/, "")}` 
-          : value,
-    });
-  }}
-/>
+                                updateContent(selectedIndex, {
+                                  content:
+                                    buttonType === "contact"
+                                      ? `📞 ${value.replace(/^📞\s*/, "")}`
+                                      : value,
+                                });
+                              }}
+                            />
                             <div className="editor-bg">
                               Background Color
                               <input
@@ -4377,10 +4437,8 @@ if(
                                 })
                               }
                             />
-  
-  </>
-)}
-                      
+                          </>
+                        )}
 
                         {/* New Editor for Multi-Image Links and Button Styling */}
                         {previewContent[selectedIndex].type ===
@@ -5565,6 +5623,7 @@ if(
                               %
                             </span>
 
+
                             <div className="editor-bg">
                               Background Color
                               <input
@@ -5633,6 +5692,34 @@ if(
                                 previewContent[
                                   selectedIndex
                                 ].style.width.replace("%", "")
+                              )}
+                              %
+                            </span>
+
+                            <label>Border Radius (%):</label>
+                            <input
+                              type="range"
+                              min="0"
+                              max="50"
+                              value={parseInt(
+                                previewContent[
+                                  selectedIndex
+                                ].style.borderRadius.replace("px", "")
+                              )}
+                              onChange={(e) =>
+                                updateContent(selectedIndex, {
+                                  style: {
+                                    ...previewContent[selectedIndex].style,
+                                    borderRadius: `${e.target.value}px`,
+                                  },
+                                })
+                              }
+                            />
+                            <span>
+                              {parseInt(
+                                previewContent[
+                                  selectedIndex
+                                ].style.borderRadius.replace("%", "")
                               )}
                               %
                             </span>
@@ -6372,23 +6459,26 @@ if(
                           />
                         </div>
                       )}
-                     {item.type === "button" && (
-  <div className="border-btn">
-    <a
-      href={item.link || "#"}
-      target={item.buttonType === 'link' ? "_blank" : undefined}
-      rel="noopener noreferrer"
-      style={item.style}
-      className="button-preview"
-    >
-      {item.content || (
-        item.buttonType === "whatsapp" ? "Connect on WhatsApp" :
-        item.buttonType === "contact" ? "Call Now" :
-        "Visit Link"
-      )}
-    </a>
-  </div>
-)}
+                      {item.type === "button" && (
+                        <div className="border-btn">
+                          <a
+                            href={item.link || "#"}
+                            target={
+                              item.buttonType === "link" ? "_blank" : undefined
+                            }
+                            rel="noopener noreferrer"
+                            style={item.style}
+                            className="button-preview"
+                          >
+                            {item.content ||
+                              (item.buttonType === "whatsapp"
+                                ? "Connect on WhatsApp"
+                                : item.buttonType === "contact"
+                                ? "Call Now"
+                                : "Visit Link")}
+                          </a>
+                        </div>
+                      )}
 
                       {item.type === "link" && (
                         <div className="border-btn">
@@ -6948,23 +7038,28 @@ if(
                                 />
                               </div>
                             )}
-                             {item.type === "button" && (
-  <div className="border-btn">
-    <a
-      href={item.link || "#"}
-      target={item.buttonType === 'link' ? "_blank" : undefined}
-      rel="noopener noreferrer"
-      style={item.style}
-      className="button-preview"
-    >
-      {item.content || (
-        item.buttonType === "whatsapp" ? "Connect on WhatsApp" :
-        item.buttonType === "contact" ? "Call Now" :
-        "Visit Link"
-      )}
-    </a>
-  </div>
-)}
+                            {item.type === "button" && (
+                              <div className="border-btn">
+                                <a
+                                  href={item.link || "#"}
+                                  target={
+                                    item.buttonType === "link"
+                                      ? "_blank"
+                                      : undefined
+                                  }
+                                  rel="noopener noreferrer"
+                                  style={item.style}
+                                  className="button-preview"
+                                >
+                                  {item.content ||
+                                    (item.buttonType === "whatsapp"
+                                      ? "Connect on WhatsApp"
+                                      : item.buttonType === "contact"
+                                      ? "Call Now"
+                                      : "Visit Link")}
+                                </a>
+                              </div>
+                            )}
 
                             {item.type === "link" && (
                               <div className="border-btn">
