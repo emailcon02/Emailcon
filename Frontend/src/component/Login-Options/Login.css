@@ -102,7 +102,7 @@
   margin: 10px 0px;
   color: gray;
   font-weight: 550;
-  /* background-color: #fff; */
+  background-color: #fff;
   text-align: center;
 }
 
@@ -459,7 +459,7 @@
   color: #2f327d;
 }
 
-@media (min-width: 768px) and (max-width: 1024px) {
+@media screen and (min-width: 600px) and (max-width: 900px) {
   .login-aside {
     display: none;
   }

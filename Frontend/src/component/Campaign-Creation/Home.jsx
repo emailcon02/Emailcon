@@ -113,6 +113,10 @@ const Home = () => {
   const [hoveredId, setHoveredId] = useState(null);
   const [modalVisible, setModalVisible] = useState(false);
   const [folderToDelete, setFolderToDelete] = useState(null);
+  const [selectedDraggedImageId, setSelectedDraggedImageId] = useState(null);
+const [pendingFolderMove, setPendingFolderMove] = useState(null);
+const [showMoveConfirmModal, setShowMoveConfirmModal] = useState(false);
+
 
   const handleDeleteFolder = async () => {
     try {
@@ -845,7 +849,7 @@ const Home = () => {
         setShowCampaignModal(false);
         setCampaignName("");
 
-        if (window.innerWidth <= 768) {
+        if (window.innerWidth <= 900) {
           navigate("/campaign"); // Mobile
         } else {
           navigate("/editor"); // PC
@@ -1384,6 +1388,13 @@ const Home = () => {
                       {folderList.map((folder) => (
                         <div
                           key={folder._id}
+                            onDragOver={(e) => e.preventDefault()}
+    onDrop={() => {
+      if (selectedDraggedImageId && currentFolder === null) {
+        setPendingFolderMove({ imageId: selectedDraggedImageId, targetFolder: folder.name });
+        setShowMoveConfirmModal(true);
+      }
+    }}
                           style={{
                             position: "relative",
                             cursor: "pointer",
@@ -1499,8 +1510,13 @@ const Home = () => {
                     )}
 
                     {galleryImages.map((item) => (
-                      <div key={item._id} className="gallery-item">
-                        <img src={item.imageUrl} alt="Uploaded" />
+<div
+    key={item._id}
+    className="gallery-item"
+    draggable={!currentFolder} // allow dragging only at root
+    onDragStart={() => setSelectedDraggedImageId(item._id)}
+  >                     
+     <img src={item.imageUrl} alt="Uploaded" />
                         <div className="gallery-actions">
                           <button
                             onClick={() =>
@@ -1589,6 +1605,54 @@ const Home = () => {
               </div>
             )}
           </FileManagerModal>
+
+          {showMoveConfirmModal && (
+  <div className="move-confirm-modal-overlay">
+    <div className="move-confirm-modal-content">
+      <p>
+        Move image to folder <strong>{pendingFolderMove?.targetFolder}</strong>?
+      </p>
+      <div className="move-confirm-button-group">
+        <button
+          className="move-confirm-btn-cancel"
+          onClick={() => {
+            setShowMoveConfirmModal(false);
+            setPendingFolderMove(null);
+          }}
+        >
+          Cancel
+        </button>
+        <button
+          className="move-confirm-btn-yes"
+          onClick={async () => {
+            try {
+              const res = await axios.put(`${apiConfig.baseURL}/api/stud/update-folder`, {
+                imageId: pendingFolderMove.imageId,
+                newFolder: pendingFolderMove.targetFolder,
+              });
+
+              if (res.data.success) {
+                toast.success("Image moved successfully");
+                fetchImages();
+              } else {
+                toast.error("Failed to move image");
+              }
+            } catch (err) {
+              toast.error("Error moving image");
+              console.error(err);
+            } finally {
+              setShowMoveConfirmModal(false);
+              setPendingFolderMove(null);
+            }
+          }}
+        >
+          Yes, Move
+        </button>
+      </div>
+    </div>
+  </div>
+)}
+
 
           <div className="side-img">
             <img src={imghome} alt="Home img" className="home-image" />

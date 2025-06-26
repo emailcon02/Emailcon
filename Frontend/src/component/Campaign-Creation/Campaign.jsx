@@ -11,29 +11,27 @@ function Campaign() {
   };
 
   return (
-    <div className="Mobile-page">
-      <div className="app-container-mobile">
-        <nav className="app-navbar">
-          <p className="mobile-head">
+    <div className="campaign-Mobile-page">
+        <nav className="campaign-app-navbar">
+          <p className="campaign-mobile-head">
             Camp<span style={{ color: "#f48c06" }}>aigns</span>
           </p>
         </nav>
 
-        <div className="app-content">
+        <div className="campaign-app-content">
           <img src={Lookingimg} alt="looking" style={{ width: "300px" }} />
           <p style={{ textAlign: "center" }}>
             Looking for creating your own campaigns! Experience it.
           </p>
         </div>
 
-        <footer className="app-footer">
-          <div className="half-circle"></div>
-          <button className="foot-button" onClick={handleToggle}>
+        <footer className="campaign-app-footer">
+          <div className="campaign-half-circle"></div>
+          <button className="campaign-foot-button" onClick={handleToggle}>
             +
           </button>
         </footer>
       </div>
-    </div>
   );
 }
 
