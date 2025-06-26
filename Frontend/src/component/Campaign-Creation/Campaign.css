@@ -1,40 +1,38 @@
-.Mobile-page {
+.campaign-Mobile-page {
   position: relative;
   background-color: #fff;
   height: 100vh;
   width: 100%;
-}
-.app-container-mobile {
   display: flex;
   flex-direction: column;
-  min-height: 100vh;
+  max-height: 100vh;
   overflow: hidden;
 }
+
 /* Navigation bar at the top */
-.app-navbar {
+.campaign-app-navbar {
   color: #fff;
   background-color: #faeedf;
+  padding: 20px;
 }
-.mobile-head {
+.campaign-mobile-head {
   font-size: 20px;
   color: #2f327d;
   /* letter-spacing: 2px; */
   font-weight: 550;
   text-align: center;
 }
-.app-content {
+.campaign-app-content {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-}
-/* Main content area expands */
-.app-content {
   flex: 1;
   padding: 1em;
 }
 
-.app-footer {
+
+.campaign-app-footer {
   background-color: #faeedf;
   text-align: center;
   position: relative;
@@ -43,31 +41,52 @@
   box-shadow: 0 0px 20px rgba(223, 222, 222, 0.5);
 }
 /* Creates a small bottom half circle centered at the bottom of the footer */
-.half-circle {
+.campaign-half-circle {
   width: 46px;
-  /* Adjust width as needed */
   height: 23px;
-  /* Half of the width for a proportional semi-circle */
   background: #ffffff;
-  /* Color of the half circle */
   border-bottom-left-radius: 30px;
   border-bottom-right-radius: 30px;
   position: absolute;
   bottom: 35px;
-  /* Positions the half circle so only the curved part shows */
   left: 50%;
   transform: translateX(-50%);
 }
 
-.foot-button {
+.campaign-foot-button {
   border-radius: 50%;
+  width: 35px;
+  height: 35px;
+  cursor: pointer;
   border: none;
   outline: none;
   background-color: #2f327d;
-  font-size: medium;
+  font-size: 16px;
   color: white;
   position: absolute;
   bottom: 38px;
   left: 50%;
   transform: translateX(-50%);
+}
+@media screen and (min-width: 600px) and (max-width: 900px) {
+.campaign-mobile-head{
+  font-size: 30px !important;
+
+}
+.campaign-app-content img{
+  width: 500px !important;
+}
+.campaign-app-content p{
+  font-size: 20px !important;
+  text-align: center;
+}
+.campaign-half-circle{
+  width: 60px !important;
+  height: 30px !important;
+}
+.campaign-foot-button{
+  width: 50px !important;
+  height: 50px !important;
+  font-size: 20px !important;
+}
 }

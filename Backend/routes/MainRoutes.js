@@ -3287,4 +3287,25 @@ router.post('/send-alert', async (req, res) => {
   }
 });
 
+// Update folderName of an image
+router.put("/update-folder", async (req, res) => {
+  const { imageId, newFolder } = req.body;
+
+  try {
+    const updated = await ImageUrl.findByIdAndUpdate(
+      imageId,
+      { folderName: newFolder },
+      { new: true }
+    );
+
+    if (!updated) return res.status(404).json({ success: false, message: "Image not found" });
+
+    res.json({ success: true, image: updated });
+  } catch (err) {
+    console.error("Error updating folder name:", err);
+    res.status(500).json({ success: false, error: "Server error" });
+  }
+});
+
+
 export default router;

@@ -70,12 +70,12 @@ const Smtppage = () => {
       {/* Left Side Input Form */}
       <div className="smtp-left-side">
         <h2 className="smpt-header">
-          <div style={{ display: "flex", justifyContent: "center" }}>
+          <div style={{ display: "flex", alignItems: "center" ,flexDirection: "column"}}>
             <span>
               <img src={logo} alt="imagesignnav" className="logo_img_sign" />{" "}
             </span>
             <span
-              style={{ marginTop: "5px", fontWeight: "600", fontSize: "26px" }}
+              style={{ fontWeight: "600", fontSize: "30px" }}
             >
               Sm<span style={{ color: "#f48c06" }}>tp</span> Set
               <span style={{ color: "#f48c06" }}>up</span>

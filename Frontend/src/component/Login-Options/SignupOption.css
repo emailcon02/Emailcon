@@ -170,16 +170,16 @@
 }
 
 /* Media Queries */
-@media (max-width: 768px) {
+@media (max-width: 600px) {
     .signupopt-container {
         flex-direction: column;
         padding: 5% 3%;
     }
 
-    .signupopt-left,
-    .signupopt-right {
+    .signupopt-left{
         width: 100%;
         text-align: center;
+        align-items: center;
     }
 
     .signupopt-image {
@@ -190,4 +190,43 @@
     .signupopt-buttons {
         align-items: center;
     }
+    .signupopt-right{
+        display: none;
+    }
+    .signupopt-demo-btn{
+        width: 100%;
+    }
+}
+
+
+/* Media Queries */
+@media screen and (min-width: 600px) and (max-width: 900px) {
+    .signupopt-container {
+        flex-direction: column;
+        padding: 5% 3%;
+    }
+
+    .signupopt-left,
+    .signupopt-right {
+        width: 100%;
+        text-align: center;
+    }
+    .signupopt-right{
+        height: auto;
+        order: 1;
+    }
+    .signupopt-left {
+        order: 2;
+    }
+
+  
+
+    .signupopt-buttons {
+        align-items: center;
+    }
+   
+    .signupopt-demo-btn{
+        width: 100%;
+    }
+    
 }

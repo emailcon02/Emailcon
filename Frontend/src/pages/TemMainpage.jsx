@@ -107,7 +107,6 @@ const TemMainpage = () => {
   const [galleryImages, setGalleryImages] = useState([]);
   const [selectedImageIndex, setSelectedImageIndex] = useState(null);
   const [selectedImageNumber, setSelectedImageNumber] = useState(null);
-
   const [showFolderModal, setShowFolderModal] = useState(false);
   const [newFolderName, setNewFolderName] = useState("");
   const [folderList, setFolderList] = useState([]);
@@ -116,6 +115,10 @@ const TemMainpage = () => {
   const [modalVisible, setModalVisible] = useState(false);
   const [folderToDelete, setFolderToDelete] = useState(null);
   const [editorType, setEditorType] = useState(null);
+  const [selectedDraggedImageId, setSelectedDraggedImageId] = useState(null);
+const [pendingFolderMove, setPendingFolderMove] = useState(null);
+const [showMoveConfirmModal, setShowMoveConfirmModal] = useState(false);
+  
   function convertToWhatsAppText(html) {
   const tempDiv = document.createElement("div");
   tempDiv.innerHTML = html;
@@ -2109,317 +2112,378 @@ const handleSaveButton = useCallback(async () => {
               <FaFolderOpen /> File Manager
             </button>
 
-            {/* file manager modal */}
-            <FileManagerModal activeTablayout={activeTablayout}>
-              {activeTablayout && (
-                <div className="modal-overlay-file-editor">
-                  <div
-                    className="modal-content-file"
-                    style={{
-                      width: "90%",
-                      maxWidth: "700px",
-                      background: "#fff",
-                      padding: "20px",
-                      borderRadius: "10px",
-                      position: "relative",
-                      maxHeight: "90vh",
-                      overflowY: "auto",
-                    }}
-                  >
-                    <div
-                      className="modal-header-file"
-                      style={{
-                        display: "flex",
-                        justifyContent: "space-between",
-                        alignItems: "center",
-                        marginBottom: "10px",
-                      }}
-                    >
-                      <h2>File Manager</h2>
-                      <button
-                        onClick={() => {
-                          setCurrentFolder(null);
-                          setActiveTablayout(false);
-                        }}
-                        style={{
-                          background: "transparent",
-                          border: "none",
-                          fontSize: "20px",
-                          cursor: "pointer",
-                          fontWeight: "bold",
-                        }}
-                      >
-                        &times;
-                      </button>
-                    </div>
-
-                    <div
-                      style={{
-                        display: "flex",
-                        gap: "10px",
-                        marginBottom: "15px",
-                      }}
-                    >
-                      <button
-                        onClick={uploadImagefile}
-                        style={{
-                          padding: "8px 16px",
-                          background: "#007bff",
-                          color: "#fff",
-                          border: "none",
-                          borderRadius: "4px",
-                          cursor: "pointer",
-                        }}
-                      >
-                        + Upload
-                      </button>
-                      <button
-                        onClick={() => setShowFolderModal(true)}
-                        style={{
-                          padding: "8px 16px",
-                          background: "#28a745",
-                          color: "#fff",
-                          border: "none",
-                          borderRadius: "4px",
-                          cursor: "pointer",
-                        }}
-                      >
-                        + Folder
-                      </button>
-                      {currentFolder && (
-                        <button
-                          onClick={() => setCurrentFolder(null)}
-                          style={{
-                            padding: "8px 16px",
-                            background: "#ffc107",
-                            color: "#000",
-                            border: "none",
-                            borderRadius: "4px",
-                            cursor: "pointer",
-                          }}
-                        >
-                          ← Back
-                        </button>
-                      )}
-                    </div>
-                    {/* Folder display (only at root level) */}
-                    {!currentFolder && (
-                      <div
-                        style={{
-                          display: "flex",
-                          flexWrap: "wrap",
-                          gap: "12px",
-                          marginBottom: "15px",
-                        }}
-                      >
-                        {folderList.map((folder) => (
-                          <div
-                            key={folder._id}
-                            style={{
-                              position: "relative",
-                              cursor: "pointer",
-                              color: "#007bff",
-                              background: "#f1f1f1",
-                              padding: "8px 12px",
-                              borderRadius: "6px",
-                              display: "flex",
-                              alignItems: "center",
-                              whiteSpace: "nowrap",
-                            }}
-                            onMouseEnter={() => setHoveredId(folder._id)}
-                            onMouseLeave={() => setHoveredId(null)}
-                          >
-                            <span onClick={() => setCurrentFolder(folder.name)}>
-                              📁 {folder.name}
-                            </span>
-
-                            {/* Delete icon on hover */}
-                            {hoveredId === folder._id && (
-                              <span
-                                style={{
-                                  color: "#f48c06",
-                                  marginLeft: "5px",
-                                  fontSize: "12px",
-                                }}
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  setFolderToDelete(folder);
-                                  setModalVisible(true);
-                                }}
-                              >
-                                <FaTrash />
-                              </span>
-                            )}
-                          </div>
-                        ))}
-                      </div>
-                    )}
-
-                    {/* Confirmation Modal */}
-                    {modalVisible && (
-                      <div
-                        style={{
-                          position: "fixed",
-                          top: 0,
-                          left: 0,
-                          width: "100%",
-                          height: "100%",
-                          background: "rgba(0,0,0,0.5)",
-                          display: "flex",
-                          alignItems: "center",
-                          zIndex: "99999",
-                          justifyContent: "center",
-                        }}
-                      >
-                        <div
-                          style={{
-                            background: "#fff",
-                            padding: "20px",
-                            borderRadius: "10px",
-                            width: "300px",
-                            textAlign: "center",
-                          }}
-                        >
-                          <p>
-                            Are you sure you want to delete folder{" "}
-                            <strong>{folderToDelete?.name}</strong>?
-                          </p>
-                          <div style={{ marginTop: "15px" }}>
-                            <button
-                              style={{
-                                marginRight: "10px",
-                                padding: "6px 12px",
-                                backgroundColor: "#ccc",
-                                border: "none",
-                                borderRadius: "4px",
-                                cursor: "pointer",
-                              }}
-                              onClick={() => setModalVisible(false)}
-                            >
-                              Cancel
-                            </button>
-                            <button
-                              style={{
-                                padding: "6px 12px",
-                                backgroundColor: "red",
-                                color: "white",
-                                border: "none",
-                                borderRadius: "4px",
-                                cursor: "pointer",
-                              }}
-                              onClick={handleDelete}
-                            >
-                              Delete
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-                    )}
-                    {/* Folder title */}
-                    {currentFolder && (
-                      <div style={{ marginBottom: "10px" }}>
-                        📂 {currentFolder}
-                      </div>
-                    )}
-
-                    {/* Images */}
-                    <div className="gallery-scroll-container">
-                      {galleryImages.length === 0 && (
-                        <div className="no-images">No images found</div>
-                      )}
-
-                      {galleryImages.map((item) => (
-                        <div key={item._id} className="gallery-item">
-                          <img src={item.imageUrl} alt="Uploaded" />
-                          <div className="gallery-actions">
-                            <button
-                              onClick={() =>
-                                uploadImage(
-                                  selectedImageIndex,
-                                  selectedImageNumber,
-                                  item.imageUrl
-                                )
-                              }
-                            >
-                              <FaCheckCircle />
-                            </button>
-                            <button onClick={() => deleteImage(item._id)}>
-                              <FaTrash />
-                            </button>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Folder creation modal */}
-                  {showFolderModal && (
-                    <div
-                      style={{
-                        position: "fixed",
-                        background: "rgba(0,0,0,0.7)",
-                        top: 0,
-                        zIndex: 99999,
-                        left: 0,
-                        width: "100%",
-                        height: "100%",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                      }}
-                    >
-                      <div
-                        style={{
-                          background: "#fff",
-                          padding: "20px",
-                          borderRadius: "8px",
-                          width: "300px",
-                        }}
-                      >
-                        <h3>Create Folder</h3>
-                        <input
-                          type="text"
-                          value={newFolderName}
-                          onChange={(e) => setNewFolderName(e.target.value)}
-                          placeholder="Folder Name"
-                          style={{
-                            width: "95%",
-                            padding: "8px",
-                            marginBottom: "10px",
-                          }}
-                        />
-                        <button
-                          onClick={createFolder}
-                          style={{
-                            padding: "8px 12px",
-                            background: "#2f327D",
-                            color: "#fff",
-                            border: "none",
-                            borderRadius: "4px",
-                          }}
-                        >
-                          Save
-                        </button>
-                        <button
-                          onClick={() => setShowFolderModal(false)}
-                          style={{
-                            marginLeft: "10px",
-                            padding: "8px 12px",
-                            background: "#f48c06",
-                            color: "#fff",
-                            border: "none",
-                            borderRadius: "4px",
-                          }}
-                        >
-                          Cancel
-                        </button>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              )}
-            </FileManagerModal>
-
+                     {/* file manager modal */}
+                     <FileManagerModal activeTablayout={activeTablayout}>
+                       {activeTablayout && (
+                         <div className="modal-overlay-file-editor">
+                           <div
+                             className="modal-content-file"
+                             style={{
+                               width: "90%",
+                               maxWidth: "700px",
+                               background: "#fff",
+                               padding: "20px",
+                               borderRadius: "10px",
+                               position: "relative",
+                               maxHeight: "90vh",
+                               overflowY: "auto",
+                             }}
+                           >
+                             <div
+                               className="modal-header-file"
+                               style={{
+                                 display: "flex",
+                                 justifyContent: "space-between",
+                                 alignItems: "center",
+                                 marginBottom: "10px",
+                               }}
+                             >
+                               <h2>File Manager</h2>
+                               <button
+                                 onClick={() => {
+                                   setCurrentFolder(null);
+                                   setActiveTablayout(false);
+                                 }}
+                                 style={{
+                                   background: "transparent",
+                                   border: "none",
+                                   fontSize: "20px",
+                                   cursor: "pointer",
+                                   fontWeight: "bold",
+                                 }}
+                               >
+                                 &times;
+                               </button>
+                             </div>
+           
+                             <div
+                               style={{
+                                 display: "flex",
+                                 gap: "10px",
+                                 marginBottom: "15px",
+                               }}
+                             >
+                               <button
+                                 onClick={uploadImagefile}
+                                 style={{
+                                   padding: "8px 16px",
+                                   background: "#007bff",
+                                   color: "#fff",
+                                   border: "none",
+                                   borderRadius: "4px",
+                                   cursor: "pointer",
+                                 }}
+                               >
+                                 + Upload
+                               </button>
+                               <button
+                                 onClick={() => setShowFolderModal(true)}
+                                 style={{
+                                   padding: "8px 16px",
+                                   background: "#28a745",
+                                   color: "#fff",
+                                   border: "none",
+                                   borderRadius: "4px",
+                                   cursor: "pointer",
+                                 }}
+                               >
+                                 + Folder
+                               </button>
+                               {currentFolder && (
+                                 <button
+                                   onClick={() => setCurrentFolder(null)}
+                                   style={{
+                                     padding: "8px 16px",
+                                     background: "#ffc107",
+                                     color: "#000",
+                                     border: "none",
+                                     borderRadius: "4px",
+                                     cursor: "pointer",
+                                   }}
+                                 >
+                                   ← Back
+                                 </button>
+                               )}
+                             </div>
+                             {/* Folder display (only at root level) */}
+                             {!currentFolder && (
+                               <div
+                                 style={{
+                                   display: "flex",
+                                   flexWrap: "wrap",
+                                   gap: "12px",
+                                   marginBottom: "15px",
+                                 }}
+                               >
+                                 {folderList.map((folder) => (
+                                   <div
+                                     key={folder._id}
+                                       onDragOver={(e) => e.preventDefault()}
+               onDrop={() => {
+                 if (selectedDraggedImageId && currentFolder === null) {
+                   setPendingFolderMove({ imageId: selectedDraggedImageId, targetFolder: folder.name });
+                   setShowMoveConfirmModal(true);
+                 }
+               }}
+                                     style={{
+                                       position: "relative",
+                                       cursor: "pointer",
+                                       color: "#007bff",
+                                       background: "#f1f1f1",
+                                       padding: "8px 12px",
+                                       borderRadius: "6px",
+                                       display: "flex",
+                                       alignItems: "center",
+                                       whiteSpace: "nowrap",
+                                     }}
+                                     onMouseEnter={() => setHoveredId(folder._id)}
+                                     onMouseLeave={() => setHoveredId(null)}
+                                   >
+                                     <span onClick={() => setCurrentFolder(folder.name)}>
+                                       📁 {folder.name}
+                                     </span>
+           
+                                     {/* Delete icon on hover */}
+                                     {hoveredId === folder._id && (
+                                       <span
+                                         style={{
+                                           color: "#f48c06",
+                                           marginLeft: "5px",
+                                           fontSize: "12px",
+                                         }}
+                                         onClick={(e) => {
+                                           e.stopPropagation();
+                                           setFolderToDelete(folder);
+                                           setModalVisible(true);
+                                         }}
+                                       >
+                                         <FaTrash />
+                                       </span>
+                                     )}
+                                   </div>
+                                 ))}
+                               </div>
+                             )}
+           
+                             {/* Confirmation Modal */}
+                             {modalVisible && (
+                               <div
+                                 style={{
+                                   position: "fixed",
+                                   top: 0,
+                                   left: 0,
+                                   width: "100%",
+                                   height: "100%",
+                                   background: "rgba(0,0,0,0.5)",
+                                   display: "flex",
+                                   alignItems: "center",
+                                   zIndex: "99999",
+                                   justifyContent: "center",
+                                 }}
+                               >
+                                 <div
+                                   style={{
+                                     background: "#fff",
+                                     padding: "20px",
+                                     borderRadius: "10px",
+                                     width: "300px",
+                                     textAlign: "center",
+                                   }}
+                                 >
+                                   <p>
+                                     Are you sure you want to delete folder{" "}
+                                     <strong>{folderToDelete?.name}</strong>?
+                                   </p>
+                                   <div style={{ marginTop: "15px" }}>
+                                     <button
+                                       style={{
+                                         marginRight: "10px",
+                                         padding: "6px 12px",
+                                         backgroundColor: "#ccc",
+                                         border: "none",
+                                         borderRadius: "4px",
+                                         cursor: "pointer",
+                                       }}
+                                       onClick={() => setModalVisible(false)}
+                                     >
+                                       Cancel
+                                     </button>
+                                     <button
+                                       style={{
+                                         padding: "6px 12px",
+                                         backgroundColor: "red",
+                                         color: "white",
+                                         border: "none",
+                                         borderRadius: "4px",
+                                         cursor: "pointer",
+                                       }}
+                                       onClick={handleDeleteFolder}
+                                     >
+                                       Delete
+                                     </button>
+                                   </div>
+                                 </div>
+                               </div>
+                             )}
+           
+                             {/* Folder title */}
+                             {currentFolder && (
+                               <div style={{ marginBottom: "10px" }}>
+                                 📂 {currentFolder}
+                               </div>
+                             )}
+           
+                             {/* Images */}
+                             <div className="gallery-scroll-container">
+                               {galleryImages.length === 0 && (
+                                 <div className="no-images">No images found</div>
+                               )}
+           
+                               {galleryImages.map((item) => (
+           <div
+               key={item._id}
+               className="gallery-item"
+               draggable={!currentFolder} // allow dragging only at root
+               onDragStart={() => setSelectedDraggedImageId(item._id)}
+             >                     
+                <img src={item.imageUrl} alt="Uploaded" />
+                                   <div className="gallery-actions">
+                                     <button
+                                       onClick={() =>
+                                         uploadImage(
+                                           selectedImageIndex,
+                                           selectedImageNumber,
+                                           item.imageUrl
+                                         )
+                                       }
+                                     >
+                                       <FaCheckCircle />
+                                     </button>
+                                     <button onClick={() => deleteImage(item._id)}>
+                                       <FaTrash />
+                                     </button>
+                                   </div>
+                                 </div>
+                               ))}
+                             </div>
+                           </div>
+           
+                           {/* Folder creation modal */}
+                           {showFolderModal && (
+                             <div
+                               style={{
+                                 position: "fixed",
+                                 background: "rgba(0,0,0,0.7)",
+                                 top: 0,
+                                 zIndex: 99999,
+                                 left: 0,
+                                 width: "100%",
+                                 height: "100%",
+                                 display: "flex",
+                                 alignItems: "center",
+                                 justifyContent: "center",
+                               }}
+                             >
+                               <div
+                                 style={{
+                                   background: "#fff",
+                                   padding: "20px",
+                                   borderRadius: "8px",
+                                   width: "300px",
+                                 }}
+                               >
+                                 <h3>Create Folder</h3>
+                                 <input
+                                   type="text"
+                                   value={newFolderName}
+                                   onChange={(e) => setNewFolderName(e.target.value)}
+                                   placeholder="Folder Name"
+                                   style={{
+                                     width: "95%",
+                                     padding: "8px",
+                                     marginBottom: "10px",
+                                   }}
+                                 />
+                                 <button
+                                   onClick={createFolder}
+                                   style={{
+                                     padding: "8px 12px",
+                                     background: "#2f327D",
+                                     color: "#fff",
+                                     border: "none",
+                                     borderRadius: "4px",
+                                   }}
+                                 >
+                                   Save
+                                 </button>
+                                 <button
+                                   onClick={() => setShowFolderModal(false)}
+                                   style={{
+                                     marginLeft: "10px",
+                                     padding: "8px 12px",
+                                     background: "#f48c06",
+                                     color: "#fff",
+                                     border: "none",
+                                     borderRadius: "4px",
+                                   }}
+                                 >
+                                   Cancel
+                                 </button>
+                               </div>
+                             </div>
+                           )}
+                         </div>
+                       )}
+                         {showMoveConfirmModal && (
+             <div className="move-confirm-modal-overlay">
+               <div className="move-confirm-modal-content">
+                 <p>
+                   Move image to folder <strong>{pendingFolderMove?.targetFolder}</strong>?
+                 </p>
+                 <div className="move-confirm-button-group">
+                   <button
+                     className="move-confirm-btn-cancel"
+                     onClick={() => {
+                       setShowMoveConfirmModal(false);
+                       setPendingFolderMove(null);
+                     }}
+                   >
+                     Cancel
+                   </button>
+                   <button
+                     className="move-confirm-btn-yes"
+                     onClick={async () => {
+                       try {
+                         const res = await axios.put(`${apiConfig.baseURL}/api/stud/update-folder`, {
+                           imageId: pendingFolderMove.imageId,
+                           newFolder: pendingFolderMove.targetFolder,
+                         });
+           
+                         if (res.data.success) {
+                           toast.success("Image moved successfully");
+                           fetchImages();
+                         } else {
+                           toast.error("Failed to move image");
+                         }
+                       } catch (err) {
+                         toast.error("Error moving image");
+                         console.error(err);
+                       } finally {
+                         setShowMoveConfirmModal(false);
+                         setPendingFolderMove(null);
+                       }
+                     }}
+                   >
+                     Yes, Move
+                   </button>
+                 </div>
+               </div>
+             </div>
+           )}
+           
+                     </FileManagerModal>
+           
+                   
             {/* Styling Controls */}
             <>
               {selectedIndex !== null && previewContent[selectedIndex] && (

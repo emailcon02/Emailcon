@@ -171,7 +171,30 @@
 }
 
 /* Media Queries */
-@media (max-width: 760px) {
+@media (max-width: 600px) {
+    .smtp-right-side{
+        display: none;
+    }
+    .smtp-left-side{
+        width: 100%;
+        justify-content: center;
+    }
+    .smtp-save-button,.smtp-cancel-button{
+        padding: 10px 30px;
+    }
+    .smtp-custom-modal-right{
+        display: none;
+    }
+    .smtp-custom-modal-left{
+        width: 100%;
+    }
+
+
+    }
+
+    
+/* Media Queries */
+@media screen and (min-width: 600px) and (max-width: 900px) {
     .smtp-right-side{
         display: none;
     }
