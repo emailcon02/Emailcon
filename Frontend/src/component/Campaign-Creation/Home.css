@@ -1265,8 +1265,7 @@ li {
     overflow-y: auto;
   }
   .nav-split h4 {
-    right: 5% !important;
-    top: 20px !important;
+    right: 2% !important;
     font-size: 0.8rem !important;
     width: 180px !important;
   }

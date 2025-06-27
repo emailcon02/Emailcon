@@ -170,7 +170,7 @@ export const sendPaymentDetailsEmail = async (user, paymentInfo) => {
   });
 
   // PDF Content with logo and table
-  const logoPath = path.join(process.cwd(), "../Frontend/public/images/logo-4.png");
+  const logoPath = path.join(process.cwd(), "../Frontend/public/images/emailcon_icon.png");
   if (fs.existsSync(logoPath)) {
     doc.image(logoPath, 50, 45, { width: 100 });
   }

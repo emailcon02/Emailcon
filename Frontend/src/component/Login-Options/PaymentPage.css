@@ -20,6 +20,9 @@
     justify-content: center;
     align-items: center;
 }
+.payment-logo{
+  width: 250px !important;
+}
 
 .card-image-payment img {
     max-width: 100%;

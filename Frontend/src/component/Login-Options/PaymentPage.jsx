@@ -6,6 +6,8 @@ import "react-toastify/dist/ReactToastify.css";
 import "./PaymentPage.css";
 import apiconfig from "../../apiconfig/apiConfig";
 import payment from "../../Images/Payment.svg";
+import logo from "../../Images/emailcon_logo.png";
+import logoIcon from "../../Images/emailcon_icon.png";
 
 
 const DURATION_OPTIONS = [
@@ -69,8 +71,8 @@ function PaymentPage() {
         amount: orderRes.data.amount,
         currency: "INR",
         name: "Emailcon",
+        image: logoIcon,
         description: "Account Activation",
-        image: "/logo192.png",
         order_id: orderRes.data.id,
         handler: async function (response) {
           // ✅ Successful payment: update and activate account
@@ -153,11 +155,11 @@ function PaymentPage() {
       </div>
       <div className="card-content">
         <h2>
-          <div style={{display:"flex",justifyContent:"center"}}>
+          <div style={{display:"flex",justifyContent:"center",flexDirection:"column",alignItems:"center"}}>
                       <span>
-                        <img src={logo} alt="imagesignnav" className="logo_img_sign" />{" "}
+                        <img src={logo} alt="imagesignnav" className="payment-logo" />{" "}
                       </span>
-                      <span style={{marginTop:"5px",fontWeight:"600",fontSize:"26px"}}>
+                      <span style={{marginBottom:"15px",fontWeight:"600",fontSize:"30px"}}>
                         pay<span style={{ color: "#f48c06" }}>ment</span>
                       </span>
                       </div>
