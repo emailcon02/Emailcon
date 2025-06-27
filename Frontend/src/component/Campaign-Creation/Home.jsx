@@ -2294,7 +2294,7 @@ const [showMoveConfirmModal, setShowMoveConfirmModal] = useState(false);
                 </div>
                 <div className="cards" onClick={handleTemplateHistory}>
                   <FaHistory className="icons campaign-history-icon" />
-                  <span className="card-texts">Template History</span>
+                  <span className="card-texts">Saved Templates</span>
                 </div>
               </div>
             )}
