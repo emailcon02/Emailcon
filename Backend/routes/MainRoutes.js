@@ -223,7 +223,7 @@ router.post('/sendtestmail', async (req, res) => {
     <table role="presentation" align="center" width="100%" style="border-collapse: separate; border-spacing: 0; margin: ${item.style.margin || '30px 0'};">
       <tr>
         <td align="center" width="100%" style="padding: 0;">
-          <div style="width:100%; height:50px; margin: 0 auto;"></div>
+          <div style="width:100%; height:25px; margin: 0 auto;"></div>
         </td>
       </tr>
     </table>
@@ -323,7 +323,7 @@ router.post('/sendtestmail', async (req, res) => {
         return `<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" align="center">
       <tr>
         <td align="center">
-          <table role="presentation" width="${item.style.width}" height="${item.style.height}" cellspacing="0" cellpadding="0" border="0"
+          <table role="presentation" width="${item.style.width}" border-radius:"${item.style.borderRadius}"; height="${item.style.height}" cellspacing="0" cellpadding="0" border="0"
                  style="background: url('${item.src1}') no-repeat center center; background-size: cover; border-radius: 10px; overflow: hidden; margin: 15px 0px !important;">
             <tr>
               <td align="center" valign="middle" style="height: ${item.style.height}; padding: 0;">
@@ -1037,7 +1037,7 @@ case 'break':
   return `<table style="width:100%; border-collapse:collapse; margin:30px 0;">
     <tr>
       <td style="padding: 0;">
-        <div style="margin:0 auto;width:100%;height:40px"></div>
+        <div style="margin:0 auto;width:100%;height:25px"></div>
       </td>
     </tr>
   </table>`;
@@ -1353,7 +1353,7 @@ case 'break':
   return `<table style="width:100%; border-collapse:collapse; margin:30px 0;">
     <tr>
       <td style="padding: 0;">
-        <div style="margin:0 auto;width:100%;height:40px"></div>
+        <div style="margin:0 auto;width:100%;height:25px"></div>
       </td>
     </tr>
   </table>`;
@@ -1784,7 +1784,7 @@ case 'break':
   return `<table style="width:100%; border-collapse:collapse; margin:30px 0;">
     <tr>
       <td style="padding: 0;">
-        <div style="margin:0 auto;width:100%;height:40px"></div>
+        <div style="margin:0 auto;width:100%;height:25px"></div>
       </td>
     </tr>
   </table>`;

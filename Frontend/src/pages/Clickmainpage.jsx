@@ -855,7 +855,7 @@ function formatPreviewContent(message) {
         type: "gap",
         style: {
           width: "100%",
-          height: "60px",
+          height: "40px",
           backgroundColor: "#000000", // optional, usually gaps are transparent or white
           margin: "30px 0", // optional spacing
         },
@@ -988,7 +988,7 @@ function formatPreviewContent(message) {
         style: {
           width: "100%",
           height: "auto",
-          borderRadius: "10px",
+          borderRadius: "0px",
           textAlign: "center",
           margin: "5px auto",
         },
@@ -1045,7 +1045,7 @@ function formatPreviewContent(message) {
         style: {
           width: "100%",
           height: isMobile ? "230px" : "350px", // Adjust height based on screen size
-          borderRadius: "10px",
+          borderRadius: "0px",
           textAlign: "center",
           margin: "5px auto",
         },
@@ -1080,7 +1080,7 @@ function formatPreviewContent(message) {
         ContentStyle: {
           width: "100%",
           backgroundColor: "white",
-          borderRadius: "10px",
+          borderRadius: "0px",
           textAlign: "center",
         },
       },
@@ -1111,7 +1111,7 @@ function formatPreviewContent(message) {
           width: "auto",
           marginTop: "20px",
           alignItems: "center",
-          borderRadius: "5px",
+          borderRadius: "0px",
           fontWeight: "bold",
           fontSize: "18px",
         },
@@ -1123,7 +1123,7 @@ function formatPreviewContent(message) {
           width: "auto",
           marginTop: "20px",
           alignItems: "center",
-          borderRadius: "5px",
+          borderRadius: "0px",
           fontWeight: "bold",
           fontSize: "18px",
         },
@@ -1160,7 +1160,7 @@ function formatPreviewContent(message) {
         fontWeight: "bold",
         fontSize: "15px",
         alignItem: "center",
-        borderRadius: "5px",
+        borderRadius: "0px",
       },
       link: "",
     },
@@ -6306,6 +6306,35 @@ const handleSaveButton = useCallback(async () => {
                               )}
                               %
                             </span>
+
+                            <label>Border Radius (%):</label>
+                            <input
+                              type="range"
+                              min="0"
+                              max="50"
+                              value={parseInt(
+                                previewContent[
+                                  selectedIndex
+                                ].style.borderRadius.replace("px", "")
+                              )}
+                              onChange={(e) =>
+                                updateContent(selectedIndex, {
+                                  style: {
+                                    ...previewContent[selectedIndex].style,
+                                    borderRadius: `${e.target.value}px`,
+                                  },
+                                })
+                              }
+                            />
+                            <span>
+                              {parseInt(
+                                previewContent[
+                                  selectedIndex
+                                ].style.borderRadius.replace("%", "")
+                              )}
+                              %
+                            </span>
+
 
                             <label>Link:</label>
                             <input

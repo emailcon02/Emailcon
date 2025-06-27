@@ -13,6 +13,9 @@ import {
   FaFolderOpen,
   FaCheckCircle,
   FaTrash,
+  FaFolder,
+  FaRegArrowAltCircleUp,
+  FaThLarge,
 } from "react-icons/fa";
 import "./Home.css";
 import { useNavigate } from "react-router-dom";
@@ -1243,36 +1246,45 @@ const [showMoveConfirmModal, setShowMoveConfirmModal] = useState(false);
               Email<span style={{ color: "#f48c06" }}>Con</span>
             </h2> */}
             <img src={Logo} alt="img_logo" className="logo_img" />
-            <button
-              className="sidebar-button campaign-button"
-              onClick={handleCampaignView}
-            >
-              Campaign
-            </button>
-            <button
-              className="sidebar-button contact-button"
-              onClick={handleContactView}
-            >
-              Contact
-            </button>
-            <button
-              className="sidebar-button contact-button"
-              onClick={handleopentem}
-            >
-              Templates
-            </button>
-            <button
-              className="sidebar-button contact-button"
-              onClick={handleRemainderrview}
-            >
-              Automation
-            </button>
-            <button
-              onClick={() => setActiveTablayout(true)}
-              className="sidebar-button contact-button"
-            >
-              File Manager
-            </button>
+            <div className="sidebar-btn-set">
+              <div className="sidebar-btn-flex" onClick={handleCampaignView}>
+                <FaRegClipboard className="icons-side" />
+                <button className="sidebar-button campaign-button">
+                  Campaign
+                </button>
+              </div>
+
+              <div className="sidebar-btn-flex" onClick={handleContactView}>
+                <FaUserPlus className="icons-side contact-create-icon" />
+                <button className="sidebar-button contact-button">
+                  Contact
+                </button>
+              </div>
+
+              <div className="sidebar-btn-flex" onClick={handleopentem}>
+                <FaThLarge className="icons-side campaign-icon" />
+                <button className="sidebar-button contact-button">
+                  Templates
+                </button>
+              </div>
+
+              <div className="sidebar-btn-flex" onClick={handleRemainderrview}>
+                <FaListAlt className="icons-side campaign-template-icon" />
+                <button className="sidebar-button contact-button">
+                  Automation
+                </button>
+              </div>
+
+              <div
+                className="sidebar-btn-flex"
+                onClick={() => setActiveTablayout(true)}
+              >
+                <FaFolder className="icons-side campaign-template-icon" />
+                <button className="sidebar-button contact-button">
+                  File Manager
+                </button>
+              </div>
+            </div>
 
             {/* <button
               className="sidebar-button contact-button"
@@ -5008,42 +5020,28 @@ const [showMoveConfirmModal, setShowMoveConfirmModal] = useState(false);
       </div>
       <div className="dwn-menu">
         <div className="mobile-menu">
-          <button
-            className="sidebar-button campaign-button"
-            onClick={handleCampaignView}
-          >
-            Campaign
-          </button>
-          <button
-            className="sidebar-button contact-button"
-            onClick={handleContactView}
-          >
-            Contact
-          </button>
-          <button
-            className="sidebar-button contact-button"
-            onClick={handleopentem}
-          >
-            Templates
-          </button>
-          <button
-            className="sidebar-button contact-button"
-            onClick={handleRemainderrview}
-          >
-            Automation
-          </button>
-           <button
-              onClick={() => setActiveTablayout(true)}
-              className="sidebar-button contact-button"
-            >
-              File Manager
-            </button>
-          {/* <button
-              className="sidebar-button contact-button"
-              onClick={handlepayment}
-            >
-              Upgrade Plan
-            </button> */}
+        <button className="sidebar-button-mobile campaign-button" onClick={handleCampaignView}>
+  Campaign
+</button>
+
+<button className="sidebar-button-mobile contact-button" onClick={handleContactView}>
+  Contact
+</button>
+
+<button className="sidebar-button-mobile contact-button" onClick={handleopentem}>
+  Templates
+</button>
+
+<button className="sidebar-button-mobile contact-button" onClick={handleRemainderrview}>
+  Automation
+</button>
+
+<button 
+  className="sidebar-button-mobile contact-button" 
+  onClick={() => setActiveTablayout(true)}
+>
+  File Manager
+</button>
         </div>
       </div>
     </>
