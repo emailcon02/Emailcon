@@ -223,7 +223,7 @@ router.post('/sendtestmail', async (req, res) => {
     <table role="presentation" align="center" width="100%" style="border-collapse: separate; border-spacing: 0; margin: ${item.style.margin || '30px 0'};">
       <tr>
         <td align="center" width="100%" style="padding: 0;">
-          <div style="width:100%; height:25px; margin: 0 auto;"></div>
+          <div style="width:100%; height:50px; margin: 0 auto;"></div>
         </td>
       </tr>
     </table>
@@ -323,7 +323,7 @@ router.post('/sendtestmail', async (req, res) => {
         return `<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" align="center">
       <tr>
         <td align="center">
-          <table role="presentation" width="${item.style.width}" border-radius:"${item.style.borderRadius}"; height="${item.style.height}" cellspacing="0" cellpadding="0" border="0"
+          <table role="presentation" width="${item.style.width}" height="${item.style.height}" cellspacing="0" cellpadding="0" border="0"
                  style="background: url('${item.src1}') no-repeat center center; background-size: cover; border-radius: 10px; overflow: hidden; margin: 15px 0px !important;">
             <tr>
               <td align="center" valign="middle" style="height: ${item.style.height}; padding: 0;">
@@ -382,10 +382,10 @@ else if (item.type === 'multi-image-card') {
 
 
       else if (item.type === 'imagewithtext') {
-        return `<table class="image-text" style="width:100%;height:220px !important;background-color:${item.style1.backgroundColor || '#f4f4f4'}; border-collapse:seperate;border-radius:${item.style1.borderRadius || '10px'};margin:20px 0px !important">
+        return `<table class="image-text" style="width:100%;height:220px !important;background-color:${item.style1.backgroundColor || '#f4f4f4'}; border-collapse:seperate;margin:20px 0px !important">
         <tr>
             <td style = "vertical-align:top;padding:10px;" >
-                <img src="${item.src1}" style="border-radius:10px;width:200px !important;height:auto;pointer-events:none !important; object-fit:cover;" alt="image"/>                  
+                <img src="${item.src1}" style="width:200px !important;height:200px !important;pointer-events:none !important; object-fit:cover;" alt="image"/>                  
             </td>
             <td style = "vertical-align:top;padding:10px;color:${item.style1.color || 'black'};" >
                 <div class="img-para" style="overflow: auto;max-height: 200px !important;font-size:18px;">
@@ -397,7 +397,7 @@ else if (item.type === 'multi-image-card') {
       }
 
       else if (item.type === 'textwithimage') {
-        return `<table class="image-text" style="width:100%;height:220px !important;background-color:${item.style.backgroundColor || '#f4f4f4'}; border-collapse:seperate;border-radius:${item.style.borderRadius || '10px'};margin:20px 0px !important">
+        return `<table class="image-text" style="width:100%;height:220px !important;background-color:${item.style.backgroundColor || '#f4f4f4'}; border-collapse:seperate;margin:20px 0px !important">
         <tr>
           <td style = "vertical-align:top;padding:10px;color:${item.style.color || 'black'};" >
                 <div class="img-para" style="overflow: auto;max-height: 200px !important;font-size:18px;">
@@ -405,7 +405,7 @@ else if (item.type === 'multi-image-card') {
                 </div> 
             </td>
             <td style = "vertical-align:top;padding:10px;" >
-                <img src="${item.src2}" style="border-radius:10px;width:200px !important;height:auto;pointer-events:none !important; object-fit:cover;" alt="image"/>                  
+                <img src="${item.src2}" style="border-radius:10px;width:200px !important;height:200px !important;pointer-events:none !important; object-fit:cover;" alt="image"/>                  
             </td>         
         </tr>
     </table>`
@@ -975,10 +975,10 @@ function generateHtml(element, userId, campaignId, recipientEmail) {
        </div>`;
 
         case 'imagewithtext':
-          return `<table class="image-text" style="width:100%;height:220px !important;border-collapse:seperate;border-radius:10px;margin:15px 0px !important;${styleString1};">
+          return `<table class="image-text" style="width:100%;height:220px !important;border-collapse:seperate;margin:15px 0px !important;${styleString1};">
       <tr>
           <td style = "vertical-align:top;padding:10px;">
-              <img  src="${src1}" style="border-radius:10px;width:200px !important;height:auto;pointer-events:none !important; object-fit:cover;" alt="image"/>                  
+              <img  src="${src1}" style="width:200px !important;height:200px !important;pointer-events:none !important; object-fit:cover;" alt="image"/>                  
           </td>
           <td style = "vertical-align:top;padding:10px;${styleString1};">
               <div class="img-para" style="overflow: auto;max-height: 200px !important;font-size:18px;">
@@ -1037,7 +1037,7 @@ case 'break':
   return `<table style="width:100%; border-collapse:collapse; margin:30px 0;">
     <tr>
       <td style="padding: 0;">
-        <div style="margin:0 auto;width:100%;height:25px"></div>
+        <div style="margin:0 auto;width:100%;height:40px"></div>
       </td>
     </tr>
   </table>`;
@@ -1060,7 +1060,7 @@ case 'break':
 
 
         case 'textwithimage':
-          return `<table class="image-text" style="width:100%;height:220px !important;border-collapse:seperate;border-radius:10px;margin:15px 0px !important;${styleString};">
+          return `<table class="image-text" style="width:100%;height:220px !important;border-collapse:seperate;margin:15px 0px !important;${styleString};">
       <tr>
         <td style = "vertical-align:top;padding:10px;${styleString};">
               <div class="img-para" style="overflow: auto;max-height: 200px !important;font-size:18px;">
@@ -1068,7 +1068,7 @@ case 'break':
               </div>
           </td>
           <td style = "vertical-align:top;padding:10px;">
-              <img  src="${src2}" style="border-radius:10px;width:200px !important;height:auto;pointer-events:none !important; object-fit:cover;" alt="image"/>                  
+              <img  src="${src2}" style="width:200px !important;height:200px !important;pointer-events:none !important; object-fit:cover;" alt="image"/>                  
           </td>
         
       </tr>
@@ -1291,10 +1291,10 @@ router.post('/sendexcelEmail', async (req, res) => {
        </div>`;
 
         case 'imagewithtext':
-          return `<table class="image-text" style="width:100%;height:220px !important;border-collapse:seperate;border-radius:10px;margin:15px 0px !important;${styleString1};">
+          return `<table class="image-text" style="width:100%;height:220px !important;border-collapse:seperate;margin:15px 0px !important;${styleString1};">
       <tr>
           <td style = "vertical-align:top;padding:10px;">
-              <img  src="${src1}" style="border-radius:10px;width:200px !important;height:auto;pointer-events:none !important; object-fit:cover;" alt="image"/>                  
+              <img  src="${src1}" style="width:200px !important;height:200px !important;pointer-events:none !important; object-fit:cover;" alt="image"/>                  
           </td>
           <td style = "vertical-align:top;padding:10px;${styleString1};">
               <div class="img-para" style="overflow: auto;max-height: 200px !important;font-size:18px;">
@@ -1353,7 +1353,7 @@ case 'break':
   return `<table style="width:100%; border-collapse:collapse; margin:30px 0;">
     <tr>
       <td style="padding: 0;">
-        <div style="margin:0 auto;width:100%;height:25px"></div>
+        <div style="margin:0 auto;width:100%;height:40px"></div>
       </td>
     </tr>
   </table>`;
@@ -1374,7 +1374,7 @@ case 'break':
 </table>`
 
         case 'textwithimage':
-          return `<table class="image-text" style="width:100%;height:220px !important;border-collapse:seperate;border-radius:10px;margin:15px 0px !important;${styleString};">
+          return `<table class="image-text" style="width:100%;height:220px !important;border-collapse:seperate;margin:15px 0px !important;${styleString};">
       <tr>
         <td style = "vertical-align:top;padding:10px;${styleString};">
               <div class="img-para" style="overflow: auto;max-height: 200px !important;font-size:18px;">
@@ -1382,7 +1382,7 @@ case 'break':
               </div>
           </td>
           <td style = "vertical-align:top;padding:10px;">
-              <img  src="${src2}" style="border-radius:10px;width:200px !important;height:auto;pointer-events:none !important; object-fit:cover;" alt="image"/>                  
+              <img  src="${src2}" style="width:200px !important;height:200px !important;pointer-events:none !important; object-fit:cover;" alt="image"/>                  
           </td>
         
       </tr>
@@ -1722,10 +1722,10 @@ router.post('/sendbulkEmail', async (req, res) => {
        </div>`;
 
         case 'imagewithtext':
-          return `<table class="image-text" style="width:100%;height:220px !important;border-collapse:seperate;border-radius:10px;margin:15px 0px !important;${styleString1};">
+          return `<table class="image-text" style="width:100%;height:220px !important;border-collapse:seperate;margin:15px 0px !important;${styleString1};">
       <tr>
           <td style = "vertical-align:top;padding:10px;">
-              <img  src="${src1}" style="border-radius:10px;width:200px !important;height:auto;pointer-events:none !important; object-fit:cover;" alt="image"/>                  
+              <img  src="${src1}" style="width:200px !important;height:200px !important;pointer-events:none !important; object-fit:cover;" alt="image"/>                  
           </td>
           <td style = "vertical-align:top;padding:10px;${styleString1};">
               <div class="img-para" style="overflow: auto;max-height: 200px !important;font-size:18px;">
@@ -1784,7 +1784,7 @@ case 'break':
   return `<table style="width:100%; border-collapse:collapse; margin:30px 0;">
     <tr>
       <td style="padding: 0;">
-        <div style="margin:0 auto;width:100%;height:25px"></div>
+        <div style="margin:0 auto;width:100%;height:40px"></div>
       </td>
     </tr>
   </table>`;
@@ -1807,7 +1807,7 @@ case 'break':
 
 
         case 'textwithimage':
-          return `<table class="image-text" style="width:100%;height:220px !important;border-collapse:seperate;border-radius:10px;margin:15px 0px !important;${styleString};">
+          return `<table class="image-text" style="width:100%;height:220px !important;border-collapse:seperate;margin:15px 0px !important;${styleString};">
       <tr>
         <td style = "vertical-align:top;padding:10px;${styleString};">
               <div class="img-para" style="overflow: auto;max-height: 200px !important;font-size:18px;">
@@ -1815,7 +1815,7 @@ case 'break':
               </div>
           </td>
           <td style = "vertical-align:top;padding:10px;">
-              <img  src="${src2}" style="border-radius:10px;width:200px !important;height:auto;pointer-events:none !important; object-fit:cover;" alt="image"/>                  
+              <img  src="${src2}" style="width:200px !important;height:200px !important;pointer-events:none !important; object-fit:cover;" alt="image"/>                  
           </td>
         
       </tr>
@@ -2545,6 +2545,51 @@ router.put('/template/:id', async (req, res) => {
     res.status(500).json({ message: "Error updating template" });
   }
 });
+//create Template
+router.post('/create-template', async (req, res) => {
+  const {
+    temname,
+    userId
+  } = req.body;
+
+  if (!userId) {
+    return res.status(400).send({
+      message: "User ID is required"
+    });
+  }
+
+  try {
+    // Check if a template with the same name already exists for the user
+    const existingTemplate = await Template.findOne({
+      temname,
+      user: userId
+    });
+    if (existingTemplate) {
+      return res.status(400).send({
+        message: "Template with this name already exists for the user"
+      });
+    }
+    // Create a new template
+    const template = new Template({
+      temname,
+      user: userId
+    });
+    const savedTemplate = await template.save();
+    const templateData = {
+      id: savedTemplate._id,
+      temname: savedTemplate.temname,
+    };
+    res.json({
+      template: templateData
+    });
+    } catch (error) {
+    console.error(error);
+    res.status(500).send({
+      message: "Error saving template"
+    });
+  }
+});
+
 
 //Save template
 router.post('/template', async (req, res) => {

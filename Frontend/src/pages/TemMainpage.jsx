@@ -682,6 +682,9 @@ function formatPreviewContent(message) {
     navigate("/home");
     sessionStorage.removeItem("firstVisit");
     sessionStorage.removeItem("toggled");
+    localStorage.removeItem("campaign");
+    localStorage.removeItem("template");
+    
   };
 
   // Add new text
@@ -968,8 +971,6 @@ function formatPreviewContent(message) {
           "Artificial intelligence is transforming the way we interact with technology, enabling machines to process data with efficiency.", // Default paragraph text
         style1: {
           color: "#000000",
-          borderRadius: "10px",
-          backgroundColor: "#f4f4f4",
         },
       },
     ]);
@@ -985,8 +986,7 @@ function formatPreviewContent(message) {
           "Artificial intelligence is transforming the way we interact with technology, enabling machines to process data with efficiency.", // Default paragraph text
         style: {
           color: "#000000",
-          backgroundColor: "#f4f4f4",
-          borderRadius: "10px",
+
         },
       },
     ]);
@@ -1690,7 +1690,7 @@ const handleSaveButton = useCallback(async () => {
   return (
     <div>
       <div className="mobile-content">
-        <div className={`desktop-nav ${activeTablayout || isModalOpen  ? "hide-nav" : ""}`}>
+        <div className={`desktop-nav ${activeTablayout ? "hide-nav" : ""}`}>
           <nav className="navbar">
             <div>
               <h3 className="company-name">

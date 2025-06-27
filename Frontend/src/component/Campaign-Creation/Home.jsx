@@ -45,9 +45,12 @@ import FileManagerModal from "../../pages/FilemanagerModal.jsx";
 const Home = () => {
   const [view, setView] = useState("main");
   const [showCampaignModal, setShowCampaignModal] = useState(false);
+  const [showTemplateModal, setShowTemplateModal] = useState(false);
   const [showCampaignModalTem, setShowCampaignModalTem] = useState(false);
   const [showCampaignModalauto, setShowCampaignModalauto] = useState(false);
   const [campaignName, setCampaignName] = useState("");
+  const [templateName, setTemplateName] = useState("");
+
   const [showfileGroupModal, setShowfileGroupModal] = useState(false);
   const [showfilesingleGroupModal, setShowfilesingleGroupModal] =
     useState(false);
@@ -737,6 +740,10 @@ const [showMoveConfirmModal, setShowMoveConfirmModal] = useState(false);
     setView("main");
   };
 
+  const handleTemplateView = () => {
+    setView("template");
+  };
+
   const handleCampaignView = () => {
     setView("campaign");
   };
@@ -796,9 +803,7 @@ const [showMoveConfirmModal, setShowMoveConfirmModal] = useState(false);
     setStep(0); // Reset steps on open
   };
 
-  const handleopentem = () => {
-    setShowtemModal(true);
-  };
+
   const handleopenbirthtem = () => {
     setShowbirthtemModal(true);
   };
@@ -812,9 +817,14 @@ const [showMoveConfirmModal, setShowMoveConfirmModal] = useState(false);
   const handleCreateCampaign = () => {
     setShowCampaignModal(true);
   };
-
+  const handleCreateTemplate = () => {
+    setShowTemplateModal(true);
+  };
   const handleviewcontacts = () => {
     setShowListPageModal(true);
+  };
+  const handleTemplateHistory = () => {
+    setShowtemModal(true);
   };
 
   const handleaddfilecontacts = () => {
@@ -822,6 +832,51 @@ const [showMoveConfirmModal, setShowMoveConfirmModal] = useState(false);
   };
   const handleaddsinglefilecontacts = () => {
     setShowfilesingleGroupModal(true);
+  };
+
+  
+  const handleCreateButtonTem = () => {
+    if (!user || !user.id) {
+      toast.error("Please ensure the user is valid");
+      return;
+    }
+    if (!templateName) {
+      toast.error("Please enter a template name");
+      return;
+    }
+
+    setIsLoading(true);
+
+    axios
+      .post(`${apiConfig.baseURL}/api/stud/create-template`, {
+        temname: templateName, // Ensure the field matches backend
+        userId: user.id,
+      })
+      .then((response) => {
+        localStorage.setItem(
+          "template",
+          JSON.stringify(response.data.template)
+        );
+        setIsLoading(false);
+        setShowTemplateModal(false);
+        setTemplateName("");
+        navigate("/create-template"); // Redirect to template creation page
+      })
+      .catch((error) => {
+        setIsLoading(false);
+        console.error("Error:", error);
+        toast.dismiss();
+
+        if (
+          error.response &&
+          error.response.data &&
+          error.response.data.message
+        ) {
+          toast.warning(error.response.data.message, { autoClose: 3000 });
+        } else {
+          toast.error("Failed to create template", { autoClose: 3000 });
+        }
+      });
   };
 
   const handleCreateButton = () => {
@@ -1242,10 +1297,10 @@ const [showMoveConfirmModal, setShowMoveConfirmModal] = useState(false);
         {/* Sidebar */}
         <div className="sidebar">
           <div>
-            {/* <h2 className="sidebar-title" onClick={handleMainView}>
+            {/* <h2 className="sidebar-title" >
               Email<span style={{ color: "#f48c06" }}>Con</span>
             </h2> */}
-            <img src={Logo} alt="img_logo" className="logo_img" />
+            <img src={Logo} alt="img_logo" className="logo_img" onClick={handleMainView}/>
             <div className="sidebar-btn-set">
               <div className="sidebar-btn-flex" onClick={handleCampaignView}>
                 <FaRegClipboard className="icons-side" />
@@ -1261,7 +1316,7 @@ const [showMoveConfirmModal, setShowMoveConfirmModal] = useState(false);
                 </button>
               </div>
 
-              <div className="sidebar-btn-flex" onClick={handleopentem}>
+              <div className="sidebar-btn-flex" onClick={handleTemplateView}>
                 <FaThLarge className="icons-side campaign-icon" />
                 <button className="sidebar-button contact-button">
                   Templates
@@ -2227,6 +2282,19 @@ const [showMoveConfirmModal, setShowMoveConfirmModal] = useState(false);
                 <div className="cards" onClick={handlecampaignhistory}>
                   <FaHistory className="icons campaign-history-icon" />
                   <span className="card-texts">Campaign History</span>
+                </div>
+              </div>
+            )}
+            
+            {view === "template" && (
+              <div className="card-grid">
+                <div className="cards" onClick={handleCreateTemplate}>
+                  <FaThLarge className="icons campaign-create-icon" />
+                  <span className="card-texts">Create Template</span>
+                </div>
+                <div className="cards" onClick={handleTemplateHistory}>
+                  <FaHistory className="icons campaign-history-icon" />
+                  <span className="card-texts">Template History</span>
                 </div>
               </div>
             )}
@@ -4937,6 +5005,40 @@ const [showMoveConfirmModal, setShowMoveConfirmModal] = useState(false);
               </div>
             </div>
           )}
+          {/* Modal for Creating Template */}
+          {showTemplateModal && (
+   <div className="campaign-modal-overlay">
+              <div className="campaign-modal-content">
+                <h3>Create Template</h3>
+                <input
+                  type="text"
+                  value={templateName}
+                  onChange={(e) => setTemplateName(e.target.value)}
+                  placeholder="Enter Template Name Max 15 letter"
+                  className="modal-input"
+                  maxLength={15}
+                />
+                <button
+                  className="modal-create-button"
+                  onClick={handleCreateButtonTem}
+                  disabled={isLoading}
+                >
+                  {isLoading ? (
+                    <span className="loader-create"></span> // Spinner
+                  ) : (
+                    "Create"
+                  )}{" "}
+                </button>
+                <button
+                  onClick={() => setShowTemplateModal(false)}
+                  className="modal-create-button-cancel-modal"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          )}
+
           {/* Modal for Creating Campaign */}
           {showCampaignModalauto && (
             <div className="campaign-modal-overlay">
@@ -5028,7 +5130,7 @@ const [showMoveConfirmModal, setShowMoveConfirmModal] = useState(false);
   Contact
 </button>
 
-<button className="sidebar-button-mobile contact-button" onClick={handleopentem}>
+<button className="sidebar-button-mobile contact-button" onClick={handleTemplateView}>
   Templates
 </button>
 

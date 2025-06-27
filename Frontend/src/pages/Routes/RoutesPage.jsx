@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { BrowserRouter as Router, Routes, Route} from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Login from "../../component/Login-Options/Login";
 import AdminLogin from "../../component/Admin/AdminLogin";
 import Mainpage from "../Mainpage";
@@ -44,6 +44,7 @@ import EmployeeSignup from "../../component/Login-Options/EmployeeSignup";
 import EmployeeDetails from "../../component/Admin/EmployeeDetails";
 import Privacypolicy from "../../component/Frontpage/Privacypolicy";
 import Termsofservice from "../../component/Frontpage/Termsofservice";
+import CreateTemplate from "../CreateTemplate";
 
 function RoutesPage() {
   const [isOnline, setIsOnline] = useState(navigator.onLine);
@@ -52,12 +53,12 @@ function RoutesPage() {
     const handleOnline = () => setIsOnline(true);
     const handleOffline = () => setIsOnline(false);
 
-    window.addEventListener('online', handleOnline);
-    window.addEventListener('offline', handleOffline);
+    window.addEventListener("online", handleOnline);
+    window.addEventListener("offline", handleOffline);
 
     return () => {
-      window.removeEventListener('online', handleOnline);
-      window.removeEventListener('offline', handleOffline);
+      window.removeEventListener("online", handleOnline);
+      window.removeEventListener("offline", handleOffline);
     };
   }, []);
 
@@ -75,11 +76,11 @@ function RoutesPage() {
         <Route path="/signup-option/:userId" element={<SignupOption />} />
         <Route path="/admin-user-create" element={<Createusers />} />
         <Route path="/business-admin-dashboard" element={<UserDemoRequest />} />
-        <Route path="/smtppage" element={<Smtppage />} />   
-        <Route path="/userpayment/:userId" element={<PaymentPage/>} />
-        <Route path="/user-payment-history/:userId" element={<UserPaymenthistory/>} />
-        <Route path="/all-user-payment-history" element={<AllUserPaymenthistory/>} />
-        <Route path="/register-form" element={<Form/>} />
+        <Route path="/smtppage" element={<Smtppage />} />
+        <Route path="/userpayment/:userId" element={<PaymentPage />} />
+        <Route path="/user-payment-history/:userId" element={<UserPaymenthistory />} />
+        <Route path="/all-user-payment-history" element={<AllUserPaymenthistory />} />
+        <Route path="/register-form" element={<Form />} />
         <Route path="/admin-login" element={<AdminLogin />} />
         <Route path="/employee-signup" element={<EmployeeSignup />} />
         <Route path="/employee-detail" element={<EmployeeDetails />} />
@@ -87,31 +88,57 @@ function RoutesPage() {
         <Route path="/privacy-policy" element={<Privacypolicy />} />
         <Route path="/terms-of-service" element={<Termsofservice />} />
         <Route path="/expired-users" element={<ExpiredUser />} />
-        <Route path="/super-admin-dashboard" element={<DashboardPage/>} />
+        <Route path="/super-admin-dashboard" element={<DashboardPage />} />
         <Route path="/sub-user-detail" element={<SubAdminUserDetail />} />
         <Route path="/sub-expired-users" element={<SubAdminExpiredUser />} />
-        <Route path="/sub-user-payment-history/:userId" element={<SubAdminUserPaymenthistory />} />
-        <Route path="/sub-all-user-payment-history" element={<SubAdminAllUserPaymenthistory />} />
-        <Route path="/sub-admin-dashboard" element={<SubAdminDashboardPage/>} />
+        <Route
+          path="/sub-user-payment-history/:userId"
+          element={<SubAdminUserPaymenthistory />}
+        />
+        <Route
+          path="/sub-all-user-payment-history"
+          element={<SubAdminAllUserPaymenthistory />}
+        />
+        <Route
+          path="/sub-admin-dashboard"
+          element={<SubAdminDashboardPage />}
+        />
         <Route path="/sub-user-enroll" element={<SubUserRequestForm />} />
         <Route path="/editor" element={<Mainpage />} />
-        <Route path="/read-editor/:userId/:campaignId" element={<Readmainpage />} />
-        <Route path="/click-editor/:userId/:campaignId" element={<Clickmainpage />} />
-        <Route path="/clicksingle-editor/:userId/:campaignId" element={<Clicksinglemainpage />} />
+        <Route path="/create-template" element={<CreateTemplate />} />
+        <Route
+          path="/read-editor/:userId/:campaignId"
+          element={<Readmainpage />}
+        />
+        <Route
+          path="/click-editor/:userId/:campaignId"
+          element={<Clickmainpage />}
+        />
+        <Route
+          path="/clicksingle-editor/:userId/:campaignId"
+          element={<Clicksinglemainpage />}
+        />
         <Route path="/home" element={<Home />} />
-<Route 
-  path="/campaigntable" 
-  element={<CampaignTable key={Date.now()} />} />
+        <Route
+          path="/campaigntable"
+          element={<CampaignTable key={Date.now()} />}
+        />
         <Route path="/campaign" element={<Campaign />} />
         <Route path="/TemMainpage" element={<TemMainpage />} />
         <Route path="/birthdayedit" element={<Birthdayeditor />} />
         <Route path="/paymentedit" element={<Paymenteditor />} />
         <Route path="/remaindertable" element={<RemainderTable />} />
-        <Route path="/forgetpassword" element={<Forgetpassword />} /> 
-        <Route path="/verifyotp" element={<Verifyotp />} /> 
-        <Route path="/resetpassword" element={<Resetpasswords />} /> 
-        <Route path="/readreport/:userId/:campaignId" element={<ReadReport />} />
-        <Route path="/readreportremainder/:userId/:campaignId" element={<Readreportremainder />} />
+        <Route path="/forgetpassword" element={<Forgetpassword />} />
+        <Route path="/verifyotp" element={<Verifyotp />} />
+        <Route path="/resetpassword" element={<Resetpasswords />} />
+        <Route
+          path="/readreport/:userId/:campaignId"
+          element={<ReadReport />}
+        />
+        <Route
+          path="/readreportremainder/:userId/:campaignId"
+          element={<Readreportremainder />}
+        />
         <Route path="*" element={<ErrorPage />} />
       </Routes>
     </Router>

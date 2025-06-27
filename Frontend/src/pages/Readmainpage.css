@@ -876,9 +876,8 @@ button[data-tooltip]:hover::after {
 
 .image-item {
     width: 190px !important;
-    height: auto;
+    height: 190px !important;
     cursor: pointer;
-    border-radius: 10px;
 }
 
 .text-item {
@@ -1449,9 +1448,8 @@ input:checked+.slider-send:before {
 
     .image-item {
         width: 120px !important;
-        height: auto;
+        height: 120px !important;
         cursor: pointer;
-        border-radius: 3px;
     }
 
     .text-item {
@@ -2013,13 +2011,12 @@ input:checked+.slider-send:before {
 
     .image-item {
         width: 140px !important;
-        height: auto;
+        height: 140px !important;
         cursor: pointer;
-        border-radius: 3px;
     }
 
     .text-item {
-        width: 220px;
+        width: 300px;
         height: 140px !important;
         font-size: 12px;
         padding: 0px 5px !important;
@@ -2221,9 +2218,8 @@ input:checked+.slider-send:before {
 
     .image-item {
         width: 120px !important;
-        height: auto;
+        height: 120px !important;
         cursor: pointer;
-        border-radius: 3px;
     }
 
     .border-btn{
@@ -2231,7 +2227,7 @@ input:checked+.slider-send:before {
     }
 
     .text-item {
-        width: 220px;
+        width: 300px;
         height: 120px !important;
         font-size: 12px;
         padding: 0px 5px !important;
