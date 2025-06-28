@@ -1413,7 +1413,7 @@ const percentageData = [
     handleCampaignView();
   }}
 >
-  <FaRegClipboard className="icons-side" />
+  <FaBullhorn className="icons-side" />
   <button className="sidebar-button campaign-button">Campaign</button>
 </div>
 
