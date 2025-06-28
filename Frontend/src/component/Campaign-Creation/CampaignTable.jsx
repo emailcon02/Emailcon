@@ -20,8 +20,7 @@ function CampaignTable() {
   const [activeCampaignId, setActiveCampaignId] = useState(null); 
   const [selectedCampaigns, setSelectedCampaigns] = useState([]);
   const [selectAll, setSelectAll] = useState(false);
-  // const [showDeleteAllConfirm, setShowDeleteAllConfirm] = useState(false);
-   const [sortOrder, setSortOrder] = useState("desc");
+  //  const [sortOrder, setSortOrder] = useState("desc");
      const [filteredCampaign, setFilteredCampaign] = useState([]);
       const [searchTerm, setSearchTerm] = useState("");
       const [fromDate, setFromDate] = useState("");
@@ -166,33 +165,42 @@ const refreshCampaigns = async () => {
 };
 
 useEffect(() => {
-  const fetchCampaigns = async () => {
-    if (!user?.id) {
-      navigate("/user-login");
-      return;
-    }
-    try {
-      const response = await axios.get(`${apiConfig.baseURL}/api/stud/campaigns/${user.id}`);
+  const fetchCampaigns = async () => { 
+  if (!user?.id) {
+    navigate("/user-login");
+    return;
+  }
 
-      const sortedCampaigns = response.data.sort(
-        (a, b) => new Date(b.senddate) - new Date(a.senddate)
-      );
-
-      const filteredCampaigns = sortedCampaigns.filter(campaign => {
-        const campaignName = campaign.campaignname?.toLowerCase() || "";
-        return !campaignName.includes("birthday campaign");
-      });
-
-      setCampaigns(filteredCampaigns);
-      setFilteredCampaign(filteredCampaigns);
-    } catch (error) {
-      console.error("Error fetching campaigns", {
-        message: error.message,
-        stack: error.stack,
-        response: error.response?.data,
-      });
-    }
+  const parseDate = (dateStr) => {
+    const [datePart, timePart] = dateStr.split(', ');
+    const [day, month, year] = datePart.split('/').map(Number);
+    const [hours, minutes, seconds] = timePart.split(':').map(Number);
+    return new Date(year, month - 1, day, hours, minutes, seconds);
   };
+
+  try {
+    const response = await axios.get(`${apiConfig.baseURL}/api/stud/campaigns/${user.id}`);
+
+    const sortedCampaigns = response.data.sort(
+      (a, b) => parseDate(b.senddate) - parseDate(a.senddate)
+    );
+
+    const filteredCampaigns = sortedCampaigns.filter(campaign => {
+      const campaignName = campaign.campaignname?.toLowerCase() || "";
+      return !campaignName.includes("birthday campaign");
+    });
+
+    setCampaigns(filteredCampaigns);
+    setFilteredCampaign(filteredCampaigns);
+  } catch (error) {
+    console.error("Error fetching campaigns", {
+      message: error.message,
+      stack: error.stack,
+      response: error.response?.data,
+    });
+  }
+};
+
 
   const shouldRefresh = localStorage.getItem("refreshCampaigns");
 
@@ -628,64 +636,67 @@ const isValidEmail = (email) => {
         </div>
       </div>
 
-      <div className="search-bar-search" style={{ marginTop: "20px" }}>
-        <div className="search-container-table">
-          <FaSearch className="search-icon" />
-          <input
-            type="text"
-            placeholder="Search across all columns..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="search-input"
-          />
-        </div>
-      </div>
-
-      <div className="admin-dashboard-table-header">
-        <div className="rows-dropdown-left">
-          <label htmlFor="rowsPerPage">Rows per page:</label>
-          <select
-            id="rowsPerPage"
-            value={rowsPerPage}
-            onChange={(e) => {
-              const value =
-                e.target.value === "all"
-                  ? filteredCampaign.length
-                  : parseInt(e.target.value);
-              setRowsPerPage(value);
-              setCurrentPage(1);
-            }}
-          >
-            <option value={20}>20</option>
-            <option value={50}>50</option>
-            <option value={100}>100</option>
-            <option value="all">All</option>
-          </select>
-        </div>
-
-        <div className="date-filter">
-          <label>From:</label>
-          <input
-            type="date"
-            value={fromDate}
-            onChange={(e) => setFromDate(e.target.value)}
-          />
-
-          <label>To:</label>
-          <input
-            type="date"
-            value={toDate}
-            onChange={(e) => setToDate(e.target.value)}
-          />
-
-          <button onClick={resetFilter}>Reset</button>
-        </div>
-      </div>
+  <div className="search-bar-search" style={{marginTop:"20px"}}>
+                  <div className="search-container-table">
+                    <FaSearch className="search-icon" />
+                    <input
+                      type="text"
+                      placeholder="Search across all columns..."
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      className="search-input"
+                    />
+                  </div>
+                </div>
+        
+                <div className="admin-dashboard-table-header">
+                  <div className="rows-dropdown-left">
+                    <label htmlFor="rowsPerPage">Rows per page:</label>
+                    <select
+                      id="rowsPerPage"
+                      value={rowsPerPage}
+                      onChange={(e) => {
+                        const value =
+                          e.target.value === "all"
+                            ? filteredCampaign.length
+                            : parseInt(e.target.value);
+                        setRowsPerPage(value);
+                        setCurrentPage(1);
+                      }}
+                    >
+                      <option value={20}>20</option>
+                      <option value={50}>50</option>
+                      <option value={100}>100</option>
+                      <option value="all">All</option>
+                    </select>
+                  </div>
+        
+                  <div className="date-filter">
+                    <label>From:</label>
+                    <input
+                      type="date"
+                      value={fromDate}
+                      onChange={(e) => setFromDate(e.target.value)}
+                    />
+        
+                    <label>To:</label>
+                    <input
+                      type="date"
+                      value={toDate}
+                      onChange={(e) => setToDate(e.target.value)}
+                    />
+        
+                    <button onClick={resetFilter}>Reset</button>
+                  </div>
+                </div>
 
      <div style={{ display: 'flex', gap: '10px', marginBottom: '10px' }}>
-  <button onClick={handleDeleteAllSelected} className="delete-all-btn">
-    Delete All
-  </button>
+ <button
+  onClick={() => setShowDeleteAllConfirm(true)}
+  className="delete-all-btn"
+>
+  Delete All
+</button>
   <button 
     onClick={refreshCampaigns} 
     className="refresh-btn"
@@ -704,11 +715,12 @@ const isValidEmail = (email) => {
     <FaSync /> 
   </button>
 </div>
+
       <div className="cam-scroll" style={{ overflowX: "auto" }}>
         <table className="cam-dashboard-table">
           <thead>
             <tr>
-              <th>
+            <th>
                 Select{" "}
                 <input
                   type="checkbox"
@@ -717,8 +729,10 @@ const isValidEmail = (email) => {
                 />
               </th>
               <th>S.No</th>
-              <th>Send Date</th>
-              <th>Campaign Name</th>
+      <th>
+        Send Date 
+      </th>               
+       <th>Campaign Name</th>
               <th>Group Name</th>
               <th>Total Count</th>
               <th>Send Count</th>
@@ -730,17 +744,17 @@ const isValidEmail = (email) => {
             </tr>
           </thead>
           <tbody>
-            {currentUsers && currentUsers.length > 0 ? (
-              currentUsers.map((campaign) => (
-                <tr key={campaign._id}>
-                  <td>
+         {currentUsers && currentUsers.length > 0 ? (
+                currentUsers.map((campaign, index) => (
+        <tr key={campaign._id}>
+                   <td>
                     <input
                       type="checkbox"
                       checked={selectedCampaigns.includes(campaign._id)}
                       onChange={() => handleCheckboxChange(campaign._id)}
                     />
                   </td>
-                  <td>{campaigns.indexOf(campaign) + 1}</td>
+                  <td>{index + 1}</td>
                   <td>{campaign.senddate}</td>
                   <td>{campaign.campaignname}</td>
                   <td>{campaign.groupname}</td>
@@ -813,61 +827,54 @@ const isValidEmail = (email) => {
                     </td>
                   )}
 
-                  <td
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent:
-                        campaign.status === "Success" ||
-                        campaign.status === "Failed"
-                          ? "center"
-                          : "flex-start",
-                      fontWeight: "bold",
-                      color:
-                        campaign.status === "Success"
-                          ? "green"
-                          : campaign.status === "Failed"
-                          ? "red"
-                          : "#2f327d",
-                    }}
-                  >
-                    {campaign.status === "Scheduled On" ||
-                    campaign.status === "Scheduled Off" ? (
-                      <>
-                        <span>{campaign.status}</span>
-                        <label
-                          className="toggle-switch"
-                          style={{ marginLeft: "15px" }}
-                        >
-                          <input
-                            type="checkbox"
-                            checked={campaign.status === "Scheduled On"}
-                            onChange={(e) => handleToggle(e, campaign._id)}
-                          />
-                          <span className="slider"></span>
-                        </label>
-                      </>
-                    ) : (
-                      <>
-                        <span>
-                          {campaign.status} - {campaign.progress}%
-                        </span>
+<td
+  style={{
+    display: "flex",
+    alignItems: "center",
+    justifyContent:
+      campaign.status === "Success" || campaign.status === "Failed"
+        ? "center"
+        : "flex-start",
+    fontWeight: "bold",
+    color:
+      campaign.status === "Success"
+        ? "green"
+        : campaign.status === "Failed"
+        ? "red"
+        : "#2f327d",
+  }}
+>
+  {campaign.status === "Scheduled On" || campaign.status === "Scheduled Off" ? (
+    <>
+      <span>{campaign.status}</span>
+      <label className="toggle-switch" style={{ marginLeft: "15px" }}>
+        <input
+          type="checkbox"
+          checked={campaign.status === "Scheduled On"}
+          onChange={(e) => handleToggle(e, campaign._id)}
+        />
+        <span className="slider"></span>
+      </label>
+    </>
+  ) : (
+    <>
+      <span>
+        {campaign.status} - {campaign.progress}%
+      </span>
 
-                        {campaign.status === "Failed" && (
-                          <button
-                            className="resend-btn"
-                            onClick={() => handleResend(campaign._id)}
-                            disabled={processingCampaigns[campaign._id]}
-                            style={{ marginLeft: "10px" }}
-                          >
-                            {processingCampaigns[campaign._id]
-                              ? "Resending..."
-                              : "Resend"}
-                          </button>
-                        )}
-                      </>
-                    )}
-                  </td>
+      {campaign.status === "Failed" && (
+        <button
+          className="resend-btn"
+          onClick={() => handleResend(campaign._id)}
+          disabled={processingCampaigns[campaign._id]}
+          style={{ marginLeft: "10px" }}
+        >
+          {processingCampaigns[campaign._id] ? "Resending..." : "Resend"}
+        </button>
+      )}
+    </>
+  )}
+</td>
 
                   <td>
                     <button
@@ -877,18 +884,16 @@ const isValidEmail = (email) => {
                       View
                     </button>
                   </td>
-                  <td>
-                    {" "}
-                    <button
-                      className="resend-btn edit-btn-campaign"
-                      onClick={() => {
-                        setSelectedBirthdayCampaignId(campaign._id);
-                        setShowBirthdayDeleteModal(true);
-                      }}
-                    >
-                      <FaTrash />
-                    </button>
-                  </td>
+                  <td>  <button
+                                        className="resend-btn edit-btn-campaign"
+                                        onClick={() => {
+                                          setSelectedBirthdayCampaignId(campaign._id);
+                                          setShowBirthdayDeleteModal(true);
+                                        }}
+                                        >
+                  <FaTrash/>
+                  </button></td>
+
                 </tr>
               ))
             ) : (
@@ -902,26 +907,26 @@ const isValidEmail = (email) => {
         </table>
       </div>
 
-      {/* Pagination */}
-      <div className="pagination-container">
-        <div className="pagination-controls">
-          <button
-            disabled={currentPage === 1}
-            onClick={() => setCurrentPage((p) => p - 1)}
-          >
-            Prev
-          </button>
-          <span>
-            Page {currentPage} of {totalPages}
-          </span>
-          <button
-            disabled={currentPage === totalPages}
-            onClick={() => setCurrentPage((p) => p + 1)}
-          >
-            Next
-          </button>
+  {/* Pagination */}
+        <div className="pagination-container">
+          <div className="pagination-controls">
+            <button
+              disabled={currentPage === 1}
+              onClick={() => setCurrentPage((p) => p - 1)}
+            >
+              Prev
+            </button>
+            <span>
+              Page {currentPage} of {totalPages}
+            </span>
+            <button
+              disabled={currentPage === totalPages}
+              onClick={() => setCurrentPage((p) => p + 1)}
+            >
+              Next
+            </button>
+          </div>
         </div>
-      </div>
 
       <ToastContainer
         className="custom-toast"
@@ -937,70 +942,71 @@ const isValidEmail = (email) => {
 
       {/* delete modal */}
       {showBirthdayDeleteModal && (
-        <div
+  <div
+    style={{
+      position: "fixed",
+      top: 0,
+      left: 0,
+      width: "100%",
+      height: "100%",
+      backgroundColor: "rgba(0, 0, 0, 0.4)", // <-- Less opaque for more transparency
+      display: "flex",
+      justifyContent: "center",
+      alignItems: "center",
+      zIndex: 9999,
+    }}
+  >
+    <div
+      style={{
+        backgroundColor: "#fff",
+        padding: "20px",
+        borderRadius: "8px",
+        textAlign: "center",
+        minWidth: "300px",
+        boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
+      }}
+    >
+      <h3>Delete Campaign History</h3>
+      <p>Are you sure you want to delete this campaign history?</p>
+      <div style={{ marginTop: "20px" }}>
+        <button
+          onClick={() => {
+            handleDeleteCampaignHistory(selectedBirthdayCampaignId);
+            setShowBirthdayDeleteModal(false);
+            setSelectedBirthdayCampaignId(null);
+          }}
           style={{
-            position: "fixed",
-            top: 0,
-            left: 0,
-            width: "100%",
-            height: "100%",
-            backgroundColor: "rgba(0, 0, 0, 0.4)", // <-- Less opaque for more transparency
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            zIndex: 9999,
+            marginRight: "10px",
+            backgroundColor: "#f48c06",
+            color: "#fff",
+            border: "none",
+            padding: "8px 16px",
+            borderRadius: "4px",
+            cursor: "pointer",
           }}
         >
-          <div
-            style={{
-              backgroundColor: "#fff",
-              padding: "20px",
-              borderRadius: "8px",
-              textAlign: "center",
-              minWidth: "300px",
-              boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
-            }}
-          >
-            <h3>Delete Campaign History</h3>
-            <p>Are you sure you want to delete this campaign history?</p>
-            <div style={{ marginTop: "20px" }}>
-              <button
-                onClick={() => {
-                  handleDeleteCampaignHistory(selectedBirthdayCampaignId);
-                  setShowBirthdayDeleteModal(false);
-                  setSelectedBirthdayCampaignId(null);
-                }}
-                style={{
-                  marginRight: "10px",
-                  backgroundColor: "#f48c06",
-                  color: "#fff",
-                  border: "none",
-                  padding: "8px 16px",
-                  borderRadius: "4px",
-                  cursor: "pointer",
-                }}
-              >
-                OK
-              </button>
-              <button
-                onClick={() => {
-                  setShowBirthdayDeleteModal(false);
-                  setSelectedBirthdayCampaignId(null);
-                }}
-                style={{
-                  backgroundColor: "#ccc",
-                  border: "none",
-                  padding: "8px 16px",
-                  borderRadius: "4px",
-                  cursor: "pointer",
-                }}
-              >
-                Cancel
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+          OK
+        </button>
+        <button
+          onClick={() => {
+            setShowBirthdayDeleteModal(false);
+            setSelectedBirthdayCampaignId(null);
+          }}
+          style={{
+            backgroundColor: "#ccc",
+            border: "none",
+            padding: "8px 16px",
+            borderRadius: "4px",
+            cursor: "pointer",
+          }}
+        >
+          Cancel
+        </button>
+      </div>
+    </div>
+  </div>
+)}
+
 
       {/* Modal for Failed Emails */}
       {showModal && (

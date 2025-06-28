@@ -84,7 +84,9 @@ const handleRefreshAndCloseModals = (e) => {
   setShowallClickModal(false);
   setShowOverallClickModal(false);
   setShowAnalysisModal(false);
-  window.location.reload();
+  setTimeout(() => {
+    window.location.reload();
+  }, 1000);
 }
 
   // Close Modal

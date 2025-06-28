@@ -16,6 +16,7 @@ import {
   FaFolder,
   FaRegArrowAltCircleUp,
   FaThLarge,
+  FaTachometerAlt,
 } from "react-icons/fa";
 import "./Home.css";
 import { useNavigate } from "react-router-dom";
@@ -41,9 +42,27 @@ import EditProfile from "./EditProfile.jsx";
 import ParaEditor from "./ParaEditor.jsx";
 import Logo from "../../Images/emailcon_svg_logo.svg";
 import FileManagerModal from "../../pages/FilemanagerModal.jsx";
+import { FaBullhorn,FaCogs, FaSave } from "react-icons/fa";
+// import {
+//   LineChart,
+//   Line,
+//   XAxis,
+//   YAxis,
+//   CartesianGrid,
+//   Tooltip,
+//   ResponsiveContainer,
+//   Legend,
+//   AreaChart,
+//   Area,
+//   PieChart,
+//   Pie,
+//   Cell,
+// } from "recharts";
+
+
 
 const Home = () => {
-  const [view, setView] = useState("main");
+  const [view, setView] = useState("dashboard");
   const [showCampaignModal, setShowCampaignModal] = useState(false);
   const [showTemplateModal, setShowTemplateModal] = useState(false);
   const [showCampaignModalTem, setShowCampaignModalTem] = useState(false);
@@ -122,6 +141,76 @@ const Home = () => {
   const [selectedDraggedImageId, setSelectedDraggedImageId] = useState(null);
 const [pendingFolderMove, setPendingFolderMove] = useState(null);
 const [showMoveConfirmModal, setShowMoveConfirmModal] = useState(false);
+const [totalCampaigns, setTotalCampaigns] = useState(0);
+const [totalContacts, setTotalContacts] = useState(0);
+const username = users?.username || user?.username || "User";
+const today = new Date().toLocaleDateString();
+
+
+
+// dashboard total campaign  
+useEffect(() => {
+  const fetchCampaignsCount = async () => {
+    if (!user?.id) return;
+    try {
+      const response = await axios.get(`${apiConfig.baseURL}/api/stud/campaigns/${user.id}`);
+      // Filter out birthday campaigns if needed, like in CampaignTable
+      const filtered = response.data.filter(campaign => {
+        const name = campaign.campaignname?.toLowerCase() || "";
+        return !name.includes("birthday campaign");
+      });
+      setTotalCampaigns(filtered.length);
+    } catch (error) {
+      setTotalCampaigns(0);
+    }
+  };
+  fetchCampaignsCount();
+}, [user?.id]);
+
+
+useEffect(() => {
+  const fetchContactsCount = async () => {
+    try {
+      const response = await axios.get(`${apiConfig.baseURL}/api/stud/students`);
+
+      const filteredContacts = response.data.filter(
+        contact => contact.group?.user === user.id
+      );
+
+      setTotalContacts(filteredContacts.length);
+    } catch (error) {
+      console.error("Error fetching contacts:", error);
+      setTotalContacts(0);
+    }
+  };
+
+  if (user?.id) {
+    fetchContactsCount();
+  }
+}, [user?.id]);
+
+
+const totalSum =
+  totalCampaigns + totalContacts + birthtemplates.length + campaigns.length;
+
+const percentageData = [
+  {
+    name: "Campaigns",
+    value: ((totalCampaigns / totalSum) * 100).toFixed(2),
+  },
+  {
+    name: "Contacts",
+    value: ((totalContacts / totalSum) * 100).toFixed(2),
+  },
+  {
+    name: "Automation",
+    value: ((birthtemplates.length / totalSum) * 100).toFixed(2),
+  },
+  {
+    name: "Saved",
+    value: ((campaigns.length / totalSum) * 100).toFixed(2),
+  },
+];
 
 
   const handleDeleteFolder = async () => {
@@ -688,6 +777,10 @@ const [showMoveConfirmModal, setShowMoveConfirmModal] = useState(false);
     setActiveOption("");
   };
 
+  const handleDashboardView = () => {
+    setView("dashboard");
+  };
+
   const toggleDropdown = () => {
     setIsEditingProfile(true);
   };
@@ -737,7 +830,7 @@ const [showMoveConfirmModal, setShowMoveConfirmModal] = useState(false);
     setShowPopup(false); // Close the modal
   };
   const handleMainView = () => {
-    setView("main");
+    setView("dashboard");
   };
 
   const handleTemplateView = () => {
@@ -1302,43 +1395,70 @@ const [showMoveConfirmModal, setShowMoveConfirmModal] = useState(false);
             </h2> */}
             <img src={Logo} alt="img_logo" className="logo_img" onClick={handleMainView}/>
             <div className="sidebar-btn-set">
-              <div className="sidebar-btn-flex" onClick={handleCampaignView}>
-                <FaRegClipboard className="icons-side" />
-                <button className="sidebar-button campaign-button">
-                  Campaign
-                </button>
-              </div>
 
-              <div className="sidebar-btn-flex" onClick={handleContactView}>
-                <FaUserPlus className="icons-side contact-create-icon" />
-                <button className="sidebar-button contact-button">
-                  Contact
+              <div className={`sidebar-btn-flex ${view === "dashboard" ? "active-tab" : ""}`}
+              onClick= {() => {
+                setView("dashboard");
+                handleDashboardView();
+              }}>
+                <FaTachometerAlt className="icons-side" />
+                <button className="sidebar-button Dashboard-button">
+                  Dashboard
                 </button>
               </div>
+       <div
+  className={`sidebar-btn-flex ${view === "campaign" ? "active-tab" : ""}`}
+  onClick={() => {
+    setView("campaign");
+    handleCampaignView();
+  }}
+>
+  <FaRegClipboard className="icons-side" />
+  <button className="sidebar-button campaign-button">Campaign</button>
+</div>
 
-              <div className="sidebar-btn-flex" onClick={handleTemplateView}>
-                <FaThLarge className="icons-side campaign-icon" />
-                <button className="sidebar-button contact-button">
-                  Templates
-                </button>
-              </div>
+<div
+  className={`sidebar-btn-flex ${view === "contact" ? "active-tab" : ""}`}
+  onClick={() => {
+    setView("contact");
+    handleContactView();
+  }}
+>
+  <FaUserPlus className="icons-side contact-create-icon" />
+  <button className="sidebar-button contact-button">Contact</button>
+</div>
 
-              <div className="sidebar-btn-flex" onClick={handleRemainderrview}>
-                <FaListAlt className="icons-side campaign-template-icon" />
-                <button className="sidebar-button contact-button">
-                  Automation
-                </button>
-              </div>
+<div
+  className={`sidebar-btn-flex ${view === "template" ? "active-tab" : ""}`}
+  onClick={() => {
+    setView("template");
+    handleTemplateView();
+  }}
+>
+  <FaThLarge className="icons-side campaign-icon" />
+  <button className="sidebar-button contact-button">Templates</button>
+</div>
 
-              <div
-                className="sidebar-btn-flex"
-                onClick={() => setActiveTablayout(true)}
-              >
-                <FaFolder className="icons-side campaign-template-icon" />
-                <button className="sidebar-button contact-button">
-                  File Manager
-                </button>
-              </div>
+<div
+  className={`sidebar-btn-flex ${view === "remainder" ? "active-tab" : ""}`}
+  onClick={() => {
+    setView("remainder");
+    handleRemainderrview();
+  }}
+>
+  <FaListAlt className="icons-side campaign-template-icon" />
+  <button className="sidebar-button contact-button">Automation</button>
+</div>
+
+<div
+  className="sidebar-btn-flex"
+  onClick={() => {
+    setActiveTablayout(true);
+  }}
+>
+  <FaFolder className="icons-side campaign-template-icon" />
+  <button className="sidebar-button contact-button">File Manager</button>
+</div>
             </div>
 
             {/* <button
@@ -2272,6 +2392,44 @@ const [showMoveConfirmModal, setShowMoveConfirmModal] = useState(false);
                 </div>
               </div>
             )}
+             {view === "dashboard" && (
+        <div className="dashboard-content">
+          <div className="dashboard-welcome-box">
+            <div className="dashboard-welcome-left">
+              <h2 className="dashboard-title-modern">Welcome back, {username} 👋</h2>
+              <p className="dashboard-subtitle-modern">
+                Today is {today}. Here's a quick summary of your campaigns.
+              </p>
+            </div>
+          </div>
+
+          <div className="card-dashboard-container">
+            <div className="cards-dashboard">
+              <div className="card-inner-text"><FaBullhorn /></div>
+              <p className="card-text-content">Total Campaigns</p>
+              <p className="card-text-highlight">{totalCampaigns}</p>
+            </div>
+
+            <div className="cards-dashboard">
+              <div className="card-inner-text"><FaUsers /></div>
+              <p className="card-text-content">Total Contacts</p>
+              <p className="card-text-highlight">{totalContacts}</p>
+            </div>
+
+            <div className="cards-dashboard">
+              <div className="card-inner-text"><FaCogs /></div>
+              <p className="card-text-content">Total Automation</p>
+              <p className="card-text-highlight">{birthtemplates.length}</p>
+            </div>
+
+            <div className="cards-dashboard">
+              <div className="card-inner-text"><FaSave /></div>
+              <p className="card-text-content">Saved Template</p>
+              <p className="card-text-highlight">{campaigns.length}</p>
+            </div>
+          </div>
+        </div>
+      )}
 
             {view === "campaign" && (
               <div className="card-grid">
@@ -2301,6 +2459,10 @@ const [showMoveConfirmModal, setShowMoveConfirmModal] = useState(false);
 
             {view === "remainder" && (
               <div className="card-grid-auto">
+                <div className="cards cards-auto" onClick={openModal}>
+                  <FaBell className="icons campaign-automation-icon" />
+                  <span className="card-texts">Create Automation</span>
+                </div>
                 <div
                   className="cards cards-auto"
                   onClick={handleselectremainder}
@@ -2308,7 +2470,10 @@ const [showMoveConfirmModal, setShowMoveConfirmModal] = useState(false);
                   <FaRegFileAlt className="icons campaign-create-icon" />
                   <span className="card-texts">Create Automation Template</span>
                 </div>
-
+                 <div className="cards cards-auto" onClick={handleopenbirthtem}>
+                  <FaListAlt className="icons campaign-template-icon" />
+                  <span className="card-texts">Automation Templates</span>
+                </div>
                 <div
                   className="cards cards-auto"
                   onClick={handleremainderhistory}
@@ -2316,16 +2481,7 @@ const [showMoveConfirmModal, setShowMoveConfirmModal] = useState(false);
                   <FaHistory className="icons campaign-history-icon" />
                   <span className="card-texts">Automation History</span>
                 </div>
-
-                <div className="cards cards-auto" onClick={handleopenbirthtem}>
-                  <FaListAlt className="icons campaign-template-icon" />
-                  <span className="card-texts">Automation Templates</span>
-                </div>
-
-                <div className="cards cards-auto" onClick={openModal}>
-                  <FaBell className="icons campaign-automation-icon" />
-                  <span className="card-texts">Create Automation</span>
-                </div>
+                
               </div>
             )}
 
@@ -5122,6 +5278,9 @@ const [showMoveConfirmModal, setShowMoveConfirmModal] = useState(false);
       </div>
       <div className="dwn-menu">
         <div className="mobile-menu">
+           <button className="sidebar-button-mobile campaign-button" onClick={handleDashboardView}>
+  Dashboard
+</button>
         <button className="sidebar-button-mobile campaign-button" onClick={handleCampaignView}>
   Campaign
 </button>
