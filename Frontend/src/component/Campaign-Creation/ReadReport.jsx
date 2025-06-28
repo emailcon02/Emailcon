@@ -75,6 +75,17 @@ const ReadReport = () => {
     setEmailClickData(clickData); // Set emails + timestamps for modal
     setShowClickModal(true);
   };
+const handleRefreshAndCloseModals = (e) => {
+  e.stopPropagation(); // Prevent event bubbling to parent elements
+  setShowModal(false);
+  setShowdelModal(false);
+  setShowfailModal(false);
+  setShowClickModal(false);
+  setShowallClickModal(false);
+  setShowOverallClickModal(false);
+  setShowAnalysisModal(false);
+  window.location.reload();
+}
 
   // Close Modal
   const handleCloseClickModal = () => {
