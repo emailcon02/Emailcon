@@ -1123,15 +1123,16 @@ function formatPreviewContent(message) {
   const handleItemClick = (index) => {
     setSelectedIndex(index); // Set the selected index when an item is clicked
     // Scroll to style controls after a short delay to ensure rendering
-    setTimeout(() => {
-      const styleControlsElement = document.querySelector(".style-controls");
-      if (styleControlsElement) {
-        styleControlsElement.scrollIntoView({
-          behavior: "smooth",
-          block: "center",
-        });
-      }
-    }, 100);
+   setTimeout(() => {
+  const styleControlsElement = document.querySelector(".style-controls");
+  if (styleControlsElement) {
+    styleControlsElement.scrollIntoView({
+      behavior: "smooth",
+      block: "nearest", // Changed from "center" to "nearest"
+      inline: "start"
+    });
+  }
+}, 300);
   };
   const handleItemClickdesktop = (index) => {
     setSelectedIndex(index); // Set the selected index when an item is clicked
@@ -5967,6 +5968,10 @@ if(
                       onDrop={() => handleDrop(index)}
                       className="content-item"
                       onClick={() => handleItemClick(index)}
+onTouchStart={(e) => {
+  e.preventDefault();
+  handleItemClick(index);
+}}
                       style={item.style}
                     >
                       {item.type === "para" && (
@@ -6561,7 +6566,11 @@ if(
                         </button>
                         <button
                           className="edit-desktop-btn"
-                          onClick={() => handleItemClickdesktop(index)}
+                          onClick={() => handleItemClick(index)}
+                           onTouchEnd={(e) => {
+    e.stopPropagation();
+    handleItemClickdesktop(index);
+  }}
                         >
                           <FiEdit />
                         </button>
