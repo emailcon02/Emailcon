@@ -34,27 +34,51 @@ const [showDeleteAllConfirm, setShowDeleteAllConfirm] = useState(false);
     const navigate = useNavigate();
     const location = useLocation();
 
+useEffect(() => {
+  filterCampaigns();
+}, [searchTerm, fromDate, toDate, campaigns]);
+
+const parseDate = (dateStr) => {
+  if (!dateStr) return new Date(0); // fallback for invalid dates
   
+  // Try ISO format first
+  if (dateStr.includes('T')) {
+    return new Date(dateStr);
+  }
 
- // Remove this function
-// const handleSortByDate = () => {
-//   const sorted = [...filteredCampaign].sort((a, b) => {
-//     const dateA = new Date(a.senddate);
-//     const dateB = new Date(b.senddate);
-//     return sortOrder === "asc" ? dateA - dateB : dateB - dateA;
-//   });
-
-//   setFilteredCampaign(sorted);
-//   setSortOrder(sortOrder === "asc" ? "desc" : "asc");
-// };
-
+  // Handle multiple date formats
+  try {
+    // Format 1: "21/06/2025, 19:38:56" (DD/MM/YYYY, 24-hour)
+    if (/^\d{1,2}\/\d{1,2}\/\d{4}, \d{1,2}:\d{2}:\d{2}$/.test(dateStr)) {
+      const [datePart, timePart] = dateStr.split(', ');
+      const [day, month, year] = datePart.split('/').map(Number);
+      const [hours, minutes, seconds] = timePart.split(':').map(Number);
+      return new Date(year, month - 1, day, hours, minutes, seconds);
+    }
     
+    // Format 2: "6/30/2025, 11:00:49 AM" (MM/DD/YYYY, AM/PM)
+    if (/^\d{1,2}\/\d{1,2}\/\d{4}, \d{1,2}:\d{2}:\d{2} [AP]M$/.test(dateStr)) {
+      const [datePart, timePart] = dateStr.split(', ');
+      const [month, day, year] = datePart.split('/').map(Number);
+      const [time, period] = timePart.split(' ');
+      let [hours, minutes, seconds] = time.split(':').map(Number);
+      
+      // Convert to 24-hour format
+      if (period === 'PM' && hours < 12) hours += 12;
+      if (period === 'AM' && hours === 12) hours = 0;
+      
+      return new Date(year, month - 1, day, hours, minutes, seconds);
+    }
+  } catch (e) {
+    console.error('Error parsing date:', dateStr, e);
+  }
   
-   useEffect(() => {
-      filterCampaigns();
-    }, [searchTerm, fromDate, toDate, campaigns]);
-  
-   const filterCampaigns = () => {
+  // Fallback to native Date parsing
+  const parsed = new Date(dateStr);
+  return isNaN(parsed) ? new Date(0) : parsed;
+};
+
+const filterCampaigns = () => {
   let filtered = [...campaigns];
 
   // Apply search
@@ -71,7 +95,7 @@ const [showDeleteAllConfirm, setShowDeleteAllConfirm] = useState(false);
   // Apply senddate filter
   if (fromDate || toDate) {
     filtered = filtered.filter((campaign) => {
-      const campaignDate = new Date(campaign.senddate);
+      const campaignDate = parseDate(campaign.senddate);
       const start = fromDate ? new Date(fromDate) : null;
       const end = toDate
         ? new Date(new Date(toDate).setHours(23, 59, 59, 999))
@@ -84,25 +108,74 @@ const [showDeleteAllConfirm, setShowDeleteAllConfirm] = useState(false);
     });
   }
 
-  // Always sort by senddate in descending order (newest first)
-  filtered.sort((a, b) => new Date(b.senddate) - new Date(a.senddate));
+  // Sort by parsed date in descending order (newest first)
+  filtered.sort((a, b) => {
+    const dateA = parseDate(a.senddate);
+    const dateB = parseDate(b.senddate);
+    return dateB - dateA;
+  });
 
   setFilteredCampaign(filtered);
   setCurrentPage(1); // Reset page after filtering
 };
 
+useEffect(() => {
+  const fetchCampaigns = async () => { 
+    if (!user?.id) {
+      navigate("/user-login");
+      return;
+    }
+
+    try {
+      const response = await axios.get(`${apiConfig.baseURL}/api/stud/campaigns/${user.id}`);
+
+      // Parse and sort campaigns by date (newest first)
+      const sortedCampaigns = response.data.sort(
+        (a, b) => parseDate(b.senddate) - parseDate(a.senddate)
+      );
+
+      // Filter out birthday campaigns
+      const filteredCampaigns = sortedCampaigns.filter(campaign => {
+        const campaignName = campaign.campaignname?.toLowerCase() || "";
+        return !campaignName.includes("birthday campaign");
+      });
+
+      console.log("Fetched and sorted campaigns:", filteredCampaigns.map(c => ({
+        name: c.campaignname,
+        date: c.senddate,
+        parsed: parseDate(c.senddate)
+      })));
+
+      setCampaigns(filteredCampaigns);
+      setFilteredCampaign(filteredCampaigns);
+    } catch (error) {
+      console.error("Error fetching campaigns", {
+        message: error.message,
+        stack: error.stack,
+        response: error.response?.data,
+      });
+    }
+  };
+
+  const shouldRefresh = localStorage.getItem("refreshCampaigns");
+  if (shouldRefresh === "true") {
+    localStorage.removeItem("refreshCampaigns");
+    fetchCampaigns(); // Refresh only
+  } else {
+    fetchCampaigns(); // Initial load
+  }
+}, [user?.id, navigate]);
+
 const indexOfLast = currentPage * rowsPerPage;
 const indexOfFirst = indexOfLast - rowsPerPage;
-const currentUsers = filteredCampaign.slice(indexOfFirst, indexOfLast); // change from campaigns
+const currentUsers = filteredCampaign.slice(indexOfFirst, indexOfLast);
 const totalPages = Math.ceil(filteredCampaign.length / rowsPerPage);
 
-  
-    const resetFilter = () => {
-      setSearchTerm("");
-      setFromDate("");
-      setToDate("");
-    };
-  
+const resetFilter = () => {
+  setSearchTerm("");
+  setFromDate("");
+  setToDate("");
+};
 
   // Function to handle "Select All" checkbox toggle
   const handleSelectAll = () => {
@@ -146,76 +219,6 @@ const totalPages = Math.ceil(filteredCampaign.length / rowsPerPage);
     }
   };
   
-// const refreshCampaigns = async () => {
-//   try {
-//     const response = await axios.get(`${apiConfig.baseURL}/api/stud/campaigns/${user.id}`);
-//     const sortedCampaigns = response.data.sort(
-//       (a, b) => new Date(b.senddate) - new Date(a.senddate)
-//     );
-//     const filteredCampaigns = sortedCampaigns.filter(campaign => {
-//       const campaignName = campaign.campaignname?.toLowerCase() || "";
-//       const exclude = campaignName.includes("birthday campaign");
-//       return !exclude;
-//     });
-//     setCampaigns(filteredCampaigns);
-//     setFilteredCampaign(filteredCampaigns);
-//   } catch (error) {
-//     console.error("Error refreshing campaigns", error);
-//     toast.error("Failed to refresh campaigns");
-//   }
-// };
-
-useEffect(() => {
-  const fetchCampaigns = async () => { 
-  if (!user?.id) {
-    navigate("/user-login");
-    return;
-  }
-
-  const parseDate = (dateStr) => {
-    const [datePart, timePart] = dateStr.split(', ');
-    const [day, month, year] = datePart.split('/').map(Number);
-    const [hours, minutes, seconds] = timePart.split(':').map(Number);
-    return new Date(year, month - 1, day, hours, minutes, seconds);
-  };
-
-  try {
-    const response = await axios.get(`${apiConfig.baseURL}/api/stud/campaigns/${user.id}`);
-
-    const sortedCampaigns = response.data.sort(
-      (a, b) => parseDate(b.senddate) - parseDate(a.senddate)
-    );
-
-    const filteredCampaigns = sortedCampaigns.filter(campaign => {
-      const campaignName = campaign.campaignname?.toLowerCase() || "";
-      return !campaignName.includes("birthday campaign");
-    });
-
-    setCampaigns(filteredCampaigns);
-    setFilteredCampaign(filteredCampaigns);
-  } catch (error) {
-    console.error("Error fetching campaigns", {
-      message: error.message,
-      stack: error.stack,
-      response: error.response?.data,
-    });
-  }
-};
-
-  const shouldRefresh = localStorage.getItem("refreshCampaigns");
-
-  if (shouldRefresh === "true") {
-    localStorage.removeItem("refreshCampaigns");
-    fetchCampaigns(); // Refresh only
-  } else {
-    fetchCampaigns(); // Initial load
-  }
-
-}, [user?.id, navigate]);
-
-
-
-
   const handleBackCampaign = () => {
     navigate("/home");
   };
