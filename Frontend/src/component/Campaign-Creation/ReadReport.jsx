@@ -573,12 +573,12 @@ const handleRefreshAndCloseModals = (e) => {
               >
                 Close
               </button>
-              <button
+              {/* <button
                 onClick={() => handleResend(campaign._id)}
                 className="target-modal-read"
               >
                 Resend
-              </button>
+              </button> */}
             </div>
             <button className="close-modal-read" onClick={handleClosefailModal}>
               x
