@@ -561,17 +561,7 @@ function formatPreviewContent(message) {
     event.stopPropagation(); // Prevent event from bubbling up
     setIsOpentemplate((prev) => !prev);
   };
-  const styleControlsRef = useRef(null);
-
-  useEffect(() => {
-    if (selectedIndex !== null && styleControlsRef.current) {
-      styleControlsRef.current.scrollIntoView({
-        behavior: "smooth",
-        block: "center",
-      });
-    }
-  }, [selectedIndex]);
-
+ 
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (templateRef.current && !templateRef.current.contains(event.target)) {
@@ -1121,19 +1111,22 @@ function formatPreviewContent(message) {
     setPreviewContent(updated);
   };
 const handleItemClick = (index) => {
+  if (selectedIndex === index) return; // already active
+
   setSelectedIndex(index);
+
   setTimeout(() => {
     const styleControlsElement = document.querySelector(".style-controls");
-    const activeElement = document.activeElement;
-    if (styleControlsElement && activeElement.tagName !== "TEXTAREA" && activeElement.tagName !== "INPUT") {
+    if (styleControlsElement) {
       styleControlsElement.scrollIntoView({
         behavior: "smooth",
         block: "nearest",
-        inline: "start"
+        inline: "start",
       });
     }
-  }, 500); // increased to ensure render completion
+  }, 500); // delay enough to let rendering stabilize
 };
+
 
   const handleItemClickdesktop = (index) => {
     setSelectedIndex(index); // Set the selected index when an item is clicked
@@ -4054,7 +4047,7 @@ if(
                       )}
                     </>
                   ) : (
-                    <div className="style-controls" ref={styleControlsRef}>
+                    <div className="style-controls" >
                       <h3>Style Controls</h3>
                       <div className="style-item">
                         {previewContent[selectedIndex].type === "para" && (
@@ -5968,10 +5961,7 @@ if(
                       onDragOver={(e) => e.preventDefault()}
                       onDrop={() => handleDrop(index)}
                       className="content-item"
-                      onClick={() => handleItemClick(index)}
-onTouchStart={() => {
-  handleItemClick(index);
-}}
+                   
                       style={item.style}
                     >
                       {item.type === "para" && (
@@ -5985,7 +5975,7 @@ onTouchStart={() => {
                               setSelectedContent(item.content);
                               setIsModalOpen(true);
                             }}
-                            style={item.style}
+                              style={{ ...item.style }} 
                             dangerouslySetInnerHTML={{ __html: item.content }}
                           />
                           {isModalOpen && selectedIndex === index && (
@@ -6206,7 +6196,7 @@ onTouchStart={() => {
                                 setIsModalOpen(true);
                               } // Open the modal
                             } // Open modal for this index
-                            style={item.style}
+                           style={{ ...item.style }}
                             dangerouslySetInnerHTML={{
                               __html: item.content1,
                             }}
@@ -6239,7 +6229,7 @@ onTouchStart={() => {
                             }
                             onMouseUp={(e) => handleCursorPosition(e, index)}
                             onSelect={(e) => handleCursorPosition(e, index)}
-                            style={item.style}
+                            style={{ ...item.style }}
                           >
                             {item.content}
                           </p>
@@ -6431,7 +6421,7 @@ onTouchStart={() => {
                                 setModalIndex(index);
                                 setIsModalOpen(true); // Open the modal
                               }} // Open modal for this index
-                              style={item.style}
+                              style={{ ...item.style }}
                               dangerouslySetInnerHTML={{
                                 __html: item.content1,
                               }}
@@ -6481,7 +6471,7 @@ onTouchStart={() => {
                                 setModalIndex(index);
                                 setIsModalOpen(true); // Open the modal
                               }} // Open modal for this index
-                              style={item.style}
+                              style={{ ...item.style }}
                               dangerouslySetInnerHTML={{
                                 __html: item.content2,
                               }}
@@ -6620,7 +6610,7 @@ onTouchStart={() => {
                                     setSelectedIndex(index);
                                     setIsModalOpen(true); // Open the modal
                                   }}
-                                  style={item.style}
+                                  style={{ ...item.style }}
                                   dangerouslySetInnerHTML={{
                                     __html: item.content,
                                   }}
@@ -6726,7 +6716,7 @@ onTouchStart={() => {
                                   contentEditable
                                   suppressContentEditableWarning
                                   onClick={() => setModalIndex(index)} // Open modal for this index
-                                  style={item.style}
+                                  style={{ ...item.style }}
                                   dangerouslySetInnerHTML={{
                                     __html: item.content1,
                                   }}
