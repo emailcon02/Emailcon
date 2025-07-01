@@ -16,6 +16,97 @@
   margin: 5px 0px 0px 25px ;
   cursor: pointer; 
 }
+.cam-History-container{
+  margin:0px 30px;
+}
+.template-icons{
+  display: flex;
+  gap:5px;
+  margin:10px 0px
+}
+.icon-his{
+  color: #f48c06;
+  font-size: 18px;
+  margin-right: 5px;
+}
+.template-icons{
+  font-size: 18px;
+  font-weight: 600;
+  color:#2f327d;
+}
+.template-details{
+   padding: 10px 20px;
+   background:#fff; 
+   width:280px;
+   border-radius: 8px;
+   box-shadow: 0 2px 4px rgba(163, 163, 163, 0.2);
+   display:flex;
+    flex-direction: column;
+    cursor: pointer;
+    transition: all 0.3s ease-in-out;
+
+}
+.template-details:hover {
+  transform: scale(1.02);
+  box-shadow: 0 4px 8px rgba(163, 163, 163, 0.3);
+}
+.template-details-container{
+  display: flex;
+  gap: 30px;
+  margin-top: 20px;
+}
+
+.icon-his-text{
+  color:black;
+  font-size: 16px;
+  font-weight:400;
+}
+
+.sub-icon-his-text{
+  color:#534f48;
+  font-size: 14px;
+  font-weight:200;
+  margin-top: 20px;
+}
+.icon-his-text-number{
+  font-weight: 400;
+  margin-left: 25%;
+  font-weight:200;
+  color:#534f48;
+}
+
+.icon-his-text-status{
+  font-size: 14px;
+  font-weight:200;
+  margin-top: 20px;
+  margin-left: 5%;
+}
+
+.header-campaign-name{
+  display:flex;
+  gap:8px;
+  align-items: center;
+  margin:20px 0px 0px 0px;
+  font-size: 18px;
+  font-weight: 500;
+  color:#2f327d;
+}
+
+.select-all{
+  display:flex;
+  gap:5px;
+  justify-content: center;
+  align-content: center;
+  margin-top: 5px;
+  background-color: #f48c06;
+  color: white;
+  border: none;
+  padding:6px;
+  font-size: 14px;
+  border-radius:5px;
+  font-size: 12px;
+  cursor: pointer; 
+}
 
 
 .admin-dashboard-header {
@@ -101,14 +192,23 @@
 
 .view-btn,
 .resend-btn {
-  background-color: #2f327d;
-  ;
+  background-color: #2f327d;;
   color: white;
   border: none;
-  padding: 5px 10px;
+  /* padding: 5px 10px; */
   margin-left: 10px;
   cursor: pointer;
   border-radius: 5px;
+}
+.failed-resend-btn{
+  width: 60px !important;
+  height: 25px !important;
+  margin-top: 15px;
+  font-size: 12px;
+}
+.failed-split-btn{
+  display: flex;
+  justify-content: space-between;
 }
 
 .view-btn:hover,
@@ -118,6 +218,9 @@
 }
 .edit-btn-campaign{
   background-color: #f48c06 !important;
+  padding: 0px 10px !important;
+  height: 35px;
+  margin-top: 10px;
 }
 .edit-btn-campaign:hover{
   background-color: #e68301 !important;
@@ -305,5 +408,14 @@
       text-align: center;
       margin-left: auto;
       margin-right: auto;
+  }
+  .template-details-container{
+    overflow: auto;
+  }
+  .failed-resend-btn{
+    margin-top: 15px;
+  }
+  .failed-split-btn{
+    margin-top: 20px;
   }
 }

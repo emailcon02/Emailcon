@@ -4,6 +4,31 @@
     height: 100vh;
 
 }
+.smtp-note-box {
+  display: flex;
+  align-items: flex-start;
+  background-color: #f0f4ff;
+  border-left: 4px solid #3f7df3;
+  padding: 15px;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  color: #333;
+  width: 90%;
+  max-width: 450px;
+  margin-bottom: 20px;
+}
+
+.smtp-note-icon {
+  color: #3f7df3;
+  margin-right: 10px;
+  margin-top: 3px;
+  font-size: 18px;
+}
+
+.smtp-note-text {
+  margin: 0;
+  line-height: 1.5;
+}
 
 
 .smtp-left-side {
@@ -24,7 +49,7 @@
 .smpt-header{
     font-size:40px;
     color:#2f327d;
-    margin:30px 0px;
+    margin:20px 0px;
 }
 
 .smtp-content-container {
@@ -192,8 +217,6 @@
 
     }
 
-    
-/* Media Queries */
 @media screen and (min-width: 600px) and (max-width: 900px) {
     .smtp-right-side{
         display: none;
@@ -211,6 +234,5 @@
     .smtp-custom-modal-left{
         width: 100%;
     }
-
 
     }

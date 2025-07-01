@@ -3,11 +3,17 @@ import mongoose from "mongoose";
 const userSchema = new mongoose.Schema({
     email: { type: String, required: true, unique: true },
     username: { type: String, required: true },
-    password: { type: String, required: true },
+    password: { type: String},
     gender: { type: String, enum: ["Male", "Female", "Other"] },
     phone: { type: Number },
     role:{ type: String },
-    smtppassword: { type: String, required: true },
+    smtppassword: { type: String},
+    google: {
+    refreshToken: String,
+    accessToken: String,
+    expiryDate: Number,
+    tokenType: String
+  },
     isActive: { type: Boolean, default: false },
     avatar: {
         type: String,

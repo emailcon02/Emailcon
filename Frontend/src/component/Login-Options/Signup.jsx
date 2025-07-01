@@ -49,23 +49,44 @@ function Signup() {
         setIsLoading(false);
         return;
       }
-      
-     toast.success("Your data saved successfully!")
-        // Navigate to SMTPPage with user data
+       try {
+        const response = await axios.post(
+            `${apiConfig.baseURL}/api/auth/signup`,{
+                email,
+                username,
+                password,
+                gender,
+                phone,
+                }
+          );      
+        toast.success(response.data.message || "Account created successfully!");
+        // const userId = response.data.user.id; 
+        // Store user data in localStorage
+        localStorage.setItem("user", JSON.stringify(response.data.user));
         setTimeout(() => {
-          navigate("/smtppage", {
-            state: {
-              email,
-              username,
-              password,
-              gender,
-              phone,
-            },
-          });
+          navigate('/smtppage');
         }, 3000);
-    
-    } 
- 
+    } catch (error) {
+          if (error.response) {
+            const errorMessage = error.response.data.message || "Error signing up";
+            if (error.response.status === 400) {
+              if (errorMessage.includes("User already exists")) {
+                toast.warning(
+                  "User already exists. Please use a different email or username."
+                );
+              } else {
+                toast.error(errorMessage);
+              }
+            } else {
+              toast.error(errorMessage);
+            }
+          } else {
+            toast.error("Network error. Please try again.");
+          }
+        } finally {
+          setIsLoading(false);
+        }
+      };
   return (
     <div className="signup-page">
       <div className="signup-cover">

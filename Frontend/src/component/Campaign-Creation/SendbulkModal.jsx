@@ -312,6 +312,7 @@ const SendbulkModal = ({ isOpen, onClose, previewContent = [], bgColor }) => {
         emailData.attachments.forEach((file) => {
           formData.append("attachments", file);
         });
+        formData.append("userId", user.id); 
 
         const uploadResponse = await axios.post(
           `${apiConfig.baseURL}/api/stud/uploadfile`,
@@ -414,6 +415,8 @@ const handleSend = async () => {
       emailData.attachments.forEach((file) => {
         formData.append("attachments", file);
       });
+      formData.append("userId", user.id);
+
 
       const uploadResponse = await axios.post(
         `${apiConfig.baseURL}/api/stud/uploadfile`,

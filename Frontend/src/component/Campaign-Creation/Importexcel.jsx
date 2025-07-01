@@ -291,6 +291,8 @@ const ExcelModal = ({ isOpen, onClose, previewContent = [], bgColor }) => {
       emailData.attachments.forEach((file) => {
         formData.append("attachments", file);
       });
+      formData.append("userId", user.id);
+
 
       const uploadResponse = await axios.post(
         `${apiConfig.baseURL}/api/stud/uploadfile`,
@@ -417,6 +419,7 @@ const ExcelModal = ({ isOpen, onClose, previewContent = [], bgColor }) => {
     if (emailData.attachments && emailData.attachments.length > 0) {
       const formData = new FormData();
       emailData.attachments.forEach((file) => formData.append("attachments", file));
+      formData.append("userId", user.id); // Include user ID in the form data
 
       const uploadResponse = await axios.post(
         `${apiConfig.baseURL}/api/stud/uploadfile`,

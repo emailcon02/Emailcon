@@ -10,7 +10,7 @@ import Adminuser from "../models/Adminuser.js";
 
 
 export const signup = async (req, res) => {
-  const { email, username, password, smtppassword, gender,phone } = req.body;
+  const { email, username, password,gender,phone} = req.body;
 
   try {
     // Check for existing user by email or username
@@ -26,30 +26,31 @@ export const signup = async (req, res) => {
       }
     }
 
-    // Validate SMTP credentials only for Gmail addresses
-    if (email.includes("@gmail.com")) {
-      const transporter = nodemailer.createTransport({
-        service: "Gmail",
-        auth: {
-          user: email,
-          pass: smtppassword,
-        },
-      });
+    // // Validate SMTP credentials only for Gmail addresses
+    // if (email.includes("@gmail.com")) {
+    //   const transporter = nodemailer.createTransport({
+    //     service: "Gmail",
+    //     auth: {
+    //       user: email,
+    //       pass: smtppassword,
+    //     },
+    //   });
 
-      try {
-        await transporter.verify();
-      } catch (smtpError) {
-        console.error("SMTP verification failed:", smtpError);
-        return res.status(400).json({
-          message:
-            "Invalid Gmail SMTP credentials. Please check your email or app password.",
-        });
-      }
-    }
+    //   try {
+    //     await transporter.verify();
+    //   } catch (smtpError) {
+    //     console.error("SMTP verification failed:", smtpError);
+    //     return res.status(400).json({
+    //       message:
+    //         "Invalid Gmail SMTP credentials. Please check your email or app password.",
+    //     });
+    //   }
+    // }
 
     // Encrypt SMTP password
-    const encryptedSmtpPassword = encryptPassword(smtppassword);
+    // const encryptedSmtpPassword = encryptPassword(smtppassword);
     const encryptedUserPassword = encryptPassword(password);
+
 
     // Save user to DB
     const user = new User({
@@ -58,7 +59,6 @@ export const signup = async (req, res) => {
       gender,
       phone,
       password: encryptedUserPassword, 
-      smtppassword: encryptedSmtpPassword,
       paymentStatus: "pending",
       isActive: false,
       role:"demo",
