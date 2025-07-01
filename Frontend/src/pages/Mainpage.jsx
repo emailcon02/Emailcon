@@ -1113,17 +1113,17 @@ function formatPreviewContent(message) {
   const styleControlsRef = useRef(null);
 
 const handleItemClick = (index) => {
-  const activeEl = document.activeElement;
-  if (activeEl && activeEl.blur) activeEl.blur();
+  const active = document.activeElement;
+  if (active && active.tagName === "P" && active.isContentEditable) {
+    active.blur(); // close keyboard safely
+  }
 
-  setSelectedIndex(index);
-
+  // Delay index selection and scroll
   setTimeout(() => {
-    if (styleControlsRef.current) {
-      styleControlsRef.current.scrollIntoView({
-        behavior: "smooth",
-        block: "center",
-      });
+    setSelectedIndex(index);
+    const el = document.querySelector(".style-controls");
+    if (el) {
+      el.scrollIntoView({ behavior: "smooth", block: "center" });
     }
   }, 300);
 };
@@ -6218,20 +6218,26 @@ if(
                       {item.type === "head" && (
                         <div ref={dropdownRef}>
                           <p
-                            className="border"
-                            contentEditable
-                            suppressContentEditableWarning
-                            onBlur={(e) =>
-                              updateContent(index, {
-                                content: e.target.textContent,
-                              })
-                            }
-                            onMouseUp={(e) => handleCursorPosition(e, index)}
-                            onSelect={(e) => handleCursorPosition(e, index)}
-                            style={item.style}
-                          >
-                            {item.content}
-                          </p>
+  className="border"
+  contentEditable
+  suppressContentEditableWarning
+  onFocus={() => setSelectedIndex(index)}
+  onBlur={(e) => {
+    if (e.relatedTarget?.classList?.contains("edit-desktop-btn")) {
+      // Don't blur if clicking edit button
+      e.preventDefault();
+      return;
+    }
+    updateContent(index, { content: e.target.textContent });
+  }}
+  onTouchStart={(e) => e.stopPropagation()}
+  onMouseUp={(e) => handleCursorPosition(e, index)}
+  onSelect={(e) => handleCursorPosition(e, index)}
+  style={item.style}
+>
+  {item.content}
+</p>
+
 
                           {/* Local state for each heading */}
                           <div className="select-group-container">
