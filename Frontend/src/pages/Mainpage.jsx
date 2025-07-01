@@ -110,53 +110,52 @@ const Mainpage = () => {
   const [folderToDelete, setFolderToDelete] = useState(null);
   const [editorType, setEditorType] = useState(null);
   const [selectedDraggedImageId, setSelectedDraggedImageId] = useState(null);
-const [pendingFolderMove, setPendingFolderMove] = useState(null);
-const [showMoveConfirmModal, setShowMoveConfirmModal] = useState(false);
+  const [pendingFolderMove, setPendingFolderMove] = useState(null);
+  const [showMoveConfirmModal, setShowMoveConfirmModal] = useState(false);
 
-function convertToWhatsAppText(html) {
-  const tempDiv = document.createElement("div");
-  tempDiv.innerHTML = html;
+  function convertToWhatsAppText(html) {
+    const tempDiv = document.createElement("div");
+    tempDiv.innerHTML = html;
 
-  const processNode = (node) => {
-    if (node.nodeType === 3) return node.textContent; // plain text
+    const processNode = (node) => {
+      if (node.nodeType === 3) return node.textContent; // plain text
 
-    let tag = node.tagName ? node.tagName.toLowerCase() : "";
-    let result = "";
+      let tag = node.tagName ? node.tagName.toLowerCase() : "";
+      let result = "";
 
-    node.childNodes.forEach((child) => {
-      result += processNode(child);
-    });
+      node.childNodes.forEach((child) => {
+        result += processNode(child);
+      });
 
-    // Use double newline for paragraph-like tags
-    if (["p", "div", "li", "tr"].includes(tag)) {
-      result += "\n\n";
-    } else if (tag === "br") {
-      result += "\n";
-    }
+      // Use double newline for paragraph-like tags
+      if (["p", "div", "li", "tr"].includes(tag)) {
+        result += "\n\n";
+      } else if (tag === "br") {
+        result += "\n";
+      }
 
-    if (tag === "b" || tag === "strong") {
-      result = `*${result.trim()}*`;
-    }
+      if (tag === "b" || tag === "strong") {
+        result = `*${result.trim()}*`;
+      }
 
-    if (tag === "i" || tag === "em") {
-      result = `_${result.trim()}_`;
-    }
+      if (tag === "i" || tag === "em") {
+        result = `_${result.trim()}_`;
+      }
 
-    return result;
-  };
+      return result;
+    };
 
-  const text = processNode(tempDiv)
-    .replace(/\n{3,}/g, "\n\n") // collapse triple+ to double newlines
-    .replace(/[ \t]+\n/g, "\n") // trim line ends
-    .trim();
+    const text = processNode(tempDiv)
+      .replace(/\n{3,}/g, "\n\n") // collapse triple+ to double newlines
+      .replace(/[ \t]+\n/g, "\n") // trim line ends
+      .trim();
 
-  return text;
-}
+    return text;
+  }
 
-function formatPreviewContent(message) {
-  return message; // Don't strip HTML here
-}
-
+  function formatPreviewContent(message) {
+    return message; // Don't strip HTML here
+  }
 
   const handleDelete = async () => {
     try {
@@ -561,7 +560,7 @@ function formatPreviewContent(message) {
     event.stopPropagation(); // Prevent event from bubbling up
     setIsOpentemplate((prev) => !prev);
   };
-  
+
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (templateRef.current && !templateRef.current.contains(event.target)) {
@@ -668,7 +667,6 @@ function formatPreviewContent(message) {
     sessionStorage.removeItem("toggled");
     localStorage.removeItem("campaign");
     localStorage.removeItem("template");
-    
   };
 
   // Add new text
@@ -946,8 +944,7 @@ function formatPreviewContent(message) {
         content1:
           "Artificial intelligence is transforming the way we interact with technology, enabling machines to process data with efficiency.", // Default paragraph text
         style1: {
-          color: "#000000"
-     
+          color: "#000000",
         },
       },
     ]);
@@ -1076,33 +1073,33 @@ function formatPreviewContent(message) {
     ]);
   };
 
- const addButton = () => {
-  saveToUndoStack();
-  setPreviewContent([
-    ...previewContent,
-    {
-      type: "button",
-      buttonType: "link", // Default to link
-      content: "Click Me",
-      whatsappNumber: "",
-      whatsappMessage: "Hello, I want to connect with you!",
-      contactNumber: "",
-      style: {
-        textAlign: "center",
-        padding: "12px 25px",
-        backgroundColor: "#000000",
-        color: "#ffffff",
-        width: "auto",
-        marginTop: "5px",
-        fontWeight: "bold",
-        fontSize: "15px",
-        alignItem: "center",
-        borderRadius: "0px",
+  const addButton = () => {
+    saveToUndoStack();
+    setPreviewContent([
+      ...previewContent,
+      {
+        type: "button",
+        buttonType: "link", // Default to link
+        content: "Click Me",
+        whatsappNumber: "",
+        whatsappMessage: "Hello, I want to connect with you!",
+        contactNumber: "",
+        style: {
+          textAlign: "center",
+          padding: "12px 25px",
+          backgroundColor: "#000000",
+          color: "#ffffff",
+          width: "auto",
+          marginTop: "5px",
+          fontWeight: "bold",
+          fontSize: "15px",
+          alignItem: "center",
+          borderRadius: "0px",
+        },
+        link: "",
       },
-      link: "",
-    },
-  ]);
-};
+    ]);
+  };
   // Handle content editing
   const updateContent = (index, newContent) => {
     saveToUndoStack(); // Save the current state before deleting
@@ -1112,21 +1109,21 @@ function formatPreviewContent(message) {
   };
   const styleControlsRef = useRef(null);
 
-const handleItemClick = (index) => {
-  const active = document.activeElement;
-  if (active && active.tagName === "P" && active.isContentEditable) {
-    active.blur(); // close keyboard safely
-  }
-
-  // Delay index selection and scroll
-  setTimeout(() => {
-    setSelectedIndex(index);
-    const el = document.querySelector(".style-controls");
-    if (el) {
-      el.scrollIntoView({ behavior: "smooth", block: "center" });
+  const handleItemClick = (index) => {
+    const active = document.activeElement;
+    if (active && active.tagName === "P" && active.isContentEditable) {
+      active.blur(); // close keyboard safely
     }
-  }, 300);
-};
+    setSelectedIndex(index);
+
+    // Delay index selection and scroll
+    setTimeout(() => {
+      const el = document.querySelector(".style-controls");
+      if (el) {
+        el.scrollIntoView({ behavior: "smooth", block: "center" });
+      }
+    }, 300);
+  };
 
   const handleItemClickdesktop = (index) => {
     setSelectedIndex(index); // Set the selected index when an item is clicked
@@ -1178,7 +1175,7 @@ const handleItemClick = (index) => {
       toast.warning("No preview content available.");
       return;
     }
- // Check for missing links and show individual toasts
+    // Check for missing links and show individual toasts
     let hasInvalidLink = false;
     previewContent.forEach((item, index) => {
       if (item.type === "multi-image" || item.type === "multi-image-card") {
@@ -1199,7 +1196,7 @@ const handleItemClick = (index) => {
     });
 
     if (hasInvalidLink) {
-      return; 
+      return;
     }
     setIsLoading(true);
     if (templateName && user && user.id && previewContent) {
@@ -1238,7 +1235,7 @@ const handleItemClick = (index) => {
       toast.error("Please ensure all fields are filled and user is valid");
     }
   };
-const handleSaveButton = useCallback(async () => {
+  const handleSaveButton = useCallback(async () => {
     if (!user || !user.id) {
       toast.error("User not found. Please log in again.");
       return;
@@ -1269,7 +1266,7 @@ const handleSaveButton = useCallback(async () => {
     });
 
     if (hasInvalidLink) {
-      return; 
+      return;
     }
 
     if (!templateName || templateName.trim() === "") {
@@ -1317,8 +1314,15 @@ const handleSaveButton = useCallback(async () => {
         { autoClose: 3000 }
       );
     }
-  }, [user, previewContent, templateName, bgColor, campaign?.camname, fetchTemplates]);
-  
+  }, [
+    user,
+    previewContent,
+    templateName,
+    bgColor,
+    campaign?.camname,
+    fetchTemplates,
+  ]);
+
   useEffect(() => {
     const handleKeyDown = (e) => {
       if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "s") {
@@ -1328,13 +1332,13 @@ const handleSaveButton = useCallback(async () => {
     };
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [handleSaveButton]); 
+  }, [handleSaveButton]);
   const sendscheduleEmail = async () => {
     if (!previewContent || previewContent.length === 0) {
       toast.warning("No preview content available.");
       return;
     }
-// Check for missing links and show individual toasts
+    // Check for missing links and show individual toasts
     let hasInvalidLink = false;
     previewContent.forEach((item, index) => {
       if (item.type === "multi-image" || item.type === "multi-image-card") {
@@ -1355,7 +1359,7 @@ const handleSaveButton = useCallback(async () => {
     });
 
     if (hasInvalidLink) {
-      return; 
+      return;
     }
     if (
       !emailData ||
@@ -1443,7 +1447,7 @@ const handleSaveButton = useCallback(async () => {
       toast.warning("No preview content available.");
       return;
     }
-// Check for missing links and show individual toasts
+    // Check for missing links and show individual toasts
     let hasInvalidLink = false;
     previewContent.forEach((item, index) => {
       if (item.type === "multi-image" || item.type === "multi-image-card") {
@@ -1464,10 +1468,10 @@ const handleSaveButton = useCallback(async () => {
     });
 
     if (hasInvalidLink) {
-      return; 
-    }    
+      return;
+    }
 
-if(
+    if (
       !emailData ||
       !emailData.recipient ||
       !emailData.subject ||
@@ -1680,11 +1684,7 @@ if(
   return (
     <div>
       <div className="mobile-content">
-        <div
-          className={`desktop-nav ${
-            activeTablayout ? "hide-nav" : ""
-          }`}
-        >
+        <div className={`desktop-nav ${activeTablayout ? "hide-nav" : ""}`}>
           <nav className="navbar">
             <div>
               <h3 className="company-name">
@@ -2108,172 +2108,283 @@ if(
               <FaFolderOpen /> File Manager
             </button>
 
-                     {/* file manager modal */}
-          <FileManagerModal activeTablayout={activeTablayout}>
-            {activeTablayout && (
-              <div className="modal-overlay-file-editor">
-                <div
-                  className="modal-content-file"
-                  style={{
-                    width: "90%",
-                    maxWidth: "700px",
-                    background: "#fff",
-                    padding: "20px",
-                    borderRadius: "10px",
-                    position: "relative",
-                    maxHeight: "90vh",
-                    overflowY: "auto",
-                  }}
-                >
+            {/* file manager modal */}
+            <FileManagerModal activeTablayout={activeTablayout}>
+              {activeTablayout && (
+                <div className="modal-overlay-file-editor">
                   <div
-                    className="modal-header-file"
+                    className="modal-content-file"
                     style={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      alignItems: "center",
-                      marginBottom: "10px",
+                      width: "90%",
+                      maxWidth: "700px",
+                      background: "#fff",
+                      padding: "20px",
+                      borderRadius: "10px",
+                      position: "relative",
+                      maxHeight: "90vh",
+                      overflowY: "auto",
                     }}
                   >
-                    <h2>File Manager</h2>
-                    <button
-                      onClick={() => {
-                        setCurrentFolder(null);
-                        setActiveTablayout(false);
-                      }}
+                    <div
+                      className="modal-header-file"
                       style={{
-                        background: "transparent",
-                        border: "none",
-                        fontSize: "20px",
-                        cursor: "pointer",
-                        fontWeight: "bold",
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                        marginBottom: "10px",
                       }}
                     >
-                      &times;
-                    </button>
-                  </div>
-
-                  <div
-                    style={{
-                      display: "flex",
-                      gap: "10px",
-                      marginBottom: "15px",
-                    }}
-                  >
-                    <button
-                      onClick={uploadImagefile}
-                      style={{
-                        padding: "8px 16px",
-                        background: "#007bff",
-                        color: "#fff",
-                        border: "none",
-                        borderRadius: "4px",
-                        cursor: "pointer",
-                      }}
-                    >
-                      + Upload
-                    </button>
-                    <button
-                      onClick={() => setShowFolderModal(true)}
-                      style={{
-                        padding: "8px 16px",
-                        background: "#28a745",
-                        color: "#fff",
-                        border: "none",
-                        borderRadius: "4px",
-                        cursor: "pointer",
-                      }}
-                    >
-                      + Folder
-                    </button>
-                    {currentFolder && (
+                      <h2>File Manager</h2>
                       <button
-                        onClick={() => setCurrentFolder(null)}
+                        onClick={() => {
+                          setCurrentFolder(null);
+                          setActiveTablayout(false);
+                        }}
+                        style={{
+                          background: "transparent",
+                          border: "none",
+                          fontSize: "20px",
+                          cursor: "pointer",
+                          fontWeight: "bold",
+                        }}
+                      >
+                        &times;
+                      </button>
+                    </div>
+
+                    <div
+                      style={{
+                        display: "flex",
+                        gap: "10px",
+                        marginBottom: "15px",
+                      }}
+                    >
+                      <button
+                        onClick={uploadImagefile}
                         style={{
                           padding: "8px 16px",
-                          background: "#ffc107",
-                          color: "#000",
+                          background: "#007bff",
+                          color: "#fff",
                           border: "none",
                           borderRadius: "4px",
                           cursor: "pointer",
                         }}
                       >
-                        ← Back
+                        + Upload
                       </button>
-                    )}
-                  </div>
-                  {/* Folder display (only at root level) */}
-                  {!currentFolder && (
-                    <div
-                      style={{
-                        display: "flex",
-                        flexWrap: "wrap",
-                        gap: "12px",
-                        marginBottom: "15px",
-                      }}
-                    >
-                      {folderList.map((folder) => (
-                        <div
-                          key={folder._id}
-                            onDragOver={(e) => e.preventDefault()}
-    onDrop={() => {
-      if (selectedDraggedImageId && currentFolder === null) {
-        setPendingFolderMove({ imageId: selectedDraggedImageId, targetFolder: folder.name });
-        setShowMoveConfirmModal(true);
-      }
-    }}
+                      <button
+                        onClick={() => setShowFolderModal(true)}
+                        style={{
+                          padding: "8px 16px",
+                          background: "#28a745",
+                          color: "#fff",
+                          border: "none",
+                          borderRadius: "4px",
+                          cursor: "pointer",
+                        }}
+                      >
+                        + Folder
+                      </button>
+                      {currentFolder && (
+                        <button
+                          onClick={() => setCurrentFolder(null)}
                           style={{
-                            position: "relative",
+                            padding: "8px 16px",
+                            background: "#ffc107",
+                            color: "#000",
+                            border: "none",
+                            borderRadius: "4px",
                             cursor: "pointer",
-                            color: "#007bff",
-                            background: "#f1f1f1",
-                            padding: "8px 12px",
-                            borderRadius: "6px",
-                            display: "flex",
-                            alignItems: "center",
-                            whiteSpace: "nowrap",
                           }}
-                          onMouseEnter={() => setHoveredId(folder._id)}
-                          onMouseLeave={() => setHoveredId(null)}
                         >
-                          <span onClick={() => setCurrentFolder(folder.name)}>
-                            📁 {folder.name}
-                          </span>
-
-                          {/* Delete icon on hover */}
-                          {hoveredId === folder._id && (
-                            <span
-                              style={{
-                                color: "#f48c06",
-                                marginLeft: "5px",
-                                fontSize: "12px",
-                              }}
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                setFolderToDelete(folder);
-                                setModalVisible(true);
-                              }}
-                            >
-                              <FaTrash />
+                          ← Back
+                        </button>
+                      )}
+                    </div>
+                    {/* Folder display (only at root level) */}
+                    {!currentFolder && (
+                      <div
+                        style={{
+                          display: "flex",
+                          flexWrap: "wrap",
+                          gap: "12px",
+                          marginBottom: "15px",
+                        }}
+                      >
+                        {folderList.map((folder) => (
+                          <div
+                            key={folder._id}
+                            onDragOver={(e) => e.preventDefault()}
+                            onDrop={() => {
+                              if (
+                                selectedDraggedImageId &&
+                                currentFolder === null
+                              ) {
+                                setPendingFolderMove({
+                                  imageId: selectedDraggedImageId,
+                                  targetFolder: folder.name,
+                                });
+                                setShowMoveConfirmModal(true);
+                              }
+                            }}
+                            style={{
+                              position: "relative",
+                              cursor: "pointer",
+                              color: "#007bff",
+                              background: "#f1f1f1",
+                              padding: "8px 12px",
+                              borderRadius: "6px",
+                              display: "flex",
+                              alignItems: "center",
+                              whiteSpace: "nowrap",
+                            }}
+                            onMouseEnter={() => setHoveredId(folder._id)}
+                            onMouseLeave={() => setHoveredId(null)}
+                          >
+                            <span onClick={() => setCurrentFolder(folder.name)}>
+                              📁 {folder.name}
                             </span>
-                          )}
+
+                            {/* Delete icon on hover */}
+                            {hoveredId === folder._id && (
+                              <span
+                                style={{
+                                  color: "#f48c06",
+                                  marginLeft: "5px",
+                                  fontSize: "12px",
+                                }}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setFolderToDelete(folder);
+                                  setModalVisible(true);
+                                }}
+                              >
+                                <FaTrash />
+                              </span>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
+                    {/* Confirmation Modal */}
+                    {modalVisible && (
+                      <div
+                        style={{
+                          position: "fixed",
+                          top: 0,
+                          left: 0,
+                          width: "100%",
+                          height: "100%",
+                          background: "rgba(0,0,0,0.5)",
+                          display: "flex",
+                          alignItems: "center",
+                          zIndex: "99999",
+                          justifyContent: "center",
+                        }}
+                      >
+                        <div
+                          style={{
+                            background: "#fff",
+                            padding: "20px",
+                            borderRadius: "10px",
+                            width: "300px",
+                            textAlign: "center",
+                          }}
+                        >
+                          <p>
+                            Are you sure you want to delete folder{" "}
+                            <strong>{folderToDelete?.name}</strong>?
+                          </p>
+                          <div style={{ marginTop: "15px" }}>
+                            <button
+                              style={{
+                                marginRight: "10px",
+                                padding: "6px 12px",
+                                backgroundColor: "#ccc",
+                                border: "none",
+                                borderRadius: "4px",
+                                cursor: "pointer",
+                              }}
+                              onClick={() => setModalVisible(false)}
+                            >
+                              Cancel
+                            </button>
+                            <button
+                              style={{
+                                padding: "6px 12px",
+                                backgroundColor: "red",
+                                color: "white",
+                                border: "none",
+                                borderRadius: "4px",
+                                cursor: "pointer",
+                              }}
+                              onClick={handleDeleteFolder}
+                            >
+                              Delete
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Folder title */}
+                    {currentFolder && (
+                      <div style={{ marginBottom: "10px" }}>
+                        📂 {currentFolder}
+                      </div>
+                    )}
+
+                    {/* Images */}
+                    <div className="gallery-scroll-container">
+                      {galleryImages.length === 0 && (
+                        <div className="no-images">No images found</div>
+                      )}
+
+                      {galleryImages.map((item) => (
+                        <div
+                          key={item._id}
+                          className="gallery-item"
+                          draggable={!currentFolder} // allow dragging only at root
+                          onDragStart={() =>
+                            setSelectedDraggedImageId(item._id)
+                          }
+                        >
+                          <img src={item.imageUrl} alt="Uploaded" />
+                          <div className="gallery-actions">
+                            <button
+                              onClick={() =>
+                                uploadImage(
+                                  selectedImageIndex,
+                                  selectedImageNumber,
+                                  item.imageUrl
+                                )
+                              }
+                            >
+                              <FaCheckCircle />
+                            </button>
+                            <button onClick={() => deleteImage(item._id)}>
+                              <FaTrash />
+                            </button>
+                          </div>
                         </div>
                       ))}
                     </div>
-                  )}
+                  </div>
 
-                  {/* Confirmation Modal */}
-                  {modalVisible && (
+                  {/* Folder creation modal */}
+                  {showFolderModal && (
                     <div
                       style={{
                         position: "fixed",
+                        background: "rgba(0,0,0,0.7)",
                         top: 0,
+                        zIndex: 99999,
                         left: 0,
                         width: "100%",
                         height: "100%",
-                        background: "rgba(0,0,0,0.5)",
                         display: "flex",
                         alignItems: "center",
-                        zIndex: "99999",
                         justifyContent: "center",
                       }}
                     >
@@ -2281,204 +2392,103 @@ if(
                         style={{
                           background: "#fff",
                           padding: "20px",
-                          borderRadius: "10px",
+                          borderRadius: "8px",
                           width: "300px",
-                          textAlign: "center",
                         }}
                       >
-                        <p>
-                          Are you sure you want to delete folder{" "}
-                          <strong>{folderToDelete?.name}</strong>?
-                        </p>
-                        <div style={{ marginTop: "15px" }}>
-                          <button
-                            style={{
-                              marginRight: "10px",
-                              padding: "6px 12px",
-                              backgroundColor: "#ccc",
-                              border: "none",
-                              borderRadius: "4px",
-                              cursor: "pointer",
-                            }}
-                            onClick={() => setModalVisible(false)}
-                          >
-                            Cancel
-                          </button>
-                          <button
-                            style={{
-                              padding: "6px 12px",
-                              backgroundColor: "red",
-                              color: "white",
-                              border: "none",
-                              borderRadius: "4px",
-                              cursor: "pointer",
-                            }}
-                            onClick={handleDeleteFolder}
-                          >
-                            Delete
-                          </button>
-                        </div>
+                        <h3>Create Folder</h3>
+                        <input
+                          type="text"
+                          value={newFolderName}
+                          onChange={(e) => setNewFolderName(e.target.value)}
+                          placeholder="Folder Name"
+                          style={{
+                            width: "95%",
+                            padding: "8px",
+                            marginBottom: "10px",
+                          }}
+                        />
+                        <button
+                          onClick={createFolder}
+                          style={{
+                            padding: "8px 12px",
+                            background: "#2f327D",
+                            color: "#fff",
+                            border: "none",
+                            borderRadius: "4px",
+                          }}
+                        >
+                          Save
+                        </button>
+                        <button
+                          onClick={() => setShowFolderModal(false)}
+                          style={{
+                            marginLeft: "10px",
+                            padding: "8px 12px",
+                            background: "#f48c06",
+                            color: "#fff",
+                            border: "none",
+                            borderRadius: "4px",
+                          }}
+                        >
+                          Cancel
+                        </button>
                       </div>
                     </div>
                   )}
-
-                  {/* Folder title */}
-                  {currentFolder && (
-                    <div style={{ marginBottom: "10px" }}>
-                      📂 {currentFolder}
-                    </div>
-                  )}
-
-                  {/* Images */}
-                  <div className="gallery-scroll-container">
-                    {galleryImages.length === 0 && (
-                      <div className="no-images">No images found</div>
-                    )}
-
-                    {galleryImages.map((item) => (
-<div
-    key={item._id}
-    className="gallery-item"
-    draggable={!currentFolder} // allow dragging only at root
-    onDragStart={() => setSelectedDraggedImageId(item._id)}
-  >                     
-     <img src={item.imageUrl} alt="Uploaded" />
-                        <div className="gallery-actions">
-                          <button
-                            onClick={() =>
-                              uploadImage(
-                                selectedImageIndex,
-                                selectedImageNumber,
-                                item.imageUrl
-                              )
-                            }
-                          >
-                            <FaCheckCircle />
-                          </button>
-                          <button onClick={() => deleteImage(item._id)}>
-                            <FaTrash />
-                          </button>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
                 </div>
-
-                {/* Folder creation modal */}
-                {showFolderModal && (
-                  <div
-                    style={{
-                      position: "fixed",
-                      background: "rgba(0,0,0,0.7)",
-                      top: 0,
-                      zIndex: 99999,
-                      left: 0,
-                      width: "100%",
-                      height: "100%",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                    }}
-                  >
-                    <div
-                      style={{
-                        background: "#fff",
-                        padding: "20px",
-                        borderRadius: "8px",
-                        width: "300px",
-                      }}
-                    >
-                      <h3>Create Folder</h3>
-                      <input
-                        type="text"
-                        value={newFolderName}
-                        onChange={(e) => setNewFolderName(e.target.value)}
-                        placeholder="Folder Name"
-                        style={{
-                          width: "95%",
-                          padding: "8px",
-                          marginBottom: "10px",
-                        }}
-                      />
+              )}
+              {showMoveConfirmModal && (
+                <div className="move-confirm-modal-overlay">
+                  <div className="move-confirm-modal-content">
+                    <p>
+                      Move image to folder{" "}
+                      <strong>{pendingFolderMove?.targetFolder}</strong>?
+                    </p>
+                    <div className="move-confirm-button-group">
                       <button
-                        onClick={createFolder}
-                        style={{
-                          padding: "8px 12px",
-                          background: "#2f327D",
-                          color: "#fff",
-                          border: "none",
-                          borderRadius: "4px",
-                        }}
-                      >
-                        Save
-                      </button>
-                      <button
-                        onClick={() => setShowFolderModal(false)}
-                        style={{
-                          marginLeft: "10px",
-                          padding: "8px 12px",
-                          background: "#f48c06",
-                          color: "#fff",
-                          border: "none",
-                          borderRadius: "4px",
+                        className="move-confirm-btn-cancel"
+                        onClick={() => {
+                          setShowMoveConfirmModal(false);
+                          setPendingFolderMove(null);
                         }}
                       >
                         Cancel
                       </button>
+                      <button
+                        className="move-confirm-btn-yes"
+                        onClick={async () => {
+                          try {
+                            const res = await axios.put(
+                              `${apiConfig.baseURL}/api/stud/update-folder`,
+                              {
+                                imageId: pendingFolderMove.imageId,
+                                newFolder: pendingFolderMove.targetFolder,
+                              }
+                            );
+
+                            if (res.data.success) {
+                              toast.success("Image moved successfully");
+                              fetchImages();
+                            } else {
+                              toast.error("Failed to move image");
+                            }
+                          } catch (err) {
+                            toast.error("Error moving image");
+                            console.error(err);
+                          } finally {
+                            setShowMoveConfirmModal(false);
+                            setPendingFolderMove(null);
+                          }
+                        }}
+                      >
+                        Yes, Move
+                      </button>
                     </div>
                   </div>
-                )}
-              </div>
-            )}
-             {showMoveConfirmModal && (
-  <div className="move-confirm-modal-overlay">
-    <div className="move-confirm-modal-content">
-      <p>
-        Move image to folder <strong>{pendingFolderMove?.targetFolder}</strong>?
-      </p>
-      <div className="move-confirm-button-group">
-        <button
-          className="move-confirm-btn-cancel"
-          onClick={() => {
-            setShowMoveConfirmModal(false);
-            setPendingFolderMove(null);
-          }}
-        >
-          Cancel
-        </button>
-        <button
-          className="move-confirm-btn-yes"
-          onClick={async () => {
-            try {
-              const res = await axios.put(`${apiConfig.baseURL}/api/stud/update-folder`, {
-                imageId: pendingFolderMove.imageId,
-                newFolder: pendingFolderMove.targetFolder,
-              });
-
-              if (res.data.success) {
-                toast.success("Image moved successfully");
-                fetchImages();
-              } else {
-                toast.error("Failed to move image");
-              }
-            } catch (err) {
-              toast.error("Error moving image");
-              console.error(err);
-            } finally {
-              setShowMoveConfirmModal(false);
-              setPendingFolderMove(null);
-            }
-          }}
-        >
-          Yes, Move
-        </button>
-      </div>
-    </div>
-  </div>
-)}
-          </FileManagerModal>
-
-         
+                </div>
+              )}
+            </FileManagerModal>
 
             {/* Styling Controls */}
             <>
@@ -4047,7 +4057,7 @@ if(
                       )}
                     </>
                   ) : (
-                     <div className="style-controls" ref={styleControlsRef}>
+                    <div className="style-controls" ref={styleControlsRef}>
                       <h3>Style Controls</h3>
                       <div className="style-item">
                         {previewContent[selectedIndex].type === "para" && (
@@ -5679,7 +5689,6 @@ if(
                               %
                             </span>
 
-
                             <div className="editor-bg">
                               Background Color
                               <input
@@ -6218,26 +6227,31 @@ if(
                       {item.type === "head" && (
                         <div ref={dropdownRef}>
                           <p
-  className="border"
-  contentEditable
-  suppressContentEditableWarning
-  onFocus={() => setSelectedIndex(index)}
-  onBlur={(e) => {
-    if (e.relatedTarget?.classList?.contains("edit-desktop-btn")) {
-      // Don't blur if clicking edit button
-      e.preventDefault();
-      return;
-    }
-    updateContent(index, { content: e.target.textContent });
-  }}
-  onTouchStart={(e) => e.stopPropagation()}
-  onMouseUp={(e) => handleCursorPosition(e, index)}
-  onSelect={(e) => handleCursorPosition(e, index)}
-  style={item.style}
->
-  {item.content}
-</p>
-
+                            className="border"
+                            contentEditable
+                            suppressContentEditableWarning
+                            onFocus={() => setSelectedIndex(index)}
+                            onBlur={(e) => {
+                              if (
+                                e.relatedTarget?.classList?.contains(
+                                  "edit-desktop-btn"
+                                )
+                              ) {
+                                // Don't blur if clicking edit button
+                                e.preventDefault();
+                                return;
+                              }
+                              updateContent(index, {
+                                content: e.target.textContent,
+                              });
+                            }}
+                            onTouchStart={(e) => e.stopPropagation()}
+                            onMouseUp={(e) => handleCursorPosition(e, index)}
+                            onSelect={(e) => handleCursorPosition(e, index)}
+                            style={item.style}
+                          >
+                            {item.content}
+                          </p>
 
                           {/* Local state for each heading */}
                           <div className="select-group-container">
@@ -6559,17 +6573,16 @@ if(
                         >
                           <FiTrash2 />
                         </button>
-                     <button
-  className="edit-desktop-btn"
-  onPointerDown={(e) => {
-    e.preventDefault(); // Prevent double focus
-    e.stopPropagation();
-    handleItemClick(index);
-  }}
->
-  <FiEdit />
-</button>
-
+                        <button
+                          className="edit-desktop-btn"
+                          onPointerDown={(e) => {
+                            e.preventDefault(); // Prevent double focus
+                            e.stopPropagation();
+                            handleItemClick(index);
+                          }}
+                        >
+                          <FiEdit />
+                        </button>
                       </div>
                     </div>
                   );
@@ -6760,7 +6773,6 @@ if(
                                     })
                                   }
                                   onFocus={() => setSelectedIndex(index)} // Keep index focused
-
                                   onMouseUp={(e) =>
                                     handleCursorPosition(e, index)
                                   }
