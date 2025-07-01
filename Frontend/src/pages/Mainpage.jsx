@@ -41,6 +41,7 @@ import ColorPicker from "./ColorPicker.jsx";
 import FileManagerModal from "./FilemanagerModal.jsx";
 import ParaEditorbutton from "../component/Campaign-Creation/ParaEditorbutton.jsx";
 
+
 const Mainpage = () => {
   const [activeTab, setActiveTab] = useState("button1");
   const [isLoading, setIsLoading] = useState(false); // State for loader
@@ -112,6 +113,7 @@ const Mainpage = () => {
   const [selectedDraggedImageId, setSelectedDraggedImageId] = useState(null);
 const [pendingFolderMove, setPendingFolderMove] = useState(null);
 const [showMoveConfirmModal, setShowMoveConfirmModal] = useState(false);
+const [scrollPosition, setScrollPosition] = useState(0);
 
 function convertToWhatsAppText(html) {
   const tempDiv = document.createElement("div");
@@ -5964,34 +5966,39 @@ if(
                    
                       style={item.style}
                     >
-                      {item.type === "para" && (
-                        <>
-                          <p
-                            className="border-para"
-                            contentEditable
-                            suppressContentEditableWarning
-                            onClick={() => {
-                              setSelectedIndex(index);
-                              setSelectedContent(item.content);
-                              setIsModalOpen(true);
-                            }}
-                              style={{ ...item.style }} 
-                            dangerouslySetInnerHTML={{ __html: item.content }}
-                          />
-                          {isModalOpen && selectedIndex === index && (
-                            <ParaEditor
-                              isOpen={isModalOpen}
-                              content={selectedContent} // Pass the correct content
-                              style={item.style}
-                              onSave={(newContent) => {
-                                updateContent(index, { content: newContent }); // Save the new content
-                                setIsModalOpen(false);
-                              }}
-                              onClose={() => setIsModalOpen(false)}
-                            />
-                          )}
-                        </>
-                      )}
+                     {item.type === "para" && (
+  <>
+    <p
+      className="border-para"
+      contentEditable
+      suppressContentEditableWarning
+      onClick={() => {
+        setSelectedIndex(index);
+        setSelectedContent(item.content);
+        setScrollPosition(window.scrollY); // ✅ Save current scroll position
+        setTimeout(() => {
+          setIsModalOpen(true); // ✅ Delay to preserve focus
+        }, 100);
+      }}
+      style={{ ...item.style }}
+      dangerouslySetInnerHTML={{ __html: item.content }}
+    />
+    {isModalOpen && selectedIndex === index && (
+      <ParaEditor
+        isOpen={isModalOpen}
+        content={selectedContent}
+        scrollPosition={scrollPosition} // ✅ Pass scroll position
+        style={item.style}
+        onSave={(newContent) => {
+          updateContent(index, { content: newContent });
+          setIsModalOpen(false);
+        }}
+        onClose={() => setIsModalOpen(false)}
+      />
+    )}
+  </>
+)}
+
 
                       {item.type === "multi-image-card" ? (
                         <div className="Layout-img">
@@ -6569,7 +6576,6 @@ if(
           </div>
 
           {/* Modal for preview Content */}
-          {/* Right Preview */}
           {isPreviewOpen && (
             <div className="preview-modal-overlay-tem">
               <div className="preview-modal-content">
@@ -6606,10 +6612,7 @@ if(
                                   className="border-para"
                                   contentEditable
                                   suppressContentEditableWarning
-                                  onClick={() => {
-                                    setSelectedIndex(index);
-                                    setIsModalOpen(true); // Open the modal
-                                  }}
+                                 
                                   style={{ ...item.style }}
                                   dangerouslySetInnerHTML={{
                                     __html: item.content,

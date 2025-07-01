@@ -9,6 +9,8 @@
   justify-content: center;
   align-items: center;
   z-index: 9999;
+  -webkit-overflow-scrolling: touch;
+
 }
 /* Ensure TinyMCE elements appear above modal */
 .tox-tinymce-aux {
