@@ -8,7 +8,7 @@ import "./ParaEditor.css";
 import { Send, Loader2, Clipboard } from "lucide-react";
 import aiicon from "../../Images/google-gemini-icon.png";
 
-const ParaEditor = ({ isOpen, content, onSave, onClose ,scrollPosition }) => {
+const ParaEditor = ({ isOpen, content, onSave, onClose }) => {
   const [editorContent, setEditorContent] = useState(content);
   const [aiInput, setAiInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -21,13 +21,6 @@ const ParaEditor = ({ isOpen, content, onSave, onClose ,scrollPosition }) => {
   const [students, setStudents] = useState([]); // Stores all students
   const user = JSON.parse(localStorage.getItem("user"));
   const dropdownRef = useRef(null);
-useEffect(() => {
-  if (isOpen && typeof scrollPosition === "number") {
-    setTimeout(() => {
-      window.scrollTo(0, scrollPosition);
-    }, 50); // ✅ Give time for DOM to stabilize
-  }
-}, [isOpen, scrollPosition]);
 
   useEffect(() => {
     const handleClickOutside = (event) => {

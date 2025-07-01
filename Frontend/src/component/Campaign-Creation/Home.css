@@ -52,7 +52,7 @@
 
 .modal-content-tem {
   background: white;
-  padding: 20px;
+  padding: 0px;
   border-radius: 8px;
   width: 300px;
   height: 300px;
@@ -61,6 +61,19 @@
   overflow: auto;
   position: relative;
 }
+
+.modal-content-tem::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.modal-content-tem::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 10px;
+}
+
+
+
 .preview-modal-overlay-tem {
   position: fixed;
   top: 0;
@@ -76,7 +89,7 @@
 
 .preview-modal-content-tem {
   background: white;
-  padding: 20px 30px 20px 20px;
+  padding: 0px 0px 20px 0px;
   border-radius: 8px;
   width: 700px;
   height: 500px;
@@ -86,20 +99,59 @@
   position: relative;
 }
 
+.preview-add-content{
+   padding: 20px 10px 0px 30px;
+}
+
+.preview-modal-content-tem::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.preview-modal-content-tem::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 10px;
+}
+
+
 .close-button-tem,
 .close-modal-read-pre {
-  position: absolute;
+  /* position: absolute;
   top: 10px;
-  right: 10px;
-  font-weight: 550;
+  right: 10px; */
+  font-weight: 700;
   background: none;
   border: none;
-  font-size: 20px;
+  /* font-size: 20px; */
   cursor: pointer;
 }
 
-ol {
+.modal-nav-previews{
+  display: flex;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: #e9e3e3;
+  padding:5px; 
+}
+.birthday-head{
+  font-size: 18px;
+}
+
+.modal-nav-previews-temps{
+  display: flex;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: #e9e3e3;
   padding: 10px;
+
+}
+
+ol {
+  padding: 10px 30px;
 }
 
 li {
@@ -1113,9 +1165,14 @@ li {
   }
 }
 
-.heading-automation{
-  display:flex;
+.heading-automation {
+  display: flex;
   justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: #e9e3e3;
+  padding: 10px;
 }
 
 .heading-automation h2{

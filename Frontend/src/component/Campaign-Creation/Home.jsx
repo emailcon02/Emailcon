@@ -1393,72 +1393,98 @@ const percentageData = [
             {/* <h2 className="sidebar-title" >
               Email<span style={{ color: "#f48c06" }}>Con</span>
             </h2> */}
-            <img src={Logo} alt="img_logo" className="logo_img" onClick={handleMainView}/>
+            <img
+              src={Logo}
+              alt="img_logo"
+              className="logo_img"
+              onClick={handleMainView}
+            />
             <div className="sidebar-btn-set">
-
-              <div className={`sidebar-btn-flex ${view === "dashboard" ? "active-tab" : ""}`}
-              onClick= {() => {
-                setView("dashboard");
-                handleDashboardView();
-              }}>
+              <div
+                className={`sidebar-btn-flex ${
+                  view === "dashboard" ? "active-tab" : ""
+                }`}
+                onClick={() => {
+                  setView("dashboard");
+                  handleDashboardView();
+                }}
+              >
                 <FaTachometerAlt className="icons-side" />
                 <button className="sidebar-button Dashboard-button">
                   Dashboard
                 </button>
               </div>
-       <div
-  className={`sidebar-btn-flex ${view === "campaign" ? "active-tab" : ""}`}
-  onClick={() => {
-    setView("campaign");
-    handleCampaignView();
-  }}
->
-  <FaBullhorn className="icons-side" />
-  <button className="sidebar-button campaign-button">Campaign</button>
-</div>
+              <div
+                className={`sidebar-btn-flex ${
+                  view === "campaign" ? "active-tab" : ""
+                }`}
+                onClick={() => {
+                  setView("campaign");
+                  handleCampaignView();
+                }}
+              >
+                <FaBullhorn className="icons-side" />
+                <button className="sidebar-button campaign-button">
+                  Campaign
+                </button>
+              </div>
 
-<div
-  className={`sidebar-btn-flex ${view === "contact" ? "active-tab" : ""}`}
-  onClick={() => {
-    setView("contact");
-    handleContactView();
-  }}
->
-  <FaUserPlus className="icons-side contact-create-icon" />
-  <button className="sidebar-button contact-button">Contact</button>
-</div>
+              <div
+                className={`sidebar-btn-flex ${
+                  view === "contact" ? "active-tab" : ""
+                }`}
+                onClick={() => {
+                  setView("contact");
+                  handleContactView();
+                }}
+              >
+                <FaUserPlus className="icons-side contact-create-icon" />
+                <button className="sidebar-button contact-button">
+                  Contact
+                </button>
+              </div>
 
-<div
-  className={`sidebar-btn-flex ${view === "template" ? "active-tab" : ""}`}
-  onClick={() => {
-    setView("template");
-    handleTemplateView();
-  }}
->
-  <FaThLarge className="icons-side campaign-icon" />
-  <button className="sidebar-button contact-button">Templates</button>
-</div>
+              <div
+                className={`sidebar-btn-flex ${
+                  view === "template" ? "active-tab" : ""
+                }`}
+                onClick={() => {
+                  setView("template");
+                  handleTemplateView();
+                }}
+              >
+                <FaThLarge className="icons-side campaign-icon" />
+                <button className="sidebar-button contact-button">
+                  Templates
+                </button>
+              </div>
 
-<div
-  className={`sidebar-btn-flex ${view === "remainder" ? "active-tab" : ""}`}
-  onClick={() => {
-    setView("remainder");
-    handleRemainderrview();
-  }}
->
-  <FaListAlt className="icons-side campaign-template-icon" />
-  <button className="sidebar-button contact-button">Automation</button>
-</div>
+              <div
+                className={`sidebar-btn-flex ${
+                  view === "remainder" ? "active-tab" : ""
+                }`}
+                onClick={() => {
+                  setView("remainder");
+                  handleRemainderrview();
+                }}
+              >
+                <FaListAlt className="icons-side campaign-template-icon" />
+                <button className="sidebar-button contact-button">
+                  Automation
+                </button>
+              </div>
 
-<div
-  className="sidebar-btn-flex"
-  onClick={() => {
-    setActiveTablayout(true);
-  }}
->
-  <FaFolder className="icons-side campaign-template-icon" />
-  <button className="sidebar-button contact-button">File Manager</button>
-</div>
+              <div
+                className="sidebar-btn-flex"
+                onClick={() => {
+                  setActiveTablayout(true);
+                }}
+              >
+                <FaFolder className="icons-side campaign-template-icon" />
+                <button className="sidebar-button contact-button">
+                  File Manager
+                </button>
+              </div>
             </div>
 
             {/* <button
@@ -1575,13 +1601,19 @@ const percentageData = [
                       {folderList.map((folder) => (
                         <div
                           key={folder._id}
-                            onDragOver={(e) => e.preventDefault()}
-    onDrop={() => {
-      if (selectedDraggedImageId && currentFolder === null) {
-        setPendingFolderMove({ imageId: selectedDraggedImageId, targetFolder: folder.name });
-        setShowMoveConfirmModal(true);
-      }
-    }}
+                          onDragOver={(e) => e.preventDefault()}
+                          onDrop={() => {
+                            if (
+                              selectedDraggedImageId &&
+                              currentFolder === null
+                            ) {
+                              setPendingFolderMove({
+                                imageId: selectedDraggedImageId,
+                                targetFolder: folder.name,
+                              });
+                              setShowMoveConfirmModal(true);
+                            }
+                          }}
                           style={{
                             position: "relative",
                             cursor: "pointer",
@@ -1697,13 +1729,13 @@ const percentageData = [
                     )}
 
                     {galleryImages.map((item) => (
-<div
-    key={item._id}
-    className="gallery-item"
-    draggable={!currentFolder} // allow dragging only at root
-    onDragStart={() => setSelectedDraggedImageId(item._id)}
-  >                     
-     <img src={item.imageUrl} alt="Uploaded" />
+                      <div
+                        key={item._id}
+                        className="gallery-item"
+                        draggable={!currentFolder} // allow dragging only at root
+                        onDragStart={() => setSelectedDraggedImageId(item._id)}
+                      >
+                        <img src={item.imageUrl} alt="Uploaded" />
                         <div className="gallery-actions">
                           <button
                             onClick={() =>
@@ -1794,52 +1826,55 @@ const percentageData = [
           </FileManagerModal>
 
           {showMoveConfirmModal && (
-  <div className="move-confirm-modal-overlay">
-    <div className="move-confirm-modal-content">
-      <p>
-        Move image to folder <strong>{pendingFolderMove?.targetFolder}</strong>?
-      </p>
-      <div className="move-confirm-button-group">
-        <button
-          className="move-confirm-btn-cancel"
-          onClick={() => {
-            setShowMoveConfirmModal(false);
-            setPendingFolderMove(null);
-          }}
-        >
-          Cancel
-        </button>
-        <button
-          className="move-confirm-btn-yes"
-          onClick={async () => {
-            try {
-              const res = await axios.put(`${apiConfig.baseURL}/api/stud/update-folder`, {
-                imageId: pendingFolderMove.imageId,
-                newFolder: pendingFolderMove.targetFolder,
-              });
+            <div className="move-confirm-modal-overlay">
+              <div className="move-confirm-modal-content">
+                <p>
+                  Move image to folder{" "}
+                  <strong>{pendingFolderMove?.targetFolder}</strong>?
+                </p>
+                <div className="move-confirm-button-group">
+                  <button
+                    className="move-confirm-btn-cancel"
+                    onClick={() => {
+                      setShowMoveConfirmModal(false);
+                      setPendingFolderMove(null);
+                    }}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    className="move-confirm-btn-yes"
+                    onClick={async () => {
+                      try {
+                        const res = await axios.put(
+                          `${apiConfig.baseURL}/api/stud/update-folder`,
+                          {
+                            imageId: pendingFolderMove.imageId,
+                            newFolder: pendingFolderMove.targetFolder,
+                          }
+                        );
 
-              if (res.data.success) {
-                toast.success("Image moved successfully");
-                fetchImages();
-              } else {
-                toast.error("Failed to move image");
-              }
-            } catch (err) {
-              toast.error("Error moving image");
-              console.error(err);
-            } finally {
-              setShowMoveConfirmModal(false);
-              setPendingFolderMove(null);
-            }
-          }}
-        >
-          Yes, Move
-        </button>
-      </div>
-    </div>
-  </div>
-)}
-
+                        if (res.data.success) {
+                          toast.success("Image moved successfully");
+                          fetchImages();
+                        } else {
+                          toast.error("Failed to move image");
+                        }
+                      } catch (err) {
+                        toast.error("Error moving image");
+                        console.error(err);
+                      } finally {
+                        setShowMoveConfirmModal(false);
+                        setPendingFolderMove(null);
+                      }
+                    }}
+                  >
+                    Yes, Move
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
 
           <div className="side-img">
             <img src={imghome} alt="Home img" className="home-image" />
@@ -2392,44 +2427,57 @@ const percentageData = [
                 </div>
               </div>
             )}
-             {view === "dashboard" && (
-        <div className="dashboard-content">
-          <div className="dashboard-welcome-box">
-            <div className="dashboard-welcome-left">
-              <h2 className="dashboard-title-modern">Welcome back, {username} 👋</h2>
-              <p className="dashboard-subtitle-modern">
-                Today is {today}. Here's a quick summary of your campaigns.
-              </p>
-            </div>
-          </div>
+            {view === "dashboard" && (
+              <div className="dashboard-content">
+                <div className="dashboard-welcome-box">
+                  <div className="dashboard-welcome-left">
+                    <h2 className="dashboard-title-modern">
+                      Welcome back, {username} 👋
+                    </h2>
+                    <p className="dashboard-subtitle-modern">
+                      Today is {today}. Here's a quick summary of your
+                      campaigns.
+                    </p>
+                  </div>
+                </div>
 
-          <div className="card-dashboard-container">
-            <div className="cards-dashboard">
-              <div className="card-inner-text"><FaBullhorn /></div>
-              <p className="card-text-content">Total Campaigns</p>
-              <p className="card-text-highlight">{totalCampaigns}</p>
-            </div>
+                <div className="card-dashboard-container">
+                  <div className="cards-dashboard">
+                    <div className="card-inner-text">
+                      <FaBullhorn />
+                    </div>
+                    <p className="card-text-content">Total Campaigns</p>
+                    <p className="card-text-highlight">{totalCampaigns}</p>
+                  </div>
 
-            <div className="cards-dashboard">
-              <div className="card-inner-text"><FaUsers /></div>
-              <p className="card-text-content">Total Contacts</p>
-              <p className="card-text-highlight">{totalContacts}</p>
-            </div>
+                  <div className="cards-dashboard">
+                    <div className="card-inner-text">
+                      <FaUsers />
+                    </div>
+                    <p className="card-text-content">Total Contacts</p>
+                    <p className="card-text-highlight">{totalContacts}</p>
+                  </div>
 
-            <div className="cards-dashboard">
-              <div className="card-inner-text"><FaCogs /></div>
-              <p className="card-text-content">Total Automation</p>
-              <p className="card-text-highlight">{birthtemplates.length}</p>
-            </div>
+                  <div className="cards-dashboard">
+                    <div className="card-inner-text">
+                      <FaCogs />
+                    </div>
+                    <p className="card-text-content">Total Automation</p>
+                    <p className="card-text-highlight">
+                      {birthtemplates.length}
+                    </p>
+                  </div>
 
-            <div className="cards-dashboard">
-              <div className="card-inner-text"><FaSave /></div>
-              <p className="card-text-content">Saved Template</p>
-              <p className="card-text-highlight">{campaigns.length}</p>
-            </div>
-          </div>
-        </div>
-      )}
+                  <div className="cards-dashboard">
+                    <div className="card-inner-text">
+                      <FaSave />
+                    </div>
+                    <p className="card-text-content">Saved Template</p>
+                    <p className="card-text-highlight">{campaigns.length}</p>
+                  </div>
+                </div>
+              </div>
+            )}
 
             {view === "campaign" && (
               <div className="card-grid">
@@ -2443,7 +2491,7 @@ const percentageData = [
                 </div>
               </div>
             )}
-            
+
             {view === "template" && (
               <div className="card-grid">
                 <div className="cards" onClick={handleCreateTemplate}>
@@ -2470,7 +2518,7 @@ const percentageData = [
                   <FaRegFileAlt className="icons campaign-create-icon" />
                   <span className="card-texts">Create Automation Template</span>
                 </div>
-                 <div className="cards cards-auto" onClick={handleopenbirthtem}>
+                <div className="cards cards-auto" onClick={handleopenbirthtem}>
                   <FaListAlt className="icons campaign-template-icon" />
                   <span className="card-texts">Automation Templates</span>
                 </div>
@@ -2481,7 +2529,6 @@ const percentageData = [
                   <FaHistory className="icons campaign-history-icon" />
                   <span className="card-texts">Automation History</span>
                 </div>
-                
               </div>
             )}
 
@@ -2546,14 +2593,7 @@ const percentageData = [
               <div className="modal-content-automation">
                 <div className="heading-automation">
                   <h2>Create Automation</h2>
-                  <span
-                    className="close-btn-automation"
-                    onClick={() => {
-                      setShowautoModal(false);
-                    }}
-                  >
-                    ×
-                  </span>
+                  <span className="close-btn-automation" onClick={() => {setShowautoModal(false);}}>×</span>
                 </div>
                 <div className="steps-container">
                   {/* Step 1 */}
@@ -2948,10 +2988,12 @@ const percentageData = [
           {showtemModal && (
             <div className="modal-overlay-tem">
               <div className="modal-content-tem">
-                <h2>Saved Templates</h2>
-                <button className="close-button-tem" onClick={handletemclose}>
-                  x
-                </button>
+                <div className="modal-nav-previews">
+                  <h2>Saved Templates</h2>
+                  <button className="close-button-tem" onClick={handletemclose}>
+                    x
+                  </button>
+                </div>
                 <ol>
                   {templates.length > 0 ? (
                     templates.map((template) => (
@@ -2974,13 +3016,15 @@ const percentageData = [
           {showbirthtemModal && (
             <div className="modal-overlay-tem">
               <div className="modal-content-tem">
-                <h2>Saved Birthday Templates</h2>
+                <div className="modal-nav-previews">
+                <h2 className="birthday-head">Saved Birthday Templates</h2>
                 <button
                   className="close-button-tem"
                   onClick={handlebirthtemclose}
                 >
                   x
                 </button>
+                </div>
                 <ol>
                   {birthtemplates.length > 0 ? (
                     birthtemplates.map((template) => (
@@ -3002,17 +3046,19 @@ const percentageData = [
           {isPreviewOpenauto && (
             <div className="preview-modal-overlay-tem">
               <div className="preview-modal-content-tem">
-                {selectedTemplatepre && (
-                  <h3 className="temname">
-                    {selectedTemplatepre.temname} Preview
-                  </h3>
-                )}
-                <button
-                  className="close-modal-read-pre"
-                  onClick={handleCloseModalpreauto}
-                >
-                  x
-                </button>
+                <div className="modal-nav-previews-temps">
+                  {selectedTemplatepre && (
+                    <h3 className="temname">
+                      {selectedTemplatepre.temname} Preview
+                    </h3>
+                  )}
+                  <button
+                    className="close-modal-read-pre"
+                    onClick={handleCloseModalpreauto}
+                  >
+                    x
+                  </button>
+                </div>
                 <div>
                   <div
                     style={{
@@ -3661,17 +3707,19 @@ const percentageData = [
           {isBirthPreviewOpen && (
             <div className="preview-modal-overlay-tem">
               <div className="preview-modal-content-tem">
-                {selectedTemplatepre && (
-                  <h3 className="temname">
-                    {selectedTemplatepre.temname} Preview
-                  </h3>
-                )}
-                <button
-                  className="close-modal-read-pre"
-                  onClick={handleCloseModalprebirth}
-                >
-                  x
-                </button>
+                <div className="modal-nav-previews-temps">
+                  {selectedTemplatepre && (
+                    <h3 className="temname">
+                      {selectedTemplatepre.temname} Preview
+                    </h3>
+                  )}
+                  <button
+                    className="close-modal-read-pre"
+                    onClick={handleCloseModalprebirth}
+                  >
+                    x
+                  </button>
+                </div>
                 <div>
                   <div
                     style={{
@@ -4387,18 +4435,20 @@ const percentageData = [
           {isPreviewOpen && (
             <div className="preview-modal-overlay-tem">
               <div className="preview-modal-content-tem">
-                {selectedTemplatepre && (
-                  <h3 className="temname">
-                    {selectedTemplatepre.temname} Preview
-                  </h3>
-                )}
-                <button
-                  className="close-modal-read-pre"
-                  onClick={handleCloseModalpre}
-                >
-                  x
-                </button>
-                <div>
+                <div className="modal-nav-previews-temps">
+                  {selectedTemplatepre && (
+                    <h3 className="temname">
+                      {selectedTemplatepre.temname} Preview
+                    </h3>
+                  )}
+                  <button
+                    className="close-modal-read-pre"
+                    onClick={handleCloseModalpre}
+                  >
+                    x
+                  </button>
+                </div>
+                <div className="preview-add-content">
                   <div
                     style={{
                       backgroundColor: bgColortem,
@@ -5163,7 +5213,7 @@ const percentageData = [
           )}
           {/* Modal for Creating Template */}
           {showTemplateModal && (
-   <div className="campaign-modal-overlay">
+            <div className="campaign-modal-overlay">
               <div className="campaign-modal-content">
                 <h3>Create Template</h3>
                 <input
@@ -5278,31 +5328,46 @@ const percentageData = [
       </div>
       <div className="dwn-menu">
         <div className="mobile-menu">
-           <button className="sidebar-button-mobile campaign-button" onClick={handleDashboardView}>
-  Dashboard
-</button>
-        <button className="sidebar-button-mobile campaign-button" onClick={handleCampaignView}>
-  Campaign
-</button>
+          <button
+            className="sidebar-button-mobile campaign-button"
+            onClick={handleDashboardView}
+          >
+            Dashboard
+          </button>
+          <button
+            className="sidebar-button-mobile campaign-button"
+            onClick={handleCampaignView}
+          >
+            Campaign
+          </button>
 
-<button className="sidebar-button-mobile contact-button" onClick={handleContactView}>
-  Contact
-</button>
+          <button
+            className="sidebar-button-mobile contact-button"
+            onClick={handleContactView}
+          >
+            Contact
+          </button>
 
-<button className="sidebar-button-mobile contact-button" onClick={handleTemplateView}>
-  Templates
-</button>
+          <button
+            className="sidebar-button-mobile contact-button"
+            onClick={handleTemplateView}
+          >
+            Templates
+          </button>
 
-<button className="sidebar-button-mobile contact-button" onClick={handleRemainderrview}>
-  Automation
-</button>
+          <button
+            className="sidebar-button-mobile contact-button"
+            onClick={handleRemainderrview}
+          >
+            Automation
+          </button>
 
-<button 
-  className="sidebar-button-mobile contact-button" 
-  onClick={() => setActiveTablayout(true)}
->
-  File Manager
-</button>
+          <button
+            className="sidebar-button-mobile contact-button"
+            onClick={() => setActiveTablayout(true)}
+          >
+            File Manager
+          </button>
         </div>
       </div>
     </>

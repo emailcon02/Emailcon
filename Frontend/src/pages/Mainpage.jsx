@@ -41,7 +41,6 @@ import ColorPicker from "./ColorPicker.jsx";
 import FileManagerModal from "./FilemanagerModal.jsx";
 import ParaEditorbutton from "../component/Campaign-Creation/ParaEditorbutton.jsx";
 
-
 const Mainpage = () => {
   const [activeTab, setActiveTab] = useState("button1");
   const [isLoading, setIsLoading] = useState(false); // State for loader
@@ -113,7 +112,6 @@ const Mainpage = () => {
   const [selectedDraggedImageId, setSelectedDraggedImageId] = useState(null);
 const [pendingFolderMove, setPendingFolderMove] = useState(null);
 const [showMoveConfirmModal, setShowMoveConfirmModal] = useState(false);
-const [scrollPosition, setScrollPosition] = useState(0);
 
 function convertToWhatsAppText(html) {
   const tempDiv = document.createElement("div");
@@ -563,7 +561,7 @@ function formatPreviewContent(message) {
     event.stopPropagation(); // Prevent event from bubbling up
     setIsOpentemplate((prev) => !prev);
   };
- 
+  
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (templateRef.current && !templateRef.current.contains(event.target)) {
@@ -1112,23 +1110,23 @@ function formatPreviewContent(message) {
     updated[index] = { ...updated[index], ...newContent };
     setPreviewContent(updated);
   };
+  const styleControlsRef = useRef(null);
+
 const handleItemClick = (index) => {
-  if (selectedIndex === index) return; // already active
+  const activeEl = document.activeElement;
+  if (activeEl && activeEl.blur) activeEl.blur();
 
   setSelectedIndex(index);
 
   setTimeout(() => {
-    const styleControlsElement = document.querySelector(".style-controls");
-    if (styleControlsElement) {
-      styleControlsElement.scrollIntoView({
+    if (styleControlsRef.current) {
+      styleControlsRef.current.scrollIntoView({
         behavior: "smooth",
-        block: "nearest",
-        inline: "start",
+        block: "center",
       });
     }
-  }, 500); // delay enough to let rendering stabilize
+  }, 300);
 };
-
 
   const handleItemClickdesktop = (index) => {
     setSelectedIndex(index); // Set the selected index when an item is clicked
@@ -1136,7 +1134,7 @@ const handleItemClick = (index) => {
 
   //delete
   const deleteContent = (index) => {
-    saveToUndoStack(); 
+    saveToUndoStack(); // Save the current state before deleting
     const updated = previewContent.filter((_, i) => i !== index);
     setPreviewContent(updated);
     if (selectedIndex === index) {
@@ -4049,7 +4047,7 @@ if(
                       )}
                     </>
                   ) : (
-                    <div className="style-controls" >
+                     <div className="style-controls" ref={styleControlsRef}>
                       <h3>Style Controls</h3>
                       <div className="style-item">
                         {previewContent[selectedIndex].type === "para" && (
@@ -5963,42 +5961,36 @@ if(
                       onDragOver={(e) => e.preventDefault()}
                       onDrop={() => handleDrop(index)}
                       className="content-item"
-                   
                       style={item.style}
                     >
-                     {item.type === "para" && (
-  <>
-    <p
-      className="border-para"
-      contentEditable
-      suppressContentEditableWarning
-      onClick={() => {
-        setSelectedIndex(index);
-        setSelectedContent(item.content);
-        setScrollPosition(window.scrollY); // ✅ Save current scroll position
-        setTimeout(() => {
-          setIsModalOpen(true); // ✅ Delay to preserve focus
-        }, 100);
-      }}
-      style={{ ...item.style }}
-      dangerouslySetInnerHTML={{ __html: item.content }}
-    />
-    {isModalOpen && selectedIndex === index && (
-      <ParaEditor
-        isOpen={isModalOpen}
-        content={selectedContent}
-        scrollPosition={scrollPosition} // ✅ Pass scroll position
-        style={item.style}
-        onSave={(newContent) => {
-          updateContent(index, { content: newContent });
-          setIsModalOpen(false);
-        }}
-        onClose={() => setIsModalOpen(false)}
-      />
-    )}
-  </>
-)}
-
+                      {item.type === "para" && (
+                        <>
+                          <p
+                            className="border-para"
+                            contentEditable
+                            suppressContentEditableWarning
+                            onClick={() => {
+                              setSelectedIndex(index);
+                              setSelectedContent(item.content);
+                              setIsModalOpen(true);
+                            }}
+                            style={item.style}
+                            dangerouslySetInnerHTML={{ __html: item.content }}
+                          />
+                          {isModalOpen && selectedIndex === index && (
+                            <ParaEditor
+                              isOpen={isModalOpen}
+                              content={selectedContent} // Pass the correct content
+                              style={item.style}
+                              onSave={(newContent) => {
+                                updateContent(index, { content: newContent }); // Save the new content
+                                setIsModalOpen(false);
+                              }}
+                              onClose={() => setIsModalOpen(false)}
+                            />
+                          )}
+                        </>
+                      )}
 
                       {item.type === "multi-image-card" ? (
                         <div className="Layout-img">
@@ -6203,7 +6195,7 @@ if(
                                 setIsModalOpen(true);
                               } // Open the modal
                             } // Open modal for this index
-                           style={{ ...item.style }}
+                            style={item.style}
                             dangerouslySetInnerHTML={{
                               __html: item.content1,
                             }}
@@ -6236,7 +6228,7 @@ if(
                             }
                             onMouseUp={(e) => handleCursorPosition(e, index)}
                             onSelect={(e) => handleCursorPosition(e, index)}
-                            style={{ ...item.style }}
+                            style={item.style}
                           >
                             {item.content}
                           </p>
@@ -6428,7 +6420,7 @@ if(
                                 setModalIndex(index);
                                 setIsModalOpen(true); // Open the modal
                               }} // Open modal for this index
-                              style={{ ...item.style }}
+                              style={item.style}
                               dangerouslySetInnerHTML={{
                                 __html: item.content1,
                               }}
@@ -6478,7 +6470,7 @@ if(
                                 setModalIndex(index);
                                 setIsModalOpen(true); // Open the modal
                               }} // Open modal for this index
-                              style={{ ...item.style }}
+                              style={item.style}
                               dangerouslySetInnerHTML={{
                                 __html: item.content2,
                               }}
@@ -6561,12 +6553,17 @@ if(
                         >
                           <FiTrash2 />
                         </button>
-                        <button
-                          className="edit-desktop-btn"
-                          onClick={() => handleItemClick(index)}
-                        >
-                          <FiEdit />
-                        </button>
+                     <button
+  className="edit-desktop-btn"
+  onPointerDown={(e) => {
+    e.preventDefault(); // Prevent double focus
+    e.stopPropagation();
+    handleItemClick(index);
+  }}
+>
+  <FiEdit />
+</button>
+
                       </div>
                     </div>
                   );
@@ -6576,6 +6573,7 @@ if(
           </div>
 
           {/* Modal for preview Content */}
+          {/* Right Preview */}
           {isPreviewOpen && (
             <div className="preview-modal-overlay-tem">
               <div className="preview-modal-content">
@@ -6612,8 +6610,11 @@ if(
                                   className="border-para"
                                   contentEditable
                                   suppressContentEditableWarning
-                                 
-                                  style={{ ...item.style }}
+                                  onClick={() => {
+                                    setSelectedIndex(index);
+                                    setIsModalOpen(true); // Open the modal
+                                  }}
+                                  style={item.style}
                                   dangerouslySetInnerHTML={{
                                     __html: item.content,
                                   }}
@@ -6719,7 +6720,7 @@ if(
                                   contentEditable
                                   suppressContentEditableWarning
                                   onClick={() => setModalIndex(index)} // Open modal for this index
-                                  style={{ ...item.style }}
+                                  style={item.style}
                                   dangerouslySetInnerHTML={{
                                     __html: item.content1,
                                   }}
@@ -6752,6 +6753,8 @@ if(
                                       content: e.target.textContent,
                                     })
                                   }
+                                  onFocus={() => setSelectedIndex(index)} // Keep index focused
+
                                   onMouseUp={(e) =>
                                     handleCursorPosition(e, index)
                                   }
