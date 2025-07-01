@@ -1120,27 +1120,28 @@ function formatPreviewContent(message) {
     updated[index] = { ...updated[index], ...newContent };
     setPreviewContent(updated);
   };
-  const handleItemClick = (index) => {
-    setSelectedIndex(index); // Set the selected index when an item is clicked
-    // Scroll to style controls after a short delay to ensure rendering
-   setTimeout(() => {
-  const styleControlsElement = document.querySelector(".style-controls");
-  if (styleControlsElement) {
-    styleControlsElement.scrollIntoView({
-      behavior: "smooth",
-      block: "nearest", // Changed from "center" to "nearest"
-      inline: "start"
-    });
-  }
-}, 300);
-  };
+const handleItemClick = (index) => {
+  setSelectedIndex(index);
+  setTimeout(() => {
+    const styleControlsElement = document.querySelector(".style-controls");
+    const activeElement = document.activeElement;
+    if (styleControlsElement && activeElement.tagName !== "TEXTAREA" && activeElement.tagName !== "INPUT") {
+      styleControlsElement.scrollIntoView({
+        behavior: "smooth",
+        block: "nearest",
+        inline: "start"
+      });
+    }
+  }, 500); // increased to ensure render completion
+};
+
   const handleItemClickdesktop = (index) => {
     setSelectedIndex(index); // Set the selected index when an item is clicked
   };
 
   //delete
   const deleteContent = (index) => {
-    saveToUndoStack(); // Save the current state before deleting
+    saveToUndoStack(); 
     const updated = previewContent.filter((_, i) => i !== index);
     setPreviewContent(updated);
     if (selectedIndex === index) {
@@ -5968,8 +5969,7 @@ if(
                       onDrop={() => handleDrop(index)}
                       className="content-item"
                       onClick={() => handleItemClick(index)}
-onTouchStart={(e) => {
-  e.preventDefault();
+onTouchStart={() => {
   handleItemClick(index);
 }}
                       style={item.style}
@@ -6567,10 +6567,6 @@ onTouchStart={(e) => {
                         <button
                           className="edit-desktop-btn"
                           onClick={() => handleItemClick(index)}
-                           onTouchEnd={(e) => {
-    e.stopPropagation();
-    handleItemClickdesktop(index);
-  }}
                         >
                           <FiEdit />
                         </button>
