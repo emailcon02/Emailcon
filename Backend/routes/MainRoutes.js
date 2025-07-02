@@ -142,400 +142,7 @@ router.delete('/birthtemplates/:templateId', async (req, res) => {
   }
 });
 
-// Route to send a test email
-// router.post('/sendtestmail', async (req, res) => {
-//   try {
-//     const {
-//       emailData,
-//       aliasName,
-//       replyTo,
-//       attachments,
-//       previewContent,
-//       bgColor,
-//       campaignId,
-//       userId
-//     } = req.body;
-
-//     // Find the current user by userId
-//     const user = await User.findById(userId);
-
-//     if (!user) {
-//       return res.status(404).send('User not found');
-//     }
-
-//     // user model has fields for email and smtppassword
-//     const {
-//       email,
-//       smtppassword
-//     } = user;
-//     // Determine the transporter based on email provider
-//     let transporter;
-
-//     if (email.includes("gmail")) {
-//       transporter = nodemailer.createTransport({
-//         service: "gmail",
-//         auth: {
-//           user: email,
-//           pass: decryptPassword(smtppassword),
-//         },
-//       });
-//     } else {
-//         transporter = nodemailer.createTransport({
-//         host: "smtp.hostinger.com",
-//         port: 465,
-//         secure: true, 
-//         auth: {
-//           user: email,
-//           pass: decryptPassword(smtppassword),
-//         },
-//         tls: {
-//           // Do not fail on invalid certificates
-//           rejectUnauthorized: false,
-//         },
-//       });
-//     };
-
-//     const generateTrackingLink = (originalUrl, userId, campaignId, recipientEmail) => {
-//       return `${apiConfig.baseURL}/api/stud/track-click?emailId=${encodeURIComponent(recipientEmail)}&url=${encodeURIComponent(originalUrl)}&userId=${userId}&campaignId=${campaignId}`;
-//     };
-
-
-//     const emailContent = previewContent.map((item) => {
-//       if (item.type === 'para') {
-//         return `<div style="border-radius:${item.style.borderRadius};font-size:${item.style.fontSize};padding:10px 40px; color:${item.style.color}; margin-top:20px; white-space: pre-line;word-break: break-word; background-color:${item.style.backgroundColor}">${item.content}</div>`;
-//       } else if (item.type === 'head') {
-//         return `<p style="font-size:${item.style.fontSize};border-radius:10px;margin-top:10px;padding:10px;font-weight:bold;color:${item.style.color};text-align:${item.style.textAlign};background-color:${item.style.backgroundColor}">${item.content}</p>`;
-//       } else if (item.type === 'logo') {
-//         return `<div style="text-align:${item.style.textAlign};margin:10px auto !important">
-//         <img src="${item.src}" style="width:${item.style.width};height:${item.style.height};border-radius:${item.style.borderRadius};pointer-events:none;margin:${item.style.margin};background-color:${item.style.backgroundColor};"/>
-//         </div>`
-//       } else if (item.type === 'image') {
-//         return `<div style="text-align:${item.style.textAlign};margin:10px auto !important">
-//         <img src="${item.src}" style="margin-top:10px;width:${item.style.width};pointer-events:none;height:${item.style.height};border-radius:${item.style.borderRadius};background-color:${item.style.backgroundColor}"/>
-//         </div>`;
-//       }
-//       else if (item.type === 'break') {
-//         return `<table role="presentation" align="center" width="100%" style="border-collapse: separate; border-spacing: 0; margin: 10px auto!important;">
-//       <tr>
-//         <td align="center"  style="padding: 0;">
-//           <hr style="width:100%; background-color:#00000; margin:30px 0px;" />
-//         </td>
-//       </tr>
-//     </table>`;
-//       } else if (item.type === 'gap') {
-//         return `
-//     <table role="presentation" align="center" width="100%" style="border-collapse: separate; border-spacing: 0; margin: ${item.style.margin || '30px 0'};">
-//       <tr>
-//         <td align="center" width="100%" style="padding: 0;">
-//           <div style="width:100%; height:50px; margin: 0 auto;"></div>
-//         </td>
-//       </tr>
-//     </table>
-//   `;}
-
-//       else if (item.type === 'cardimage') {
-//         return `
-//         <table role="presentation" align="center" width="${item.style.width}" style="border-collapse: separate; border-spacing: 0; margin: 10px auto!important;">
-//     <tr>
-//         <td align="center" width="${item.style.width}" style="vertical-align: top; border-radius: 10px; padding: 0;">
-//             <!-- Image -->
-//             <img src="${item.src1}" width="${item.style.width}" style="display: block; width: 100%; height: auto; max-width: ${item.style.width}; border-top-left-radius: 10px; border-top-right-radius: 10px; object-fit: cover;" alt="image"/>
-            
-//             <!-- Text Content -->
-//             <div style="font-size: 15px; background-color: ${item.style1.backgroundColor || '#f4f4f4'};width: ${item.style.width}; color: ${item.style1.color || 'black'}; padding:10px 0px; border-bottom-left-radius: 10px; border-bottom-right-radius: 10px;">
-//                 ${item.content1}
-//             </div>
-//         </td>
-//     </tr>
-// </table>`
-//       }
-
-//       else if (item.type === 'multi-image') {
-//         return `<table class="multi" style="width:100%; border-collapse:collapse;margin:10px auto !important;">
-//         <tr>
-//             <td style="width:50%;text-align:center;padding:8px; vertical-align:top;">
-//                 <img src="${item.src1}" style="border-radius:10px;height:240px !important;width:100%;pointer-events:none !important; object-fit:cover;" alt="image"/>
-//                     <a class = "img-btn"
-//                     href="${generateTrackingLink(item.link1, userId, campaignId, emailData.recipient)}"
-//                     target = "_blank"
-//                     style = "display:inline-block;padding:12px 25px;margin-top:20px;font-weight:bold;font-size:${item.buttonStyle1.fontSize || '18px'};width:${item.buttonStyle1.width || 'auto'};color:${item.buttonStyle1.color || '#000'};text-decoration:none;background-color:${item.buttonStyle1.backgroundColor || '#f0f0f0'};text-align:${item.buttonStyle1.textAlign || 'left'};border-radius:${item.buttonStyle1.borderRadius || '5px'};" >
-//                         ${item.content1}
-//                     </a>
-//             </td>
-//             <td style="width:50%;text-align:center;padding:8px; vertical-align:top;">
-//                 <img src="${item.src2}" style="border-radius:10px;height:240px !important;width:100%;pointer-events:none !important; object-fit:cover;" alt="image"/>
-//                     <a class = "img-btn"
-//                     href="${generateTrackingLink(item.link2, userId, campaignId, emailData.recipient)}"
-//                     target = "_blank"
-//                     style = "display:inline-block;padding:12px 25px;font-weight:bold;font-size:${item.buttonStyle1.fontSize || '18px'};margin-top:20px;width:${item.buttonStyle2.width || 'auto'};color:${item.buttonStyle2.color || '#000'};text-decoration:none;background-color:${item.buttonStyle2.backgroundColor || '#f0f0f0'};text-align:${item.buttonStyle2.textAlign || 'left'};border-radius:${item.buttonStyle2.borderRadius || '5px'};" >
-//                         ${item.content2}
-//                     </a>
-//             </td>
-//         </tr>
-//     </table>`
-
-//       }
-
-//       else if (item.type === 'multipleimage') {
-//         return `<table class="multi" style="width:100%; border-collapse:collapse;margin:10px auto !important;">
-//         <tr>
-//             <td style="width:50%;text-align:center;padding:8px; vertical-align:top;">
-//                 <img src="${item.src1}" style="border-radius:10px;object-fit:contain;height:230px !important;width:100%;pointer-events:none !important; object-fit:cover;" alt="image"/>
-//             </td>
-//             <td style="width:50%;text-align:center;padding:8px; vertical-align:top;">
-//                 <img src="${item.src2}" style="border-radius:10px;object-fit:contain;height:230px !important;width:100%;pointer-events:none !important; object-fit:cover;" alt="image"/>
-//             </td>
-//         </tr>
-//     </table>`
-//       }
-
-
-//       else if (item.type === 'icons') {
-//         return `<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background-color:${item.ContentStyle.backgroundColor || 'white'}; border-radius:${item.ContentStyle.borderRadius || '10px'}; margin:15px 0px !important;">
-//             <tr>
-//                 <td align="${item.ContentStyle.textAlign}" style="padding: 20px; text-align: center;">
-//                     <table role="presentation" cellspacing="0" cellpadding="0" border="0" align="center">
-//                         <tr>
-//                             <td style="padding: 0 10px;">
-//                                 <a href="${generateTrackingLink(item.links1, userId, campaignId, emailData.recipient)}" target="_blank" style="text-decoration:none;">
-//                                     <img src="${item.iconsrc1}" style="cursor:pointer;width:${item.style1.width};height:${item.style1.height};" alt="icon1"/>
-//                                 </a>
-//                             </td>
-//                             <td style="padding: 0 10px;">
-//                                 <a href="${generateTrackingLink(item.links2, userId, campaignId, emailData.recipient)}" target="_blank" style="text-decoration:none;">
-//                                     <img src="${item.iconsrc2}" style="cursor:pointer;width:${item.style2.width};height:${item.style2.height};" alt="icon2"/>
-//                                 </a>
-//                             </td>
-//                             <td style="padding: 0 12px;">
-//                                 <a href="${generateTrackingLink(item.links3, userId, campaignId, emailData.recipient)}" target="_blank" style="text-decoration:none;">
-//                                     <img src="${item.iconsrc3}" style="cursor:pointer;width:${item.style3.width};height:${item.style3.height};" alt="icon3"/>
-//                                 </a>
-//                             </td>
-//                             <td style="padding: 0 10px;">
-//                                 <a href="${generateTrackingLink(item.links4, userId, campaignId, emailData.recipient)}" target="_blank" style="text-decoration:none;">
-//                                     <img src="${item.iconsrc4}" style="cursor:pointer;width:${item.style4.width};height:${item.style4.height};" alt="icon4"/>
-//                                 </a>
-//                             </td>
-//                         </tr>
-//                     </table>
-//                 </td>
-//             </tr>
-//         </table>`;
-//       }
-
-//       else if (item.type === 'video-icon') {
-//         return `<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" align="center">
-//       <tr>
-//         <td align="center">
-//           <table role="presentation" width="${item.style.width}" height="${item.style.height}" cellspacing="0" cellpadding="0" border="0"
-//                  style="background: url('${item.src1}') no-repeat center center; background-size: cover; border-radius: 10px; overflow: hidden; margin: 15px 0px !important;">
-//             <tr>
-//               <td align="center" valign="middle" style="height: ${item.style.height}; padding: 0;">
-//                 <a href="${generateTrackingLink(item.link, userId, campaignId, emailData.recipient)}" target="_blank" rel="noopener noreferrer" style="text-decoration: none;">
-//   <img src="${item.src2}" width="70" height="70" 
-//        style="display: block; border-radius: 50%; background-color: white; cursor: pointer;" 
-//        alt="Play Video" border="0"/>
-// </a>
-//               </td>
-//             </tr>
-//           </table>
-//         </td>
-//       </tr>
-//     </table>`;
-//       }
-
-//       else if (item.type ==='banner') {
-//         return `<div>
-//         <img src="${item.src}" style="margin-top:10px;width:${item.style.width};pointer-events:none;height:${item.style.height};border-radius:${item.style.borderRadius};background-color:${item.style.backgroundColor}"/>
-//         </div>`;
-//       }
-
-
-
-
-// else if (item.type === 'multi-image-card') {
-//         return `<table class="multi" style="width:100%; border-collapse:collapse;margin:10px auto !important;">
-//     <tr>
-//       <td style="width:50%;text-align:center;padding:8px; vertical-align:top;">
-//         <img src="${item.src1}" style="border-radius:10px;object-fit:contain;height:230px !important;width:100%;pointer-events:none !important; object-fit:cover;" alt="image"/>
-//         <h3 style="margin:10px 0;">${item.title1 || 'Name of the product'}</h3>
-//         <p style="margin:5px 0;"><s>${item.originalPrice1 ? `₹${item.originalPrice1}` : '₹9000'}</s></p>
-//         <p style="margin:5px 0;">${item.offerPrice1 ? `Off Price ₹${item.offerPrice1}` : 'Off Price ₹5999'}</p>
-//         <a class="img-btn"
-//           href="${generateTrackingLink(item.link1, userId, campaignId, emailData.recipient)}"
-//           target="_blank"
-//           style="display:inline-block;padding:12px 25px;margin-top:20px;font-weight:bold;font-size:${item.buttonStyle1.fontSize || '18px'};width:${item.buttonStyle1.width || 'auto'};color:${item.buttonStyle1.color || '#000'};text-decoration:none;background-color:${item.buttonStyle1.backgroundColor || '#f0f0f0'};text-align:${item.buttonStyle1.textAlign || 'left'};border-radius:${item.buttonStyle1.borderRadius || '5px'};">
-//           ${item.content1}
-//         </a>
-//       </td>
-//       <td style="width:50%;text-align:center;padding:8px; vertical-align:top;">
-//         <img src="${item.src2}" style="border-radius:10px;object-fit:contain;height:230px !important;width:100%;pointer-events:none !important; object-fit:cover;" alt="image"/>
-//         <h3 style="margin:10px 0;">${item.title2 || 'Name of the product'}</h3>
-//         <p style="margin:5px 0;"><s>${item.originalPrice2 ? `₹${item.originalPrice2}` : '₹8000'}</s></p>
-//         <p style="margin:5px 0;">${item.offerPrice2 ? `Off Price ₹${item.offerPrice2}` : 'Off Price ₹4999'}</p>
-//         <a class="img-btn"
-//           href="${generateTrackingLink(item.link2, userId, campaignId, emailData.recipient)}"
-//           target="_blank"
-//           style="display:inline-block;padding:12px 25px;font-weight:bold;font-size:${item.buttonStyle2.fontSize || '18px'};margin-top:20px;width:${item.buttonStyle2.width || 'auto'};color:${item.buttonStyle2.color || '#000'};text-decoration:none;background-color:${item.buttonStyle2.backgroundColor || '#f0f0f0'};text-align:${item.buttonStyle2.textAlign || 'left'};border-radius:${item.buttonStyle2.borderRadius || '5px'};">
-//           ${item.content2}
-//         </a>
-//       </td>
-//     </tr>
-//   </table>`;
-//       }
-
-
-//       else if (item.type === 'imagewithtext') {
-//         return `<table class="image-text" style="width:100%;height:220px !important;background-color:${item.style1.backgroundColor || '#f4f4f4'}; border-collapse:seperate;margin:20px 0px !important">
-//         <tr>
-//             <td style = "vertical-align:top;padding:10px;" >
-//                 <img src="${item.src1}" style="width:200px !important;height:200px !important;pointer-events:none !important; object-fit:cover;" alt="image"/>                  
-//             </td>
-//             <td style = "vertical-align:top;padding:10px;color:${item.style1.color || 'black'};" >
-//                 <div class="img-para" style="overflow: auto;max-height: 200px !important;font-size:18px;">
-//                 ${item.content1}
-//                 </div>
-//             </td>
-//         </tr>
-//     </table>`;
-//       }
-
-//       else if (item.type === 'textwithimage') {
-//         return `<table class="image-text" style="width:100%;height:220px !important;background-color:${item.style.backgroundColor || '#f4f4f4'}; border-collapse:seperate;margin:20px 0px !important">
-//         <tr>
-//           <td style = "vertical-align:top;padding:10px;color:${item.style.color || 'black'};" >
-//                 <div class="img-para" style="overflow: auto;max-height: 200px !important;font-size:18px;">
-//                 ${item.content2}
-//                 </div> 
-//             </td>
-//             <td style = "vertical-align:top;padding:10px;" >
-//                 <img src="${item.src2}" style="border-radius:10px;width:200px !important;height:200px !important;pointer-events:none !important; object-fit:cover;" alt="image"/>                  
-//             </td>         
-//         </tr>
-//     </table>`
-//       }
-//       else if (item.type === 'link-image') {
-//         return `<div style="text-align:${item.style.textAlign};margin:10px auto !important">
-//         <a href="${generateTrackingLink(item.link, userId, campaignId, emailData.recipient)}" taget="_blank" style="text-decoration:none;"><img src="${item.src}" style="margin-top:10px;width:${item.style.width};text-align:${item.style.textAlign};pointer-events:none;height:${item.style.height};border-radius:${item.style.borderRadius};background-color:${item.style.backgroundColor}"/></a>
-//         </div>`;
-//       } else if (item.type === 'button') {
-//         return `<div style="text-align:${item.style.textAlign || 'left'};padding-top:20px;">
-//                   <a href="${generateTrackingLink(item.link, userId, campaignId, emailData.recipient)}" target="_blank" style="display:inline-block;font-weight:bold;font-size:${item.style.fontSize};padding:12px 25px;width:${item.style.width || 'auto'};color:${item.style.color || '#000'};text-decoration:none;background-color:${item.style.backgroundColor || '#f0f0f0'};text-align:${item.style.textAlign || 'left'};border-radius:${item.style.borderRadius || '0px'};">
-//                     ${item.content || 'Button'}
-//                   </a>
-//                 </div>`;
-//       }
-//     }).join('');
-
-//     const Attachments = attachments.map(file => ({
-//       filename: file.originalName,
-//       path: file.fileUrl, // Use Cloudinary URL directly
-//       contentType: file.mimetype
-//     }));
-
-//     const trackingPixel = `<img src="${apiConfig.baseURL}/api/stud/track-email-open?emailId=${encodeURIComponent(emailData.recipient)}&userId=${userId}&campaignId=${campaignId}&t=${Date.now()}" width="1" height="1" style="display:none;" />`;
-
-//     const mailOptions = {
-//       from: `"${aliasName}" <${email}>`,
-//       to: emailData.recipient,
-//       subject: emailData.subject,
-//       replyTo:replyTo,
-//       attachments: Attachments,
-
-//       html: `
-//         <html>
-//           <head>
-//             <style>
-//               body { font-family: Arial, sans-serif; margin: 0; padding: 0; }
-               
-//               @media(max-width:768px) {
-//                 .main { width: 330px !important; }
-//                 .img-case { width: 330px !important; }
-
-//                 .para{
-//                   font-size:15px !important;
-//                 }
- 
-//                 .img-para{
-//                   font-size:15px !important;
-//                 }
-//                 .image-text{
-//                   width:330px !important;}
-                            
-//               .image-text tr{
-//     display: flex !important;
-//     flex-wrap: nowrap !important;
-//     justify-content: space-between !important;
-//   }
-                
-//   /* Keep images inline on small screens */
-//   .multi tr {
-//     display: flex !important;
-//     flex-wrap: nowrap !important;
-//     justify-content: space-between !important;
-//   }
-//   .multi tr td {
-//     width: 48% !important; /* Ensures images stay side by side */
-//     padding: 5px !important;
-//   }
-//   .multi tr td img {
-//     height: 150px !important; /* Adjust image height for better fit */
-//     width: 100% !important;
-//     object-fit: cover !important;
-//   } 
-
-//                 // .multimain td{
-//                 //   padding:5px 8px 0px 0px !important;
-//                 // }
-//                 // .multi-img{
-//                 //   width:100% !important;
-//                 //   max-width:170px !important;
-//                 //   height:auto !important;
-//                 //   object-fit: contain !important; 
-
-//                 // }
-//                  .img-btn{
-//                   width:85% !important;
-//                   margin:20px auto !important;
-//                   font-size:10px !important;
-//                   padding:10px !important;
-                  
-//                 }
-//                 .head{
-//                   font-size:20px !important;
-//                 }
-//               }
-//             </style>
-//           </head>
-
-//           <body>
-//               <div style="display:none !important; max-height:0px; max-width:0px; opacity:0; overflow:hidden;">
-//                 ${emailData.previewtext}  
-//               </div>
-//             <div class="main" style ="background-color:${bgColor || "white"};box-shadow:0 4px 8px rgba(0, 0, 0, 0.2);border:1px solid rgb(255, 245, 245);padding:20px;width:700px;height:auto;border-radius:10px;margin:0 auto;" >
-//               ${emailContent}
-//               ${trackingPixel}
-//             </div>
-          
-//           </body>
-      
-//         </html>
-//       `,
-//     };
-
-//     transporter.sendMail(mailOptions, (error) => {
-//       if (error) {
-//         return res.status(500).send(error.toString());
-//       }
-//       console.log(`Email sent to: ${emailData.recipient}`);
-//       res.send('Email Sent');
-//     });
-//   } catch (error) {
-//     res.status(500).send(`Error: ${error.message}`);
-//   }
-// });
-
-// Route to send a test email
+//single send
 router.post('/sendtestmail', async (req, res) => {
   try {
     const {
@@ -551,8 +158,11 @@ router.post('/sendtestmail', async (req, res) => {
 
     // Find the current user by userId
     const user = await User.findById(userId);
+    if(!user){
+          return res.status(404).send('User not found');
+    }
 
-const {email,smtppassword}= user;
+    const {email}= user;
 
     const generateTrackingLink = (originalUrl, userId, campaignId, recipientEmail) => {
       return `${apiConfig.baseURL}/api/stud/track-click?emailId=${encodeURIComponent(recipientEmail)}&url=${encodeURIComponent(originalUrl)}&userId=${userId}&campaignId=${campaignId}`;
@@ -927,7 +537,7 @@ if (attachments && attachments.length > 0) {
       // Use Hostinger SMTP
       try {
         const transporter = nodemailer.createTransport({
-          host: "smtp.hostinger.com",
+         host: "smtp.hostinger.com",
           port: 465,
           secure: true,
           auth: {
@@ -1064,8 +674,8 @@ router.post('/start-campaign', async (req, res) => {
     transporter = await createTransporter(user,aliasName);
 
     // Configure delay settings (in milliseconds)
-    const DELAY_BETWEEN_EMAILS = 200; // 0.2 seconds between each email
-    const DELAY_BETWEEN_BATCHES = 1000; // 1 second between batches
+    const DELAY_BETWEEN_EMAILS = 500; // 0.5 seconds between each email
+    const DELAY_BETWEEN_BATCHES = 2000; // 2 second between batches
     const BATCH_SIZE = 10; // Number of emails to send in each batch
 
     // Split students into batches
@@ -1200,26 +810,24 @@ router.post('/start-campaign', async (req, res) => {
   } 
 });
 
-// Helper function to create transporter
-async function createTransporter(user,aliasName) {
+// Helper function to create transporter with minimal logging
+async function createTransporter(user, aliasName) {
   if (user.email.includes('gmail')) {
     const oAuth2Client = await getAuthorizedOAuthClient(user._id);
     const gmail = google.gmail({ version: 'v1', auth: oAuth2Client });
 
     return {
       sendMail: async (mailOptions) => {
-        // Process attachments for Gmail API
-        let attachmentParts = [];
-        if (mailOptions.attachments && mailOptions.attachments.length > 0) {
-          for (const file of mailOptions.attachments) {
-            try {
+        try {
+          // Process attachments for Gmail API
+          let attachmentParts = [];
+          if (mailOptions.attachments && mailOptions.attachments.length > 0) {
+            for (const file of mailOptions.attachments) {
               const response = await fetch(file.path);
-              if (!response.ok) throw new Error(`Failed to fetch attachment: ${response.statusText}`);
-
+              if (!response.ok) throw new Error(`Failed to fetch attachment`);
               const arrayBuffer = await response.arrayBuffer();
               const buffer = Buffer.from(arrayBuffer);
               const base64Content = buffer.toString('base64');
-
               attachmentParts.push([
                 `--boundary_string`,
                 `Content-Type: ${file.contentType}`,
@@ -1228,46 +836,47 @@ async function createTransporter(user,aliasName) {
                 '',
                 base64Content
               ].join('\n'));
-            } catch (error) {
-              console.error(`Error processing attachment ${file.filename}:`, error);
             }
           }
+
+          // Construct email message
+          const messageParts = [
+            `From: "${aliasName}" <${user.email}>`,
+            `Sender: "${aliasName}" <${user.email}>`,
+            `To: ${mailOptions.to}`,
+            `Reply-To: ${mailOptions.replyTo}`,
+            `Subject: ${mailOptions.subject}`,
+            'MIME-Version: 1.0',
+            'Content-Type: multipart/mixed; boundary="boundary_string"',
+            '',
+            '--boundary_string',
+            'Content-Type: text/html; charset="UTF-8"',
+            '',
+            mailOptions.html,
+            ...attachmentParts,
+            '--boundary_string--'
+          ];
+
+          const rawMessage = messageParts.join('\n');
+          const encodedMessage = Buffer.from(rawMessage)
+            .toString('base64')
+            .replace(/\+/g, '-')
+            .replace(/\//g, '_')
+            .replace(/=+$/, '');
+
+          await gmail.users.messages.send({
+            userId: 'me',
+            requestBody: { raw: encodedMessage }
+          });
+          console.log(`Sent Mail Via Gmail Api to ${mailOptions.to}`);
+        } catch (error) {
+          console.log(`❌ Failed to send to ${mailOptions.to}`);
+          throw error;
         }
-
-        // Construct email message
-        const messageParts = [
-          `From: "${aliasName}" <${user.email}>`,
-          `Sender: "${aliasName}" <${user.email}>`,
-          `To: ${mailOptions.to}`,
-          `Reply-To: ${mailOptions.replyTo}`,
-          `Subject: ${mailOptions.subject}`,
-          'MIME-Version: 1.0',
-          'Content-Type: multipart/mixed; boundary="boundary_string"',
-          '',
-          '--boundary_string',
-          'Content-Type: text/html; charset="UTF-8"',
-          '',
-          mailOptions.html,
-          ...attachmentParts,
-          '--boundary_string--'
-        ];
-
-        const rawMessage = messageParts.join('\n');
-        const encodedMessage = Buffer.from(rawMessage)
-          .toString('base64')
-          .replace(/\+/g, '-')
-          .replace(/\//g, '_')
-          .replace(/=+$/, '');
-
-        await gmail.users.messages.send({
-          userId: 'me',
-          requestBody: { raw: encodedMessage }
-        });
-        console.log(`✅ Gmail API: Email sent to ${mailOptions.to}`);
       }
     };
   } else {
-    // SMTP (e.g., Hostinger)
+    // Hostinger SMTP
     const config = {
       auth: {
         user: user.email,
@@ -1275,18 +884,43 @@ async function createTransporter(user,aliasName) {
       },
       pool: true,
       maxConnections: 3,
-      tls: { rejectUnauthorized: false },
+      tls: { rejectUnauthorized: false }
     };
 
-    return nodemailer.createTransport({
+    const transporter = nodemailer.createTransport({
       host: "smtp.hostinger.com",
       port: 465,
       secure: true,
       ...config
     });
+
+    return {
+      sendMail: async (mailOptions) => {
+        try {
+          // Process attachments for SMTP
+          if (mailOptions.attachments && mailOptions.attachments.length > 0) {
+            mailOptions.attachments = await Promise.all(mailOptions.attachments.map(async (file) => {
+              const response = await fetch(file.path);
+              if (!response.ok) throw new Error(`Failed to fetch attachment`);
+              const arrayBuffer = await response.arrayBuffer();
+              return {
+                filename: file.filename,
+                content: Buffer.from(arrayBuffer),
+                contentType: file.contentType
+              };
+            }))
+          }
+
+          await transporter.sendMail(mailOptions);
+          console.log(`Sent Mail Via Hostinger to ${mailOptions.to}`);
+        } catch (error) {
+          console.log(`❌ Failed to send to ${mailOptions.to}`);
+          throw error;
+        }
+      }
+    };
   }
 }
-
 // Helper function to create mail options
 function createMailOptions({
   student,
@@ -2146,36 +1780,8 @@ router.post('/sendbulkEmail', async (req, res) => {
 
   // user model has fields for email and smtppassword
   const {
-    email,
-    smtppassword
+    email
   } = user;
-
-  // Determine the transporter based on email provider
-  let transporter;
-
-  if (email.includes("gmail")) {
-    transporter = nodemailer.createTransport({
-      service: "gmail",
-      auth: {
-        user: email,
-        pass: decryptPassword(smtppassword),
-      },
-    });
-  } else {
-    transporter = nodemailer.createTransport({
-      host: "smtp.hostinger.com",
-      port: 465,
-      secure: true, // Use SSL/TLS
-      auth: {
-        user: email,
-        pass: decryptPassword(smtppassword),
-      },
-      tls: {
-        // Do not fail on invalid certificates
-        rejectUnauthorized: false,
-      },
-    });
-  }
 
 
   try {
@@ -2440,117 +2046,206 @@ case 'break':
     };
 
     const dynamicHtml = bodyElements.map(generateHtml).join('');
-    const Attachments = attachments.map(file => ({
-      filename: file.originalName,
-      path: file.fileUrl, // Use Cloudinary URL directly
-      contentType: file.mimetype
-    }));
+     // Tracking pixel
     const trackingPixel = `<img src="${apiConfig.baseURL}/api/stud/track-email-open?emailId=${encodeURIComponent(recipientEmail)}&userId=${userId}&campaignId=${campaignId}&t=${Date.now()}" width="1" height="1" style="display:none;" />`;
 
-    const mailOptions = {
-      from: `"${aliasName}" <${email}>`,
-      to: recipientEmail,
-      subject: subject,
-      replyTo:replyTo,
-      attachments: Attachments,
-      html: `
-        <html>
-          <head>
-            <style>
-              body { font-family: Arial, sans-serif; margin: 0; padding: 0; }
-              
-             .img-case {
-  margin:0 auto !important;
-  text-align:center !important;
-  display:block;
-  width:100%;
-  max-width: 650px; /* Adjust as needed */
-}
-
-.img-case img {
-  display: block;
-  margin: 0 auto; /* Ensures the image is centered */
-  max-width: 100%;
-  height: auto; /* Ensures the image maintains its aspect ratio */
-}
-           
-
-              @media(max-width:768px) {
-                .main { width: 330px !important; }
-                .img-case { width: 330px !important; }
-
-                .para{
-                  font-size:15px !important;
-                }
-                .img-para{
-                  font-size:12px !important;
-                }
-                  .image-text tr{
-    display: flex !important;
-    flex-wrap: nowrap !important;
-    justify-content: space-between !important;
-  }
-                
-  /* Keep images inline on small screens */
-  .multi tr {
-    display: flex !important;
-    flex-wrap: nowrap !important;
-    justify-content: space-between !important;
-  }
-  .multi tr td {
-    width: 48% !important; /* Ensures images stay side by side */
-    padding: 5px !important;
-  }
-  .multi tr td img {
-    height: 150px !important; /* Adjust image height for better fit */
-    width: 100% !important;
-    object-fit: cover !important;
-  } 
-
-                // .multimain td{
-                //   padding:5px 8px 0px 0px !important;
-                // }
-                // .multi-img{
-                //   width:100% !important;
-                //   max-width:170px !important;
-                //   height:auto !important;
-                //   object-fit: contain !important; 
-
-                // }
-                 .img-btn{
-                  width:85% !important;
-                  margin:20px auto !important;
-                  font-size:10px !important;
-                  padding:10px !important;
-                  
-                }
-                .head{
-                  font-size:20px !important;
-                }
+    // Full email HTML
+    const emailHtml = `
+      <html>
+        <head>
+          <style>
+            body { font-family: Arial, sans-serif; margin: 0; padding: 0; }
+            @media(max-width:768px) {
+              .main { width: 330px !important; }
+              .img-case { width: 330px !important; }
+              .para{ font-size:15px !important; }
+              .img-para{ font-size:15px !important; }
+              .image-text{ width:330px !important;}
+              .image-text tr{
+                display: flex !important;
+                flex-wrap: nowrap !important;
+                justify-content: space-between !important;
               }
-            </style>
-          </head>
-          <body>
+              .multi tr {
+                display: flex !important;
+                flex-wrap: nowrap !important;
+                justify-content: space-between !important;
+              }
+              .multi tr td {
+                width: 48% !important;
+                padding: 5px !important;
+              }
+              .multi tr td img {
+                height: 150px !important;
+                width: 100% !important;
+                object-fit: cover !important;
+              }
+              .img-btn{
+                width:85% !important;
+                margin:20px auto !important;
+                font-size:10px !important;
+                padding:10px !important;
+              }
+              .head{
+                font-size:20px !important;
+              }
+            }
+          </style>
+        </head>
+        <body>
             <div style="display:none !important; max-height:0px; max-width:0px; opacity:0; overflow:hidden;">
               ${previewtext}
             </div>
               <div class="main" style="background-color:${bgColor || "white"}; box-shadow:0 4px 8px rgba(0, 0, 0, 0.2); border:1px solid rgb(255, 245, 245); padding:20px;width:700px;height:auto;border-radius:10px;margin:0 auto;">
                 ${dynamicHtml}
-                 ${trackingPixel}
+                ${trackingPixel}
               </div>
           </body>
-        </html>
-      `
-    };
+      </html>
+    `;
 
-    await transporter.sendMail(mailOptions);
-    console.log(`Email sent to: ${recipientEmail}`);
-    res.send('All Email sent successfully!');
+    // Process attachments
+   let attachmentParts = [];
+
+if (attachments && attachments.length > 0) {
+  for (const file of attachments) {
+    try {
+      const response = await fetch(file.fileUrl);
+      if (!response.ok) throw new Error(`Failed to fetch attachment: ${response.statusText}`);
+
+      // Convert arrayBuffer to Buffer
+      const arrayBuffer = await response.arrayBuffer();
+      const buffer = Buffer.from(arrayBuffer);
+
+      const base64Content = buffer.toString('base64');
+
+      attachmentParts.push([
+        `--boundary_string`,
+        `Content-Type: ${file.mimetype}`,
+        `Content-Disposition: attachment; filename="${file.originalName}"`,
+        `Content-Transfer-Encoding: base64`,
+        '',
+        base64Content
+      ].join('\n'));
+    } catch (error) {
+      console.error(`Error processing attachment ${file.originalName}:`, error);
+    }
+  }
+}
+
+ // Determine sending method based on email domain
+    if (email.includes("gmail")) {
+      try {
+        const oAuth2Client = await getAuthorizedOAuthClient(userId);
+        
+        const messageParts = [
+          `From: "${aliasName}" <${email}>`,
+          `To: ${recipientEmail}`,
+          `Reply-To: ${replyTo || email}`,
+          `Subject: ${subject}`,
+          'MIME-Version: 1.0',
+          'Content-Type: multipart/mixed; boundary="boundary_string"',
+          '',
+          '--boundary_string',
+          'Content-Type: text/html; charset="UTF-8"',
+          '',
+          emailHtml,
+          ...attachmentParts,
+          '--boundary_string--'
+        ];
+
+        const rawMessage = messageParts.join('\n');
+        const encodedMessage = Buffer.from(rawMessage)
+          .toString('base64')
+          .replace(/\+/g, '-')
+          .replace(/\//g, '_')
+          .replace(/=+$/, '');
+
+        const gmail = google.gmail({ version: 'v1', auth: oAuth2Client });
+        const sendResponse = await gmail.users.messages.send({
+          userId: 'me',
+          requestBody: { raw: encodedMessage }
+        });
+
+        console.log(`✅ Email sent via Gmail API to: ${recipientEmail}`);
+        return res.status(200).json({ 
+          message: 'Email sent successfully via Gmail API', 
+          response: sendResponse.data 
+        });
+
+      } catch (error) {
+        console.error('Gmail API error:', error);
+        if (error.code === 401) {
+          return res.status(401).json({
+            error: 'Gmail authentication failed - token may be expired',
+            authUrl: `${apiConfig.baseURL}/auth/google?userId=${userId}`
+          });
+        }
+        throw error;
+      }
+    } else {
+      // Use Hostinger SMTP
+      try {
+        const transporter = nodemailer.createTransport({
+          host: "smtp.hostinger.com",
+          port: 465,
+          secure: true,
+          auth: {
+            user: email,
+            pass: decryptPassword(user.smtppassword),
+          },
+          tls: {
+            rejectUnauthorized: false,
+          },
+        });
+
+        // Prepare attachments for Nodemailer
+        const Attachments = attachments.map(file => ({
+      filename: file.originalName,
+      path: file.fileUrl, // Use Cloudinary URL directly
+      contentType: file.mimetype
+    }));
+
+        const info = await transporter.sendMail({
+          from: `"${aliasName}" <${email}>`,
+          to: recipientEmail,
+          replyTo: replyTo || email,
+          subject: subject,
+          html: emailHtml,
+          attachments: Attachments,
+          headers: {
+            'X-Campaign-ID': campaignId,
+            'X-User-ID': userId
+          }
+        });
+
+        console.log(`✅ Email sent via Hostinger: ${recipientEmail}`);
+        return res.status(200).json({ 
+          message: 'Email sent successfully via Hostinger SMTP', 
+          messageId: info.messageId 
+        });
+
+      } catch (error) {
+        console.error('Hostinger SMTP error:', error);
+        if (error.code === 'EAUTH') {
+          return res.status(401).json({ 
+            error: 'Hostinger authentication failed - check your credentials'
+          });
+        }
+        throw error;
+      }
+    }
+
   } catch (error) {
-    console.error("Error sending email:", error);
-    res.status(500).send(error.toString());
+    console.error('FULL SEND ERROR:', error);
+    return res.status(500).json({ 
+      error: `Error sending email: ${error.message}` 
+    });
   }
 });
+
+
+   
 
 //getting particular students in selected group for send bulk
 router.get("/groups/:groupId/students", async (req, res) => {
@@ -3859,24 +3554,6 @@ router.put("/update-folder", async (req, res) => {
   } catch (err) {
     console.error("Error updating folder name:", err);
     res.status(500).json({ success: false, error: "Server error" });
-  }
-});
-
-// In your backend route file (e.g., templateRoutes.js)
-router.get('/by-campaign-name/:campaignName', async (req, res) => {
-  try {
-    const template = await Template.findOne({ 
-      camname: req.params.campaignName 
-    }).select('temname');
-    
-    if (!template) {
-      return res.status(404).json({ message: 'No template found for this campaign' });
-    }
-    
-    res.json({ temname: template.temname });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: 'Server error' });
   }
 });
 

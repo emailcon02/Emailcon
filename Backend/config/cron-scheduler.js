@@ -7,6 +7,11 @@ import apiConfig from "../api/apiconfigbackend.js";
 
 console.log("Cron job started for sending scheduled emails.");
 
+// Configure delay settings (in milliseconds)
+const DELAY_BETWEEN_EMAILS = 500; // 0.5 seconds between each email
+const DELAY_BETWEEN_BATCHES = 2000; // 2 seconds between batches
+const BATCH_SIZE = 10; // Number of emails to send in each batch
+
 // Helper function to validate email
 const isValidEmail = (email) => {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
@@ -62,8 +67,8 @@ cron.schedule('*/10 * * * *', async () => {
       console.log(`Processing scheduled email for user: ${camhistory.user}`);
       const groupId = camhistory.groupId?.trim();
 
-      // Update status to Pending
-      await Camhistory.findByIdAndUpdate(camhistory._id, { status: "Pending" });
+      // Update status to Processing
+      await Camhistory.findByIdAndUpdate(camhistory._id, { status: "Processing" });
 
       // Get students based on groupId
       let students = [];
@@ -96,97 +101,101 @@ cron.schedule('*/10 * * * *', async () => {
         failedEmails: invalidEmails,
       });
 
-      const batchSize = 10;
-      const totalEmails = validStudents.length;
-      let processedEmails = 0;
-      let sentEmails = [];
-      let failedEmails = [...invalidEmails]; // Start with invalid emails
-
-      // Split into batches
+      // Split students into batches
       const batches = [];
-      for (let i = 0; i < validStudents.length; i += batchSize) {
-        batches.push(validStudents.slice(i, i + batchSize));
+      let sentEmails = [];
+      let failedEmails = [...invalidEmails];
+      
+      for (let i = 0; i < validStudents.length; i += BATCH_SIZE) {
+        batches.push(validStudents.slice(i, i + BATCH_SIZE));
       }
 
-      // Process batches in parallel
-      await Promise.all(
-        batches.map(async (batch) => {
-          for (const student of batch) {
-            try {
-              // Personalize content
-              const personalizedContent = camhistory.previewContent.map((item) => {
-                const personalizedItem = { ...item };
-                if (item.content) {
-                  Object.entries(student).forEach(([key, value]) => {
-                    const regex = new RegExp(`\\{?${key}\\}?`, "g");
-                    personalizedItem.content = personalizedItem.content.replace(
-                      regex,
-                      value != null ? String(value).trim() : ""
-                    );
-                  });
-                }
-                return personalizedItem;
-              });
+      // Process batches sequentially with delay
+      for (let batchIndex = 0; batchIndex < batches.length; batchIndex++) {
+        const batch = batches[batchIndex];
+        const batchSent = [];
+        const batchFailed = [];
 
-              // Personalize subject
-              let personalizedSubject = camhistory.subject;
-              Object.entries(student).forEach(([key, value]) => {
-                const regex = new RegExp(`\\{?${key}\\}?`, "g");
-                personalizedSubject = personalizedSubject.replace(
-                  regex,
-                  value != null ? String(value).trim() : ""
-                );
-              });
-
-              // Send email
-              await sendEmailToStudent({
-                student,
-                campaignId: camhistory._id,
-                userId: camhistory.user,
-                subject: personalizedSubject,
-                attachments: camhistory.attachments,
-                previewtext: camhistory.previewtext,
-                aliasName: camhistory.aliasName,
-                replyTo: camhistory.replyTo,
-                previewContent: personalizedContent,
-                bgColor: camhistory.bgColor,
-              });
-              sentEmails.push(student.Email);
-            } catch (error) {
-              console.error(`❌ Error sending to ${student.Email}:`, error);
-              failedEmails.push(student.Email);
-            }
-
-            processedEmails++;
-            const progress = Math.round((processedEmails / totalEmails) * 100);
-
-            // Update progress dynamically
-            await Camhistory.findByIdAndUpdate(camhistory._id, {
-              progress,
-              sendcount: sentEmails.length,
-              failedcount: failedEmails.length,
-              sentEmails,
-              failedEmails,
-              status:
-                progress === 100
-                  ? failedEmails.length > 0
-                    ? "Partial Success"
-                    : "Success"
-                  : "Processing",
+        // Process emails within batch sequentially with delay
+        for (const student of batch) {
+          try {
+            // Personalize content
+            const personalizedContent = camhistory.previewContent.map((item) => {
+              const personalizedItem = { ...item };
+              if (item.content) {
+                Object.entries(student).forEach(([key, value]) => {
+                  const regex = new RegExp(`\\{?${key}\\}?`, "g");
+                  personalizedItem.content = personalizedItem.content.replace(
+                    regex,
+                    value != null ? String(value).trim() : ""
+                  );
+                });
+              }
+              return personalizedItem;
             });
 
-            // Optional throttling: delay between emails
-            await new Promise((resolve) => setTimeout(resolve, 1000));
+            // Personalize subject
+            let personalizedSubject = camhistory.subject;
+            Object.entries(student).forEach(([key, value]) => {
+              const regex = new RegExp(`\\{?${key}\\}?`, "g");
+              personalizedSubject = personalizedSubject.replace(
+                regex,
+                value != null ? String(value).trim() : ""
+              );
+            });
+
+            // Send email
+            await sendEmailToStudent({
+              student,
+              campaignId: camhistory._id,
+              userId: camhistory.user,
+              subject: personalizedSubject,
+              attachments: camhistory.attachments,
+              previewtext: camhistory.previewtext,
+              aliasName: camhistory.aliasName,
+              replyTo: camhistory.replyTo,
+              previewContent: personalizedContent,
+              bgColor: camhistory.bgColor,
+            });
+            batchSent.push(student.Email);
+            
+            // Add delay between individual emails
+            if (student !== batch[batch.length - 1]) {
+              await new Promise(resolve => setTimeout(resolve, DELAY_BETWEEN_EMAILS));
+            }
+            
+          } catch (error) {
+            console.error(`❌ Error sending to ${student.Email}:`, error);
+            batchFailed.push(student.Email);
           }
-        })
-      );
+        }
 
-      // Final update
-      const finalStatus = failedEmails.length === 0 ? "Success" : "Failed";
+        // Update sent and failed emails
+        sentEmails = [...sentEmails, ...batchSent];
+        failedEmails = [...failedEmails, ...batchFailed];
+
+        // Update progress after each batch
+        const currentProgress = Math.round(((batchIndex + 1) / batches.length) * 100);
+        await Camhistory.findByIdAndUpdate(camhistory._id, {
+          progress: currentProgress,
+          sendcount: sentEmails.length,
+          failedcount: failedEmails.length,
+          sentEmails: sentEmails,
+          failedEmails: failedEmails,
+          status: "Processing",
+        });
+
+        // Add delay between batches (except after last batch)
+        if (batchIndex < batches.length - 1) {
+          await new Promise(resolve => setTimeout(resolve, DELAY_BETWEEN_BATCHES));
+        }
+      }
+
+      // Final update after all batches are processed
+      const finalStatus = failedEmails.length > 0 ? "Failed" : "Success";
       const finalProgress = failedEmails.length > 0
-        ? Math.round((failedEmails.length / (sentEmails.length + failedEmails.length)) * 100)
-        : 100;
-
+          ? Math.round((failedEmails.length / (sentEmails.length + failedEmails.length)) * 100)
+          : 100;
       await Camhistory.findByIdAndUpdate(camhistory._id, {
         status: finalStatus,
         progress: finalProgress,
@@ -196,8 +205,8 @@ cron.schedule('*/10 * * * *', async () => {
         sentEmails,
         failedEmails,
       });
-      
-    console.log(`Campaign ${camhistory._id} completed with status ${finalStatus}`);
+
+      console.log(`Campaign ${camhistory._id} completed with status ${finalStatus}`);
     }
   } catch (error) {
     console.error("Error in cron job:", error.message);

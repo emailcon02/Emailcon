@@ -37,7 +37,6 @@ cron.schedule("*/10 * * * *", async () => {
 
   // ✅ Null check to avoid TypeError
   if (!user || !user.email) {
-    console.warn(`⚠️ Skipping payment ID ${payment._id} — user not found or missing email.`);
     continue;
   }
 

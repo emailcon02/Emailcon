@@ -8,6 +8,8 @@ import "react-toastify/dist/ReactToastify.css";
 import apiConfig from "../../apiconfig/apiConfig";
 import sign from "../../Images/ex1.png";
 import smtpmodal from "../../Images/bgsmtp.png"
+import logo from "../../Images/emailcon_svg_logo.svg";
+
 
 
 function EmployeeSignup() {
@@ -87,10 +89,16 @@ function EmployeeSignup() {
           </p>
         </div>
         <div className="signup-container">
-          <h2 className="signup-header">
-          <span> Email<span style={{ color: "#f48c06" }}>con</span></span>
-          <span style={{marginLeft:"5px"}}>Sign<span style={{ color: "#f48c06" }}>up</span></span>  
-          </h2>
+            <h2 className="signup-header">
+                    <span>
+                        <img src={logo} alt="imagesignnav" className="logo_img_sign" />{" "}
+                      </span>
+                      <div>
+                      <span style={{marginTop:"5px",fontWeight:"600",fontSize:"26px"}}>
+                        Signup in to Emailcon
+                      </span>
+                      </div>
+                    </h2>
           <div>
             <div className="label">
               <label>Select Mail Service</label>

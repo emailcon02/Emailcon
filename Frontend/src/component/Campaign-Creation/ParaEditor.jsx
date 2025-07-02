@@ -209,7 +209,7 @@ const ParaEditor = ({ isOpen, content, onSave, onClose }) => {
 
             {/* Show fields only for the selected heading */}
             {selectedGroup && (
-              <div className="dropdown-container">
+              <div className="dropdown-container-para">
                 <p className="template-title">
                   <span>Add</span> Variable
                 </p>

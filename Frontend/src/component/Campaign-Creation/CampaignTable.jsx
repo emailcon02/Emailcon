@@ -789,10 +789,9 @@ const isValidEmail = (email) => {
                         Group Name: {campaign.groupname}
                       </p>
                     </div>
-
                     <div
                       className="template-details"
-                      onClick={() => handleview(user.id, campaign._id)}
+                      style={{cursor:"auto"}}
                     >
                       <div className="template-icons">
                         <FaHourglassHalf className="icon-his" size={18} />
@@ -812,7 +811,8 @@ const isValidEmail = (email) => {
                           style={{
                             cursor: "pointer",
                             textDecoration: "underline",
-                            marginLeft: 10,
+                            color:"#2f327d",
+                            marginTop:10
                           }}
                           onClick={(e) => {
                             e.stopPropagation();
@@ -822,7 +822,7 @@ const isValidEmail = (email) => {
                             );
                           }}
                         >
-                          [Edit]
+                          Edit
                         </span>
                       )}
                       {/* Modal */}
@@ -855,7 +855,7 @@ const isValidEmail = (email) => {
                     </div>
                     <div
                       className="template-details"
-                      onClick={() => handleview(user.id, campaign._id)}
+                      style={{cursor:"auto"}}
                     >
                       <div className="template-icons">
                         <FaCheck className="icon-his" size={18} />
@@ -863,8 +863,10 @@ const isValidEmail = (email) => {
                       </div>
                       <div className="failed-split-btn">
                       <span
+                        onClick={() => handleview(user.id, campaign._id)}
                         style={{
                           fontWeight: "bold",
+                          cursor:"pointer",
                           color:
                             campaign.status === "Success"
                               ? "green"

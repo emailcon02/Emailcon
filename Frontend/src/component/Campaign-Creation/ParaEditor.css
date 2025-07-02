@@ -18,7 +18,7 @@
   z-index: 10002 !important;
 }
 
-.dropdown-container {
+.dropdown-container-para {
   position: absolute;
   left: 5px; /* Position the dropdown to the left */
   top: -220px !important;
@@ -32,7 +32,7 @@
   z-index: 1000;
 }
 
-.dropdown-container h4 {
+.dropdown-container-para h4 {
   font-size: 14px;
   color: #333;
 }
@@ -251,7 +251,7 @@
     padding: 5px 0px;
     font-size: 12px;
   }
-  .dropdown-container {
+  .dropdown-container-para {
     width: 120px;
   }
   .para-btn {
