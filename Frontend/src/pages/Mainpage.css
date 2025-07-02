@@ -443,6 +443,7 @@ button[data-tooltip]:hover::after {
     padding: 10px;
     background-color: transparent !important;
     width: 100%;
+    
 }
 .content-item-preview {
     margin-bottom: 10px;

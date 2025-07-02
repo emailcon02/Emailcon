@@ -428,6 +428,8 @@ button[data-tooltip]:hover::after {
     padding: 10px;
     background-color: transparent !important;
     width: 100%;
+    touch-action: manipulation;
+
 }
 .content-item-preview {
     margin-bottom: 10px;
@@ -1567,6 +1569,9 @@ input:checked+.slider-send:before {
         background-color: white;
         transform: translate(-50%, -50%);
     }
+      .edit-desktop-btn{
+        display: none !important;    
+     }
     
 
 .multiimg {
