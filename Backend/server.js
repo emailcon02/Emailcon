@@ -39,16 +39,7 @@ connectDB();
 const app = express();
 
 // Enhanced CORS configuration
-app.use(cors({
-  origin: [
-    'https://emailcon.in',
-    'https://www.emailcon.in',
-    'http://localhost:3000' // for development
-  ],
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE'],
-  allowedHeaders: ['Content-Type', 'Authorization']
-}));
+app.use(cors());
 
 // Middleware
 app.use(express.json({ limit: '100mb' }));

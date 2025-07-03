@@ -1302,7 +1302,8 @@ li {
 .cards-dashboard {
   width: 180px;
   height: 180px;
-  background: linear-gradient(135deg, #f8fafc, #e2e8f0);
+  background:white;
+  cursor: pointer;
   padding: 10px 20px;
   border-radius: 16px;
   box-shadow: 0 4px 12px rgba(30, 30, 30, 0.08);
