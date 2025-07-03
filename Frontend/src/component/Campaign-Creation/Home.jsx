@@ -856,6 +856,9 @@ const percentageData = [
   const handleCreateContactView = () => {
     setView("create-contact");
   };
+  const handlenavigatecampaign = () => {
+    navigate('/campaigntable')
+  }
   const handlePreview = (template) => {
     setShowtemModal(false);
     setIsPreviewOpen(true);
@@ -2441,8 +2444,8 @@ const percentageData = [
                   </div>
                 </div>
 
-                <div className="card-dashboard-container">
-                  <div className="cards-dashboard">
+                <div className="card-dashboard-container" >
+                  <div className="cards-dashboard" onClick={handlenavigatecampaign}>
                     <div className="card-inner-text">
                       <FaBullhorn />
                     </div>
@@ -2450,7 +2453,7 @@ const percentageData = [
                     <p className="card-text-highlight">{totalCampaigns}</p>
                   </div>
 
-                  <div className="cards-dashboard">
+                  <div className="cards-dashboard"  onClick={()=>{setView("contact")}}>
                     <div className="card-inner-text">
                       <FaUsers />
                     </div>
@@ -2458,7 +2461,7 @@ const percentageData = [
                     <p className="card-text-highlight">{totalContacts}</p>
                   </div>
 
-                  <div className="cards-dashboard">
+                  <div className="cards-dashboard" onClick={()=>{setView("remainder")}}>
                     <div className="card-inner-text">
                       <FaCogs />
                     </div>
@@ -2468,7 +2471,7 @@ const percentageData = [
                     </p>
                   </div>
 
-                  <div className="cards-dashboard">
+                  <div className="cards-dashboard" onClick={()=>{setView("template")}}>
                     <div className="card-inner-text">
                       <FaSave />
                     </div>

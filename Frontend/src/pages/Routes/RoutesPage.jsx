@@ -77,7 +77,7 @@ function RoutesPage() {
         <Route path="/admin-user-create" element={<Createusers />} />
         <Route path="/business-admin-dashboard" element={<UserDemoRequest />} />
         <Route path="/smtppage" element={<Smtppage />} />
-        <Route path="/userpayment/:userId" element={<PaymentPage />} />
+        {/* <Route path="/userpayment/:userId" element={<PaymentPage />} /> */}
         <Route path="/user-payment-history/:userId" element={<UserPaymenthistory />} />
         <Route path="/all-user-payment-history" element={<AllUserPaymenthistory />} />
         <Route path="/register-form" element={<Form />} />

@@ -297,15 +297,14 @@ li {
 }
 
 .card-grid-auto {
-  margin-top: 9%;
-  display: flex;
+  margin-top: 5%;
+  display: grid;
   gap: 40px;
-  flex-wrap: wrap;
+  grid-template-columns: auto auto;
   align-items: center;
   align-content: center;
-  justify-content: center;
-  width: 800px;
-  padding: 80px;
+  width: 500px;
+  padding: 60px;
   background-color: #fff;
   border-radius: 10px;
 }
@@ -538,11 +537,9 @@ li {
   transition: transform 0.3s ease;
 }
 
-
-
 .cards-auto{
-  width: 130px !important;
-  height: 130px !important;
+  width: 180px !important;
+  height: 150px !important;
 }
 .cards-auto .icons {
   font-size: 25px !important;
@@ -1302,7 +1299,8 @@ li {
 .cards-dashboard {
   width: 180px;
   height: 180px;
-  background: linear-gradient(135deg, #f8fafc, #e2e8f0);
+  background:white;
+  cursor: pointer;
   padding: 10px 20px;
   border-radius: 16px;
   box-shadow: 0 4px 12px rgba(30, 30, 30, 0.08);
@@ -1483,10 +1481,22 @@ li {
     font-size: 0.8rem;
   }
 
-  .card-grid,.card-grid-auto {
-    width: 40%;
+  .card-grid {
+    width: 60%;
     padding: 20px !important;
-    margin-top: 30px;
+    margin-top: 40px;
+    grid-template-columns: auto;
+
+
+  }
+  
+ .card-grid-auto {
+    width: 60%;
+    padding: 20px !important;
+    margin-top: 40px;
+    grid-template-columns: auto;
+    height: 50vh;
+    overflow: auto;
 
   }
 
@@ -1496,10 +1506,11 @@ li {
   }
 
   .cards {
-    padding: 0px 5px !important;
-    width: 165px;
-    height: 165px;
+        padding: 10px 20px !important;
+        width: 150px !important;
+        height: 140px !important;
   }
+  
 
  
   .home-modal {
@@ -1551,7 +1562,7 @@ li {
 } 
 @media screen and (min-width: 900px) and (max-width: 1280px) {
   .navbars{
-    height: 8%;
+    height: 9%;
   }
 
 }
@@ -1579,6 +1590,7 @@ li {
   .dashboard-welcome-box{
     margin-top: 10%;
     padding: 35px 6%;
+    margin-left: 6%;
   }
   .navbars{
     height: 7%;
@@ -1621,9 +1633,10 @@ li {
   }
 
   .card-grid,.card-grid-auto {
-    width: 40%;
-    padding: 20px !important;
+    width: 45%;
+    padding: 80px !important;
     margin-top: 30px;
+    gap: 30px !important;
 
   }
 
@@ -1633,9 +1646,13 @@ li {
   }
 
   .cards {
-    padding: 0px !important;
-    width: 165px;
-    height: 165px;
+    padding: 20px !important;
+    width: 170px;
+    height: 170px;
+  }
+  .cards-auto{
+    padding:5px !important;
+    width: 140px !important;
   }
 
   .maincontent-main {

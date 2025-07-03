@@ -782,13 +782,13 @@ button[data-tooltip]:hover::after {
 }
 
 /* Modal Overlay */
-.modal-overlay-send {
+.modal-overlay-style {
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: rgb(0 0 0 / 87%);
+    /* background-color: rgb(0 0 0 / 87%); */
     display: flex;
     justify-content: center;
     align-items: center;
@@ -801,7 +801,7 @@ button[data-tooltip]:hover::after {
     padding: 20px;
     width: 300px;
     border-radius: 10px;
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    /* box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3); */
     text-align: center;
 }
 
@@ -963,27 +963,27 @@ button[data-tooltip]:hover::after {
 }
 
 .modal-content-style {
-    background: white;
-    padding: 20px;
-    border-radius: 10px;
-    width: 90%;
-    position: relative;
-    max-width: 300px;
-    max-height: 350px;
+    width: 100vw;
+    height: 260px;
+    background: #fff;
+    /* border-radius: 16px 16px 0 0; */
+    /* box-shadow: 0 -2px 16px rgba(0, 0, 0, 0.1); */
+    padding: 0px;
     overflow-y: auto;
+    position: relative;
 
 }
 
 .close-btn-style {
     color: black;
     border: none;
-    font-size: 18px;
+    /* font-size: 18px; */
     font-weight: bold;
     background-color: transparent;
     cursor: pointer;
-    position: absolute;
-    right: 15px;
-    top: 15px;
+    /* position: absolute;
+    /* right: 15px; */
+    /* top: 15px;  */
 }
 
 .del-edit-btn {
@@ -1501,6 +1501,28 @@ input:checked+.slider-send:before {
         height: 100vh;
         width: 100%;
     }
+
+    .modal-nav-style-control {
+        position: sticky;
+        display:flex;
+        justify-content:space-between;
+        align-content: center;
+        top: 0;
+        z-index: 10;
+        background: #eeeeee;
+        padding: 10px;
+    }
+
+    .preview-title {
+        margin-top: 5px;
+        margin-bottom: 0px !important;
+        margin-left: 5px;
+    }
+
+    .style-item {
+        padding: 16px;
+    }
+ 
    
     .mobile-head {
         font-size: 20px;
@@ -1544,19 +1566,28 @@ input:checked+.slider-send:before {
         width: 95% !important;
     }
 
-    .modal-overlay-send {
+    .modal-overlay-style {
         position: fixed;
-        top: 0;
         left: 0;
-        width: 100%;
-        height: 100%;
-        background-color: rgb(0 0 0 / 87%);
+        top: 70%;
+        width: 100vw;
+        height: 220px;
+        /* background: rgba(0, 0, 0, 0.2); */
+        /* Optional: slight overlay */
         display: flex;
         justify-content: center;
-        align-items: center;
-        z-index:8888 !important; 
-        /* Maximum possible z-index */
-        /* Highest priority */
+        align-items: flex-end;
+        z-index: 9999;
+        pointer-events: auto;
+    }
+
+
+    .edit-desktop-btn {
+        display: none !important;
+    }
+
+    .edit-con-btn {
+        display: block;
     }
 
     .navbar-content {
@@ -2103,13 +2134,13 @@ input:checked+.slider-send:before {
         width: 95% !important;
     }
 
-    .modal-overlay-send {
+    .modal-overlay-style {
         position: fixed;
         top: 0;
         left: 0;
         width: 100%;
         height: 100%;
-        background-color: rgb(0 0 0 / 87%);
+        /* background-color: rgb(0 0 0 / 87%); */
         display: flex;
         justify-content: center;
         align-items: center;

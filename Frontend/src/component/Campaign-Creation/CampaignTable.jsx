@@ -34,6 +34,7 @@ const [showDeleteAllConfirm, setShowDeleteAllConfirm] = useState(false);
     const navigate = useNavigate();
     const location = useLocation();
 
+
 useEffect(() => {
   filterCampaigns();
 }, [searchTerm, fromDate, toDate, campaigns]);
@@ -140,12 +141,6 @@ useEffect(() => {
         return !campaignName.includes("birthday campaign");
       });
 
-      console.log("Fetched and sorted campaigns:", filteredCampaigns.map(c => ({
-        name: c.campaignname,
-        date: c.senddate,
-        parsed: parseDate(c.senddate)
-      })));
-
       setCampaigns(filteredCampaigns);
       setFilteredCampaign(filteredCampaigns);
     } catch (error) {
@@ -164,6 +159,12 @@ useEffect(() => {
   } else {
     fetchCampaigns(); // Initial load
   }
+
+    // Then run every 5 seconds
+  const intervalId = setInterval(fetchCampaigns, 5000);
+
+  // Clear interval on unmount
+  return () => clearInterval(intervalId);
 }, [user?.id, navigate]);
 
 const indexOfLast = currentPage * rowsPerPage;
@@ -710,15 +711,15 @@ const isValidEmail = (email) => {
   }} 
   className="delete-all-btn"
 >
-  Delete All
-</button>
+ <FaTrash />
+ </button>
         <p className="select-all">
            <input
             type="checkbox"
             checked={selectAll}
             onChange={handleSelectAll}
           />
-          {" "}Select
+          {" "}Select All
         </p>
       </div>
       <div className="cam-History-container">
@@ -748,7 +749,7 @@ const isValidEmail = (email) => {
                       />
                       Campaign : {campaign.campaignname}
                     </p>
-                    <button
+                    {/* <button
                       className="resend-btn edit-btn-campaign"
                        onClick={() => {
     if (selectedCampaigns.length === 0) {
@@ -759,7 +760,7 @@ const isValidEmail = (email) => {
   }}                    
                     >
                       <FaTrash />
-                    </button>
+                    </button> */}
                   </div>
                   <div className="template-details-container">
                     <div
@@ -789,10 +790,9 @@ const isValidEmail = (email) => {
                         Group Name: {campaign.groupname}
                       </p>
                     </div>
-
                     <div
                       className="template-details"
-                      onClick={() => handleview(user.id, campaign._id)}
+                      style={{cursor:"auto"}}
                     >
                       <div className="template-icons">
                         <FaHourglassHalf className="icon-his" size={18} />
@@ -812,7 +812,8 @@ const isValidEmail = (email) => {
                           style={{
                             cursor: "pointer",
                             textDecoration: "underline",
-                            marginLeft: 10,
+                            color:"#2f327d",
+                            marginTop:10
                           }}
                           onClick={(e) => {
                             e.stopPropagation();
@@ -822,7 +823,7 @@ const isValidEmail = (email) => {
                             );
                           }}
                         >
-                          [Edit]
+                          Edit
                         </span>
                       )}
                       {/* Modal */}
@@ -855,7 +856,7 @@ const isValidEmail = (email) => {
                     </div>
                     <div
                       className="template-details"
-                      onClick={() => handleview(user.id, campaign._id)}
+                      style={{cursor:"auto"}}
                     >
                       <div className="template-icons">
                         <FaCheck className="icon-his" size={18} />
@@ -863,8 +864,10 @@ const isValidEmail = (email) => {
                       </div>
                       <div className="failed-split-btn">
                       <span
+                        onClick={() => handleview(user.id, campaign._id)}
                         style={{
                           fontWeight: "bold",
+                          cursor:"pointer",
                           color:
                             campaign.status === "Success"
                               ? "green"
@@ -1033,7 +1036,7 @@ const isValidEmail = (email) => {
               padding: "20px",
               borderRadius: "8px",
               textAlign: "center",
-              minWidth: "300px",
+              width: "500px",
               boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
             }}
           >
