@@ -156,7 +156,7 @@ const Birthdayeditor = () => {
     return message; // Don't strip HTML here
   }
 
-  const handleDeleteFolder = async () => {
+  const handleDelete = async () => {
     try {
       const response = await axios.delete(
         `${apiConfig.baseURL}/api/stud/folder/${folderToDelete.name}`
@@ -962,6 +962,7 @@ const Birthdayeditor = () => {
           "Artificial intelligence is transforming the way we interact with technology, enabling machines to process data with efficiency.", // Default paragraph text
         style1: {
           color: "#000000",
+          backgroundColor: "#f4f4f4",
         },
       },
     ]);
@@ -977,6 +978,7 @@ const Birthdayeditor = () => {
           "Artificial intelligence is transforming the way we interact with technology, enabling machines to process data with efficiency.", // Default paragraph text
         style: {
           color: "#000000",
+          backgroundColor: "#f4f4f4",
         },
       },
     ]);
@@ -2496,7 +2498,7 @@ const Birthdayeditor = () => {
                   {isMobilestyle ? (
                     <>
                       {isModalOpenstyle && (
-                        <div className="modal-overlay-style">
+                        <div className="modal-overlay-send">
                           <div className="modal-content-style">
                             <div className="modal-nav-style-control">
                               <h3 className="preview-title">Style Controls</h3>
@@ -2555,6 +2557,31 @@ const Birthdayeditor = () => {
                                   </span>
                                 </>
                               )}
+                              {previewContent[selectedIndex].type ===
+                                "multipleimage" && (
+                                <>
+                                  <h3 className="no-style">
+                                    No Style Available For Multiple Image
+                                  </h3>
+                                </>
+                              )}
+
+                              {previewContent[selectedIndex].type === "gap" && (
+                                <>
+                                  <h3 className="no-style">
+                                    No Style Available For Gap
+                                  </h3>
+                                </>
+                              )}
+                              {previewContent[selectedIndex].type ===
+                                "break" && (
+                                <>
+                                  <h3 className="no-style">
+                                    No Style Available For Break
+                                  </h3>
+                                </>
+                              )}
+
 
                               {previewContent[selectedIndex].type ===
                                 "head" && (
