@@ -1483,12 +1483,18 @@ li {
     font-size: 0.8rem;
   }
 
-  .card-grid,.card-grid-auto {
-    width: 60%;
-    padding: 50px !important;
-    margin-top: 25%;
-   
+  .card-grid{
+    width: 55%;
+    padding: 30px !important;
+    margin-top: 12%;
+    gap:30px;
+  }
 
+  .card-grid-auto {
+    width: 60%;
+    padding: 60px !important;
+    margin-top: 20%;
+    gap:20px;
   }
   .cards-auto {
     width: 120px !important;
