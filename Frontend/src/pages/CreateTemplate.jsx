@@ -2504,7 +2504,7 @@ const CreateTemplate = () => {
                   {isMobilestyle ? (
                     <>
                       {isModalOpenstyle && (
-                        <div className="modal-overlay-send">
+                        <div className="modal-overlay-style">
                           <div className="modal-content-style">
                           <div className="modal-nav-style-control">
                               <h3 className="preview-title">Style Controls</h3>

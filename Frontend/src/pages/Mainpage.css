@@ -883,7 +883,7 @@ button[data-tooltip]:hover::after {
     height: 200px !important;
     align-items: center;
     gap: 0px;
-    /* padding: 8px 10px; */
+    padding: 8px 10px;
 }
 .card-image {
     width: 100% !important;
@@ -913,8 +913,8 @@ button[data-tooltip]:hover::after {
     font-size: 15px;
 }
 .image-item {
-    width: 200px !important;
-    height: 200px !important;
+    width: 190px !important;
+    height: 190px !important;
     cursor: pointer;
 }
 
@@ -923,7 +923,7 @@ button[data-tooltip]:hover::after {
     max-height: 190px !important;
     overflow: auto;
     padding: 5px;
-   
+    background-color: #f4f4f4;
 }
 
 .video-icon {
@@ -1512,6 +1512,30 @@ input:checked+.slider-send:before {
         height: 100vh;
         width: 100%;
     }
+
+    .modal-nav-style-control {
+        position: sticky;
+        display:flex;
+        justify-content:space-between;
+        align-content: center;
+        top: 0;
+        z-index: 10;
+        background: #eeeeee;
+        /* or match your modal background */
+        padding: 10px;
+        /* optional: subtle separator */
+    }
+
+    .preview-title {
+        margin-top: 5px;
+        margin-bottom: 0px !important;
+        margin-left: 5px;
+    }
+
+    .style-item {
+        padding: 16px;
+    }
+ 
    
     .mobile-head {
         font-size: 20px;
@@ -1528,10 +1552,10 @@ input:checked+.slider-send:before {
     }
 
     .text-item {
-        /* width:90px; */
+        width:90px;
         height:120px !important;
         font-size: 12px;
-        padding:0px 5px !important;
+        padding: 0px 5px !important;
     }
     .modal{
         z-index:9800;
@@ -1585,7 +1609,7 @@ input:checked+.slider-send:before {
         align-items: center;
         justify-content: center;
         background-color: #fff;
-        z-index: 9999;
+        z-index: 8888;
         /* Below modal */
         box-shadow: 0 0px 5px rgb(187, 187, 187);
         position: absolute;
@@ -2108,8 +2132,6 @@ input:checked+.slider-send:before {
     .image-text-wrapper {
         height: 120px !important;
         border-radius: 3px !important;
-        width:450px !important;
-        justify-content: space-between;
     }
 
     .editor-bg {
@@ -2135,7 +2157,7 @@ input:checked+.slider-send:before {
         display: flex;
         justify-content: center;
         align-items: center;
-        z-index: 8888 !important;
+        z-index: 9999 !important;
         /* Maximum possible z-index */
         /* Highest priority */
     }
@@ -2275,6 +2297,4 @@ input:checked+.slider-send:before {
   word-break: break-word;
   cursor: pointer;
 }
-
-
 
