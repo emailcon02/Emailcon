@@ -39,7 +39,7 @@ app.get('/api/auth/google', (req, res) => {
   const oAuth2Client = new google.auth.OAuth2(
     process.env.CLIENT_ID,
     process.env.CLIENT_SECRET,
-    `${apiconfigbackend.baseURL}/api/oauth2callback`
+    process.env.REDIRECT_URI
   );
 
   const state = encodeURIComponent(JSON.stringify({ userId }));
@@ -73,7 +73,7 @@ app.get('/api/oauth2callback', async (req, res) => {
     const oAuth2Client = new google.auth.OAuth2(
       process.env.CLIENT_ID,
       process.env.CLIENT_SECRET,
-      `${apiconfigbackend.baseURL}/api/oauth2callback`
+      process.env.REDIRECT_URI
     );
 
     const { tokens } = await oAuth2Client.getToken(code);

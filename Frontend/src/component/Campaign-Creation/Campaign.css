@@ -68,25 +68,67 @@
   left: 50%;
   transform: translateX(-50%);
 }
-@media screen and (min-width: 600px) and (max-width: 900px) {
+
+  @media (max-width:600px){
 .campaign-mobile-head{
   font-size: 30px !important;
 
 }
 .campaign-app-content img{
-  width: 500px !important;
+  width: 300px !important;
 }
 .campaign-app-content p{
-  font-size: 20px !important;
+  font-size: 15px !important;
   text-align: center;
 }
 .campaign-half-circle{
   width: 60px !important;
   height: 30px !important;
+  bottom: 100px !important;
 }
 .campaign-foot-button{
   width: 50px !important;
   height: 50px !important;
   font-size: 20px !important;
+  bottom: 100px !important;
 }
+.campaign-app-footer{
+  padding: 4em !important;
+}
+}
+
+@media screen and (min-width: 750px) and (max-width: 900px){
+  .campaign-mobile-head {
+    font-size: 30px !important;
+
+  }
+
+  .campaign-app-content img {
+    width: 500px !important;
+  }
+
+  .campaign-app-content p {
+    font-size: 20px !important;
+    text-align: center;
+  }
+
+  .campaign-half-circle {
+    width: 80px !important;
+    height: 40px !important;
+    bottom: 161px !important;
+    border-bottom-left-radius: 50px;
+    border-bottom-right-radius: 50px;
+  }
+
+  .campaign-app-footer{
+     padding: 6em !important;
+  }
+
+  .campaign-foot-button {
+    width: 80px !important;
+    height: 80px !important;
+    font-size: 30px !important;
+    bottom: 163px !important;
+  }
+
 }

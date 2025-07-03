@@ -6104,7 +6104,7 @@ const CreateTemplate = () => {
                       onDragOver={(e) => e.preventDefault()}
                       onDrop={() => handleDrop(index)}
                       className="content-item"
-                      // onClick={() => handleItemClick(index)}
+                      onClick={() => handleItemClick(index)}
                       style={item.style}
                     >
                       {item.type === "para" && (
