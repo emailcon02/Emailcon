@@ -23,7 +23,7 @@ const Smtppage = () => {
     }
 
     // Pass userId to backend
-    window.location.href = `${apiConfig.baseURL}/auth/google?userId=${userData.id}`;
+    window.location.href = `${apiConfig.baseURL}/api/auth/google?userId=${userData.id}`;
   };
 
   const handleCancel = () => {
