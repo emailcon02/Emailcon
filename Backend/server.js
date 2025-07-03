@@ -24,16 +24,13 @@ connectDB();
 const app = express();
 
 // Middleware - CORRECTED VERSION
-app.use(cors({
-  origin: `${apiconfigfrontend.baseURL}`, 
-  credentials: true
-}));
+app.use(cors());
 app.use(express.json({ limit: '100mb' })); 
 app.use(express.urlencoded({ limit: '100mb', extended: true })); 
 
 
 // Modified /auth/google endpoint
-app.get('/auth/google', (req, res) => {
+app.get('/api/auth/google', (req, res) => {
   const { userId } = req.query; // Important for associating with your user
   if (!userId) {
     return res.status(400).json({ error: "User ID required" });
@@ -42,7 +39,7 @@ app.get('/auth/google', (req, res) => {
   const oAuth2Client = new google.auth.OAuth2(
     process.env.CLIENT_ID,
     process.env.CLIENT_SECRET,
-    `${apiconfigbackend.baseURL}/oauth2callback`
+    `${apiconfigbackend.baseURL}/api/oauth2callback`
   );
 
   const state = encodeURIComponent(JSON.stringify({ userId }));
@@ -61,7 +58,7 @@ app.get('/auth/google', (req, res) => {
 });
 
 // Modified /oauth2callback endpoint
-app.get('/oauth2callback', async (req, res) => {
+app.get('/api/oauth2callback', async (req, res) => {
   try {
     const { code, state } = req.query;
     if (!code || !state) {
@@ -76,7 +73,7 @@ app.get('/oauth2callback', async (req, res) => {
     const oAuth2Client = new google.auth.OAuth2(
       process.env.CLIENT_ID,
       process.env.CLIENT_SECRET,
-      `${apiconfigbackend.baseURL}/oauth2callback`
+      `${apiconfigbackend.baseURL}/api/oauth2callback`
     );
 
     const { tokens } = await oAuth2Client.getToken(code);
@@ -106,7 +103,7 @@ app.get('/oauth2callback', async (req, res) => {
 });
 
 // Temporary test route
-app.get('/api/test-oauth/:id', async (req, res) => {
+app.get('/api/api/test-oauth/:id', async (req, res) => {
   try {
     const oAuth2Client = await getAuthorizedOAuthClient(req.params.id);
     res.send("✅ Token refresh and OAuth client ready");

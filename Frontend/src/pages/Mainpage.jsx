@@ -157,7 +157,7 @@ const Mainpage = () => {
     return message; // Don't strip HTML here
   }
 
-  const handleDelete = async () => {
+  const handleDeleteFolder = async () => {
     try {
       const response = await axios.delete(
         `${apiConfig.baseURL}/api/stud/folder/${folderToDelete.name}`
@@ -1117,7 +1117,19 @@ const Mainpage = () => {
     updated[index] = { ...updated[index], ...newContent };
     setPreviewContent(updated);
   };
-
+  const handleItemClick = (index) => {
+    setSelectedIndex(index); // Set the selected index when an item is clicked
+    // Scroll to style controls after a short delay to ensure rendering
+    setTimeout(() => {
+      const styleControlsElement = document.querySelector(".style-controls");
+      if (styleControlsElement) {
+        styleControlsElement.scrollIntoView({
+          behavior: "smooth",
+          block: "center",
+        });
+      }
+    }, 100);
+  };
   const handleItemClickdesktop = (index) => {
     setSelectedIndex(index); // Set the selected index when an item is clicked
   };
@@ -6092,6 +6104,7 @@ const Mainpage = () => {
                       onDragOver={(e) => e.preventDefault()}
                       onDrop={() => handleDrop(index)}
                       className="content-item"
+                      // onClick={() => handleItemClick(index)}
                       style={item.style}
                     >
                       {item.type === "para" && (

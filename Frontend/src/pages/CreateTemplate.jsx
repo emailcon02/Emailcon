@@ -79,7 +79,7 @@ const CreateTemplate = () => {
   const [isOpen, setIsOpen] = useState(false);
   const modalRef = useRef(null);
   const [isNavOpen, setIsNavOpen] = useState(false);
-  const [isMobilestyle, setIsMobilestyle] = useState(window.innerWidth <= 600);
+  const [isMobilestyle, setIsMobilestyle] = useState(window.innerWidth <= 250);
   const [isModalOpenstyle, setIsModalOpenstyle] = useState(false);
   const [isOpentemplate, setIsOpentemplate] = useState(false); // Manage dropdown visibility
   const [templates, setTemplates] = useState([]); // Store fetched templates
@@ -158,7 +158,7 @@ const CreateTemplate = () => {
     return message; // Don't strip HTML here
   }
 
-  const handleDelete = async () => {
+  const handleDeleteFolder = async () => {
     try {
       const response = await axios.delete(
         `${apiConfig.baseURL}/api/stud/folder/${folderToDelete.name}`
@@ -1118,19 +1118,19 @@ const CreateTemplate = () => {
     updated[index] = { ...updated[index], ...newContent };
     setPreviewContent(updated);
   };
-  // const handleItemClick = (index) => {
-  //   setSelectedIndex(index); // Set the selected index when an item is clicked
-  //   // Scroll to style controls after a short delay to ensure rendering
-  //   setTimeout(() => {
-  //     const styleControlsElement = document.querySelector(".style-controls");
-  //     if (styleControlsElement) {
-  //       styleControlsElement.scrollIntoView({
-  //         behavior: "smooth",
-  //         block: "center",
-  //       });
-  //     }
-  //   }, 100);
-  // };
+  const handleItemClick = (index) => {
+    setSelectedIndex(index); // Set the selected index when an item is clicked
+    // Scroll to style controls after a short delay to ensure rendering
+    setTimeout(() => {
+      const styleControlsElement = document.querySelector(".style-controls");
+      if (styleControlsElement) {
+        styleControlsElement.scrollIntoView({
+          behavior: "smooth",
+          block: "center",
+        });
+      }
+    }, 100);
+  };
   const handleItemClickdesktop = (index) => {
     setSelectedIndex(index); // Set the selected index when an item is clicked
   };
@@ -2502,7 +2502,7 @@ const CreateTemplate = () => {
                   {isMobilestyle ? (
                     <>
                       {isModalOpenstyle && (
-                        <div className="modal-overlay-send">
+                        <div className="modal-overlay-style">
                           <div className="modal-content-style">
                           <div className="modal-nav-style-control">
                               <h3 className="preview-title">Style Controls</h3>
@@ -6703,12 +6703,6 @@ const CreateTemplate = () => {
                         >
                           <FiEdit />
                         </button>
-                          <button
-                                                  className="edit-con-btn"
-                                                  onClick={() => setIsModalOpenstyle(true)}
-                                                >
-                                                  <FiEdit />
-                                                </button>
                       </div>
                     </div>
                   );
@@ -7354,7 +7348,7 @@ const CreateTemplate = () => {
 
           {/* send mail Modal */}
           {isOpen && (
-            <div className="modal-overlay-style">
+            <div className="modal-overlay-send">
               <div className="modal-content-send" ref={modalRef}>
                 <h2>Select an Option</h2>
 
