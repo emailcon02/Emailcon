@@ -30,7 +30,10 @@ app.use(express.urlencoded({ limit: '100mb', extended: true }));
 
 
 //google end-point
-app.get('/auth/google', (req, res) => {
+app.get('/auth/google', (req, res) => {  
+console.log('CLIENT_ID:', process.env.CLIENT_ID);
+console.log('CLIENT_SECRET:', process.env.CLIENT_SECRET);
+console.log('REDIRECT_URI:', process.env.REDIRECT_URI);
 
   const { userId } = req.query; // Important for associating with your user
   if (!userId) {
