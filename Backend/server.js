@@ -31,11 +31,10 @@ app.use(express.urlencoded({ limit: '100mb', extended: true }));
 
 //google end-point
 app.get('/auth/google', (req, res) => {  
-console.log('CLIENT_ID:', process.env.CLIENT_ID);
-console.log('CLIENT_SECRET:', process.env.CLIENT_SECRET);
-console.log('REDIRECT_URI:', process.env.REDIRECT_URI);
-
-  const { userId } = req.query; // Important for associating with your user
+  console.log('CLIENT_ID:', process.env.CLIENT_ID);
+  console.log('CLIENT_SECRET:', process.env.CLIENT_SECRET);
+  console.log('REDIRECT_URI:', process.env.REDIRECT_URI); 
+  const { userId } = req.query;
   if (!userId) {
     return res.status(400).json({ error: "User ID required" });
   }
@@ -43,22 +42,24 @@ console.log('REDIRECT_URI:', process.env.REDIRECT_URI);
   const oAuth2Client = new google.auth.OAuth2(
     process.env.CLIENT_ID,
     process.env.CLIENT_SECRET,
-    process.env.REDIRECT_URI
+    process.env.REDIRECT_URI // Make sure this matches exactly
   );
 
   const state = encodeURIComponent(JSON.stringify({ userId }));
   const authUrl = oAuth2Client.generateAuthUrl({
     access_type: 'offline',
     prompt: 'consent',
-    redirect_uri: process.env.REDIRECT_URI,  
-    state,
     scope: [
       'https://www.googleapis.com/auth/gmail.send',
       'https://www.googleapis.com/auth/userinfo.profile',
       'https://www.googleapis.com/auth/userinfo.email',
       'openid'
-    ]
+    ],
+    state,
+    redirect_uri: process.env.REDIRECT_URI // Explicitly include this
   });
+  
+  console.log('Generated Auth URL:', authUrl); // For debugging
   res.redirect(authUrl);
 });
 
@@ -105,6 +106,15 @@ app.get('/oauth2callback', async (req, res) => {
     console.error("OAuth2 error:", err);
     return res.redirect(`${apiconfigfrontend.baseURL}/auth-warning?error=${encodeURIComponent(err.message)}`);
   }
+});
+
+app.get('/debug/oauth-config', (req, res) => {
+  res.json({
+    clientId: process.env.CLIENT_ID,
+    redirectUri: process.env.REDIRECT_URI,
+    nodeEnv: process.env.NODE_ENV,
+    timestamp: new Date()
+  });
 });
 
 // Temporary test route
