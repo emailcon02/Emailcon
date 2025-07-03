@@ -25,11 +25,11 @@ const app = express();
 
 // Middleware - CORRECTED VERSION
 app.use(cors({
-  origin: `${apiconfigfrontend.baseURL}`, // your frontend origin
+  origin: `${apiconfigfrontend.baseURL}`, 
   credentials: true
 }));
-app.use(express.json({ limit: '100mb' })); // For JSON payloads
-app.use(express.urlencoded({ limit: '100mb', extended: true })); // For URL-encoded data
+app.use(express.json({ limit: '100mb' })); 
+app.use(express.urlencoded({ limit: '100mb', extended: true })); 
 
 
 // Modified /auth/google endpoint
@@ -118,13 +118,13 @@ app.get('/api/test-oauth/:id', async (req, res) => {
 
 
 // Routes
-app.use('/api/stud', studentRoutes);
-app.use('/api/auth', authRoutes);
-app.use('/api/admin', adminRoutes);
-app.use("/api/order", createOrderRoute);
+app.use('/stud', studentRoutes);
+app.use('/auth', authRoutes);
+app.use('/admin', adminRoutes);
+app.use("/order", createOrderRoute);
 
 app.get('/', (req, res) => {
-    res.json('Hello');
+    res.json('Hello demo route welcome');
 });
 
 // Error Handling
