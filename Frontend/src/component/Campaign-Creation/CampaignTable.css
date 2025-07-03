@@ -9,7 +9,7 @@
   background-color: #f48c06;
   color: white;
   border: none;
-  padding:6px;
+  padding:6px 8px;
   font-size: 14px;
   border-radius:5px;
   font-size: 12px;
@@ -411,6 +411,10 @@
   }
   .template-details-container{
     overflow: auto;
+  }
+  .template-details{
+    width: 160px;
+    height: 140px;
   }
   .failed-resend-btn{
     margin-top: 15px;
