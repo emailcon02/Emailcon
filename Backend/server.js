@@ -47,6 +47,7 @@ app.get('/auth/google', (req, res) => {
   const authUrl = oAuth2Client.generateAuthUrl({
     access_type: 'offline',
     prompt: 'consent',
+    redirect_uri: process.env.REDIRECT_URI,  
     state,
     scope: [
       'https://www.googleapis.com/auth/gmail.send',
