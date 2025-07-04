@@ -31,14 +31,10 @@ app.use(express.urlencoded({ limit: '100mb', extended: true }));
 
 //google end-point
 app.get('/auth/google', (req, res) => {  
-console.log('CLIENT_ID:', process.env.CLIENT_ID);
-console.log('CLIENT_SECRET:', process.env.CLIENT_SECRET);
-console.log('REDIRECT_URI:', process.env.REDIRECT_URI);
   const { userId } = req.query; // Important for associating with your user
   if (!userId) {
     return res.status(400).json({ error: "User ID required" });
   }
-
   const oAuth2Client = new google.auth.OAuth2(
     process.env.CLIENT_ID,
     process.env.CLIENT_SECRET,
@@ -81,18 +77,29 @@ app.get('/oauth2callback', async (req, res) => {
     const { tokens } = await oAuth2Client.getToken(code);
     oAuth2Client.setCredentials(tokens);
 
-    // Verify the user exists before storing tokens
+    // Get user profile info from Google
+    const oauth2 = google.oauth2({ version: 'v2', auth: oAuth2Client });
+    const userInfo = await oauth2.userinfo.get();
+
+    const googleEmail = userInfo.data.email;
+
+    // Verify user from your DB
     const user = await User.findById(userId);
     if (!user) {
       throw new Error("User not found");
     }
 
-    // Always update these fields
+    // Compare authenticated email with stored email
+    if (user.email.toLowerCase() !== googleEmail.toLowerCase()) {
+        return res.redirect(`${apiconfigfrontend.baseURL}/auth-warning?message=Google auth email mismatch&email=${googleEmail}`);
+    }
+
+    // Save tokens if email matches
     user.google = {
       accessToken: tokens.access_token,
       expiryDate: tokens.expiry_date,
       tokenType: tokens.token_type,
-      ...(tokens.refresh_token && { refreshToken: tokens.refresh_token }) // Only update if new refresh token
+      ...(tokens.refresh_token && { refreshToken: tokens.refresh_token })
     };
 
     await user.save();
@@ -103,6 +110,7 @@ app.get('/oauth2callback', async (req, res) => {
     return res.redirect(`${apiconfigfrontend.baseURL}/auth-warning?error=${encodeURIComponent(err.message)}`);
   }
 });
+
 
 // Temporary test route
 app.get('/api/test-oauth/:id', async (req, res) => {
@@ -120,7 +128,7 @@ app.get('/api/test-oauth/:id', async (req, res) => {
 app.use('/stud', studentRoutes);
 app.use('/auth', authRoutes);
 app.use('/admin', adminRoutes);
-app.use("/order", createOrderRoute);
+app.use('/order', createOrderRoute);
 
 app.get('/', (req, res) => {
     res.json('Hello demo route welcome');

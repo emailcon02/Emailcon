@@ -40,6 +40,7 @@ import apiConfig from "../apiconfig/apiConfig.js";
 import ColorPicker from "./ColorPicker.jsx";
 import FileManagerModal from "./FilemanagerModal.jsx";
 import ParaEditorbutton from "../component/Campaign-Creation/ParaEditorbutton.jsx";
+import ColorPalettePicker from "./ColorPalettePicker.jsx";
 
 const CreateTemplate = () => {
   const [activeTab, setActiveTab] = useState("button1");
@@ -113,6 +114,17 @@ const CreateTemplate = () => {
   const [selectedDraggedImageId, setSelectedDraggedImageId] = useState(null);
   const [pendingFolderMove, setPendingFolderMove] = useState(null);
   const [showMoveConfirmModal, setShowMoveConfirmModal] = useState(false);
+  const [isMobilestylecolor, setIsMobilestylecolor] = useState(
+    window.innerWidth <= 900
+  );
+  useEffect(() => {
+    const handleResizecolor = () => {
+      setIsMobilestylecolor(window.innerWidth <= 900);
+    };
+
+    window.addEventListener("resize", handleResizecolor);
+    return () => window.removeEventListener("resize", handleResizecolor);
+  }, []);
 
   function convertToWhatsAppText(html) {
     const tempDiv = document.createElement("div");
@@ -158,7 +170,7 @@ const CreateTemplate = () => {
     return message; // Don't strip HTML here
   }
 
-  const handleDelete = async () => {
+  const handleDeleteFolder = async () => {
     try {
       const response = await axios.delete(
         `${apiConfig.baseURL}/api/stud/folder/${folderToDelete.name}`
@@ -831,7 +843,7 @@ const CreateTemplate = () => {
         },
         src1: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTjCoUtOal33JWLqals1Wq7p6GGCnr3o-lwpQ&s", // Default image source
         content1:
-          "Artificial intelligence is transforming the way we interact with technology.", // Default paragraph text
+          "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.", // Default paragraph text", // Default paragraph text
         style1: {
           color: "#000000",
           backgroundColor: "#f4f4f4",
@@ -953,7 +965,7 @@ const CreateTemplate = () => {
         type: "imagewithtext",
         src1: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTjCoUtOal33JWLqals1Wq7p6GGCnr3o-lwpQ&s", // Default image source
         content1:
-          "Artificial intelligence is transforming the way we interact with technology, enabling machines to process data with efficiency.", // Default paragraph text
+          "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.", // Default paragraph text", // Default paragraph text
         style1: {
           color: "#000000",
           backgroundColor: "#f4f4f4",
@@ -969,7 +981,7 @@ const CreateTemplate = () => {
         type: "textwithimage",
         src2: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTjCoUtOal33JWLqals1Wq7p6GGCnr3o-lwpQ&s", // Default image source
         content2:
-          "Artificial intelligence is transforming the way we interact with technology, enabling machines to process data with efficiency.", // Default paragraph text
+          "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.", // Default paragraph text", // Default paragraph text
         style: {
           color: "#000000",
           backgroundColor: "#f4f4f4",
@@ -2097,15 +2109,23 @@ const CreateTemplate = () => {
                 >
                   <FaPlusSquare /> Button
                 </button>
-                <button className="editor-button">
-                  <input
-                    type="color"
-                    value={bgColor}
-                    onChange={(e) => setBgColor(e.target.value)}
-                    className="bg-color-pic"
+
+                {isMobilestylecolor ? (
+                  <ColorPalettePicker
+                    label={bgColor}
+                    onChange={(color) => setBgColor(color)}
                   />
-                  Template-Bg
-                </button>
+                ) : (
+                  <button className="editor-button">
+                    <input
+                      type="color"
+                      value={bgColor}
+                      onChange={(e) => setBgColor(e.target.value)}
+                      className="bg-color-pic"
+                    />
+                    Template-Bg
+                  </button>
+                )}
               </div>
             </div>
             <button
@@ -2506,7 +2526,7 @@ const CreateTemplate = () => {
                       {isModalOpenstyle && (
                         <div className="modal-overlay-style">
                           <div className="modal-content-style">
-                          <div className="modal-nav-style-control">
+                            <div className="modal-nav-style-control">
                               <h3 className="preview-title">Style Controls</h3>
                               <button
                                 className="close-btn-style"
@@ -2588,7 +2608,6 @@ const CreateTemplate = () => {
                                   </h3>
                                 </>
                               )}
-
 
                               {previewContent[selectedIndex].type ===
                                 "head" && (
@@ -4287,6 +4306,30 @@ const CreateTemplate = () => {
                               )}
                               %
                             </span>
+                          </>
+                        )}
+
+                        {previewContent[selectedIndex].type ===
+                          "multipleimage" && (
+                          <>
+                            <h3 className="no-style">
+                              No Style Available For Multiple Image
+                            </h3>
+                          </>
+                        )}
+
+                        {previewContent[selectedIndex].type === "gap" && (
+                          <>
+                            <h3 className="no-style">
+                              No Style Available For Gap
+                            </h3>
+                          </>
+                        )}
+                        {previewContent[selectedIndex].type === "break" && (
+                          <>
+                            <h3 className="no-style">
+                              No Style Available For Break
+                            </h3>
                           </>
                         )}
 

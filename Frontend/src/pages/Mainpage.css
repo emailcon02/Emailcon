@@ -883,7 +883,8 @@ button[data-tooltip]:hover::after {
     height: 200px !important;
     align-items: center;
     gap: 0px;
-    padding: 8px 10px;
+    padding: 10px 10px;
+    border-radius: 8px;
 }
 .card-image {
     width: 100% !important;
@@ -916,6 +917,7 @@ button[data-tooltip]:hover::after {
     width: 190px !important;
     height: 190px !important;
     cursor: pointer;
+    border-radius: 8px;
 }
 
 .text-item {
@@ -923,7 +925,13 @@ button[data-tooltip]:hover::after {
     max-height: 190px !important;
     overflow: auto;
     padding: 5px;
-    background-color: #f4f4f4;
+    /* background-color: #f4f4f4; */
+}
+
+.no-style {
+    color: #797878;
+    margin: 5% auto;
+    text-align: center;
 }
 
 .video-icon {
@@ -1513,6 +1521,13 @@ input:checked+.slider-send:before {
         width: 100%;
     }
 
+    .no-style {
+        color: #797878;
+        margin-top: 20% !important;
+        text-align: center;
+        font-size: 15px;
+    }
+
     .modal-nav-style-control {
         position: sticky;
         display:flex;
@@ -1566,6 +1581,9 @@ input:checked+.slider-send:before {
      .image-text-wrapper {
         height:120px !important;
         border-radius: 3px !important;
+        padding: 5px 3px !important;
+        border-radius: 8px !important;
+        justify-content: space-between;
      }
     .editor-bg {
         width: 90%;
@@ -2129,10 +2147,7 @@ input:checked+.slider-send:before {
         width: 95% !important;
     }
 
-    .image-text-wrapper {
-        height: 120px !important;
-        border-radius: 3px !important;
-    }
+   
 
     .editor-bg {
         width: 90%;
@@ -2183,7 +2198,15 @@ input:checked+.slider-send:before {
         justify-content: space-between;
         height: 50px;
     }
-
+     
+    .image-text-wrapper {
+        height: 120px !important;
+        border-radius: 3px !important;
+        width: 450px !important;
+        justify-content: space-between;
+        padding: 10px;
+        border-radius: 8px;
+    }
     
     .template-list {
         top: 30% !important;

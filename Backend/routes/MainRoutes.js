@@ -912,7 +912,7 @@ async function createTransporter(user, aliasName) {
           }
 
           await transporter.sendMail(mailOptions);
-          console.log(`Sent Mail Via Hostinger to ${mailOptions.to}`);
+          console.log(`✅ Sent Mail Via Hostinger to ${mailOptions.to}`);
         } catch (error) {
           console.log(`❌ Failed to send to ${mailOptions.to}`);
           throw error;
@@ -1119,10 +1119,10 @@ function generateHtml(element, userId, campaignId, recipientEmail) {
        </div>`;
 
         case 'imagewithtext':
-          return `<table class="image-text" style="width:100%;height:220px !important;border-collapse:seperate;margin:15px 0px !important;${styleString1};">
+          return `<table class="image-text" style="width:100%;border-radius:10px;height:220px !important;border-collapse:seperate;margin:15px 0px !important;${styleString1};">
       <tr>
           <td style = "vertical-align:top;padding:10px;">
-              <img  src="${src1}" style="width:200px !important;height:200px !important;pointer-events:none !important; object-fit:cover;" alt="image"/>                  
+              <img  src="${src1}" style="width:200px !important;border-radius:10px;height:200px !important;pointer-events:none !important; object-fit:cover;" alt="image"/>                  
           </td>
           <td style = "vertical-align:top;padding:10px;${styleString1};">
               <div class="img-para" style="overflow: auto;max-height: 200px !important;font-size:18px;">
@@ -1204,7 +1204,7 @@ case 'break':
 
 
         case 'textwithimage':
-          return `<table class="image-text" style="width:100%;height:220px !important;border-collapse:seperate;margin:15px 0px !important;${styleString};">
+          return `<table class="image-text" style="width:100%;border-radius:10px;height:220px !important;border-collapse:seperate;margin:15px 0px !important;${styleString};">
       <tr>
         <td style = "vertical-align:top;padding:10px;${styleString};">
               <div class="img-para" style="overflow: auto;max-height: 200px !important;font-size:18px;">
@@ -1212,7 +1212,7 @@ case 'break':
               </div>
           </td>
           <td style = "vertical-align:top;padding:10px;">
-              <img  src="${src2}" style="width:200px !important;height:200px !important;pointer-events:none !important; object-fit:cover;" alt="image"/>                  
+              <img  src="${src2}" style="width:200px !important;border-radius:10px;height:200px !important;pointer-events:none !important; object-fit:cover;" alt="image"/>                  
           </td>
         
       </tr>
@@ -1838,10 +1838,10 @@ router.post('/sendbulkEmail', async (req, res) => {
        </div>`;
 
         case 'imagewithtext':
-          return `<table class="image-text" style="width:100%;height:220px !important;border-collapse:seperate;margin:15px 0px !important;${styleString1};">
+          return `<table class="image-text" style="width:100%;border-radius:10px;height:220px !important;border-collapse:seperate;margin:15px 0px !important;${styleString1};">
       <tr>
           <td style = "vertical-align:top;padding:10px;">
-              <img  src="${src1}" style="width:200px !important;height:200px !important;pointer-events:none !important; object-fit:cover;" alt="image"/>                  
+              <img  src="${src1}" style="width:200px !important;border-radius:10px;height:200px !important;pointer-events:none !important; object-fit:cover;" alt="image"/>                  
           </td>
           <td style = "vertical-align:top;padding:10px;${styleString1};">
               <div class="img-para" style="overflow: auto;max-height: 200px !important;font-size:18px;">
@@ -1923,7 +1923,7 @@ case 'break':
 
 
         case 'textwithimage':
-          return `<table class="image-text" style="width:100%;height:220px !important;border-collapse:seperate;margin:15px 0px !important;${styleString};">
+          return `<table class="image-text" style="width:100%;border-radius:10px;height:220px !important;border-collapse:seperate;margin:15px 0px !important;${styleString};">
       <tr>
         <td style = "vertical-align:top;padding:10px;${styleString};">
               <div class="img-para" style="overflow: auto;max-height: 200px !important;font-size:18px;">
@@ -1931,7 +1931,7 @@ case 'break':
               </div>
           </td>
           <td style = "vertical-align:top;padding:10px;">
-              <img  src="${src2}" style="width:200px !important;height:200px !important;pointer-events:none !important; object-fit:cover;" alt="image"/>                  
+              <img  src="${src2}" style="width:200px !important;border-radius:10px;height:200px !important;pointer-events:none !important; object-fit:cover;" alt="image"/>                  
           </td>
         
       </tr>

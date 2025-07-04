@@ -853,7 +853,8 @@ button[data-tooltip]:hover::after {
     height: 200px !important;
     align-items: center;
     /* gap: 15px; */
-    padding: 8px 0px;
+    padding: 10px 10px;
+    border-radius:8px;
 }
 .card-image {
     width: 100% !important;
@@ -879,9 +880,10 @@ button[data-tooltip]:hover::after {
 }
 
 .image-item {
-    width: 190px !important;
-    height: 190px !important;
+    width: 200px !important;
+    height: 200px !important;
     cursor: pointer;
+    border-radius: 8px;
 }
 
 .text-item {
@@ -1204,6 +1206,12 @@ button[data-tooltip]:hover::after {
     font-size: 14px;
 }
 
+.no-style{
+    color:#797878;
+    margin:5% auto;
+    text-align: center;
+}
+
 .temname {
     color: #2f327D;
     font-size: 18px;
@@ -1439,6 +1447,13 @@ input:checked+.slider-send:before {
         height: 100vh;
         width: 100%;
     }
+    .no-style {
+        color: #797878;
+        margin-top: 20% !important;
+        text-align: center;
+        font-size: 15px;
+    }
+
     .modal-nav-style-control {
         position: sticky;
         display:flex;
@@ -1476,7 +1491,7 @@ input:checked+.slider-send:before {
     }
 
     .text-item {
-        width:90px;
+        width:100px;
         height:120px !important;
         font-size: 12px;
         padding: 0px 5px !important;
@@ -1685,10 +1700,14 @@ input:checked+.slider-send:before {
     }
 
     .image-text-wrapper {
-         padding:0px !important;
-         gap:0px !important;
-         margin-top: 10px;
+        height:120px !important;
+        border-radius: 3px !important;
+        padding: 5px 3px !important;
+        border-radius: 8px !important;
+        justify-content: space-between;
+        margin-top: 10px;
     }
+
     .image-text-container{
            padding:0px !important;
            gap:0px !important;
@@ -2220,6 +2239,7 @@ input:checked+.slider-send:before {
         background: #ff6700;
         /* Slightly darker orange */
     }
+   
     
   } 
 
@@ -2246,6 +2266,7 @@ input:checked+.slider-send:before {
         width: 120px !important;
         height: 120px !important;
         cursor: pointer;
+        border-radius:8px;
     }
 
     .border-btn{
@@ -2257,7 +2278,7 @@ input:checked+.slider-send:before {
         height: 120px !important;
         font-size: 12px;
         padding: 0px 5px !important;
-        background-color: #f4f4f4;
+        /* background-color: #f4f4f4; */
     }
 
     .modal {
@@ -2273,6 +2294,8 @@ input:checked+.slider-send:before {
         border-radius: 3px !important;
            width: 450px !important;
         justify-content: space-between;
+        padding: 10px;
+        border-radius: 8px;
     }
 
     .editor-bg {
@@ -2464,11 +2487,11 @@ input:checked+.slider-send:before {
 
     }
 
-    .image-text-wrapper {
+    /* .image-text-wrapper {
         padding: 0px !important;
         gap: 0px !important;
         margin-top: 10px !important;
-    }
+    } */
 
     .image-text-container {
         padding: 0px !important;
