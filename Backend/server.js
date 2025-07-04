@@ -34,7 +34,7 @@ app.get('/auth/google', (req, res) => {
 console.log('CLIENT_ID:', process.env.CLIENT_ID);
 console.log('CLIENT_SECRET:', process.env.CLIENT_SECRET);
 console.log('REDIRECT_URI:', process.env.REDIRECT_URI);
-  const { userId } = req.query;
+  const { userId } = req.query; // Important for associating with your user
   if (!userId) {
     return res.status(400).json({ error: "User ID required" });
   }
@@ -42,27 +42,23 @@ console.log('REDIRECT_URI:', process.env.REDIRECT_URI);
   const oAuth2Client = new google.auth.OAuth2(
     process.env.CLIENT_ID,
     process.env.CLIENT_SECRET,
-    process.env.REDIRECT_URI // Make sure this matches exactly
+    process.env.REDIRECT_URI
   );
 
   const state = encodeURIComponent(JSON.stringify({ userId }));
   const authUrl = oAuth2Client.generateAuthUrl({
     access_type: 'offline',
     prompt: 'consent',
+    state,
     scope: [
       'https://www.googleapis.com/auth/gmail.send',
       'https://www.googleapis.com/auth/userinfo.profile',
       'https://www.googleapis.com/auth/userinfo.email',
       'openid'
-    ],
-    state,
-    include_granted_scopes: true
+    ]
   });
-  
-  console.log('Generated Auth URL:', authUrl); // For debugging
   res.redirect(authUrl);
 });
-
 // Modified /oauth2callback endpoint
 app.get('/oauth2callback', async (req, res) => {
   try {
