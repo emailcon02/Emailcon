@@ -45,6 +45,7 @@ import EmployeeDetails from "../../component/Admin/EmployeeDetails";
 import Privacypolicy from "../../component/Frontpage/Privacypolicy";
 import Termsofservice from "../../component/Frontpage/Termsofservice";
 import CreateTemplate from "../CreateTemplate";
+import AuthWarning from "../../component/Login-Options/AuthWarning";
 
 function RoutesPage() {
   const [isOnline, setIsOnline] = useState(navigator.onLine);
@@ -82,6 +83,7 @@ function RoutesPage() {
         <Route path="/all-user-payment-history" element={<AllUserPaymenthistory />} />
         <Route path="/register-form" element={<Form />} />
         <Route path="/admin-login" element={<AdminLogin />} />
+        <Route path="/auth-warning" element={<AuthWarning />} />   
         <Route path="/employee-signup" element={<EmployeeSignup />} />
         <Route path="/employee-detail" element={<EmployeeDetails />} />
         <Route path="/user-detail" element={<UserDetail />} />
