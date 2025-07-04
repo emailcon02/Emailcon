@@ -270,7 +270,7 @@
 .main-content {
   width: 82%;
   background-color: #feecd5;
-  height: 110vh;
+  /* height: 110vh; */
 }
 /* .campaign-button{
   margin-top: 30px;
@@ -1450,8 +1450,8 @@
     align-items: flex-start;
     text-align: left;
     gap: 16px;
-    padding: 24px 5%;
-    width:300px;
+    /* padding: 24px 5%; */
+    width:270px;
     
   }
 
@@ -1510,11 +1510,7 @@
 
   .card-grid-auto{
     grid-template-columns: auto auto;
-    /* Center items horizontally */
     align-items: center;
-    /* Center items vertically */
-    /* width: 100%; */
-    /* padding: 20px !important; */
   }
 
   .main-content {
@@ -1605,7 +1601,7 @@
   }
   .dashboard-welcome-box{
     margin-top: 10%;
-    padding: 35px 6%;
+    padding: 35px 5%;
     width: 400px;
   }
   .navbars{
