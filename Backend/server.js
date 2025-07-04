@@ -11,200 +11,116 @@ import './config/cron-userexpiry.js';
 import createOrderRoute from './routes/create-order.js';
 import { google } from 'googleapis';
 import User from './models/User.js';
-// import apiconfigbackend from './api/apiconfigbackend.js';
+import apiconfigbackend from './api/apiconfigbackend.js';
 import apiconfigfrontend from './api/apiconfigfrontend.js';
 import getAuthorizedOAuthClient from './config/googleAuthClient.js';
 
-// Load environment variables with explicit path
-dotenv.config({ path: process.env.NODE_ENV === 'production' ? '.env.production' : '.env' });
-
-// Validate required environment variables
-const requiredEnvVars = ['CLIENT_ID', 'CLIENT_SECRET', 'REDIRECT_URI'];
-const missingVars = requiredEnvVars.filter(varName => !process.env[varName]);
-
-if (missingVars.length > 0) {
-  console.error('FATAL: Missing required environment variables:', missingVars);
-  process.exit(1);
-}
-
-console.log('OAuth Configuration Verified:', {
-  clientId: !!process.env.CLIENT_ID,
-  redirectUri: process.env.REDIRECT_URI,
-  environment: process.env.NODE_ENV
-});
+// Load environment variables
+dotenv.config();
 
 // Connect to MongoDB
 connectDB();
 
 const app = express();
 
-// Enhanced CORS configuration
+// Middleware - CORRECTED VERSION
 app.use(cors());
-
-// Middleware
-app.use(express.json({ limit: '100mb' }));
-app.use(express.urlencoded({ limit: '100mb', extended: true }));
+app.use(express.json({ limit: '100mb' })); 
+app.use(express.urlencoded({ limit: '100mb', extended: true })); 
 
 
-app.get('/auth/google', (req, res) => {
+//google end-point
+app.get('/auth/google', (req, res) => {  
+console.log('CLIENT_ID:', process.env.CLIENT_ID);
+console.log('CLIENT_SECRET:', process.env.CLIENT_SECRET);
+console.log('REDIRECT_URI:', process.env.REDIRECT_URI);
   const { userId } = req.query;
-  
   if (!userId) {
-    return res.status(400).json({ 
-      error: "User ID required",
-      solution: "Add ?userId=YOUR_USER_ID to the request"
-    });
+    return res.status(400).json({ error: "User ID required" });
   }
 
-  try {
-    const oAuth2Client = new google.auth.OAuth2(
-      process.env.CLIENT_ID,
-      process.env.CLIENT_SECRET,
-      process.env.REDIRECT_URI
-    );
+  const oAuth2Client = new google.auth.OAuth2(
+    process.env.CLIENT_ID,
+    process.env.CLIENT_SECRET,
+    process.env.REDIRECT_URI // Make sure this matches exactly
+  );
 
-    const state = encodeURIComponent(JSON.stringify({ 
-      userId,
-      timestamp: Date.now(),
-      source: 'emailcon'
-    }));
-
-    const authUrl = oAuth2Client.generateAuthUrl({
-      access_type: 'offline',
-      prompt: 'consent',
-      scope: [
-        'https://www.googleapis.com/auth/gmail.send',
-        'https://www.googleapis.com/auth/userinfo.profile',
-        'https://www.googleapis.com/auth/userinfo.email',
-        'openid'
-      ],
-      state,
-      include_granted_scopes: true
-    });
-
-    console.log(`Generated Auth URL for user ${userId}`);
-    return res.redirect(authUrl);
-  } catch (err) {
-    console.error('OAuth Initiation Error:', err);
-    return res.status(500).redirect(
-      `${apiconfigfrontend.baseURL}/auth-error?message=${encodeURIComponent(err.message)}`
-    );
-  }
+  const state = encodeURIComponent(JSON.stringify({ userId }));
+  const authUrl = oAuth2Client.generateAuthUrl({
+    access_type: 'offline',
+    prompt: 'consent',
+    scope: [
+      'https://www.googleapis.com/auth/gmail.send',
+      'https://www.googleapis.com/auth/userinfo.profile',
+      'https://www.googleapis.com/auth/userinfo.email',
+      'openid'
+    ],
+    state,
+    include_granted_scopes: true
+  });
+  
+  console.log('Generated Auth URL:', authUrl); // For debugging
+  res.redirect(authUrl);
 });
 
-/**
- * Google OAuth Callback Handler
- * Route: /api/oauth2callback
- */
+// Modified /oauth2callback endpoint
 app.get('/oauth2callback', async (req, res) => {
   try {
-    const { code, state, error } = req.query;
-    
-    // Handle OAuth errors from Google
-    if (error) {
-      throw new Error(`Google OAuth error: ${error}`);
-    }
-
+    const { code, state } = req.query;
     if (!code || !state) {
-      throw new Error("Missing required parameters: code and state");
+      throw new Error("Missing authorization code or state");
     }
 
-    // State validation
-    let parsedState;
-    try {
-      parsedState = JSON.parse(decodeURIComponent(state));
-    } catch (err) {
-      throw new Error("Invalid state parameter format");
+    const { userId } = JSON.parse(decodeURIComponent(state));
+    if (!userId) {
+      throw new Error("Invalid state parameter");
     }
 
-    const { userId, timestamp, source } = parsedState;
-    if (!userId || !timestamp || source !== 'emailcon') {
-      throw new Error("Invalid state data");
-    }
-
-    // State timestamp validation (10 minute expiry)
-    const stateAge = Date.now() - timestamp;
-    if (stateAge > 10 * 60 * 1000) {
-      throw new Error("OAuth session expired - please try again");
-    }
-
-    // Initialize OAuth2 client
     const oAuth2Client = new google.auth.OAuth2(
       process.env.CLIENT_ID,
       process.env.CLIENT_SECRET,
       process.env.REDIRECT_URI
     );
 
-    // Exchange code for tokens
     const { tokens } = await oAuth2Client.getToken(code);
     oAuth2Client.setCredentials(tokens);
 
-    // Verify and update user
+    // Verify the user exists before storing tokens
     const user = await User.findById(userId);
     if (!user) {
-      throw new Error("User not found in database");
+      throw new Error("User not found");
     }
 
-    // Store tokens securely
+    // Always update these fields
     user.google = {
       accessToken: tokens.access_token,
       expiryDate: tokens.expiry_date,
       tokenType: tokens.token_type,
-      ...(tokens.refresh_token && { refreshToken: tokens.refresh_token }),
-      lastAuth: new Date()
+      ...(tokens.refresh_token && { refreshToken: tokens.refresh_token }) // Only update if new refresh token
     };
 
     await user.save();
 
-    // Successful redirect
-    const redirectUrl = new URL(`${apiconfigfrontend.baseURL}/user-login`);
-    redirectUrl.searchParams.set('success', 'true');
-    redirectUrl.searchParams.set('userId', userId);
-    return res.redirect(redirectUrl.toString());
-    
+    return res.redirect(`${apiconfigfrontend.baseURL}/user-login?success=true`);
   } catch (err) {
-    console.error("OAuth Callback Error:", err);
-    
-    const redirectUrl = new URL(`${apiconfigfrontend.baseURL}/auth-error`);
-    redirectUrl.searchParams.set('error', encodeURIComponent(err.message));
-    return res.redirect(redirectUrl.toString());
+    console.error("OAuth2 error:", err);
+    return res.redirect(`${apiconfigfrontend.baseURL}/auth-warning?error=${encodeURIComponent(err.message)}`);
   }
 });
 
-// Debug endpoint to verify configuration
-app.get('/debug/oauth-config', (req, res) => {
-  res.json({
-    status: 'active',
-    clientId: process.env.CLIENT_ID ? 'configured' : 'missing',
-    redirectUri: process.env.REDIRECT_URI,
-    nodeEnv: process.env.NODE_ENV,
-    timestamp: new Date(),
-    frontendBase: apiconfigfrontend.baseURL
-  });
-});
-
-// OAuth test endpoint
+// Temporary test route
 app.get('/api/test-oauth/:id', async (req, res) => {
   try {
     const oAuth2Client = await getAuthorizedOAuthClient(req.params.id);
-    res.json({
-      status: "success",
-      message: "OAuth client is ready",
-      client: {
-        credentials: oAuth2Client.credentials
-      }
-    });
+    res.send("✅ Token refresh and OAuth client ready");
   } catch (err) {
-    console.error("OAuth Test Error:", err);
-    res.status(500).json({
-      status: "error",
-      message: err.message,
-      solution: "Check user's OAuth tokens and refresh if needed"
-    });
+    console.error(err);
+    res.status(500).send("❌ " + err.message);
   }
 });
 
-// Application Routes
+
+// Routes
 app.use('/stud', studentRoutes);
 app.use('/auth', authRoutes);
 app.use('/admin', adminRoutes);
@@ -214,34 +130,15 @@ app.get('/', (req, res) => {
     res.json('Hello demo route welcome');
 });
 
-
-// Error Handling Middleware
+// Error Handling
 app.use((req, res) => {
-  res.status(404).json({ 
-    error: 'Route not found',
-    availableEndpoints: [
-      '/auth/google',
-      '/oauth2callback',
-      '/stud',
-      '/auth',
-      '/admin',
-      '/order'
-    ]
-  });
+    res.status(404).json({ message: 'Route not found' });
 });
 
 app.use((err, req, res, next) => {
-  console.error('Server Error:', err.stack);
-  res.status(500).json({ 
-    error: 'Internal Server Error',
-    requestId: req.id,
-    timestamp: new Date()
-  });
+    console.error(err.stack);
+    res.status(500).json({ message: 'Internal Server Error' });
 });
 
-// Server startup
 const PORT = process.env.PORT || 8000;
-app.listen(PORT, () => {
-  console.log(`Server running in ${process.env.NODE_ENV} mode on port ${PORT}`);
-  console.log(`OAuth Redirect URI: ${process.env.REDIRECT_URI}`);
-});
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
