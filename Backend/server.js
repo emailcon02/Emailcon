@@ -11,7 +11,7 @@ import './config/cron-userexpiry.js';
 import createOrderRoute from './routes/create-order.js';
 import { google } from 'googleapis';
 import User from './models/User.js';
-import apiconfigbackend from './api/apiconfigbackend.js';
+// import apiconfigbackend from './api/apiconfigbackend.js';
 import apiconfigfrontend from './api/apiconfigfrontend.js';
 import getAuthorizedOAuthClient from './config/googleAuthClient.js';
 
@@ -210,15 +210,10 @@ app.use('/auth', authRoutes);
 app.use('/admin', adminRoutes);
 app.use("/order", createOrderRoute);
 
-// Basic health check
 app.get('/', (req, res) => {
-  res.json({
-    status: 'running',
-    service: 'EmailCon API',
-    version: '1.0',
-    timestamp: new Date()
-  });
+    res.json('Hello demo route welcome');
 });
+
 
 // Error Handling Middleware
 app.use((req, res) => {
