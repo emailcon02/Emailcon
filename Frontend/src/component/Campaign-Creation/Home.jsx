@@ -143,6 +143,7 @@ const [pendingFolderMove, setPendingFolderMove] = useState(null);
 const [showMoveConfirmModal, setShowMoveConfirmModal] = useState(false);
 const [totalCampaigns, setTotalCampaigns] = useState(0);
 const [totalContacts, setTotalContacts] = useState(0);
+const [totalAutomation, setTotalAutomation] = useState(0);
 const username = users?.username || user?.username || "User";
 const today = new Date().toLocaleDateString();
 
@@ -167,16 +168,32 @@ useEffect(() => {
   fetchCampaignsCount();
 }, [user?.id]);
 
+// dashboard total automation  
+useEffect(() => {
+  const fetchAutomationCount = async () => {
+    if (!user?.id) return;
+    try {
+      const response = await axios.get(`${apiConfig.baseURL}/api/stud/campaigns/${user.id}`);
+      // Filter out birthday campaigns if needed, like in CampaignTable
+      const filtered = response.data.filter(campaign => {
+        const name = campaign.campaignname?.toLowerCase() || "";
+        return name.includes("birthday campaign");
+      });
+      setTotalAutomation(filtered.length);
+    } catch (error) {
+      setTotalAutomation(0);
+    }
+  };
+  fetchAutomationCount();
+}, [user?.id]);
 
 useEffect(() => {
   const fetchContactsCount = async () => {
     try {
       const response = await axios.get(`${apiConfig.baseURL}/api/stud/students`);
-
       const filteredContacts = response.data.filter(
         contact => contact.group?.user === user.id
       );
-
       setTotalContacts(filteredContacts.length);
     } catch (error) {
       console.error("Error fetching contacts:", error);
@@ -190,30 +207,8 @@ useEffect(() => {
 }, [user?.id]);
 
 
-const totalSum =
-  totalCampaigns + totalContacts + birthtemplates.length + campaigns.length;
 
-const percentageData = [
-  {
-    name: "Campaigns",
-    value: ((totalCampaigns / totalSum) * 100).toFixed(2),
-  },
-  {
-    name: "Contacts",
-    value: ((totalContacts / totalSum) * 100).toFixed(2),
-  },
-  {
-    name: "Automation",
-    value: ((birthtemplates.length / totalSum) * 100).toFixed(2),
-  },
-  {
-    name: "Saved",
-    value: ((campaigns.length / totalSum) * 100).toFixed(2),
-  },
-];
-
-
-  const handleDeleteFolder = async () => {
+const handleDeleteFolder = async () => {
     try {
       const response = await axios.delete(
         `${apiConfig.baseURL}/api/stud/folder/${folderToDelete.name}`
@@ -2467,7 +2462,7 @@ const percentageData = [
                     </div>
                     <p className="card-text-content">Total Automation</p>
                     <p className="card-text-highlight">
-                      {birthtemplates.length}
+                      {totalAutomation}
                     </p>
                   </div>
 
@@ -2476,7 +2471,7 @@ const percentageData = [
                       <FaSave />
                     </div>
                     <p className="card-text-content">Saved Template</p>
-                    <p className="card-text-highlight">{campaigns.length}</p>
+                    <p className="card-text-highlight">{templates.length}</p>
                   </div>
                 </div>
               </div>

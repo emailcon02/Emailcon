@@ -56,9 +56,15 @@ cron.schedule("*/10 * * * *", async () => {
         ? "Your Emailcon access has expired"
         : "Reminder: Your Emailcon access is expiring soon";
 
-      const message = isFinalNotice
-        ? `Your account access has expired as of <strong>${now.toLocaleString()}</strong>.`
-        : `Your Emailcon account will expire on <strong>${expiryDate.toLocaleDateString()}</strong>. Please renew to avoid interruption.`;
+// Example: try to get user locale and timezone from user data
+const userLocale = user.locale || 'en-US'; 
+const userTimeZone = user.timeZone || 'Asia/Kolkata'; 
+
+const formattedExpiry = expiryDate.toLocaleString(userLocale, { timeZone: userTimeZone });
+
+const message = isFinalNotice
+  ? `Your account access has expired as of <strong>${formattedExpiry}</strong>.`
+  : `Your Emailcon account will expire on <strong>${formattedExpiry}</strong>. Please renew to avoid interruption.`;
 
       const mailOptions = {
         from: `"Emailcon Support" <user-noreply@account.emailcon.in>`,

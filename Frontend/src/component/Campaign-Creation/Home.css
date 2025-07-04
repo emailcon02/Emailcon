@@ -61,6 +61,11 @@
   overflow: auto;
   position: relative;
 }
+.modal-content-tem ol li{
+  cursor: pointer;
+  padding: 5px;
+  border-bottom: 1px solid #ddd;
+}
 
 .modal-content-tem::-webkit-scrollbar {
   width: 6px;
@@ -71,7 +76,6 @@
   background: #888;
   border-radius: 10px;
 }
-
 
 
 .preview-modal-overlay-tem {
