@@ -60,8 +60,7 @@ function Signup() {
                 }
           );      
         toast.success(response.data.message || "Account created successfully!");
-        // const userId = response.data.user.id; 
-        // Store user data in localStorage
+
         localStorage.setItem("user", JSON.stringify(response.data.user));
         setTimeout(() => {
           navigate('/smtppage');

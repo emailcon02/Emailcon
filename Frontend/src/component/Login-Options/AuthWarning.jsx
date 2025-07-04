@@ -7,17 +7,18 @@ import apiConfig from '../../apiconfig/apiConfig';
 export default function AuthWarning() {
   const [searchParams] = useSearchParams();
   const [mounted, setMounted] = useState(false);
-
   const message = searchParams.get('message') || searchParams.get('error');
   const email = searchParams.get('email');
-  const redirectTo = searchParams.get('redirectTo') || `${apiConfig.baseURL}/api/auth/google`;
+  const userId = searchParams.get('userId'); 
+  const redirectTo = searchParams.get('redirectTo') || `${apiConfig.baseURL}/api/auth/google?userId=${userId}`;
 
   useEffect(() => {
-    setMounted(true); // Ensure DOM is ready before toast
+    setMounted(true);
   }, []);
 
   useEffect(() => {
     if (mounted) {
+   
       const fullMessage = message
         ? email
           ? `${message}: ${email}. Please try another account.`
@@ -31,7 +32,7 @@ export default function AuthWarning() {
         },
       });
     }
-  }, [mounted, message, email, redirectTo]);
+  }, [mounted, message, email, userId, redirectTo]);
 
   return (
     <ToastContainer

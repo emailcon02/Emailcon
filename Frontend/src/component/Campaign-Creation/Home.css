@@ -150,11 +150,11 @@
 
 }
 
-ol {
+.rule-modal-container ol {
   padding: 10px 30px;
 }
 
-li {
+.rule-modal-container ol li {
   cursor: pointer;
   padding: 5px;
   border-bottom: 1px solid #ddd;

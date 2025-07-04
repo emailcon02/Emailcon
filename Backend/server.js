@@ -88,10 +88,11 @@ app.get('/oauth2callback', async (req, res) => {
     if (!user) {
       throw new Error("User not found");
     }
+    const retryUrl = `${apiconfigfrontend.baseURL}/api/auth/google?userId=${userId}`;
 
     // Compare authenticated email with stored email
     if (user.email.toLowerCase() !== googleEmail.toLowerCase()) {
-        return res.redirect(`${apiconfigfrontend.baseURL}/auth-warning?message=Google auth email mismatch&email=${googleEmail}`);
+        return res.redirect(`${apiconfigfrontend.baseURL}/auth-warning?message=Google auth email mismatch&email=${googleEmail}&userId=${userId}&redirectTo=${encodeURIComponent(retryUrl)}`);
     }
 
     // Save tokens if email matches
