@@ -4,7 +4,7 @@ import User from '../models/User.js';
 const getAuthorizedOAuthClient = async (userId) => {
   const user = await User.findById(userId);
 
-  if (!user || !user.google.refreshToken) {
+  if (!user || !user.google?.refreshToken) {
     throw new Error("Google authentication required");
   }
 
@@ -25,13 +25,35 @@ const getAuthorizedOAuthClient = async (userId) => {
       throw new Error("Failed to retrieve access token");
     }
 
+    // Save access token to DB (optional)
     user.google.accessToken = accessTokenResponse.token;
-    await user.save(); // ✅ Save updated access token
+    await user.save();
 
     return oAuth2Client;
   } catch (err) {
-    console.error("❌ Token refresh failed:", err.message);
-    throw new Error("Failed to refresh Google access token");
+    console.error("❌ Token refresh failed:", {
+      message: err.message,
+      code: err.code,
+      errors: err.errors,
+      response: err.response?.data,
+    });
+
+    // Optional: trigger re-auth if token is expired or invalid
+    const reauthUrl = oAuth2Client.generateAuthUrl({
+      access_type: 'offline',
+      prompt: 'consent',
+      scope: [
+        'https://www.googleapis.com/auth/gmail.send',
+        'https://www.googleapis.com/auth/userinfo.email',
+        'openid',
+      ],
+    });
+
+    // Instead of throwing just a message, throw an object
+    throw {
+      message: "Failed to refresh Google access token",
+      authUrl: reauthUrl,
+    };
   }
 };
 

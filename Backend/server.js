@@ -116,13 +116,22 @@ app.get('/oauth2callback', async (req, res) => {
 // Temporary test route
 app.get('/api/test-oauth/:id', async (req, res) => {
   try {
-    const oAuth2Client = await getAuthorizedOAuthClient(req.params.id);
+    const client = await getAuthorizedOAuthClient(req.params.id);
     res.send("✅ Token refresh and OAuth client ready");
   } catch (err) {
-    console.error(err);
+    console.error("❌ Error in /api/test-oauth:", err);
+
+    if (err.authUrl) {
+      return res.status(401).json({
+        error: err.message,
+        authUrl: err.authUrl,
+      });
+    }
+
     res.status(500).send("❌ " + err.message);
   }
 });
+
 
 // Routes
 app.use('/stud', studentRoutes);
