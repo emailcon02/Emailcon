@@ -267,13 +267,15 @@
 }
 .target-modal-read {
   display: block;
-  /* margin: 15px auto 0; */
+  margin: 15px auto 0;
   padding: 8px 16px;
   background: #f48c06;
   color: white;
+  margin: 10px auto 0px auto;
   border: none;
   border-radius: 5px;
   cursor: pointer;
+
 }
 
 @media (max-width: 600px) {

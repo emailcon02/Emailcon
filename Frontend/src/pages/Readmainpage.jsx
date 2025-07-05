@@ -1275,7 +1275,7 @@ const Readmainpage = () => {
           userId: user.id,
           previewContent,
           bgColor,
-          camname: campaign.camname,
+          camname:readcampaigns?.campaignname?.trim() || "",
         })
         .then((res) => {
           console.log("Template saved successfully:", res.data);
@@ -1365,7 +1365,7 @@ const Readmainpage = () => {
           {
             previewContent,
             bgColor,
-            camname: campaign?.camname || "",
+            camname:readcampaigns?.campaignname?.trim() || "",
           }
         );
         toast.success("Template updated successfully.");
@@ -1390,7 +1390,7 @@ const Readmainpage = () => {
     previewContent,
     templateName,
     bgColor,
-    campaign?.camname,
+    readcampaigns?.campaignname?.trim() || "",
     fetchTemplates,
   ]);
 

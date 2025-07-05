@@ -2,15 +2,9 @@ import { google } from 'googleapis';
 import User from '../models/User.js';
 
 const getAuthorizedOAuthClient = async (userId) => {
-
   const user = await User.findById(userId);
 
-  if (!user) {
-    throw new Error("Google authentication required");
-  }
-
-  // ✅ DIRECT check (avoid optional chaining)
-  if (!user.google.refreshToken || typeof user.google.refreshToken !== 'string') {
+  if (!user || !user.google.refreshToken) {
     throw new Error("Google authentication required");
   }
 
@@ -25,17 +19,18 @@ const getAuthorizedOAuthClient = async (userId) => {
   });
 
   try {
-    const { credentials } = await oAuth2Client.refreshAccessToken();
-    oAuth2Client.setCredentials(credentials);
+    const accessTokenResponse = await oAuth2Client.getAccessToken();
 
-    user.google.accessToken = credentials.access_token;
-    user.google.expiryDate = credentials.expiry_date;
-    await user.save();
+    if (!accessTokenResponse || !accessTokenResponse.token) {
+      throw new Error("Failed to retrieve access token");
+    }
 
-    // console.log("✅ Token refreshed successfully for user:", userId);
+    user.google.accessToken = accessTokenResponse.token;
+    await user.save(); // ✅ Save updated access token
+
     return oAuth2Client;
   } catch (err) {
-    console.error("❌ Token refresh failed:", err);
+    console.error("❌ Token refresh failed:", err.message);
     throw new Error("Failed to refresh Google access token");
   }
 };

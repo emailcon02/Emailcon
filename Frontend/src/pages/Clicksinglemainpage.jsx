@@ -1254,7 +1254,7 @@ const Clicksinglemainpage = () => {
           userId: user.id,
           previewContent,
           bgColor,
-          camname: campaign.camname,
+          camname: clickcampaigns?.campaignname?.trim() || "",
         })
         .then((res) => {
           console.log("Template saved successfully:", res.data);
@@ -1369,7 +1369,7 @@ const Clicksinglemainpage = () => {
     previewContent,
     templateName,
     bgColor,
-    campaign?.camname,
+    clickcampaigns?.campaignname?.trim() || "",
     fetchTemplates,
   ]);
 
