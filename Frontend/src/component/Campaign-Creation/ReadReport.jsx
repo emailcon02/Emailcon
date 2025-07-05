@@ -24,9 +24,9 @@ const ReadReport = () => {
   const [showfailModal, setShowfailModal] = useState(false);
   const [emailData, setEmailData] = useState([]);
   const [urlCount, setUrlCount] = useState(0);
-  const [clickedUrls, setClickedUrls] = useState([]); // Stores URLs + email clicks
-  const [emailClickData, setEmailClickData] = useState([]); // Emails + timestamps for modal
-  const [urlEmails, setUrlEmails] = useState([]); // Stores emails for each URL
+  const [clickedUrls, setClickedUrls] = useState([]); 
+  const [emailClickData, setEmailClickData] = useState([]); 
+  const [urlEmails, setUrlEmails] = useState([]); 
   const [showClickModal, setShowClickModal] = useState(false);
   const [showallClickModal, setShowallClickModal] = useState(false);
   const [showOverallClickModal, setShowOverallClickModal] = useState(false);
@@ -34,15 +34,15 @@ const ReadReport = () => {
   const [showAnalysisModal, setShowAnalysisModal] = useState(false);
 
   const processDataForGraph = () => {
-    const timeCounts = Array(24).fill(0); // Array to store counts for each hour (0-23)
+    const timeCounts = Array(24).fill(0); 
 
     emailData.forEach((email) => {
-      const hour = new Date(email.timestamp).getHours(); // Get hour in 24-hour format
-      timeCounts[hour] += 1; // Increase count for that hour
+      const hour = new Date(email.timestamp).getHours(); 
+      timeCounts[hour] += 1;
     });
 
     return timeCounts.map((count, hour) => {
-      // Convert to 12-hour format with AM/PM
+     
       const period = hour < 12 ? "AM" : "PM";
       const formattedHour = hour % 12 === 0 ? 12 : hour % 12; // Convert 0 to 12 for 12AM/PM
 

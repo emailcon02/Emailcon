@@ -27,7 +27,6 @@ import {
   ListObjectsV2Command,
 } from '@aws-sdk/client-s3';
 import  { google } from 'googleapis';
-import { encode } from 'js-base64';
 
 import getAuthorizedOAuthClient from "../config/googleAuthClient.js";
 const router = express.Router();
@@ -50,7 +49,6 @@ router.post('/upload', upload.array('image', 10), async (req, res) => {
       );
       urls.push(url);
     }
-
     res.json({ imageUrls: urls });
   } catch (err) {
     console.error(err);

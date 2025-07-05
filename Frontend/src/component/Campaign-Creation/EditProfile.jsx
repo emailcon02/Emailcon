@@ -74,7 +74,7 @@ const EditProfile = ({ users, handleLogout }) => {
       const res = await axios.post(`${apiConfig.baseURL}/api/stud/upload`, form, {
         headers: { "Content-Type": "multipart/form-data" },
       });
-      setFormData({ ...formData, avatar: res.data.imageUrl });
+      setFormData({ ...formData, avatar: res.data.imageUrls[0] });
     } catch (error) {
       console.error("Upload failed", error);
     }
@@ -252,36 +252,58 @@ const saveUsername = async () => {
         src={src}
         alt={`Avatar ${index + 1}`}
         className="ep-avatar-option"
-        onClick={async () => {
-          try {
-            const response = await fetch(src);
-            const blob = await response.blob();
-            const file = new File([blob], `avatar-${Date.now()}.jpg`, { type: blob.type });
-        
-            const formDataUpload = new FormData();
-            formDataUpload.append("image", file);
-            formDataUpload.append("userId",users._id);
-            formDataUpload.append("folderName","profile");
-        
-            const uploadRes = await axios.post(`${apiConfig.baseURL}/api/stud/upload`, formDataUpload, {
-              headers: { "Content-Type": "multipart/form-data" },
-            });
-        
-            setFormData(prev => ({
-              ...prev,
-              avatar: uploadRes.data.imageUrl, 
-            }));
-          } catch (err) {
-            console.error("Error uploading default avatar:", err);
-            toast.error("Failed to upload default avatar");
+      onClick={async () => {
+  try {
+    const img = new Image();
+    img.crossOrigin = "anonymous"; 
+    img.src = src;
+
+    img.onload = async () => {
+      const canvas = document.createElement("canvas");
+      canvas.width = img.width;
+      canvas.height = img.height;
+      const ctx = canvas.getContext("2d");
+      ctx.drawImage(img, 0, 0);
+
+      // Convert canvas to blob
+      canvas.toBlob(async (blob) => {
+        if (!blob) {
+          toast.error("Image conversion failed");
+          return;
+        }
+
+        const file = new File([blob], `avatar-${Date.now()}.jpg`, { type: blob.type });
+
+        const formDataUpload = new FormData();
+        formDataUpload.append("image", file);
+        formDataUpload.append("userId", users._id);
+        formDataUpload.append("folderName", "profile");
+
+        const uploadRes = await axios.post(
+          `${apiConfig.baseURL}/api/stud/upload`,
+          formDataUpload,
+          {
+            headers: { "Content-Type": "multipart/form-data" },
           }
-        }}
-        
+        );
+        setFormData((prev) => ({
+          ...prev,
+          avatar: uploadRes.data.imageUrls[0],
+        }));
+      }, "image/jpeg");
+    };
+    img.onerror = () => {
+      toast.error("Failed to load avatar image");
+    };
+  } catch (err) {
+    console.error("Error uploading default avatar:", err);
+    toast.error("Failed to upload default avatar");
+  }
+}} 
       />
     ))}
   </div>
 </div>
-
             <div className="ep-field">
               <label className="ep-label">Username:</label>
               <div className="ep-edit-container">
@@ -312,11 +334,10 @@ const saveUsername = async () => {
                 )}
               </div>
             </div>
-
-
-            {["userPassword", "smtpPassword"].map((field) => (
+            
+            {["userPassword"].map((field) => (
               <div className="ep-field" key={field}>
-                <label className="ep-label">{field === "userPassword" ? "User Password:" : "SMTP Password:"}</label>
+                <label className="ep-label">{field === "userPassword" ? "User Password:" :""}</label>
                 <div className="ep-edit-container">
                   <input
                     name={field}

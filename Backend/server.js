@@ -124,7 +124,6 @@ app.get('/api/test-oauth/:id', async (req, res) => {
   }
 });
 
-
 // Routes
 app.use('/stud', studentRoutes);
 app.use('/auth', authRoutes);
