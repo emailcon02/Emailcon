@@ -851,6 +851,9 @@
 
   .mobile-toggle {
     display: block;
+    padding: 5px;
+    top: 10px;
+    left: 5px;
   }
   .search-bar-header{
     display: none !important;

@@ -207,4 +207,8 @@ input:checked + .slider:before {
     font-size: 20px !important;
     padding-top: 15px;
   }
+  .logo_img_admin {
+  width: 130px;
+  margin-left: 20px;
+}
 }

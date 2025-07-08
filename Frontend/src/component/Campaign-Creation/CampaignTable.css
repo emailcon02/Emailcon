@@ -35,9 +35,9 @@
   color:#2f327d;
 }
 .template-details{
-   padding: 10px 20px;
+   padding: 10px;
    background:#fff; 
-   width:280px;
+   width:150px;
    border-radius: 8px;
    box-shadow: 0 2px 4px rgba(163, 163, 163, 0.2);
    display:flex;
@@ -86,7 +86,7 @@
   display:flex;
   gap:8px;
   align-items: center;
-  margin:20px 0px 0px 0px;
+  /* margin:20px 0px 0px 0px; */
   font-size: 18px;
   font-weight: 500;
   color:#2f327d;
@@ -203,7 +203,7 @@
 .failed-resend-btn{
   width: 60px !important;
   height: 25px !important;
-  margin-top: 15px;
+  /* margin-top: 15px; */
   font-size: 12px;
 }
 .failed-split-btn{
@@ -413,7 +413,7 @@
     overflow: auto;
   }
   .template-details{
-    width: 160px;
+    width: 155px;
     height: 140px;
   }
   .failed-resend-btn{

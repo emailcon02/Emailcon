@@ -1297,9 +1297,14 @@
 /* dashboard content */
 .card-dashboard-container {
   display: grid;
-  grid-template-columns: auto auto auto auto;
+  grid-template-columns: auto auto ;
   gap: 20px;
-  padding: 0;
+  width:50%; 
+}
+
+.Home-cards-dashboard{
+   display: flex;
+  width:100%;
 }
 
 /* Card Styles */
@@ -1420,22 +1425,47 @@
 }
 
 
-
+.dashboard-barchart-wrapper {
+  width: 50%;
+  min-width: 450px !important;
+  margin-top: 0;
+  height: 100% !important;
+  min-height:400px!important;
+  display:block;
+  background-color: white;
+  padding: 10px;
+  margin-left: 20px;
+  border-radius: 10px;
+  
+}
+.graph-box {
+  height: 500px; /* or 100%, or whatever you need */
+}
 
  
 @media (max-width:600px) {
   .sidebar {
     display: none;
   }
+  .Home-cards-dashboard {
+     flex-direction: column;
+  }
+  .dashboard-barchart-wrapper {
+    display:none;
+  }
+  /* .recharts-wrapper .recharts-cartesian-axis-tick-value {
+    font-size: 8px !important;
+  } */
   .card-dashboard-container {
     grid-template-columns: 1fr;
     gap: 20px;
     justify-content: center;
+    width: 100%;
   }
 
   .cards-dashboard {
     width: 90%;
-    max-width: 300px;
+    max-width: 600px;
     height: auto;
     margin: 0 auto;
     padding: 15px;
@@ -1585,24 +1615,24 @@
   }
     .card-dashboard-container {
     grid-template-columns: auto auto;
-    gap:25%;
+    gap:15%;
     justify-content: center;
+    width: 100%;
   }
 
-  .cards-dashboard {
-    width: 100%;
-    max-width: 250px;
-    height: auto;
-    margin: auto;
+  .dashboard-barchart-wrapper {
+    display:none;
   }
+
+
 
   .card-text-highlight {
     font-size: 36px;
   }
   .dashboard-welcome-box{
     margin-top: 10%;
-    padding: 35px 5%;
-    width: 400px;
+    /* padding: 35px 5%; */
+    width: 550px;
   }
   .navbars{
     height: 7%;

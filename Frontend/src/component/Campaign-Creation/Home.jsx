@@ -42,23 +42,10 @@ import EditProfile from "./EditProfile.jsx";
 import ParaEditor from "./ParaEditor.jsx";
 import Logo from "../../Images/emailcon_svg_logo.svg";
 import FileManagerModal from "../../pages/FilemanagerModal.jsx";
-import { FaBullhorn,FaCogs, FaSave } from "react-icons/fa";
-// import {
-//   LineChart,
-//   Line,
-//   XAxis,
-//   YAxis,
-//   CartesianGrid,
-//   Tooltip,
-//   ResponsiveContainer,
-//   Legend,
-//   AreaChart,
-//   Area,
-//   PieChart,
-//   Pie,
-//   Cell,
-// } from "recharts";
-
+import { FaBullhorn, FaCogs, FaSave } from "react-icons/fa";
+import {
+  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell,
+} from 'recharts';
 
 
 const Home = () => {
@@ -139,76 +126,94 @@ const Home = () => {
   const [modalVisible, setModalVisible] = useState(false);
   const [folderToDelete, setFolderToDelete] = useState(null);
   const [selectedDraggedImageId, setSelectedDraggedImageId] = useState(null);
-const [pendingFolderMove, setPendingFolderMove] = useState(null);
-const [showMoveConfirmModal, setShowMoveConfirmModal] = useState(false);
-const [totalCampaigns, setTotalCampaigns] = useState(0);
-const [totalContacts, setTotalContacts] = useState(0);
-const [totalAutomation, setTotalAutomation] = useState(0);
-const username = users?.username || user?.username || "User";
-const today = new Date().toLocaleDateString();
+  const [pendingFolderMove, setPendingFolderMove] = useState(null);
+  const [showMoveConfirmModal, setShowMoveConfirmModal] = useState(false);
+  const [totalCampaigns, setTotalCampaigns] = useState(0);
+  const [totalContacts, setTotalContacts] = useState(0);
+  const [totalAutomation, setTotalAutomation] = useState(0);
+  const username = users?.username || user?.username || "User";
+  const today = new Date().toLocaleDateString();
 
 
+// Step 1: Original values from DB
+const rawData = [
+  { name: 'Campaigns', value: totalCampaigns },
+  { name: 'Contacts', value: totalContacts },
+  { name: 'Automation', value: totalAutomation },
+  { name: 'Templates', value: templates.length },
+];
 
-// dashboard total campaign  
-useEffect(() => {
-  const fetchCampaignsCount = async () => {
-    if (!user?.id) return;
-    try {
-      const response = await axios.get(`${apiConfig.baseURL}/api/stud/campaigns/${user.id}`);
-      // Filter out birthday campaigns if needed, like in CampaignTable
-      const filtered = response.data.filter(campaign => {
-        const name = campaign.campaignname?.toLowerCase() || "";
-        return !name.includes("birthday campaign");
-      });
-      setTotalCampaigns(filtered.length);
-    } catch (error) {
-      setTotalCampaigns(0);
+// Step 2: Find max value
+const maxValue = Math.max(...rawData.map(item => item.value));
+
+// Step 3: Normalize values (scale all relative to max = 100%)
+const dashboardData = rawData.map(item => ({
+  name: item.name,
+  value: maxValue > 0 ? Math.round((item.value / maxValue) * 100) : 0,
+  actual: item.value, // Optional: for tooltip or debugging
+}));
+
+
+  // dashboard total campaign  
+  useEffect(() => {
+    const fetchCampaignsCount = async () => {
+      if (!user?.id) return;
+      try {
+        const response = await axios.get(`${apiConfig.baseURL}/api/stud/campaigns/${user.id}`);
+        // Filter out birthday campaigns if needed, like in CampaignTable
+        const filtered = response.data.filter(campaign => {
+          const name = campaign.campaignname?.toLowerCase() || "";
+          return !name.includes("birthday campaign");
+        });
+        setTotalCampaigns(filtered.length);
+      } catch (error) {
+        setTotalCampaigns(0);
+      }
+    };
+    fetchCampaignsCount();
+  }, [user?.id]);
+
+  // dashboard total automation  
+  useEffect(() => {
+    const fetchAutomationCount = async () => {
+      if (!user?.id) return;
+      try {
+        const response = await axios.get(`${apiConfig.baseURL}/api/stud/campaigns/${user.id}`);
+        // Filter out birthday campaigns if needed, like in CampaignTable
+        const filtered = response.data.filter(campaign => {
+          const name = campaign.campaignname?.toLowerCase() || "";
+          return name.includes("birthday campaign");
+        });
+        setTotalAutomation(filtered.length);
+      } catch (error) {
+        setTotalAutomation(0);
+      }
+    };
+    fetchAutomationCount();
+  }, [user?.id]);
+
+  useEffect(() => {
+    const fetchContactsCount = async () => {
+      try {
+        const response = await axios.get(`${apiConfig.baseURL}/api/stud/students`);
+        const filteredContacts = response.data.filter(
+          contact => contact.group?.user === user.id
+        );
+        setTotalContacts(filteredContacts.length);
+      } catch (error) {
+        console.error("Error fetching contacts:", error);
+        setTotalContacts(0);
+      }
+    };
+
+    if (user?.id) {
+      fetchContactsCount();
     }
-  };
-  fetchCampaignsCount();
-}, [user?.id]);
-
-// dashboard total automation  
-useEffect(() => {
-  const fetchAutomationCount = async () => {
-    if (!user?.id) return;
-    try {
-      const response = await axios.get(`${apiConfig.baseURL}/api/stud/campaigns/${user.id}`);
-      // Filter out birthday campaigns if needed, like in CampaignTable
-      const filtered = response.data.filter(campaign => {
-        const name = campaign.campaignname?.toLowerCase() || "";
-        return name.includes("birthday campaign");
-      });
-      setTotalAutomation(filtered.length);
-    } catch (error) {
-      setTotalAutomation(0);
-    }
-  };
-  fetchAutomationCount();
-}, [user?.id]);
-
-useEffect(() => {
-  const fetchContactsCount = async () => {
-    try {
-      const response = await axios.get(`${apiConfig.baseURL}/api/stud/students`);
-      const filteredContacts = response.data.filter(
-        contact => contact.group?.user === user.id
-      );
-      setTotalContacts(filteredContacts.length);
-    } catch (error) {
-      console.error("Error fetching contacts:", error);
-      setTotalContacts(0);
-    }
-  };
-
-  if (user?.id) {
-    fetchContactsCount();
-  }
-}, [user?.id]);
+  }, [user?.id]);
 
 
 
-const handleDeleteFolder = async () => {
+  const handleDeleteFolder = async () => {
     try {
       const response = await axios.delete(
         `${apiConfig.baseURL}/api/stud/folder/${folderToDelete.name}`
@@ -715,8 +720,8 @@ const handleDeleteFolder = async () => {
     // Extract field names from the first student found
     const newFieldNames = filteredStudents.length
       ? Object.keys(filteredStudents[0]).filter(
-          (key) => !["_id", "group", "__v"].includes(key)
-        )
+        (key) => !["_id", "group", "__v"].includes(key)
+      )
       : [];
 
     setFieldNames(newFieldNames);
@@ -925,7 +930,7 @@ const handleDeleteFolder = async () => {
     setShowfilesingleGroupModal(true);
   };
 
-  
+
   const handleCreateButtonTem = () => {
     if (!user || !user.id) {
       toast.error("Please ensure the user is valid");
@@ -1399,9 +1404,8 @@ const handleDeleteFolder = async () => {
             />
             <div className="sidebar-btn-set">
               <div
-                className={`sidebar-btn-flex ${
-                  view === "dashboard" ? "active-tab" : ""
-                }`}
+                className={`sidebar-btn-flex ${view === "dashboard" ? "active-tab" : ""
+                  }`}
                 onClick={() => {
                   setView("dashboard");
                   handleDashboardView();
@@ -1413,9 +1417,8 @@ const handleDeleteFolder = async () => {
                 </button>
               </div>
               <div
-                className={`sidebar-btn-flex ${
-                  view === "campaign" ? "active-tab" : ""
-                }`}
+                className={`sidebar-btn-flex ${view === "campaign" ? "active-tab" : ""
+                  }`}
                 onClick={() => {
                   setView("campaign");
                   handleCampaignView();
@@ -1428,9 +1431,8 @@ const handleDeleteFolder = async () => {
               </div>
 
               <div
-                className={`sidebar-btn-flex ${
-                  view === "contact" ? "active-tab" : ""
-                }`}
+                className={`sidebar-btn-flex ${view === "contact" ? "active-tab" : ""
+                  }`}
                 onClick={() => {
                   setView("contact");
                   handleContactView();
@@ -1443,9 +1445,8 @@ const handleDeleteFolder = async () => {
               </div>
 
               <div
-                className={`sidebar-btn-flex ${
-                  view === "template" ? "active-tab" : ""
-                }`}
+                className={`sidebar-btn-flex ${view === "template" ? "active-tab" : ""
+                  }`}
                 onClick={() => {
                   setView("template");
                   handleTemplateView();
@@ -1458,9 +1459,8 @@ const handleDeleteFolder = async () => {
               </div>
 
               <div
-                className={`sidebar-btn-flex ${
-                  view === "remainder" ? "active-tab" : ""
-                }`}
+                className={`sidebar-btn-flex ${view === "remainder" ? "active-tab" : ""
+                  }`}
                 onClick={() => {
                   setView("remainder");
                   handleRemainderrview();
@@ -1889,17 +1889,15 @@ const handleDeleteFolder = async () => {
 
               <div className="auto-options-unique">
                 <button
-                  className={`auto-option-btn-unique ${
-                    activeOption === "birthday" ? "auto-active-unique" : ""
-                  }`}
+                  className={`auto-option-btn-unique ${activeOption === "birthday" ? "auto-active-unique" : ""
+                    }`}
                   onClick={() => setActiveOption("birthday")}
                 >
                   Birthday Remainder
                 </button>
                 <button
-                  className={`auto-option-btn-unique ${
-                    activeOption === "payment" ? "auto-active-unique" : ""
-                  }`}
+                  className={`auto-option-btn-unique ${activeOption === "payment" ? "auto-active-unique" : ""
+                    }`}
                   onClick={() => setActiveOption("payment")}
                 >
                   Payment Remainder
@@ -2044,7 +2042,7 @@ const handleDeleteFolder = async () => {
                   {/* Display Attached Files */}
                   <div className="file-list">
                     {emailData.attachments &&
-                    emailData.attachments.length > 0 ? (
+                      emailData.attachments.length > 0 ? (
                       <ol>
                         {emailData.attachments.map((file, index) => (
                           <li key={index}>
@@ -2177,7 +2175,7 @@ const handleDeleteFolder = async () => {
                   {/* Display Attached Files */}
                   <div className="file-list">
                     {emailData.attachments &&
-                    emailData.attachments.length > 0 ? (
+                      emailData.attachments.length > 0 ? (
                       <ol>
                         {emailData.attachments.map((file, index) => (
                           <li key={index}>
@@ -2439,40 +2437,107 @@ const handleDeleteFolder = async () => {
                   </div>
                 </div>
 
-                <div className="card-dashboard-container" >
-                  <div className="cards-dashboard" onClick={handlenavigatecampaign}>
-                    <div className="card-inner-text">
-                      <FaBullhorn />
+                <div className="Home-cards-dashboard">
+                  <div className="card-dashboard-container" >
+                    <div className="cards-dashboard" onClick={handlenavigatecampaign}>
+                      <div className="card-inner-text">
+                        <FaBullhorn />
+                      </div>
+                      <p className="card-text-content">Total Campaigns</p>
+                      <p className="card-text-highlight">{totalCampaigns}</p>
                     </div>
-                    <p className="card-text-content">Total Campaigns</p>
-                    <p className="card-text-highlight">{totalCampaigns}</p>
-                  </div>
 
-                  <div className="cards-dashboard"  onClick={()=>{setView("contact")}}>
-                    <div className="card-inner-text">
-                      <FaUsers />
+                    <div className="cards-dashboard" onClick={() => { setView("contact") }}>
+                      <div className="card-inner-text">
+                        <FaUsers />
+                      </div>
+                      <p className="card-text-content">Total Contacts</p>
+                      <p className="card-text-highlight">{totalContacts}</p>
                     </div>
-                    <p className="card-text-content">Total Contacts</p>
-                    <p className="card-text-highlight">{totalContacts}</p>
-                  </div>
 
-                  <div className="cards-dashboard" onClick={()=>{setView("remainder")}}>
-                    <div className="card-inner-text">
-                      <FaCogs />
+                    <div className="cards-dashboard" onClick={() => { setView("remainder") }}>
+                      <div className="card-inner-text">
+                        <FaCogs />
+                      </div>
+                      <p className="card-text-content">Total Automation</p>
+                      <p className="card-text-highlight">
+                        {totalAutomation}
+                      </p>
                     </div>
-                    <p className="card-text-content">Total Automation</p>
-                    <p className="card-text-highlight">
-                      {totalAutomation}
-                    </p>
-                  </div>
 
-                  <div className="cards-dashboard" onClick={()=>{setView("template")}}>
-                    <div className="card-inner-text">
-                      <FaSave />
+                    <div className="cards-dashboard" onClick={() => { setView("template") }}>
+                      <div className="card-inner-text">
+                        <FaSave />
+                      </div>
+                      <p className="card-text-content">Saved Template</p>
+                      <p className="card-text-highlight">{templates.length}</p>
                     </div>
-                    <p className="card-text-content">Saved Template</p>
-                    <p className="card-text-highlight">{templates.length}</p>
                   </div>
+                  <div className="dashboard-barchart-wrapper">
+  <ResponsiveContainer width="100%" height={400}>
+    <BarChart
+      data={dashboardData}
+      margin={{ top: 0, right: 30, left: 20, bottom: 5 }}
+    >
+      <defs>
+        <linearGradient id="barGradient1" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stopColor="#667eea" />
+          <stop offset="100%" stopColor="#764ba2" />
+        </linearGradient>
+        <linearGradient id="barGradient2" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0%" stopColor="#f7971e" />
+          <stop offset="100%" stopColor="#ffd200" />
+        </linearGradient>
+        <linearGradient id="barGradient3" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stopColor="#4facfe" />
+          <stop offset="100%" stopColor="#00f2fe" />
+        </linearGradient>
+        <linearGradient id="barGradient4" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stopColor="#43e97b" />
+          <stop offset="100%" stopColor="#38f9d7" />
+        </linearGradient>
+      </defs>
+      <XAxis
+        dataKey="name"
+        interval={0}
+        tick={{ fill: "#000", fontSize: 14 }}
+      />
+      <YAxis
+        allowDecimals={false}
+        ticks={[0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100]}
+        tick={{ fontSize: 14 }}
+      />
+<Tooltip
+  content={({ active, payload }) => {
+    if (active && payload && payload.length > 0) {
+      const data = payload[0].payload;
+      return (
+        <div style={{
+          background: "#fff",
+          border: "1px solid #ccc",
+          padding: "10px",
+          borderRadius: "4px"
+        }}>
+          <strong>{data.name}</strong><br />
+          Actual: <span>{data.actual}</span><br />
+          Percentage: <span>{data.value}%</span>
+        </div>
+      );
+    }
+    return null;
+  }}
+/>
+      <Bar dataKey="value" radius={[0, 0, 0, 0]} barSize={40}>
+        {dashboardData.map((entry, index) => (
+          <Cell
+            key={`cell-${index}`}
+            fill={`url(#barGradient${(index % 4) + 1})`}
+          />
+        ))}
+      </Bar>
+    </BarChart>
+  </ResponsiveContainer>
+</div>
                 </div>
               </div>
             )}
@@ -2591,7 +2656,7 @@ const handleDeleteFolder = async () => {
               <div className="modal-content-automation">
                 <div className="heading-automation">
                   <h2>Create Automation</h2>
-                  <span className="close-btn-automation" onClick={() => {setShowautoModal(false);}}>×</span>
+                  <span className="close-btn-automation" onClick={() => { setShowautoModal(false); }}>×</span>
                 </div>
                 <div className="steps-container">
                   {/* Step 1 */}
@@ -2887,7 +2952,7 @@ const handleDeleteFolder = async () => {
                     {/* Display Attached Files */}
                     <div className="file-list">
                       {emailData.attachments &&
-                      emailData.attachments.length > 0 ? (
+                        emailData.attachments.length > 0 ? (
                         <ol>
                           {emailData.attachments.map((file, index) => (
                             <li key={index}>
@@ -3015,13 +3080,13 @@ const handleDeleteFolder = async () => {
             <div className="modal-overlay-tem">
               <div className="modal-content-tem">
                 <div className="modal-nav-previews">
-                <h2 className="birthday-head">Saved Birthday Templates</h2>
-                <button
-                  className="close-button-tem"
-                  onClick={handlebirthtemclose}
-                >
-                  x
-                </button>
+                  <h2 className="birthday-head">Saved Birthday Templates</h2>
+                  <button
+                    className="close-button-tem"
+                    onClick={handlebirthtemclose}
+                  >
+                    x
+                  </button>
                 </div>
                 <ol>
                   {birthtemplates.length > 0 ? (
@@ -3389,7 +3454,7 @@ const handleDeleteFolder = async () => {
                                         <span>Add</span> Variable
                                       </p>
                                       {fieldNames[index] &&
-                                      fieldNames[index].length > 0 ? (
+                                        fieldNames[index].length > 0 ? (
                                         <div>
                                           {fieldNames[index].map(
                                             (field, idx) => (
@@ -4050,7 +4115,7 @@ const handleDeleteFolder = async () => {
                                         <span>Add</span> Variable
                                       </p>
                                       {fieldNames[index] &&
-                                      fieldNames[index].length > 0 ? (
+                                        fieldNames[index].length > 0 ? (
                                         <div>
                                           {fieldNames[index].map(
                                             (field, idx) => (
@@ -4778,7 +4843,7 @@ const handleDeleteFolder = async () => {
                                         <span>Add</span> Variable
                                       </p>
                                       {fieldNames[index] &&
-                                      fieldNames[index].length > 0 ? (
+                                        fieldNames[index].length > 0 ? (
                                         <div>
                                           {fieldNames[index].map(
                                             (field, idx) => (

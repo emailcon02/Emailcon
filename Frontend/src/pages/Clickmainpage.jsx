@@ -1398,7 +1398,7 @@ const Clickmainpage = () => {
     previewContent,
     templateName,
     bgColor,
-    clickcampaigns?.campaignname?.trim() || "",
+    clickcampaigns?.campaignname || "",
     fetchTemplates,
   ]);
 

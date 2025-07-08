@@ -122,15 +122,15 @@
 }
 
 .report-value {
-  font-size: 28px;
-  font-weight: 700;
-  color: #222;
-  margin-bottom: 12px;
+  font-size: 20px;
+  font-weight: 300;
+  color:#6d6b68;
+  margin: 0px auto 15px auto;
 }
 
 .report-badge {
   display: inline-block;
-  padding: 4px 12px;
+  padding: 8px 5px;
   background: #f2f2f2;
   color: #555;
   font-size: 13px;
@@ -267,15 +267,13 @@
 }
 .target-modal-read {
   display: block;
-  margin: 15px auto 0;
+  margin: 10px auto 0;
   padding: 8px 16px;
   background: #f48c06;
   color: white;
-  margin: 10px auto 0px auto;
   border: none;
   border-radius: 5px;
   cursor: pointer;
-
 }
 
 @media (max-width: 600px) {

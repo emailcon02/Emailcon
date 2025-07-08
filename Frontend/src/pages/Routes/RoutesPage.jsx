@@ -22,7 +22,7 @@ import Verifyotp from "../../component/Login-Options/Verifyotp";
 import Resetpasswords from "../../component/Login-Options/Resetpassword";
 import Frontpageroute from "./Frontpageroute";
 import Form from "../../component/Frontpage/Form";
-import PaymentPage from "../../component/Login-Options/PaymentPage";
+// import PaymentPage from "../../component/Login-Options/PaymentPage";
 import SignupOption from "../../component/Login-Options/SignupOption";
 import UserPaymenthistory from "../../component/Admin/UserPaymenthistory";
 import Smtppage from "../../component/Login-Options/Smtppage";

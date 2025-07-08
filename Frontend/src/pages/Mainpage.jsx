@@ -2808,10 +2808,10 @@ const Mainpage = () => {
                                     value={
                                       previewContent[selectedIndex]
                                         .buttonType === "contact"
-                                        ? `☏ ${
+                                        ? `📞 ${
                                             previewContent[
                                               selectedIndex
-                                            ].content?.replace(/^☏\s*/, "") ||
+                                            ].content?.replace(/^📞\s*/, "") ||
                                             ""
                                           }`
                                         : previewContent[selectedIndex]

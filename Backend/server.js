@@ -113,8 +113,8 @@ app.get('/oauth2callback', async (req, res) => {
 });
 
 
-// Temporary test route
-app.get('/api/test-oauth/:id', async (req, res) => {
+//Temporary test route
+app.get('/test-oauth/:id', async (req, res) => {
   try {
     const client = await getAuthorizedOAuthClient(req.params.id);
     res.send("✅ Token refresh and OAuth client ready");

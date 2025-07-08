@@ -160,9 +160,7 @@ const handleRefreshAndCloseModals = (e) => {
     navigate(`/read-editor/${userId}/${campaignId}`);
   };
   const handleoverallEditor = (userId, campaignId) => {
-    navigate(`/click-editor/${userId}/${campaignId}`,{
-      state:{campaignname}
-    });
+    navigate(`/click-editor/${userId}/${campaignId}`);
   };
 
   const handleoverallsingleEditor = (userId, campaignId, emails) => {
