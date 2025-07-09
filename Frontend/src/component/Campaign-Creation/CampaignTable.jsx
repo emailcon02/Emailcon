@@ -1035,7 +1035,6 @@ const isValidEmail = (email) => {
 
   return (
     <div key={campaignId}
-
             style={{
               marginBottom: "18px",
               borderBottom: "1px solid #eee",

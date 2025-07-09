@@ -32,9 +32,9 @@
 /* Adjust gap for better alignment */
 .navbar-container {
     display: flex;
-    justify-content: space-between;
+    /* justify-content: space-between; */
     align-items: center;
-    gap: 24px;
+    gap: 48%;
 }
 
 .logoContent{
@@ -277,6 +277,9 @@
         width: 100%;
         padding-top: 20px;
     }
+    .navbar-container{
+        gap: 45%;
+    }
 }
 
 @media (min-width: 768px) and (max-width: 1024px) {
@@ -285,6 +288,7 @@
     }
     .menu {
         gap:10px !important;
+        margin-right: 15px;
     }
     .navbar-container {
         justify-content: space-between !important;

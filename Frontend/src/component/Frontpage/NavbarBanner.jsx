@@ -43,7 +43,7 @@ const NavbarBanner = ({ onOpenModal }) => {
     <div>
       {/* Navbar */}
       <div className="navmain">
-        <div className={`navbarfront${isSticky ? "sticky" : ""}`}>
+        <div className={`navbarfront ${isSticky ? "sticky" : ""}`}>
           <div className="navbar-container">
             <img src={logo} alt="imagehomenav" className="logo_img_nav"/>
             {/* Hamburger Toggle */}

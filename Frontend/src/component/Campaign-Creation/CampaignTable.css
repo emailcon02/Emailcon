@@ -414,12 +414,19 @@
   }
   .template-details{
     width: 155px;
-    height: 140px;
+    /* height: 140px; */
   }
-  .failed-resend-btn{
+  /* .failed-resend-btn{
     margin-top: 15px;
   }
   .failed-split-btn{
     margin-top: 20px;
+  } */
+}
+@media screen and (min-width: 600px) and (max-width: 900px){
+
+    .template-details-container{
+    overflow-x: auto;
+
   }
 }
