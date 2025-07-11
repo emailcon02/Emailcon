@@ -55,11 +55,6 @@ const [currentPage, setCurrentPage] = useState(1);
 const [processingCampaigns, setProcessingCampaigns] = useState({});
 
 // Campaign Metrics State
-const [openCounts, setOpenCounts] = useState({});
-const [urlCounts, setUrlCounts] = useState({});
-const [emailData, setEmailData] = useState({});
-const [clickedUrls, setClickedUrls] = useState({});
-const [urlEmails, setUrlEmails] = useState({});
 const [emailClickData, setEmailClickData] = useState([]);
 
 // Scheduling State

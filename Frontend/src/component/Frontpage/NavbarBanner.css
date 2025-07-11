@@ -10,6 +10,8 @@
     z-index: 1000;
     margin: 0 auto;
     border-radius:10px;
+    display: flex;
+    justify-content: center;
 }
 .logo_img_nav{
     width:200px;
@@ -32,9 +34,9 @@
 /* Adjust gap for better alignment */
 .navbar-container {
     display: flex;
-    /* justify-content: space-between; */
+    justify-content: space-between;
     align-items: center;
-    gap: 48%;
+    width: 95%;
 }
 
 .logoContent{
@@ -252,12 +254,18 @@
     .menu {
         display: none;
     }
+ 
     .navbarfront{
         width: 80%;
+    }
+    .navbarfront.sticky{
+        padding: 15px 0px;
+
     }
 
     .menu-toggle {
         display: flex;
+        padding-right: 10px;
     }
     .banner-content h1{
         font-size: 45px;
