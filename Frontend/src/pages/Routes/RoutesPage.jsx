@@ -4,7 +4,7 @@ import Login from "../../component/Login-Options/Login";
 import AdminLogin from "../../component/Admin/AdminLogin";
 import Mainpage from "../Mainpage";
 import Home from "../../component/Campaign-Creation/Home";
-import CampaignTable from "../../component/Campaign-Creation/CampaignTable";
+import CampaignTable from "../../component/Campaign-Creation/CampaignTableNew";
 import ErrorPage from "../../component/Campaign-Creation/ErrorPage";
 import Campaign from "../../component/Campaign-Creation/Campaign";
 import ReadReport from "../../component/Campaign-Creation/ReadReport";

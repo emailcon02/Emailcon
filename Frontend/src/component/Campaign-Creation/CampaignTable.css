@@ -111,8 +111,10 @@
 
 .admin-dashboard-header {
   color: #2b2d77;
-  font-size: 24px !important;
+  font-size: 1.4rem !important;
+  font-family: 600;
   padding: 5px !important;
+  margin-left: 10px;
 
 }
 
@@ -121,11 +123,12 @@
   justify-content: space-between;
   background-color:white;
   font-weight: bold;
-  padding:10px;
+  padding:15px;
   margin: 0px;
    position: sticky;
    top: 0;
    z-index: 9999;
+   border-bottom: 1px solid #ebe6dd;;
 }
 .action-btn-campaign{
   display: flex;
@@ -134,9 +137,9 @@
 }
 
 .admin-nav-button {
-  background-color: #2f327d;
-  color: white;
-  border: none !important;
+  background-color: #f2f3fc;
+  color: #2f327d;
+  border:1px solid #b8b9d6;
   display: flex  !important;
   justify-content: center !important;
   gap: 5px !important;
@@ -147,7 +150,6 @@
   padding: 8px 5px;
   font-size: 14px;
   border-radius: 8px;
-  margin-top: 5px;
 }
 
 /* Table Styles */
@@ -401,7 +403,7 @@
       height: 40px;
       font-size: 12px;
       border-radius: 25px;
-      margin-top: 5px;
+      /* margin-top: 5px; */
   }
   .search-container{
       align-content: center !important;
@@ -413,8 +415,8 @@
     overflow: auto;
   }
   .template-details{
-    width: 155px;
-    /* height: 140px; */
+    width: 160px;
+    height: 140px;
   }
   /* .failed-resend-btn{
     margin-top: 15px;
