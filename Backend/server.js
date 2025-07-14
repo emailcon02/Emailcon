@@ -84,7 +84,8 @@ app.get('/oauth2callback', async (req, res) => {
     const retryUrl = `${apiconfigfrontend.baseURL}/api/auth/google?userId=${userId}`;
 
     if (!hasGmailSend) {
-      return res.redirect(`${apiconfigfrontend.baseURL}/auth-warning?message=Gmail Send Scope not granted by user&userId=${userId}&redirectTo=${encodeURIComponent(retryUrl)}`);
+      return res.redirect(`${apiconfigfrontend.baseURL}/auth-warning?message=Gmail send scope permission not granted. Please enable it to continue.&userId=${userId}&redirectTo=${encodeURIComponent(retryUrl)}`);
+
     }
 
     // Fetch user info

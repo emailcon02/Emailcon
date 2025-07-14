@@ -17,6 +17,7 @@ import {
   FaRegArrowAltCircleUp,
   FaThLarge,
   FaTachometerAlt,
+  FaChartBar,
 } from "react-icons/fa";
 import "./Home.css";
 import { useNavigate } from "react-router-dom";
@@ -50,6 +51,7 @@ import {
 
 const Home = () => {
   const [view, setView] = useState("dashboard");
+    const [campaignMetrics, setCampaignMetrics] = useState({});
   const [showCampaignModal, setShowCampaignModal] = useState(false);
   const [showTemplateModal, setShowTemplateModal] = useState(false);
   const [showCampaignModalTem, setShowCampaignModalTem] = useState(false);
@@ -142,6 +144,8 @@ const rawData = [
   { name: 'Automation', value: totalAutomation },
   { name: 'Templates', value: templates.length },
 ];
+
+
 
 // Step 2: Find max value
 const maxValue = Math.max(...rawData.map(item => item.value));
@@ -480,6 +484,36 @@ const dashboardData = rawData.map(item => ({
         setTemplates(templatesRes.data);
         setBirthTemplates(birthtemplatesRes.data);
         setPaymentdetails(paymentdetails.data);
+        
+      const metrics = {};
+      await Promise.all(
+        campaignsRes.data.map(async (campaign) => {
+          try {
+            const [openRes, clickRes] = await Promise.all([
+              axios.get(
+                `${apiConfig.baseURL}/api/stud/get-email-open-count?userId=${user.id}&campaignId=${campaign._id}`
+              ),
+              axios.get(
+                `${apiConfig.baseURL}/api/stud/get-click?userId=${user.id}&campaignId=${campaign._id}`
+              ),
+            ]);
+
+            metrics[campaign._id] = {
+              openCount: openRes.data.count || 0,
+              clickCount: clickRes.data.count || 0,
+            };
+          } catch (e) {
+            console.error(`Failed to fetch metrics for ${campaign._id}`, e);
+            metrics[campaign._id] = {
+              openCount: 0,
+              clickCount: 0,
+            };
+          }
+        })
+      );
+
+      setCampaignMetrics(metrics);
+
       } catch (error) {
         console.error("Error fetching student dashboard data:", {
           message: error.message,
@@ -2409,6 +2443,8 @@ const dashboardData = rawData.map(item => ({
           {isEditingProfile && (
             <EditProfile users={users} handleLogout={handleLogout} />
           )}
+<div className="main-content-sub">
+
 
           <div className="maincontent-main">
             {view === "main" && (
@@ -2473,73 +2509,121 @@ const dashboardData = rawData.map(item => ({
                       <p className="card-text-highlight">{templates.length}</p>
                     </div>
                   </div>
-                  <div className="dashboard-barchart-wrapper">
-  <ResponsiveContainer width="100%" height={400}>
-    <BarChart
-      data={dashboardData}
-      margin={{ top: 0, right: 30, left: 20, bottom: 5 }}
-    >
-      <defs>
-        <linearGradient id="barGradient1" x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0%" stopColor="#667eea" />
-          <stop offset="100%" stopColor="#764ba2" />
-        </linearGradient>
-        <linearGradient id="barGradient2" x1="0" y1="0" x2="1" y2="0">
-          <stop offset="0%" stopColor="#f7971e" />
-          <stop offset="100%" stopColor="#ffd200" />
-        </linearGradient>
-        <linearGradient id="barGradient3" x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0%" stopColor="#4facfe" />
-          <stop offset="100%" stopColor="#00f2fe" />
-        </linearGradient>
-        <linearGradient id="barGradient4" x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0%" stopColor="#43e97b" />
-          <stop offset="100%" stopColor="#38f9d7" />
-        </linearGradient>
-      </defs>
-      <XAxis
-        dataKey="name"
-        interval={0}
-        tick={{ fill: "#000", fontSize: 14 }}
+                 <div className="top-performers-container top-per-home">
+                <div className="top-header">
+                  <div>
+                    <h2 className="top-performers-title">Top Performers</h2>
+                    <p className="top-performers-subtitle">
+                      Best campaigns by engagement
+                    </p>
+                  </div>
+                  <FaChartBar className="icon-right" />
+                </div>
+              <div className="top-performers-container-scroll-home">
+
+                {[...campaigns]
+                  .sort((a, b) => {
+                    const aOpen = campaignMetrics[a._id]?.openCount || 0;
+                    const bOpen = campaignMetrics[b._id]?.openCount || 0;
+                    const aRate = (aOpen / (a.totalcount || 1)) * 100;
+                    const bRate = (bOpen / (b.totalcount || 1)) * 100;
+                    return bRate - aRate; // Sort by open rate descending
+                  })
+                  .map((item, idx) => {
+                    const metrics = campaignMetrics[item._id] || {};
+                    const open = metrics.openCount || 0;
+                    const click = metrics.clickCount || 0;
+
+                    const openRate = (
+                      (open / (item.totalcount || 1)) *
+                      100
+                    ).toFixed(0);
+                    const clickRate = (
+                      (click / (item.totalcount || 1)) *
+                      100
+                    ).toFixed(0);
+
+                    return (
+                      <div
+                        key={item._id || idx}
+                        className="campaign-row"
+                        onClick={handlenavigatecampaign}
+                      >
+                        <div className="rank-badge badge-orange-his">{idx + 1}</div>
+                        <div className="campaign-details">
+                          <div className="campaign-header">
+                            <p className="campaign-title">
+                              {item.campaignname || "Unnamed Campaign"}
+                            </p>
+                            <span
+                              className={`status-tag ${
+                                item.status === "Success"
+                                  ? "status-active"
+                                  : item.status === "Failed"
+                                  ? "status-paused"
+                                  : "status-completed"
+                              }`}
+                            >
+                              {item.status}
+                            </span>
+                          </div>
+                          <div className="inline-campaign-data">
+                            <div className="campaign-stats">
+                              <p>
+                                Open Rate:{" "}
+                                <span className="highlight">{openRate}%</span>
+                              </p>
+                              <p>
+                                Click Rate:{" "}
+                                <span className="highlight">{clickRate}%</span>
+                              </p>
+                            </div>
+                            <div className="campaign-stats">
+                              <p>
+                                Delivered:{" "}
+                                <span className="revenue">
+                                  {item.sendcount || 0}/{item.totalcount || 0}
+                                </span>
+                              </p>
+                              <p className="trend-camp">
+                                Failed:{" "}
+                                <span className="trend">
+                                  {item.failedcount || 0}
+                                </span>
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                  </div>
+              </div>
+                </div>
+              
+              <div className="graph-card-container">
+  <h2 className="dashboard-graph-title">Overview Snapshot</h2>
+  <p className="dashboard-graph-subtitle">Total Campaigns, Contacts, Automations & Templates</p>
+  <ResponsiveContainer width="100%" height={250}>
+    <BarChart data={dashboardData} layout="vertical" margin={{ left: 50, right: 20 }}>
+      <CartesianGrid strokeDasharray="3 3" />
+      <XAxis type="number" domain={[0, 100]} hide />
+      <YAxis type="category" dataKey="name" stroke="#64748b" fontSize={12} />
+      <Tooltip
+        formatter={(value, name, props) => `${props.payload.actual} Total`}
+        labelFormatter={(label) => `Category: ${label}`}
       />
-      <YAxis
-        allowDecimals={false}
-        ticks={[0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100]}
-        tick={{ fontSize: 14 }}
-      />
-<Tooltip
-  content={({ active, payload }) => {
-    if (active && payload && payload.length > 0) {
-      const data = payload[0].payload;
-      return (
-        <div style={{
-          background: "#fff",
-          border: "1px solid #ccc",
-          padding: "10px",
-          borderRadius: "4px"
-        }}>
-          <strong>{data.name}</strong><br />
-          Actual: <span>{data.actual}</span><br />
-          Percentage: <span>{data.value}%</span>
-        </div>
-      );
-    }
-    return null;
-  }}
-/>
-      <Bar dataKey="value" radius={[0, 0, 0, 0]} barSize={40}>
+      <Bar dataKey="value" fill="#60a5fa">
         {dashboardData.map((entry, index) => (
-          <Cell
-            key={`cell-${index}`}
-            fill={`url(#barGradient${(index % 4) + 1})`}
-          />
+          <Cell key={`cell-${index}`} fill={["#3b82f6", "#10b981", "#f59e0b", "#8b5cf6"][index]} />
         ))}
       </Bar>
     </BarChart>
   </ResponsiveContainer>
 </div>
-                </div>
+
               </div>
+              
             )}
 
             {view === "campaign" && (
@@ -2649,7 +2733,7 @@ const dashboardData = rawData.map(item => ({
               </div>
             )}
           </div>
-
+</div>
           {/* create Automation section */}
           {showautoModal && (
             <div className="modal-overlay-automation">
@@ -5388,6 +5472,7 @@ const dashboardData = rawData.map(item => ({
             theme="light" // Optional: Choose theme ('light', 'dark', 'colored')
           />
         </div>
+
       </div>
       <div className="dwn-menu">
         <div className="mobile-menu">
