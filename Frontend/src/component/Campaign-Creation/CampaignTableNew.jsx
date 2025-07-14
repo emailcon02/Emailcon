@@ -2388,6 +2388,7 @@ const CampaignTableNew = ({ onSelect = () => {}, className = "" }) => {
                   </div>
                   <FaChartBar className="icon-right" />
                 </div>
+              <div className="top-performers-container-scroll">
 
                 {[...campaigns]
                   .sort((a, b) => {
@@ -2465,6 +2466,7 @@ const CampaignTableNew = ({ onSelect = () => {}, className = "" }) => {
                       </div>
                     );
                   })}
+                  </div>
               </div>
             </div>
           </div>

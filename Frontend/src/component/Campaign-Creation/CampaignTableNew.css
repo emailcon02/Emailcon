@@ -210,7 +210,7 @@
   display: flex;
   align-items: center;
   background: #fffaf3;
-border-radius: 6px;
+border-radius: 6px !important;
  border: 1px solid #e3e2df;;
   padding: 5px 10px;
   
@@ -285,7 +285,7 @@ border-radius: 6px;
   justify-content: space-between;
   padding: 10px 14px;
   cursor: pointer;
-border: 1px solid #ebe6dd;
+border-bottom: 1px solid #ebe6dd;
   transition: background 0.2s;
 }
 
@@ -300,7 +300,6 @@ border: 1px solid #ebe6dd;
 .option-checkbox {
   margin-right: 10px;
 }
-
 
 .option-label {
   font-weight: 600;
@@ -335,7 +334,7 @@ border: 1px solid #ebe6dd;
   align-items: center;
   padding: 10px 14px;
   cursor: pointer;
-border: 1px solid #ebe6dd;
+border-bottom: 1px solid #ebe6dd;
   transition: background 0.2s;
 }
 
@@ -376,6 +375,7 @@ border: 1px solid #ebe6dd;
 @media (max-width: 640px) {
   .dropdown-header {
     padding: 10px;
+    border: none;
   }
 
   .search-row {
@@ -385,7 +385,8 @@ border: 1px solid #ebe6dd;
   }
 
   .search-container {
-    width: 90%;
+    width:200px !important;
+    margin-left: 0px !important;
   }
 
   .date-filter-group {
@@ -395,6 +396,9 @@ border: 1px solid #ebe6dd;
 
   .date-input-group {
     width: 100%;
+  }
+  .date-input{
+    width: 90% !important;
   }
 
   .action-button {
@@ -606,7 +610,7 @@ border: 1px solid #ebe6dd;
 
 @media screen and (max-width: 600px) {
   .history-cards{
-    width: 93%;
+    width: 95%;
     height: 200px;
   }
   .cards-board-img {
@@ -623,7 +627,7 @@ border: 1px solid #ebe6dd;
     font-size: 18px;
     margin-left: 20px;
 }
-.top-performers-container{
+.top-performers-container-scroll{
     height: 300px !important;
 }
  #file{
@@ -936,13 +940,14 @@ border: 1px solid #ebe6dd;
   margin: 0 auto;
   padding: 20px;
   width: 90%;
-  height: 550px;
-  overflow: auto; 
-  /* scrollbar-width: thin; 
-  scrollbar-color: #cbd5e0 transparent;  */
+
 }
 
+.top-performers-container-scroll {
+  height: 550px;
+  overflow: auto; 
 
+}
 
 .top-header {
   display: flex;
@@ -1272,6 +1277,9 @@ border: 1px solid #ebe6dd;
 .icon-linebar-2{
    width:15%;
    height:15%;
+}
+.option-item,.select-all-item{
+  width: 100% !important;
 }
 .linebar-div {
     padding:10px;
