@@ -56,6 +56,7 @@ app.get('/auth/google', (req, res) => {
   res.redirect(authUrl);
 });
 // Modified /oauth2callback endpoint
+// Modified /oauth2callback endpoint
 app.get('/oauth2callback', async (req, res) => {
   try {
     const { code, state } = req.query;
@@ -77,25 +78,30 @@ app.get('/oauth2callback', async (req, res) => {
     const { tokens } = await oAuth2Client.getToken(code);
     oAuth2Client.setCredentials(tokens);
 
-    // Get user profile info from Google
+    // Check if the required scope is present
+    const grantedScopes = tokens.scope?.split(' ') || [];
+    const hasGmailSend = grantedScopes.includes('https://www.googleapis.com/auth/gmail.send');
+    const retryUrl = `${apiconfigfrontend.baseURL}/api/auth/google?userId=${userId}`;
+
+    if (!hasGmailSend) {
+      return res.redirect(`${apiconfigfrontend.baseURL}/auth-warning?message=Gmail Send Scope not granted by user&userId=${userId}&redirectTo=${encodeURIComponent(retryUrl)}`);
+    }
+
+    // Fetch user info
     const oauth2 = google.oauth2({ version: 'v2', auth: oAuth2Client });
     const userInfo = await oauth2.userinfo.get();
-
     const googleEmail = userInfo.data.email;
 
-    // Verify user from your DB
     const user = await User.findById(userId);
     if (!user) {
       throw new Error("User not found");
     }
-    const retryUrl = `${apiconfigfrontend.baseURL}/api/auth/google?userId=${userId}`;
 
-    // Compare authenticated email with stored email
     if (user.email.toLowerCase() !== googleEmail.toLowerCase()) {
-        return res.redirect(`${apiconfigfrontend.baseURL}/auth-warning?message=Google auth email mismatch&email=${googleEmail}&userId=${userId}&redirectTo=${encodeURIComponent(retryUrl)}`);
+      return res.redirect(`${apiconfigfrontend.baseURL}/auth-warning?message=Google auth email mismatch&email=${googleEmail}&userId=${userId}&redirectTo=${encodeURIComponent(retryUrl)}`);
     }
 
-    // Save tokens if email matches
+    // Save tokens if scope and email match
     user.google = {
       accessToken: tokens.access_token,
       expiryDate: tokens.expiry_date,
@@ -111,7 +117,6 @@ app.get('/oauth2callback', async (req, res) => {
     return res.redirect(`${apiconfigfrontend.baseURL}/auth-warning?error=${encodeURIComponent(err.message)}`);
   }
 });
-
 
 //Temporary test route
 app.get('/test-oauth/:id', async (req, res) => {

@@ -112,8 +112,8 @@ input[type="color"] {
 
 
 .bg-color-pic {
-    width: 15px !important;
-    height: 15px !important;
+    width: 25px !important;
+    height: 25px !important;
 
 }
 
@@ -383,8 +383,8 @@ button[data-tooltip]:hover::after {
 }
 
 .gallery-actions button {
-  font-size: 12px;
-  padding: 4px 8px;
+  font-size: 20px !important;
+  padding: 5px 8px;
   background-color: #2f327d;
   color: white;
   border: none;

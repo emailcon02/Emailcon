@@ -260,7 +260,7 @@ function Signup() {
                 {isLoading ? (
                   <span className="loader-signup"></span> // Spinner
                 ) : (
-                  "Sign in"
+                  "Sign up"
                 )}
               </button>
             </div>
