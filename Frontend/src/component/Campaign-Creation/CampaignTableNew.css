@@ -175,7 +175,7 @@
 
 .dropdown-content {
   margin-top: 18px;
-  background: #ffffff;
+  background: #fffaf3;
   border: 1px solid #dce3eb;
   border-radius: 8px;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.05);
@@ -385,7 +385,7 @@ border-bottom: 1px solid #ebe6dd;
   }
 
   .search-container {
-    width:200px !important;
+    width:185px !important;
     margin-left: 0px !important;
   }
 
@@ -553,6 +553,9 @@ border-bottom: 1px solid #ebe6dd;
     color:#353333;
     font-size: 18px;
     margin-top: 10px;
+}
+.dropdown-content{
+  width:300px !important;
 }
 .values-his{
      padding:5px 12px;
