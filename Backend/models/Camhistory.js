@@ -1,3 +1,5 @@
+import mongoose from "mongoose";
+
 const camhistorySchema = new mongoose.Schema({
   campaignname: {
     type: String,
@@ -94,3 +96,7 @@ const camhistorySchema = new mongoose.Schema({
   strict: false,
   timestamps: true, 
 });
+
+
+const Camhistory = mongoose.model("Camhistory", camhistorySchema);
+export default Camhistory;
