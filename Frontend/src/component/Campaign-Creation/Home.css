@@ -660,7 +660,7 @@
   overflow-y:auto;
 }
 .top-per-home{
-  width: 45% !important;
+  /* width: 45% !important; */
   border: none !important;
   border-radius: 16px !important;
 }
@@ -1304,7 +1304,7 @@
   display: grid;
   grid-template-columns: auto auto ;
   gap: 20px;
-  width:50%; 
+  /* width:50%;  */
 }
 
 .Home-cards-dashboard{
