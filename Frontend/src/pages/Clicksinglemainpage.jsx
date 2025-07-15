@@ -1261,7 +1261,6 @@ const Clicksinglemainpage = () => {
           toast.success("Template Saved Successfully");
           setTimeout(() => {
             setShowTemplateModal(false);
-            setTemplateName("");
             setIsLoading(false);
           }, 2000);
           fetchTemplates(); // Refresh templates after saving

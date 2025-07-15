@@ -24,7 +24,8 @@ const studentSchema = new mongoose.Schema({
     }
 }, { 
     strict: false,
-    versionKey: false 
+    versionKey: false, 
+    timestamps: true
 });
 
 const Student = mongoose.model('Student', studentSchema);

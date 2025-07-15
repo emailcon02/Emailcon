@@ -1230,19 +1230,18 @@ const Birthdayeditor = () => {
     setIsLoading(true);
     if (templateName && user && user.id && previewContent) {
       axios
-        .post(`${apiConfig.baseURL}/api/stud/template`, {
+        .post(`${apiConfig.baseURL}/api/stud/birthtemplate`, {
           temname: templateName,
           userId: user.id,
           previewContent,
           bgColor,
-          camname: campaign.camname,
+          camname:`${campaign.camname} Birthday Campaign`
         })
         .then((res) => {
           console.log("Template saved successfully:", res.data);
           toast.success("Template Saved Successfully");
           setTimeout(() => {
             setShowTemplateModal(false);
-            setTemplateName("");
             setIsLoading(false);
           }, 2000);
           fetchTemplates(); // Refresh templates after saving
@@ -1311,7 +1310,7 @@ const Birthdayeditor = () => {
       const checkRes = await axios.get(
         `${
           apiConfig.baseURL
-        }/api/stud/template/check?temname=${encodeURIComponent(
+        }/api/stud/birthtemplates/check?temname=${encodeURIComponent(
           templateName
         )}&userId=${user.id}`
       );
@@ -1321,11 +1320,11 @@ const Birthdayeditor = () => {
       if (existingTemplate) {
         // Update existing template
         await axios.put(
-          `${apiConfig.baseURL}/api/stud/template/${existingTemplate._id}`,
+          `${apiConfig.baseURL}/api/stud/birthtemplates/${existingTemplate._id}`,
           {
             previewContent,
             bgColor,
-            camname: campaign?.camname || "",
+            camname: `${campaign.camname} Birthday Campaign`
           }
         );
         toast.success("Template updated successfully.");

@@ -2748,6 +2748,43 @@ router.put('/template/:id', async (req, res) => {
     res.status(500).json({ message: "Error updating template" });
   }
 });
+
+router.get('/birthtemplates/check', async (req, res) => {
+  const { temname, userId } = req.query;
+
+  if (!temname || !userId) {
+    return res.status(400).json({ message: "Template name and user ID required" });
+  }
+
+  const template = await BirthdayTemplate.findOne({ temname, user: userId });
+  if (template) {
+    return res.json(template);
+  } else {
+    return res.json(null);
+  }
+});
+router.put('/birthtemplates/:id', async (req, res) => {
+  const { id } = req.params;
+  const { previewContent, bgColor, camname } = req.body;
+
+  try {
+    const updated = await BirthdayTemplate.findByIdAndUpdate(
+      id,
+      { previewContent, bgColor, camname, updatedAt: new Date() },
+      { new: true }
+    );
+
+    if (!updated) {
+      return res.status(404).json({ message: "Template not found" });
+    }
+
+    res.json(updated);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Error updating template" });
+  }
+});
+
 //create Template
 router.post('/create-template', async (req, res) => {
   const {

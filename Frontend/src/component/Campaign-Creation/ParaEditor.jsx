@@ -17,15 +17,15 @@ const ParaEditor = ({ isOpen, content, onSave, onClose }) => {
   const [tooltipVisible, setTooltipVisible] = useState(false);
   const [selectedGroup, setSelectedGroup] = useState(false);
   const [fieldNames, setFieldNames] = useState({});
-  const [groups, setGroups] = useState([]); // Stores group names
-  const [students, setStudents] = useState([]); // Stores all students
+  const [groups, setGroups] = useState([]);
+  const [students, setStudents] = useState([]);
   const user = JSON.parse(localStorage.getItem("user"));
   const dropdownRef = useRef(null);
 
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
-        setSelectedGroup(""); // Close dropdown
+        setSelectedGroup("");
         setFieldNames([]);
       }
     };
@@ -60,8 +60,6 @@ const ParaEditor = ({ isOpen, content, onSave, onClose }) => {
 
   const handleGroupChange = (e) => {
     const groupName = e.target.value;
-
-    // Force the dropdown to open every time by resetting selectedGroup
     setSelectedGroup("");
     setTimeout(() => setSelectedGroup(groupName), 0);
 
@@ -117,7 +115,14 @@ const ParaEditor = ({ isOpen, content, onSave, onClose }) => {
 
     try {
       const result = await model.generateContent(aiInput);
-      const res = await result.response.text();
+      let res = await result.response.text();
+
+      res = res
+        .replace(/\*\*\*/g, "")
+        .replace(/\*\*/g, "")
+        .replace(/\*/g, "")
+        .trim();
+
       setAiResponse(res || "AI content could not be generated.");
     } catch (error) {
       console.error("AI Error:", error);
@@ -143,7 +148,7 @@ const ParaEditor = ({ isOpen, content, onSave, onClose }) => {
           onInit={(evt, editor) => (editorRef.current = { editor })}
           init={{
             menubar: true,
-            zIndex: 10000, // Higher than your modal
+            zIndex: 10000,
             branding: false,
             plugins: [
               "lists",
@@ -158,7 +163,6 @@ const ParaEditor = ({ isOpen, content, onSave, onClose }) => {
             toolbar: `undo redo | bold italic underline | fontfamily fontsize | 
               alignleft aligncenter alignright | bullist numlist | 
               forecolor backcolor | code`,
-            // Color settings
             quickbars_selection_toolbar: "bold italic | forecolor backcolor",
             color_cols: 5,
             color_map: [
@@ -173,16 +177,11 @@ const ParaEditor = ({ isOpen, content, onSave, onClose }) => {
               "0000FF",
               "Blue",
             ],
-
-            // Font settings
             font_size_formats:
               "8px 10px 12px 14px 16px 18px 20px 24px 28px 32px 36px 48px",
             font_family_formats:
               "Andale Mono=andale mono,times; Arial=arial,helvetica,sans-serif; Arial Black=arial black,avant garde; Book Antiqua=book antiqua,palatino; Comic Sans MS=comic sans ms,sans-serif; Courier New=courier new,courier; Georgia=georgia,palatino; Helvetica=helvetica; Impact=impact,chicago; Symbol=symbol; Tahoma=tahoma,arial,helvetica,sans-serif; Terminal=terminal,monaco; Times New Roman=times new roman,times; Trebuchet MS=trebuchet ms,geneva; Verdana=verdana,geneva; Webdings=webdings; Wingdings=wingdings,zapf dingbats",
-
-            // Other settings
             forced_root_block: "p",
-            // content_style: "body { font-family: Arial; font-size: 14px; }",
             skin: "oxide",
             content_css: "default",
           }}
@@ -195,7 +194,6 @@ const ParaEditor = ({ isOpen, content, onSave, onClose }) => {
             Cancel
           </button>
           <div className="select-group-container" ref={dropdownRef}>
-            {/* Select Group */}
             <select
               onChange={(e) => handleGroupChange(e)}
               value=""
@@ -214,7 +212,6 @@ const ParaEditor = ({ isOpen, content, onSave, onClose }) => {
               ))}
             </select>
 
-            {/* Show fields only for the selected heading */}
             {selectedGroup && (
               <div className="dropdown-container">
                 <p className="template-title">
@@ -226,7 +223,7 @@ const ParaEditor = ({ isOpen, content, onSave, onClose }) => {
                       <div
                         className="list-field"
                         key={idx}
-                        onClick={() => handleInsertVariable(`{${field}}`)} // Correct index
+                        onClick={() => handleInsertVariable(`{${field}}`)}
                       >
                         {field}
                       </div>
@@ -244,7 +241,6 @@ const ParaEditor = ({ isOpen, content, onSave, onClose }) => {
           </p>
         </div>
 
-        {/* Animated AI Chatbot */}
         {chatbotVisible && (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -285,12 +281,13 @@ const ParaEditor = ({ isOpen, content, onSave, onClose }) => {
                         <span className="tooltip">Copied!</span>
                       )}
                     </div>
-                    <pre>{aiResponse}</pre>
+                    <pre style={{ whiteSpace: "pre-wrap" }}>
+                      {aiResponse.trim()}
+                    </pre>
                   </>
                 )}
               </div>
 
-              {/* Use textarea for better mobile editing */}
               <textarea
                 className="ai-input"
                 placeholder="Ask AI to generate content..."
@@ -300,7 +297,7 @@ const ParaEditor = ({ isOpen, content, onSave, onClose }) => {
                 style={{
                   resize: "vertical",
                   width: "100%",
-                  maxWidth:"600px",
+                  maxWidth: "600px",
                   minHeight: "40px",
                   maxHeight: "120px",
                   fontSize: "1rem",
@@ -312,7 +309,6 @@ const ParaEditor = ({ isOpen, content, onSave, onClose }) => {
                 }}
               />
 
-              {/* Animated Send Button */}
               <motion.button
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.9 }}
