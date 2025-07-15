@@ -2522,7 +2522,7 @@ const CampaignTableNew = ({ onSelect = () => {}, className = "" }) => {
           <div className="engage-boxes">
             <div>
               <h2>Engagement Timeline</h2>
-              <p className="engage-para">Email engagement trends over time</p>
+              <p className="engage-para" style={{marginBottom:"16px"}}>Email engagement trends over time</p>
             </div>
 
             <div>

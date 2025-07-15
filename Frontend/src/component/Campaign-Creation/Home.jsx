@@ -137,7 +137,7 @@ const Home = () => {
   const [pendingFolderMove, setPendingFolderMove] = useState(null);
   const [showMoveConfirmModal, setShowMoveConfirmModal] = useState(false);
   const [totalCampaigns, setTotalCampaigns] = useState(0);
-  const [totalContacts, setTotalContacts] = useState(0);
+  const [totalContacts, setTotalContacts] = useState([]);
   const [totalAutomation, setTotalAutomation] = useState(0);
   const username = users?.username || user?.username || "User";
   const today = new Date().toLocaleDateString();
@@ -191,7 +191,7 @@ campaigns.forEach((c) => {
   }
 });
 
-students.forEach((s) => {
+totalContacts.forEach((s) => {
   if (!s.createdAt) return;
   const created = new Date(s.createdAt);
   if (isNaN(created)) return;
@@ -263,7 +263,7 @@ templates.forEach((t) => {
         const filteredContacts = response.data.filter(
           contact => contact.group?.user === user.id
         );
-        setTotalContacts(filteredContacts.length);
+        setTotalContacts(filteredContacts);
       } catch (error) {
         console.error("Error fetching contacts:", error);
         setTotalContacts(0);
@@ -2548,7 +2548,7 @@ templates.forEach((t) => {
                         <FaUsers />
                       </div>
                       <p className="card-text-content">Total Contacts</p>
-                      <p className="card-text-highlight">{totalContacts}</p>
+                      <p className="card-text-highlight">{totalContacts.length}</p>
                     </div>
 
                     <div className="cards-dashboard" onClick={() => { setView("remainder") }}>

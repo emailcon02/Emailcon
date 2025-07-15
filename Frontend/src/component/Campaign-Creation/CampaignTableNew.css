@@ -1108,7 +1108,7 @@ border-bottom: 1px solid #ebe6dd;
  padding: 20px;
  border-radius: 8px;
  border: 1px solid #e2e8f0;
- font-family: "Inter", sans-serif;
+ /* font-family: "Inter", sans-serif; */
  width: 93%;
  margin: 20px auto;
 }
@@ -1122,7 +1122,7 @@ border-bottom: 1px solid #ebe6dd;
 
 .engage-para{
  color: #64748b;
- margin-bottom: 16px;
+ /* margin-bottom: 16px; */
 }
 
 .button-group {
