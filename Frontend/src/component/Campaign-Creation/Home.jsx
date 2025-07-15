@@ -18,6 +18,9 @@ import {
   FaThLarge,
   FaTachometerAlt,
   FaChartBar,
+  FaPuzzlePiece,
+  FaCog,
+  FaUserFriends,
 } from "react-icons/fa";
 import "./Home.css";
 import { useNavigate } from "react-router-dom";
@@ -46,6 +49,9 @@ import FileManagerModal from "../../pages/FilemanagerModal.jsx";
 import { FaBullhorn, FaCogs, FaSave } from "react-icons/fa";
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell,
+  LineChart,
+  Legend,
+  Line,
 } from 'recharts';
 
 
@@ -135,27 +141,81 @@ const Home = () => {
   const [totalAutomation, setTotalAutomation] = useState(0);
   const username = users?.username || user?.username || "User";
   const today = new Date().toLocaleDateString();
+const [timelineData, setTimelineData] = useState([]);
+const [visible, setVisible] = useState({
+  campaigns: true,
+  contacts: true,
+  automation: false,
+  templates: false,
+});
+
+const toggleLine = (key) => {
+  setVisible((prev) => ({ ...prev, [key]: !prev[key] }));
+};
+
+useEffect(() => {
+  if (!campaigns || !students || !templates) return;
+
+  const today = new Date();
+  const past10Days = Array.from({ length: 10 }).map((_, i) => {
+    const d = new Date(today);
+    d.setDate(today.getDate() - i);
+    return d.toISOString().split("T")[0]; // YYYY-MM-DD
+  }).reverse();
+
+  const dataMap = {};
+  past10Days.forEach((date) => {
+    dataMap[date] = {
+      date,
+      campaigns: 0,
+      automation: 0,
+      contacts: 0,
+      templates: 0,
+    };
+  });
+
+campaigns.forEach((c) => {
+  if (!c.createdAt) return;
+  const created = new Date(c.createdAt);
+  if (isNaN(created)) return;
+
+  const date = created.toISOString().split("T")[0];
+  const name = c.campaignname?.toLowerCase() || "";
+
+  if (dataMap[date]) {
+    if (name.includes("birthday")) {
+      dataMap[date].automation += 1;
+    } else {
+      dataMap[date].campaigns += 1;
+    }
+  }
+});
+
+students.forEach((s) => {
+  if (!s.createdAt) return;
+  const created = new Date(s.createdAt);
+  if (isNaN(created)) return;
+
+  const date = created.toISOString().split("T")[0];
+  if (dataMap[date]) {
+    dataMap[date].contacts += 1;
+  }
+});
+
+templates.forEach((t) => {
+  if (!t.createdAt) return;
+  const created = new Date(t.createdAt);
+  if (isNaN(created)) return;
+
+  const date = created.toISOString().split("T")[0];
+  if (dataMap[date]) {
+    dataMap[date].templates += 1;
+  }
+});
 
 
-// Step 1: Original values from DB
-const rawData = [
-  { name: 'Campaigns', value: totalCampaigns },
-  { name: 'Contacts', value: totalContacts },
-  { name: 'Automation', value: totalAutomation },
-  { name: 'Templates', value: templates.length },
-];
-
-
-
-// Step 2: Find max value
-const maxValue = Math.max(...rawData.map(item => item.value));
-
-// Step 3: Normalize values (scale all relative to max = 100%)
-const dashboardData = rawData.map(item => ({
-  name: item.name,
-  value: maxValue > 0 ? Math.round((item.value / maxValue) * 100) : 0,
-  actual: item.value, // Optional: for tooltip or debugging
-}));
+  setTimelineData(Object.values(dataMap));
+}, [campaigns, students, templates]);
 
 
   // dashboard total campaign  
@@ -2525,9 +2585,17 @@ const dashboardData = rawData.map(item => ({
                   .sort((a, b) => {
                     const aOpen = campaignMetrics[a._id]?.openCount || 0;
                     const bOpen = campaignMetrics[b._id]?.openCount || 0;
-                    const aRate = (aOpen / (a.totalcount || 1)) * 100;
-                    const bRate = (bOpen / (b.totalcount || 1)) * 100;
-                    return bRate - aRate; // Sort by open rate descending
+
+
+    const aClick = campaignMetrics[a._id]?.clickCount || 0;
+    const bClick = campaignMetrics[b._id]?.clickCount || 0;
+
+    const aTotal = a.totalcount || 1;
+    const bTotal = b.totalcount || 1;
+
+    const aAvg = ((aOpen + aClick) / (2 * aTotal)) * 100;
+    const bAvg = ((bOpen + bClick) / (2 * bTotal)) * 100;
+                    return bAvg - aAvg; 
                   })
                   .map((item, idx) => {
                     const metrics = campaignMetrics[item._id] || {};
@@ -2549,7 +2617,13 @@ const dashboardData = rawData.map(item => ({
                         className="campaign-row"
                         onClick={handlenavigatecampaign}
                       >
-                        <div className="rank-badge badge-orange-his">{idx + 1}</div>
+ <div
+  className={`rank-badge ${
+    item.status === "Failed" ? "badge-orange-light" : "badge-orange-his"
+  }`}
+>
+  {idx + 1}
+</div>
                         <div className="campaign-details">
                           <div className="campaign-header">
                             <p className="campaign-title">
@@ -2602,24 +2676,68 @@ const dashboardData = rawData.map(item => ({
                 </div>
               
               <div className="graph-card-container">
-  <h2 className="dashboard-graph-title">Overview Snapshot</h2>
-  <p className="dashboard-graph-subtitle">Total Campaigns, Contacts, Automations & Templates</p>
-  <ResponsiveContainer width="100%" height={250}>
-    <BarChart data={dashboardData} layout="vertical" margin={{ left: 50, right: 20 }}>
+ <div className="engagement-container" style={{border:"none"}}>
+  <div className="engage-boxes"  style={{marginBottom:"20px",gap:"20px"}}>
+ <div>
+  <h2 style={{marginBottom:"10px"}}>Activity Timeline</h2>
+  <p className="engage-para" style={{fontSize:"1rem"}}>Daily trends of Campaigns, Contacts, Automations & Templates over the past 10 days</p>
+</div>
+
+   <div className="button-group">
+  <button
+    className={`toggle-button ${visible.campaigns ? "active" : ""}`}
+    onClick={() => toggleLine("campaigns")}
+  >
+    <FaBullhorn style={{ marginRight: "6px" }} /> Campaigns
+  </button>
+
+  <button
+    className={`toggle-button ${visible.contacts ? "active" : ""}`}
+    onClick={() => toggleLine("contacts")}
+  >
+    <FaUserFriends style={{ marginRight: "6px" }} /> Contacts
+  </button>
+
+  <button
+    className={`toggle-button ${visible.automation ? "active" : ""}`}
+    onClick={() => toggleLine("automation")}
+  >
+    <FaCog style={{ marginRight: "6px" }} /> Automation
+  </button>
+
+  <button
+    className={`toggle-button ${visible.templates ? "active" : ""}`}
+    onClick={() => toggleLine("templates")}
+  >
+    <FaPuzzlePiece style={{ marginRight: "6px" }} /> Templates
+  </button>
+</div>
+
+  </div>
+
+  <ResponsiveContainer width="95%" height={350}>
+    <LineChart data={timelineData}>
       <CartesianGrid strokeDasharray="3 3" />
-      <XAxis type="number" domain={[0, 100]} hide />
-      <YAxis type="category" dataKey="name" stroke="#64748b" fontSize={12} />
-      <Tooltip
-        formatter={(value, name, props) => `${props.payload.actual} Total`}
-        labelFormatter={(label) => `Category: ${label}`}
-      />
-      <Bar dataKey="value" fill="#60a5fa">
-        {dashboardData.map((entry, index) => (
-          <Cell key={`cell-${index}`} fill={["#3b82f6", "#10b981", "#f59e0b", "#8b5cf6"][index]} />
-        ))}
-      </Bar>
-    </BarChart>
+      <XAxis dataKey="date" stroke="#64748b" fontSize={11} />
+      <YAxis stroke="#64748b" fontSize={12} />
+      <Tooltip />
+      <Legend />
+      {visible.campaigns && (
+        <Line type="monotone" dataKey="campaigns" stroke="#3b82f6" strokeWidth={2} dot={{ r: 3 }} />
+      )}
+      {visible.contacts && (
+        <Line type="monotone" dataKey="contacts" stroke="#10b981" strokeWidth={2} dot={{ r: 3 }} />
+      )}
+      {visible.automation && (
+        <Line type="monotone" dataKey="automation" stroke="#f59e0b" strokeWidth={2} dot={{ r: 3 }} />
+      )}
+      {visible.templates && (
+        <Line type="monotone" dataKey="templates" stroke="#8b5cf6" strokeWidth={2} dot={{ r: 3 }} />
+      )}
+    </LineChart>
   </ResponsiveContainer>
+</div>
+
 </div>
 
               </div>
@@ -2890,6 +3008,7 @@ const dashboardData = rawData.map(item => ({
                           className="alias-container-select"
                         >
                           <option value="">Select ReplyTo</option>
+                          <option value={user.email}>{user.email}</option>
                           {replyOptions.map((reply) => (
                             <option key={reply._id} value={reply.replyTo}>
                               {reply.replyTo}

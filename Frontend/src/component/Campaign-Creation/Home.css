@@ -1216,6 +1216,8 @@
   z-index: 100;
   background: #e9e3e3;
   padding: 10px;
+  border-top-left-radius: 10px;
+  border-top-right-radius: 10px;
 }
 
 .heading-automation h2{
@@ -1390,9 +1392,9 @@
 /* Welcome Header */
 .dashboard-welcome-box {
   padding: 30px;
-  background: #fff;
+  /* background: #fff; */
   border-radius: 16px;
-  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.05);
+  /* box-shadow: 0 12px 24px rgba(0, 0, 0, 0.05); */
   margin-bottom: 20px;
   width: 900px;
 
@@ -1455,8 +1457,11 @@
   /* padding: 20px; */
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
   width: 100%;
-  max-width: 930px;
+  max-width: 950px;
   margin:20px 0px;
+}
+.toggle-button{
+  padding: 5px 10px !important;
 }
 
 .dashboard-graph-title {
@@ -1516,7 +1521,7 @@
   }
 
   .dashboard-title-modern {
-    font-size: 1.4rem;
+    font-size: 1.3rem;
   }
   .dashboard-content{
     overflow: auto;
@@ -1625,7 +1630,7 @@
   }
     .top-per-home{
       width: 88% !important;
-      margin-bottom: 20px !important;
+      /* margin-bottom: 20px !important; */
     }
   .nav-split h4 {
     right: 2% !important;
@@ -1636,7 +1641,6 @@
     height:8% !important;
     }
     .graph-card-container{
-      width:88%;
       margin: 0px 0px 20px 0px;
     }
   
@@ -1651,10 +1655,13 @@
 
 }
 @media screen and (min-width: 600px) and (max-width: 800px) {
-  .dashboard-welcome-box,.graph-card-container{
+  .dashboard-welcome-box{
     width: 660px !important;
+    margin-top: 50% !important;
   }
- 
+   .graph-card-container{
+    width: 720px !important;
+  }
   .top-per-home{
     width: 40%;
   }
@@ -1676,7 +1683,7 @@
     display: none;
   }
    .main-content-sub{
-    margin-top:10% !important;
+    margin-top:12% !important;
     
   }
  
@@ -1713,7 +1720,7 @@
     width: 700px;
   }
   .graph-card-container{
-    width: 700px;
+    width: 760px;
   }
 
   .navbars{
@@ -1779,7 +1786,7 @@
   }
 
   .maincontent-main {
-    height: 75vh;
+    height: 78vh;
     overflow: auto;
     
   }

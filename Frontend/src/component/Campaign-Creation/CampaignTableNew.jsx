@@ -11,7 +11,7 @@ import Bounce from "../../Images/alert.png";
 import scheduled from "../../Images/event.png";
 import delivered from "../../Images/direction.png";
 import totaluser from "../../Images/group.png";
-import check from "../../Images/check.png";
+// import check from "../../Images/check.png";
 import mails from "../../Images/mail-card.png";
 // import mail from "../../Images/mail-card-1.png";
 import { unparse } from "papaparse";
@@ -19,7 +19,13 @@ import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
-
+import {
+  FaExclamationTriangle,
+  FaEnvelopeOpen,
+  FaMousePointer,
+  FaPaperPlane,
+  FaCheckCircle,
+} from "react-icons/fa";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import {
@@ -2175,18 +2181,23 @@ const CampaignTableNew = ({ onSelect = () => {}, className = "" }) => {
                 <div className="boards-table">
                   <div className="div-boards-table">
                     <div className="div-boards-card">
-                      <div className="cards-board-img blue">
-                        <img
+                      {/* <img
                           src={delivered}
                           alt="Templates"
                           className="board-img"
-                        />
-                      </div>
+                        /> */}
+                      <FaPaperPlane className="sent-details" />
+
                       <div className="data-progress">
                         <p>Sent</p>
                         <div style={{ display: "flex", gap: "10px" }}>
                           <span>
-                            <progress id="file" value="100" max="100">
+                            <progress
+                              id="file"
+                              value="100"
+                              max="100"
+                              className="sent-progress"
+                            >
                               100%
                             </progress>
                           </span>
@@ -2205,18 +2216,23 @@ const CampaignTableNew = ({ onSelect = () => {}, className = "" }) => {
                 <div className="boards-table">
                   <div className="div-boards-table">
                     <div className="div-boards-card">
-                      <div className="cards-board-img orange">
-                        <img
+                      {/* <img
                           src={check}
                           alt="Templates"
                           className="board-img"
-                        />
-                      </div>
+                        /> */}
+                      <FaCheckCircle className="delivered-details" />
+
                       <div className="data-progress">
                         <p>Delivered</p>
                         <div style={{ display: "flex", gap: "10px" }}>
                           <span>
-                            <progress id="file" value={deliveredRate} max="100">
+                            <progress
+                              id="file"
+                              value={deliveredRate}
+                              max="100"
+                              className="delivered-progress"
+                            >
                               {deliveredRate}%
                             </progress>
                           </span>
@@ -2235,18 +2251,23 @@ const CampaignTableNew = ({ onSelect = () => {}, className = "" }) => {
                 <div className="boards-table">
                   <div className="div-boards-table">
                     <div className="div-boards-card">
-                      <div className="cards-board-img purple">
-                        <img
+                      {/* <img
                           src={mails}
                           alt="Templates"
                           className="board-img"
-                        />
-                      </div>
+                        /> */}
+                      <FaEnvelopeOpen className="opened-details" />
+
                       <div className="data-progress">
                         <p>Opened</p>
                         <div style={{ display: "flex", gap: "10px" }}>
                           <span>
-                            <progress id="file" value={readRate} max="100">
+                            <progress
+                              id="file"
+                              value={readRate}
+                              max="100"
+                              className="opened-progress"
+                            >
                               {readRate}%
                             </progress>
                           </span>
@@ -2263,18 +2284,23 @@ const CampaignTableNew = ({ onSelect = () => {}, className = "" }) => {
                 <div className="boards-table">
                   <div className="div-boards-table">
                     <div className="div-boards-card">
-                      <div className="cards-board-img orange-2">
-                        <img
+                      {/* <img
                           src={click}
                           alt="Templates"
                           className="board-img"
-                        />
-                      </div>
+                        /> */}
+                      <FaMousePointer className="clicked-details" />
+
                       <div className="data-progress">
                         <p>Clicked</p>
                         <div style={{ display: "flex", gap: "10px" }}>
                           <span>
-                            <progress id="file" value={clickRate} max="100">
+                            <progress
+                              id="file"
+                              value={clickRate}
+                              max="100"
+                              className="clicked-progress"
+                            >
                               {clickRate}%
                             </progress>
                           </span>
@@ -2291,18 +2317,22 @@ const CampaignTableNew = ({ onSelect = () => {}, className = "" }) => {
                 <div className="boards-table">
                   <div className="div-boards-table">
                     <div className="div-boards-card">
-                      <div className="cards-board-img red">
-                        <img
+                      {/* <img
                           src={Bounce}
                           alt="Templates"
                           className="board-img"
-                        />
-                      </div>
+                        /> */}
+                      <FaExclamationTriangle className="bounced-details" />
                       <div className="data-progress">
                         <p>Bounced</p>
                         <div style={{ display: "flex", gap: "10px" }}>
                           <span>
-                            <progress id="file" value={failedRate} max="100">
+                            <progress
+                              id="file"
+                              value={failedRate}
+                              max="100"
+                              className="failed-progress"
+                            >
                               {failedRate}%
                             </progress>
                           </span>
@@ -2388,85 +2418,100 @@ const CampaignTableNew = ({ onSelect = () => {}, className = "" }) => {
                   </div>
                   <FaChartBar className="icon-right" />
                 </div>
-              <div className="top-performers-container-scroll">
+                <div className="top-performers-container-scroll">
+                  {[...campaigns]
+                    .sort((a, b) => {
+                      const aOpen = campaignMetrics[a._id]?.openCount || 0;
+                      const bOpen = campaignMetrics[b._id]?.openCount || 0;
 
-                {[...campaigns]
-                  .sort((a, b) => {
-                    const aOpen = campaignMetrics[a._id]?.openCount || 0;
-                    const bOpen = campaignMetrics[b._id]?.openCount || 0;
-                    const aRate = (aOpen / (a.totalcount || 1)) * 100;
-                    const bRate = (bOpen / (b.totalcount || 1)) * 100;
-                    return bRate - aRate; // Sort by open rate descending
-                  })
-                  .map((item, idx) => {
-                    const metrics = campaignMetrics[item._id] || {};
-                    const open = metrics.openCount || 0;
-                    const click = metrics.clickCount || 0;
+                      const aClick = campaignMetrics[a._id]?.clickCount || 0;
+                      const bClick = campaignMetrics[b._id]?.clickCount || 0;
 
-                    const openRate = (
-                      (open / (item.totalcount || 1)) *
-                      100
-                    ).toFixed(0);
-                    const clickRate = (
-                      (click / (item.totalcount || 1)) *
-                      100
-                    ).toFixed(0);
+                      const aTotal = a.totalcount || 1;
+                      const bTotal = b.totalcount || 1;
 
-                    return (
-                      <div
-                        key={item._id || idx}
-                        className="campaign-row"
-                        onClick={(e) => handleCampaignSelect(item, e)}
-                      >
-                        <div className="rank-badge badge-orange-his">{idx + 1}</div>
-                        <div className="campaign-details">
-                          <div className="campaign-header">
-                            <p className="campaign-title">
-                              {item.campaignname || "Unnamed Campaign"}
-                            </p>
-                            <span
-                              className={`status-tag ${
-                                item.status === "Success"
-                                  ? "status-active"
-                                  : item.status === "Failed"
-                                  ? "status-paused"
-                                  : "status-completed"
-                              }`}
-                            >
-                              {item.status}
-                            </span>
-                          </div>
-                          <div className="inline-campaign-data">
-                            <div className="campaign-stats">
-                              <p>
-                                Open Rate:{" "}
-                                <span className="highlight">{openRate}%</span>
+                      const aAvg = ((aOpen + aClick) / (2 * aTotal)) * 100;
+                      const bAvg = ((bOpen + bClick) / (2 * bTotal)) * 100;
+                      return bAvg - aAvg;
+                    })
+                    .map((item, idx) => {
+                      const metrics = campaignMetrics[item._id] || {};
+                      const open = metrics.openCount || 0;
+                      const click = metrics.clickCount || 0;
+
+                      const openRate = (
+                        (open / (item.totalcount || 1)) *
+                        100
+                      ).toFixed(0);
+                      const clickRate = (
+                        (click / (item.totalcount || 1)) *
+                        100
+                      ).toFixed(0);
+
+                      return (
+                        <div
+                          key={item._id || idx}
+                          className="campaign-row"
+                          onClick={(e) => handleCampaignSelect(item, e)}
+                        >
+                         <div
+  className={`rank-badge ${
+    item.status === "Failed" ? "badge-orange-light" : "badge-orange-his"
+  }`}
+>
+  {idx + 1}
+</div>
+
+                          <div className="campaign-details">
+                            <div className="campaign-header">
+                              <p className="campaign-title">
+                                {item.campaignname || "Unnamed Campaign"}
                               </p>
-                              <p>
-                                Click Rate:{" "}
-                                <span className="highlight">{clickRate}%</span>
-                              </p>
+                              <span
+                                className={`status-tag ${
+                                  item.status === "Success"
+                                    ? "status-active"
+                                    : item.status === "Failed"
+                                    ? "status-paused"
+                                    : "status-completed"
+                                }`}
+                              >
+                                {item.status}
+                              </span>
                             </div>
-                            <div className="campaign-stats">
-                              <p>
-                                Delivered:{" "}
-                                <span className="revenue">
-                                  {item.sendcount || 0}/{item.totalcount || 0}
-                                </span>
-                              </p>
-                              <p className="trend-camp">
-                                Failed:{" "}
-                                <span className="trend">
-                                  {item.failedcount || 0}
-                                </span>
-                              </p>
+                            <div className="inline-campaign-data">
+                              <div className="campaign-stats">
+                                <p>
+                                  Open Rate:{" "}
+                                  <span className="highlight">{openRate}%</span>
+                                </p>
+                                <p>
+                                  Click Rate:{" "}
+                                  <span className="highlight">
+                                    {clickRate}%
+                                  </span>
+                                </p>
+                              </div>
+                              <div className="campaign-stats">
+                                <p>
+                                  Delivered:{" "}
+                                  <span className="revenue">
+                                    {item.sendcount || 0}/{item.totalcount || 0}
+                                  </span>
+                                </p>
+                                <p className="trend-camp">
+                                  Failed:{" "}
+                                  <span className="trend">
+                                    {item.failedcount || 0}
+                                  </span>
+                                </p>
+                              </div>
                             </div>
                           </div>
                         </div>
-                      </div>
-                    );
-                  })}
-                  </div>
+                      );
+                    })}
+                </div>
               </div>
             </div>
           </div>
@@ -2561,11 +2606,12 @@ const CampaignTableNew = ({ onSelect = () => {}, className = "" }) => {
           <div className="content-line-bar-below">
             <div className="linebar-div">
               <div className="linebar-content">
-                <img
+                {/* <img
                   src={delivered}
                   alt="icons-linebar"
                   className="icon-linebar-2"
-                />
+                /> */}
+                <FaPaperPlane className="icon-linebar-1" />
                 <p className="line-bar-title">Sent</p>
               </div>
               <p className="value-linebar">{campaignDetails.sendcount}</p>
@@ -2573,7 +2619,8 @@ const CampaignTableNew = ({ onSelect = () => {}, className = "" }) => {
             </div>
             <div className="linebar-div">
               <div className="linebar-content">
-                <img src={mails} alt="icons-linebar" className="icon-linebar" />
+                {/* <img src={mails} alt="icons-linebar" className="icon-linebar" /> */}
+                <FaEnvelopeOpen className="icon-linebar-2" />
                 <p className="line-bar-title">Opens</p>
               </div>
               <p className="value-linebar">{openCount}</p>
@@ -2581,7 +2628,8 @@ const CampaignTableNew = ({ onSelect = () => {}, className = "" }) => {
             </div>
             <div className="linebar-div">
               <div className="linebar-content">
-                <img src={click} alt="icons-linebar" className="icon-linebar" />
+                {/* <img src={click} alt="icons-linebar" className="icon-linebar" /> */}
+                <FaMousePointer className="icon-linebar-3" />
                 <p className="line-bar-title">Clicks</p>
               </div>
               <p className="value-linebar">{urlCount}</p>
@@ -2589,11 +2637,12 @@ const CampaignTableNew = ({ onSelect = () => {}, className = "" }) => {
             </div>
             <div className="linebar-div">
               <div className="linebar-content">
-                <img
+                {/* <img
                   src={Bounce}
                   alt="icons-linebar"
                   className="icon-linebar"
-                />
+                /> */}
+                <FaExclamationTriangle className="icon-linebar-4" />
                 <p className="line-bar-title">Bounces</p>
               </div>
               <p className="value-linebar">{campaignDetails.failedcount}</p>
