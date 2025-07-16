@@ -999,7 +999,6 @@ async function createTransporter(user, aliasName) {
               ].join('\n'));
             }
           }
-         const unsubscribeLink = `${apiConfig.baseURL}/api/stud/unsubscribe?email=${encodeURIComponent(mailOptions.to)}`;
 
           // Construct email message
           const messageParts = [
@@ -1010,7 +1009,6 @@ async function createTransporter(user, aliasName) {
             `Subject: ${mailOptions.subject}`,
             'MIME-Version: 1.0',
             'Content-Type: multipart/mixed; boundary="boundary_string"',
-            `List-Unsubscribe: <${unsubscribeLink}>`, 
             '',
             '--boundary_string',
             'Content-Type: text/html; charset="UTF-8"',
@@ -1109,7 +1107,7 @@ function createMailOptions({
   }));
 
   const trackingPixel = `<img src="${apiConfig.baseURL}/api/stud/track-email-open?emailId=${encodeURIComponent(student.Email)}&userId=${userId}&campaignId=${campaignId}&t=${Date.now()}" width="1" height="1" style="display:none;" />`;
-    const unsubscribeLink = `${apiConfig.baseURL}/api/stud/unsubscribe?email=${encodeURIComponent(student.Email)}`;
+  const unsubscribeLink = `${apiConfig.baseURL}/api/stud/unsubscribe?email=${encodeURIComponent(student.Email)}`;
 
   return {
     from: `"${aliasName}" <${userEmail}>`,
@@ -1117,11 +1115,6 @@ function createMailOptions({
     subject: subject,
     replyTo: replyTo,
     attachments: emailAttachments,
-     headers: {
-            'X-Campaign-ID': campaignId,
-            'X-User-ID': userId,
-            'List-Unsubscribe': `<${unsubscribeLink}>` ,
-          },
     html: `
       <html>
         <head>
@@ -1202,6 +1195,10 @@ function createMailOptions({
           <div class="main" style="background-color:${bgColor || "white"}; box-shadow:0 4px 8px rgba(0, 0, 0, 0.2); border:1px solid rgb(255, 245, 245); padding:20px;width:700px;height:auto;border-radius:10px;margin:0 auto;">
             ${dynamicHtml}
             ${trackingPixel}
+             <div style="text-align:center; margin-top: 40px; font-size: 14px; color: #777;">
+  If you no longer wish to receive these emails, you can 
+  <a href="${unsubscribeLink}" style="color:#007BFF; text-decoration:underline;">unsubscribe here</a>.
+</div>
             
           </div>
         </body>
@@ -2225,7 +2222,7 @@ case 'break':
     const dynamicHtml = bodyElements.map(generateHtml).join('');
      // Tracking pixel
     const trackingPixel = `<img src="${apiConfig.baseURL}/api/stud/track-email-open?emailId=${encodeURIComponent(recipientEmail)}&userId=${userId}&campaignId=${campaignId}&t=${Date.now()}" width="1" height="1" style="display:none;" />`;
-const unsubscribeLink = `${apiConfig.baseURL}/api/unsubscribe?email=${encodeURIComponent(recipientEmail)}`;
+    const unsubscribeLink = `${apiConfig.baseURL}/api/unsubscribe?email=${encodeURIComponent(recipientEmail)}`;
 
     // Full email HTML
     const emailHtml = `
@@ -2277,6 +2274,10 @@ const unsubscribeLink = `${apiConfig.baseURL}/api/unsubscribe?email=${encodeURIC
               <div class="main" style="background-color:${bgColor || "white"}; box-shadow:0 4px 8px rgba(0, 0, 0, 0.2); border:1px solid rgb(255, 245, 245); padding:20px;width:700px;height:auto;border-radius:10px;margin:0 auto;">
                 ${dynamicHtml}
                 ${trackingPixel}
+                  <div style="text-align:center; margin-top: 40px; font-size: 14px; color: #777;">
+  If you no longer wish to receive these emails, you can 
+  <a href="${unsubscribeLink}" style="color:#007BFF; text-decoration:underline;">unsubscribe here</a>.
+</div>
               </div>
           </body>
       </html>
@@ -2323,7 +2324,6 @@ if (attachments && attachments.length > 0) {
           `Subject: ${subject}`,
           'MIME-Version: 1.0',
           'Content-Type: multipart/mixed; boundary="boundary_string"',
-          `List-Unsubscribe: <${unsubscribeLink}>`,   
           '',
           '--boundary_string',
           'Content-Type: text/html; charset="UTF-8"',
@@ -2395,7 +2395,6 @@ if (attachments && attachments.length > 0) {
           headers: {
             'X-Campaign-ID': campaignId,
             'X-User-ID': userId,
-            'List-Unsubscribe': `<${unsubscribeLink}>` 
           }
         });
 
