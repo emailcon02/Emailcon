@@ -159,6 +159,12 @@ router.post('/sendtestmail', async (req, res) => {
     if(!user){
           return res.status(404).send('User not found');
     }
+const student = await Student.findOne({ Email: emailData.recipient });
+
+if (student?.isUnsubscribed) {
+  console.log(`❌ Skipping email for unsubscribed recipient: ${emailData.recipient}`);
+  return res.status(200).json({ message: 'User has unsubscribed. Email not sent.' });
+}
 
     const {email}= user;
 
@@ -396,6 +402,7 @@ else if (item.type === 'multi-image-card') {
 
     // Tracking pixel
     const trackingPixel = `<img src="${apiConfig.baseURL}/api/stud/track-email-open?emailId=${encodeURIComponent(emailData.recipient)}&userId=${userId}&campaignId=${campaignId}&t=${Date.now()}" width="1" height="1" style="display:none;" />`;
+    const unsubscribeLink = `${apiConfig.baseURL}/api/stud/unsubscribe?email=${encodeURIComponent(emailData.recipient)}`;
 
     // Full email HTML
     const emailHtml = `
@@ -493,6 +500,7 @@ if (attachments && attachments.length > 0) {
           `Subject: ${emailData.subject}`,
           'MIME-Version: 1.0',
           'Content-Type: multipart/mixed; boundary="boundary_string"',
+          `List-Unsubscribe: <${unsubscribeLink}>`,   
           '',
           '--boundary_string',
           'Content-Type: text/html; charset="UTF-8"',
@@ -563,7 +571,9 @@ if (attachments && attachments.length > 0) {
           attachments: Attachments,
           headers: {
             'X-Campaign-ID': campaignId,
-            'X-User-ID': userId
+            'X-User-ID': userId,
+            'List-Unsubscribe': `<${unsubscribeLink}>` 
+
           }
         });
 
@@ -592,6 +602,152 @@ if (attachments && attachments.length > 0) {
   }
 });
 
+router.get('/unsubscribe', async (req, res) => {
+  const { email } = req.query;
+
+  if (!email) {
+    return res.status(400).send("Invalid unsubscribe link.");
+  }
+
+  try {
+    const student = await Student.findOne({ Email: email });
+
+    if (!student) {
+      return res.status(404).send("Email not found.");
+    }
+
+    // Mark as unsubscribed
+    student.isUnsubscribed = true;
+    await student.save();
+
+    // HTML with Undo button
+    return res.send(`
+      <html>
+        <head>
+          <title>Unsubscribed</title>
+          <style>
+            body {
+              font-family: 'Segoe UI', sans-serif;
+              background: #f4f4f4;
+              display: flex;
+              justify-content: center;
+              align-items: center;
+              height: 100vh;
+              margin: 0;
+            }
+            .box {
+              background: white;
+              padding: 30px 40px;
+              border-radius: 10px;
+              box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+              text-align: center;
+              width: 100%;
+              max-width: 400px;
+            }
+            h2 {
+              color: #333;
+              margin-bottom: 15px;
+            }
+            p {
+              color: #666;
+              font-size: 15px;
+              margin-bottom: 25px;
+            }
+            .btn {
+              background-color: #F48C06;
+              color: white;
+              border: none;
+              padding: 10px 20px;
+              font-size: 15px;
+              border-radius: 6px;
+              cursor: pointer;
+              transition: 0.3s;
+              text-decoration: none;
+            }
+            .btn:hover {
+              background-color: #ea8502ff;
+            }
+          </style>
+        </head>
+        <body>
+          <div class="box">
+            <h2>You’ve successfully unsubscribed</h2>
+            <p>If this was a mistake, you can undo it below.</p>
+            <a class="btn" href="${apiConfig.baseURL}/api/stud/resubscribe?email=${encodeURIComponent(email)}">Undo Unsubscribe</a>
+          </div>
+        </body>
+      </html>
+    `);
+  } catch (err) {
+    console.error("Unsubscribe error:", err);
+    return res.status(500).send("Something went wrong. Please try again later.");
+  }
+});
+
+router.get('/resubscribe', async (req, res) => {
+  const { email } = req.query;
+
+  if (!email) {
+    return res.status(400).send("Invalid resubscribe request.");
+  }
+
+  try {
+    const student = await Student.findOne({ Email: email });
+
+    if (!student) {
+      return res.status(404).send("Email not found.");
+    }
+
+    student.isUnsubscribed = false;
+    await student.save();
+
+    return res.send(`
+      <html>
+        <head>
+          <title>Resubscribed</title>
+          <style>
+            body {
+              font-family: 'Segoe UI', sans-serif;
+              background: #f4f4f4;
+              display: flex;
+              justify-content: center;
+              align-items: center;
+              height: 100vh;
+              margin: 0;
+            }
+            .box {
+              background: white;
+              padding: 30px 40px;
+              border-radius: 10px;
+              box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+              text-align: center;
+              width: 100%;
+              max-width: 400px;
+            }
+            h2 {
+              color: #333;
+              margin-bottom: 15px;
+            }
+            p {
+              color: #666;
+              font-size: 15px;
+              margin-bottom: 25px;
+            }
+          </style>
+        </head>
+        <body>
+          <div class="box">
+            <h2>You’ve been resubscribed</h2>
+            <p>Welcome back! You’ll now receive future emails from us.</p>
+          </div>
+        </body>
+      </html>
+    `);
+  } catch (err) {
+    console.error("Resubscribe error:", err);
+    return res.status(500).send("Something went wrong. Please try again later.");
+  }
+});
 
 
 // New route for starting campaigns
@@ -625,6 +781,7 @@ router.post('/start-campaign', async (req, res) => {
     if (!previewContent || previewContent.length === 0) {
       return res.status(400).json({ error: "No preview content available." });
     }
+    
 
     // Filter out students with invalid emails before processing
     const validStudents = students.filter(student => 
@@ -672,7 +829,7 @@ router.post('/start-campaign', async (req, res) => {
     transporter = await createTransporter(user,aliasName);
 
     // Configure delay settings (in milliseconds)
-    const DELAY_BETWEEN_EMAILS = 500; // 0.5 seconds between each email
+    const DELAY_BETWEEN_EMAILS = 1000; // 1 seconds between each email
     const DELAY_BETWEEN_BATCHES = 2000; // 2 second between batches
     const BATCH_SIZE = 10; // Number of emails to send in each batch
 
@@ -694,6 +851,12 @@ router.post('/start-campaign', async (req, res) => {
       // Process emails within batch sequentially with delay
       for (const student of batch) {
         try {
+
+    const dbStudent = await Student.findOne({ Email: student.Email });
+    if (dbStudent?.isUnsubscribed) {
+      console.log(`⛔ Skipping unsubscribed user: ${student.Email}`);
+      continue; // skip to next student
+    }
           // Personalize content
           const personalizedContent = previewContent.map((item) => {
             const personalizedItem = { ...item };
@@ -836,6 +999,7 @@ async function createTransporter(user, aliasName) {
               ].join('\n'));
             }
           }
+         const unsubscribeLink = `${apiConfig.baseURL}/api/stud/unsubscribe?email=${encodeURIComponent(mailOptions.to)}`;
 
           // Construct email message
           const messageParts = [
@@ -846,6 +1010,7 @@ async function createTransporter(user, aliasName) {
             `Subject: ${mailOptions.subject}`,
             'MIME-Version: 1.0',
             'Content-Type: multipart/mixed; boundary="boundary_string"',
+            `List-Unsubscribe: <${unsubscribeLink}>`, 
             '',
             '--boundary_string',
             'Content-Type: text/html; charset="UTF-8"',
@@ -944,6 +1109,7 @@ function createMailOptions({
   }));
 
   const trackingPixel = `<img src="${apiConfig.baseURL}/api/stud/track-email-open?emailId=${encodeURIComponent(student.Email)}&userId=${userId}&campaignId=${campaignId}&t=${Date.now()}" width="1" height="1" style="display:none;" />`;
+    const unsubscribeLink = `${apiConfig.baseURL}/api/stud/unsubscribe?email=${encodeURIComponent(student.Email)}`;
 
   return {
     from: `"${aliasName}" <${userEmail}>`,
@@ -951,6 +1117,11 @@ function createMailOptions({
     subject: subject,
     replyTo: replyTo,
     attachments: emailAttachments,
+     headers: {
+            'X-Campaign-ID': campaignId,
+            'X-User-ID': userId,
+            'List-Unsubscribe': `<${unsubscribeLink}>` ,
+          },
     html: `
       <html>
         <head>
@@ -1031,6 +1202,7 @@ function createMailOptions({
           <div class="main" style="background-color:${bgColor || "white"}; box-shadow:0 4px 8px rgba(0, 0, 0, 0.2); border:1px solid rgb(255, 245, 245); padding:20px;width:700px;height:auto;border-radius:10px;margin:0 auto;">
             ${dynamicHtml}
             ${trackingPixel}
+            
           </div>
         </body>
       </html>
@@ -1775,6 +1947,13 @@ router.post('/sendbulkEmail', async (req, res) => {
   if (!user) {
     return res.status(404).send('User not found');
   }
+  const student = await Student.findOne({ Email: recipientEmail });
+
+if (student?.isUnsubscribed) {
+  console.log(`❌ Skipping email for unsubscribed recipient: ${recipientEmail}`);
+  return res.status(200).json({ message: 'User has unsubscribed. Email not sent.' });
+}
+
 
   // user model has fields for email and smtppassword
   const {
@@ -2046,6 +2225,7 @@ case 'break':
     const dynamicHtml = bodyElements.map(generateHtml).join('');
      // Tracking pixel
     const trackingPixel = `<img src="${apiConfig.baseURL}/api/stud/track-email-open?emailId=${encodeURIComponent(recipientEmail)}&userId=${userId}&campaignId=${campaignId}&t=${Date.now()}" width="1" height="1" style="display:none;" />`;
+const unsubscribeLink = `${apiConfig.baseURL}/api/unsubscribe?email=${encodeURIComponent(recipientEmail)}`;
 
     // Full email HTML
     const emailHtml = `
@@ -2143,6 +2323,7 @@ if (attachments && attachments.length > 0) {
           `Subject: ${subject}`,
           'MIME-Version: 1.0',
           'Content-Type: multipart/mixed; boundary="boundary_string"',
+          `List-Unsubscribe: <${unsubscribeLink}>`,   
           '',
           '--boundary_string',
           'Content-Type: text/html; charset="UTF-8"',
@@ -2213,7 +2394,8 @@ if (attachments && attachments.length > 0) {
           attachments: Attachments,
           headers: {
             'X-Campaign-ID': campaignId,
-            'X-User-ID': userId
+            'X-User-ID': userId,
+            'List-Unsubscribe': `<${unsubscribeLink}>` 
           }
         });
 

@@ -1304,7 +1304,6 @@
   display: grid;
   grid-template-columns: auto auto ;
   gap: 20px;
-  /* width:50%;  */
 }
 
 .Home-cards-dashboard{
