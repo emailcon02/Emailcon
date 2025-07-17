@@ -453,12 +453,12 @@ else if (item.type === 'multi-image-card') {
           </div>
           <div class="main" style="background-color:${bgColor || "white"};box-shadow:0 4px 8px rgba(0, 0, 0, 0.2);border:1px solid rgb(255, 245, 245);padding:20px;width:700px;height:auto;border-radius:10px;margin:0 auto;">
             ${emailContent}
-            ${trackingPixel}
-            <div style="text-align:center; margin-top: 40px; font-size: 14px; color: #777;">
+            ${trackingPixel}        
+          </div>
+           <div style="text-align:center; margin-top: 20px; font-size: 14px; color: #777;">
   If you no longer wish to receive these emails, you can 
   <a href="${unsubscribeLink}" style="color:#007BFF; text-decoration:underline;">unsubscribe here</a>.
 </div>
-          </div>
         </body>
       </html>
     `;
@@ -1198,13 +1198,12 @@ function createMailOptions({
           </div>
           <div class="main" style="background-color:${bgColor || "white"}; box-shadow:0 4px 8px rgba(0, 0, 0, 0.2); border:1px solid rgb(255, 245, 245); padding:20px;width:700px;height:auto;border-radius:10px;margin:0 auto;">
             ${dynamicHtml}
-            ${trackingPixel}
-             <div style="text-align:center; margin-top: 40px; font-size: 14px; color: #777;">
+            ${trackingPixel}           
+          </div>
+          <div style="text-align:center; margin-top: 20px; font-size: 14px; color: #777;">
   If you no longer wish to receive these emails, you can 
   <a href="${unsubscribeLink}" style="color:#007BFF; text-decoration:underline;">unsubscribe here</a>.
-</div>
-            
-          </div>
+        </div>
         </body>
       </html>
     `
@@ -2277,12 +2276,12 @@ case 'break':
             </div>
               <div class="main" style="background-color:${bgColor || "white"}; box-shadow:0 4px 8px rgba(0, 0, 0, 0.2); border:1px solid rgb(255, 245, 245); padding:20px;width:700px;height:auto;border-radius:10px;margin:0 auto;">
                 ${dynamicHtml}
-                ${trackingPixel}
-                  <div style="text-align:center; margin-top: 40px; font-size: 14px; color: #777;">
+                ${trackingPixel}               
+              </div>
+              <div style="text-align:center; margin-top: 20px; font-size: 14px; color: #777;">
   If you no longer wish to receive these emails, you can 
   <a href="${unsubscribeLink}" style="color:#007BFF; text-decoration:underline;">unsubscribe here</a>.
 </div>
-              </div>
           </body>
       </html>
     `;
