@@ -1695,9 +1695,10 @@ const CampaignTableNew = ({ onSelect = () => {}, className = "" }) => {
                     Edit
                   </span>
                 )}
-              </div>
+              </div>            
+            </div>
 
-              {/* Modal */}
+             {/* Modal */}
               {isModalOpen && activeCampaignId === campaignId && (
                 <div
                   className="modal-schedule"
@@ -1722,7 +1723,6 @@ const CampaignTableNew = ({ onSelect = () => {}, className = "" }) => {
                   </div>
                 </div>
               )}
-            </div>
             <div className="history-cards" onClick={handlereadDetails}>
               <div className="sub-card-content">
                 <img src={opened} alt="Templates" className="cards-his-img" />

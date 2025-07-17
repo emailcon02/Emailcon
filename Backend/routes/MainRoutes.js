@@ -454,6 +454,10 @@ else if (item.type === 'multi-image-card') {
           <div class="main" style="background-color:${bgColor || "white"};box-shadow:0 4px 8px rgba(0, 0, 0, 0.2);border:1px solid rgb(255, 245, 245);padding:20px;width:700px;height:auto;border-radius:10px;margin:0 auto;">
             ${emailContent}
             ${trackingPixel}
+            <div style="text-align:center; margin-top: 40px; font-size: 14px; color: #777;">
+  If you no longer wish to receive these emails, you can 
+  <a href="${unsubscribeLink}" style="color:#007BFF; text-decoration:underline;">unsubscribe here</a>.
+</div>
           </div>
         </body>
       </html>
@@ -980,6 +984,7 @@ async function createTransporter(user, aliasName) {
     return {
       sendMail: async (mailOptions) => {
         try {
+          const unsubscribeHeader = `List-Unsubscribe: <${mailOptions.unsubscribeLink}>`;
           // Process attachments for Gmail API
           let attachmentParts = [];
           if (mailOptions.attachments && mailOptions.attachments.length > 0) {
@@ -1009,6 +1014,8 @@ async function createTransporter(user, aliasName) {
             `Subject: ${mailOptions.subject}`,
             'MIME-Version: 1.0',
             'Content-Type: multipart/mixed; boundary="boundary_string"',
+            `${unsubscribeHeader}`, 
+            
             '',
             '--boundary_string',
             'Content-Type: text/html; charset="UTF-8"',
@@ -1115,6 +1122,10 @@ function createMailOptions({
     subject: subject,
     replyTo: replyTo,
     attachments: emailAttachments,
+     headers: {
+    'List-Unsubscribe': `<${unsubscribeLink}>`
+  },
+  unsubscribeLink, 
     html: `
       <html>
         <head>
@@ -2222,7 +2233,7 @@ case 'break':
     const dynamicHtml = bodyElements.map(generateHtml).join('');
      // Tracking pixel
     const trackingPixel = `<img src="${apiConfig.baseURL}/api/stud/track-email-open?emailId=${encodeURIComponent(recipientEmail)}&userId=${userId}&campaignId=${campaignId}&t=${Date.now()}" width="1" height="1" style="display:none;" />`;
-    const unsubscribeLink = `${apiConfig.baseURL}/api/unsubscribe?email=${encodeURIComponent(recipientEmail)}`;
+    const unsubscribeLink = `${apiConfig.baseURL}/api/stud/unsubscribe?email=${encodeURIComponent(recipientEmail)}`;
 
     // Full email HTML
     const emailHtml = `
@@ -2324,6 +2335,7 @@ if (attachments && attachments.length > 0) {
           `Subject: ${subject}`,
           'MIME-Version: 1.0',
           'Content-Type: multipart/mixed; boundary="boundary_string"',
+          `List-Unsubscribe: <${unsubscribeLink}>`,   
           '',
           '--boundary_string',
           'Content-Type: text/html; charset="UTF-8"',
@@ -2395,6 +2407,7 @@ if (attachments && attachments.length > 0) {
           headers: {
             'X-Campaign-ID': campaignId,
             'X-User-ID': userId,
+            'List-Unsubscribe': `<${unsubscribeLink}>`
           }
         });
 
