@@ -984,7 +984,6 @@ async function createTransporter(user, aliasName) {
     return {
       sendMail: async (mailOptions) => {
         try {
-          const unsubscribeHeader = `List-Unsubscribe: <${mailOptions.unsubscribeLink}>`;
           // Process attachments for Gmail API
           let attachmentParts = [];
           if (mailOptions.attachments && mailOptions.attachments.length > 0) {
@@ -1014,8 +1013,6 @@ async function createTransporter(user, aliasName) {
             `Subject: ${mailOptions.subject}`,
             'MIME-Version: 1.0',
             'Content-Type: multipart/mixed; boundary="boundary_string"',
-            `${unsubscribeHeader}`, 
-            
             '',
             '--boundary_string',
             'Content-Type: text/html; charset="UTF-8"',
@@ -1122,10 +1119,6 @@ function createMailOptions({
     subject: subject,
     replyTo: replyTo,
     attachments: emailAttachments,
-     headers: {
-    'List-Unsubscribe': `<${unsubscribeLink}>`
-  },
-  unsubscribeLink, 
     html: `
       <html>
         <head>
@@ -2335,7 +2328,6 @@ if (attachments && attachments.length > 0) {
           `Subject: ${subject}`,
           'MIME-Version: 1.0',
           'Content-Type: multipart/mixed; boundary="boundary_string"',
-          `List-Unsubscribe: <${unsubscribeLink}>`,   
           '',
           '--boundary_string',
           'Content-Type: text/html; charset="UTF-8"',
@@ -2407,7 +2399,6 @@ if (attachments && attachments.length > 0) {
           headers: {
             'X-Campaign-ID': campaignId,
             'X-User-ID': userId,
-            'List-Unsubscribe': `<${unsubscribeLink}>`
           }
         });
 
