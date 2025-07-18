@@ -14,6 +14,10 @@ const studentSchema = new mongoose.Schema({
         type: Map,
         of: String,
     },
+    user: {
+             type: mongoose.Schema.Types.ObjectId,
+             ref: "User",
+         },
     group: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "Group",
@@ -21,7 +25,11 @@ const studentSchema = new mongoose.Schema({
     lastSentYear: { 
         type: Number,
         default: 0,
-    }
+    },
+         isUnsubscribed: {
+    type: Boolean,
+    default: false, 
+  },
 }, { 
     strict: false,
     versionKey: false, 

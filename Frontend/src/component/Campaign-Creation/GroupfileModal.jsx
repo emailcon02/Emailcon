@@ -87,10 +87,11 @@ const GroupfileModal = ({ onClose }) => {
           return obj;
         }, {});
         studentData.group = selectedGroupForUpload; // Add group ID for association
+        studentData.user = user.id;
         return studentData;
       });
 
-      console.log("uploaded data", payload);
+      //console.log("uploaded data", payload);
       axios
         .post(`${apiConfig.baseURL}/api/stud/students/upload`, payload)
         .then(() => {

@@ -159,12 +159,25 @@ router.post('/sendtestmail', async (req, res) => {
     if(!user){
           return res.status(404).send('User not found');
     }
-const student = await Student.findOne({ Email: emailData.recipient });
 
-if (student?.isUnsubscribed) {
+// Find the student by email and check ownership directly
+const student = await Student.findOne({ Email: emailData.recipient,user: userId });
+
+if (!student) {
+  return res.status(404).json({ message: 'Student not found' });
+}
+
+// ✅ Check if student belongs to the current user
+if (student.user.toString() !== userId) {
+  return res.status(403).json({ message: 'Unauthorized access to student' });
+}
+
+// ✅ Check if unsubscribed
+if (student.isUnsubscribed) {
   console.log(`❌ Skipping email for unsubscribed recipient: ${emailData.recipient}`);
   return res.status(200).json({ message: 'User has unsubscribed. Email not sent.' });
 }
+
 
     const {email}= user;
 
@@ -402,7 +415,7 @@ else if (item.type === 'multi-image-card') {
 
     // Tracking pixel
     const trackingPixel = `<img src="${apiConfig.baseURL}/api/stud/track-email-open?emailId=${encodeURIComponent(emailData.recipient)}&userId=${userId}&campaignId=${campaignId}&t=${Date.now()}" width="1" height="1" style="display:none;" />`;
-    const unsubscribeLink = `${apiConfig.baseURL}/api/stud/unsubscribe?email=${encodeURIComponent(emailData.recipient)}`;
+    const unsubscribeLink = `${apiConfig.baseURL}/api/stud/unsubscribe?email=${encodeURIComponent(emailData.recipient)}&userId=${userId}`;
 
     // Full email HTML
     const emailHtml = `
@@ -607,18 +620,25 @@ if (attachments && attachments.length > 0) {
 });
 
 router.get('/unsubscribe', async (req, res) => {
-  const { email } = req.query;
+   const { email, userId } = req.query;
 
-  if (!email) {
+  if (!email || !userId) {
     return res.status(400).send("Invalid unsubscribe link.");
   }
 
   try {
-    const student = await Student.findOne({ Email: email });
+  // Find the student by email and check ownership directly
+const student = await Student.findOne({ Email: email,user: userId});
 
-    if (!student) {
-      return res.status(404).send("Email not found.");
-    }
+if (!student) {
+  return res.status(404).json({ message: 'Student not found' });
+}
+
+// ✅ Check if student belongs to the current user
+if (student.user.toString() !== userId) {
+  return res.status(403).json({ message: 'Unauthorized access to student' });
+}
+
 
     // Mark as unsubscribed
     student.isUnsubscribed = true;
@@ -677,7 +697,7 @@ router.get('/unsubscribe', async (req, res) => {
           <div class="box">
             <h2>You’ve successfully unsubscribed</h2>
             <p>If this was a mistake, you can undo it below.</p>
-            <a class="btn" href="${apiConfig.baseURL}/api/stud/resubscribe?email=${encodeURIComponent(email)}">Undo Unsubscribe</a>
+            <a class="btn" href="${apiConfig.baseURL}/api/stud/resubscribe?email=${encodeURIComponent(email)}&userId=${userId}">Undo Unsubscribe</a>
           </div>
         </body>
       </html>
@@ -689,18 +709,26 @@ router.get('/unsubscribe', async (req, res) => {
 });
 
 router.get('/resubscribe', async (req, res) => {
-  const { email } = req.query;
+   const { email, userId } = req.query;
 
-  if (!email) {
-    return res.status(400).send("Invalid resubscribe request.");
+  if (!email || !userId) {
+    return res.status(400).send("Invalid unsubscribe link.");
   }
 
   try {
-    const student = await Student.findOne({ Email: email });
+   // Find the student by email and check ownership directly
+const student = await Student.findOne({ Email: email,user: userId });
 
-    if (!student) {
-      return res.status(404).send("Email not found.");
-    }
+if (!student) {
+  return res.status(404).json({ message: 'Student not found' });
+}
+
+// ✅ Check if student belongs to the current user
+if (student.user.toString() !== userId) {
+  return res.status(403).json({ message: 'Unauthorized access to student' });
+}
+
+
 
     student.isUnsubscribed = false;
     await student.save();
@@ -856,11 +884,24 @@ router.post('/start-campaign', async (req, res) => {
       for (const student of batch) {
         try {
 
-    const dbStudent = await Student.findOne({ Email: student.Email });
-    if (dbStudent?.isUnsubscribed) {
-      console.log(`⛔ Skipping unsubscribed user: ${student.Email}`);
-      continue; // skip to next student
+   const dbStudent = await Student.findOne({ Email: student.Email,user: userId });
+
+    if (!dbStudent) {
+      console.log(`❌ Student not found: ${student.Email}`);
+      continue;
     }
+
+    if (!dbStudent.user || dbStudent.user.toString() !== userId) {
+      console.log(`🚫 Unauthorized or invalid user for: ${student.Email}`);
+      continue;
+    }
+
+    if (dbStudent.isUnsubscribed) {
+      console.log(`⛔ Skipping unsubscribed user: ${student.Email}`);
+      continue;
+    }
+
+
           // Personalize content
           const personalizedContent = previewContent.map((item) => {
             const personalizedItem = { ...item };
@@ -1111,7 +1152,7 @@ function createMailOptions({
   }));
 
   const trackingPixel = `<img src="${apiConfig.baseURL}/api/stud/track-email-open?emailId=${encodeURIComponent(student.Email)}&userId=${userId}&campaignId=${campaignId}&t=${Date.now()}" width="1" height="1" style="display:none;" />`;
-  const unsubscribeLink = `${apiConfig.baseURL}/api/stud/unsubscribe?email=${encodeURIComponent(student.Email)}`;
+  const unsubscribeLink = `${apiConfig.baseURL}/api/stud/unsubscribe?email=${encodeURIComponent(student.Email)}&userId=${userId}`;
 
   return {
     from: `"${aliasName}" <${userEmail}>`,
@@ -1947,15 +1988,25 @@ router.post('/sendbulkEmail', async (req, res) => {
   if (!user) {
     return res.status(404).send('User not found');
   }
-  const student = await Student.findOne({ Email: recipientEmail });
 
-if (student?.isUnsubscribed) {
+// Find the student by email and check ownership directly
+const student = await Student.findOne({ Email: recipientEmail,user: userId});
+
+if (!student) {
+  return res.status(404).json({ message: 'Student not found' });
+}
+
+// ✅ Check if student belongs to the current user
+if (student.user.toString() !== userId) {
+  return res.status(403).json({ message: 'Unauthorized access to student' });
+}
+
+// ✅ Check if unsubscribed
+if (student.isUnsubscribed) {
   console.log(`❌ Skipping email for unsubscribed recipient: ${recipientEmail}`);
   return res.status(200).json({ message: 'User has unsubscribed. Email not sent.' });
 }
 
-
-  // user model has fields for email and smtppassword
   const {
     email
   } = user;
@@ -2225,7 +2276,7 @@ case 'break':
     const dynamicHtml = bodyElements.map(generateHtml).join('');
      // Tracking pixel
     const trackingPixel = `<img src="${apiConfig.baseURL}/api/stud/track-email-open?emailId=${encodeURIComponent(recipientEmail)}&userId=${userId}&campaignId=${campaignId}&t=${Date.now()}" width="1" height="1" style="display:none;" />`;
-    const unsubscribeLink = `${apiConfig.baseURL}/api/stud/unsubscribe?email=${encodeURIComponent(recipientEmail)}`;
+    const unsubscribeLink = `${apiConfig.baseURL}/api/stud/unsubscribe?email=${encodeURIComponent(recipientEmail)}&userId=${userId}`;
 
     // Full email HTML
     const emailHtml = `
@@ -2595,10 +2646,25 @@ router.post("/students/manual", async (req, res) => {
   res.status(201).send(student);
 });
 
-//getting all students in corresponting group
-router.get("/students", async (req, res) => {
-  const students = await Student.find().populate("group");
-  res.send(students);
+router.get('/students', async (req, res) => {
+  try {
+    const { user } = req.query; // expecting user ID in query
+
+    // Populate the group and filter by group's user
+    const students = await Student.find()
+      .populate({
+        path: 'group',
+        match: { user: user }, // filter groups by user ID
+      });
+
+    // Filter out students whose group is null after population
+    const filteredStudents = students.filter(student => student.group !== null);
+
+    res.json(filteredStudents);
+  } catch (error) {
+    console.error("Error fetching students:", error);
+    res.status(500).json({ message: 'Error fetching students' });
+  }
 });
 
 //getting all groups
@@ -2763,19 +2829,7 @@ router.get('/all-payment-history', async (req, res) => {
   }
 });
 
-// 3. GET route to fetch all students, with optional filtering by group
-router.get('/students', async (req, res) => {
-  try {
-    const { group } = req.query; // Filter by group if provided
-    const filter = group ? { group: mongoose.Types.ObjectId(group) } : {}; // Apply filter if group is provided
-    const students = await Student.find(filter).populate('group'); // Populate the group field to get the group name and other details
-    res.json(students);
-  } catch (error) {
-    res.status(500).json({
-      message: 'Error fetching students',
-    });
-  }
-});
+
 
 // 4. DELETE route to delete selected students
 router.delete('/students', async (req, res) => {
@@ -3146,6 +3200,27 @@ router.get('/campaigns/:userId', async (req, res) => {
     });
   }
 });
+
+router.get("/groups/:groupId/unsubscribe-student", async (req, res) => {
+  const { groupId } = req.params;
+  
+  if (!mongoose.Types.ObjectId.isValid(groupId)) {
+    return res.status(400).json({ error: "Invalid groupId" });
+  }
+
+  try {
+    const students = await Student.find({
+      group: groupId,
+      isUnsubscribed: true 
+    });
+
+    res.json(students);
+  } catch (err) {
+    console.error("Error fetching students:", err);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
 
 // Store campaign history
 router.post("/camhistory", async (req, res) => {

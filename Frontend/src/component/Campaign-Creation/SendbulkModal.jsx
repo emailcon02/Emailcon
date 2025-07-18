@@ -228,7 +228,7 @@ const SendbulkModal = ({ isOpen, onClose, previewContent = [], bgColor }) => {
         
         const [groupsResponse, studentsResponse] = await Promise.all([
           axios.get(`${apiConfig.baseURL}/api/stud/groups/${user.id}`),
-          axios.get(`${apiConfig.baseURL}/api/stud/students`)
+          axios.get(`${apiConfig.baseURL}/api/stud/students?user=${user.id}`)
         ]);
 
         setGroups(groupsResponse.data);

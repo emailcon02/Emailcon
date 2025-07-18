@@ -53,6 +53,7 @@ import {
 } from "recharts";
 
 import { FaChartBar } from "react-icons/fa";
+import { MdOutlineUnsubscribe } from "react-icons/md";
 
 const CampaignTableNew = ({ onSelect = () => {}, className = "" }) => {
   const navigate = useNavigate();
@@ -79,8 +80,11 @@ const CampaignTableNew = ({ onSelect = () => {}, className = "" }) => {
   const [openCount, setOpenCount] = useState(0);
   const [showModal, setShowModal] = useState(false);
   const [showdelModal, setShowdelModal] = useState(false);
+  const [showunsubModal, setShowunsubModal] = useState(false);
+
   const [showfailModal, setShowfailModal] = useState(false);
   const [emailData, setEmailData] = useState([]);
+  const [unsubscribe,setUnsubscribe] = useState([]);
   const [urlCount, setUrlCount] = useState(0);
   const [clickedUrls, setClickedUrls] = useState([]);
   const [emailClickData, setEmailClickData] = useState([]);
@@ -98,7 +102,7 @@ const CampaignTableNew = ({ onSelect = () => {}, className = "" }) => {
     opens: true,
     clicks: true,
     bounces: false,
-    //   unsubscribes: false,
+    unsubscribes: false,
   });
 
   // Fix: Add state for single campaign details
@@ -222,45 +226,73 @@ const CampaignTableNew = ({ onSelect = () => {}, className = "" }) => {
     const blob = new Blob([excelBuffer], { type: "application/octet-stream" });
     saveAs(blob, `${campaignDetails.campaignname}_campaign_report.xlsx`);
   };
+const generateEngagementTimeline = () => {
+  const timeline = {};
 
-  const generateEngagementTimeline = () => {
-    const timeline = {};
-    const bounceRate = campaignDetails.failedcount || 0;
+  // 📬 Opens
+  emailData.forEach((item) => {
+    let dateKey = "Unknown";
+    if (item.timestamp && !isNaN(new Date(item.timestamp))) {
+      dateKey = new Date(item.timestamp).toLocaleDateString();
+    } else {
+      dateKey = new Date().toLocaleDateString(); // fallback
+    }
 
-    // Process opens
-    emailData.forEach((item) => {
-      const dateKey = new Date(item.timestamp).toLocaleDateString(); // or .toISOString().slice(0, 10) for YYYY-MM-DD
+    if (!timeline[dateKey])
+      timeline[dateKey] = { date: dateKey, opens: 0, clicks: 0, bounces: 0, unsubscribes: 0 };
+    timeline[dateKey].opens += 1;
+  });
+
+  // 🔗 Clicks
+  clickedUrls.forEach((url) => {
+    url.clicks.forEach((click) => {
+      let dateKey = "Unknown";
+      if (click.timestamp && !isNaN(new Date(click.timestamp))) {
+        dateKey = new Date(click.timestamp).toLocaleDateString();
+      } else {
+        dateKey = new Date().toLocaleDateString(); // fallback
+      }
+
       if (!timeline[dateKey])
-        timeline[dateKey] = { date: dateKey, opens: 0, clicks: 0 };
-      timeline[dateKey].opens += 1;
+        timeline[dateKey] = { date: dateKey, opens: 0, clicks: 0, bounces: 0, unsubscribes: 0 };
+      timeline[dateKey].clicks += 1;
     });
+  });
 
-    // Process clicks
-    clickedUrls.forEach((url) => {
-      url.clicks.forEach((click) => {
-        const dateKey = new Date(click.timestamp).toLocaleDateString();
-        if (!timeline[dateKey])
-          timeline[dateKey] = { date: dateKey, opens: 0, clicks: 0 };
-        timeline[dateKey].clicks += 1;
-      });
+  // 📤 Unsubscribes
+  if (Array.isArray(unsubscribe)) {
+    unsubscribe.forEach((item) => {
+      let dateKey = "Unknown";
+      if (item.timestamp && !isNaN(new Date(item.timestamp))) {
+        dateKey = new Date(item.timestamp).toLocaleDateString();
+      } else {
+        dateKey = new Date().toLocaleDateString(); // fallback
+      }
+
+      if (!timeline[dateKey])
+        timeline[dateKey] = { date: dateKey, opens: 0, clicks: 0, bounces: 0, unsubscribes: 0 };
+      timeline[dateKey].unsubscribes += 1;
     });
+  }
 
-    Object.values(timeline).forEach((day) => {
-      day.bounces = bounceRate; // apply same value to all
-    });
+  // ✅ Add bounce only on first activity date
+  const bounceRate = campaignDetails.failedcount || 0;
+  const sortedDates = Object.keys(timeline).sort((a, b) => new Date(a) - new Date(b));
 
-    // Convert object to sorted array
-    return Object.values(timeline).sort(
-      (a, b) => new Date(a.date) - new Date(b.date)
-    );
-  };
+  if (sortedDates.length > 0 && bounceRate > 0) {
+    const firstDate = sortedDates[0];
+    timeline[firstDate].bounces = bounceRate;
+  }
+
+  return Object.values(timeline).sort((a, b) => new Date(a.date) - new Date(b.date));
+};
 
   useEffect(() => {
-    if (emailData.length > 0 || clickedUrls.length > 0) {
-      const processed = generateEngagementTimeline();
-      setTimelineData(processed);
-    }
-  }, [emailData, clickedUrls]);
+  const timeline = generateEngagementTimeline();
+  // console.log("Engagement timeline data", timeline);
+  setTimelineData(timeline)
+}, [emailData, clickedUrls, unsubscribe, campaignDetails]);
+
 
   const toggleLine = (key) => {
     setVisible((prev) => ({ ...prev, [key]: !prev[key] }));
@@ -553,6 +585,8 @@ const CampaignTableNew = ({ onSelect = () => {}, className = "" }) => {
     fetchCampaigns();
   }, [user?.id]);
 
+
+
   // Handle click outside
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -667,6 +701,7 @@ const CampaignTableNew = ({ onSelect = () => {}, className = "" }) => {
     e.stopPropagation();
     setShowModal(false);
     setShowdelModal(false);
+    setShowunsubModal(false);
     setShowfailModal(false);
     setShowClickModal(false);
     setShowallClickModal(false);
@@ -756,6 +791,26 @@ const CampaignTableNew = ({ onSelect = () => {}, className = "" }) => {
     }
   };
 
+useEffect(() => {
+  if (campaignDetails?.groupId) {
+    fetchUnsubscribeCount();
+  }
+}, [campaignDetails?.groupId]);
+
+  const fetchUnsubscribeCount= async () => {
+    try {
+      const res = await axios.get(
+        `${apiConfig.baseURL}/api/stud/groups/${campaignDetails.groupId}/unsubscribe-student`
+      );
+      const newEmails = res.data || [];
+      setUnsubscribe(newEmails); 
+      //console.log("unsub mail",newEmails)
+    } catch (err) {
+      console.error("Error fetching unsubscribe details", err);
+      setUnsubscribe([]);
+    }
+  };
+
   const handlereadDetails = () => {
     fetchEmailDetails();
     setShowModal(true);
@@ -800,6 +855,13 @@ const CampaignTableNew = ({ onSelect = () => {}, className = "" }) => {
   const handleClosedelModal = () => {
     setShowdelModal(false);
   };
+   const handleopenunsubmodal = () => {
+    setShowunsubModal(true);
+  };
+
+  const handleCloseunsubModal = () => {
+    setShowunsubModal(false);
+  };
 
   const handleopenfailmodal = () => {
     setShowfailModal(true);
@@ -818,6 +880,10 @@ const CampaignTableNew = ({ onSelect = () => {}, className = "" }) => {
   const clickRate =
     campaignDetails.totalcount > 0
       ? ((urlCount / campaignDetails.totalcount) * 100).toFixed(2)
+      : "0.00";
+ const unsubRate =
+    campaignDetails.totalcount > 0
+      ? ((unsubscribe.length / campaignDetails.totalcount) * 100).toFixed(2)
       : "0.00";
 
   const deliveredRate =
@@ -849,6 +915,11 @@ const CampaignTableNew = ({ onSelect = () => {}, className = "" }) => {
       name: "Bounced",
       value: `${campaignDetails.failedcount}`,
       fill: "#ff5d78",
+    },
+      {
+      name: "Unsubscribe",
+      value: `${unsubscribe.length}`,
+      fill: "#8B5CF6",
     },
   ];
 
@@ -1751,6 +1822,7 @@ const CampaignTableNew = ({ onSelect = () => {}, className = "" }) => {
                 />
               </div>
             </div>
+            
             <div className="history-cards" onClick={handleopendelmodal}>
               <div className="sub-card-content">
                 <img
@@ -1826,6 +1898,53 @@ const CampaignTableNew = ({ onSelect = () => {}, className = "" }) => {
               <button
                 className="close-modal-read"
                 onClick={handleClosedelModal}
+              >
+                x
+              </button>
+            </div>
+          </div>
+        )}
+
+           {/* Modal for Unsubscribe Details */}
+        {showunsubModal && (
+          <div className="modal-overlay-read" onClick={handleCloseunsubModal}>
+            <div
+              className="modal-content-read"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <h2 className="modal-heading-read">Unsubscribed Rate</h2>
+              <div className="modal-content-read-table">
+                <table className="email-table-read">
+                  <thead>
+                    <tr>
+                      <th>Mail ID-{unsubscribe.length}</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    
+                    {unsubscribe.length > 0 ? (
+                      unsubscribe.map((item, index) => (
+                        <tr key={index}>
+                          <td>{item.Email}</td>
+                        </tr>
+                      ))
+                    ) : (
+                      <tr>
+                        <td colSpan="2">No Data Available</td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+              <button
+                className="target-modal-read"
+                onClick={handleCloseunsubModal}
+              >
+                Close
+              </button>
+              <button
+                className="close-modal-read"
+                onClick={handleCloseunsubModal}
               >
                 x
               </button>
@@ -2176,9 +2295,9 @@ const CampaignTableNew = ({ onSelect = () => {}, className = "" }) => {
               >
                 Detailed Breakdown
               </h2>
-              <div className="container-boards">
+              <div className="container-boards" >
                 {/* -------------------------table one -----------------------------*/}
-                <div className="boards-table">
+                <div className="boards-table" >
                   <div className="div-boards-table">
                     <div className="div-boards-card">
                       {/* <img
@@ -2213,14 +2332,10 @@ const CampaignTableNew = ({ onSelect = () => {}, className = "" }) => {
                   </div>
                 </div>
                 {/* ----------------------------table 2-------------------------------- */}
-                <div className="boards-table">
+                <div className="boards-table"  onClick={handleopendelmodal}>
                   <div className="div-boards-table">
                     <div className="div-boards-card">
-                      {/* <img
-                          src={check}
-                          alt="Templates"
-                          className="board-img"
-                        /> */}
+                     
                       <FaCheckCircle className="delivered-details" />
 
                       <div className="data-progress">
@@ -2248,7 +2363,7 @@ const CampaignTableNew = ({ onSelect = () => {}, className = "" }) => {
                   </div>
                 </div>
                 {/* ----------------------------table 3-------------------------------- */}
-                <div className="boards-table">
+                <div className="boards-table"  onClick={handlereadDetails}>
                   <div className="div-boards-table">
                     <div className="div-boards-card">
                       {/* <img
@@ -2281,7 +2396,7 @@ const CampaignTableNew = ({ onSelect = () => {}, className = "" }) => {
                   </div>
                 </div>
                 {/* ----------------------------table 4-------------------------------- */}
-                <div className="boards-table">
+                <div className="boards-table" onClick={fetchEmailClickDetails}>
                   <div className="div-boards-table">
                     <div className="div-boards-card">
                       {/* <img
@@ -2314,14 +2429,9 @@ const CampaignTableNew = ({ onSelect = () => {}, className = "" }) => {
                   </div>
                 </div>
                 {/* ----------------------------table 5-------------------------------- */}
-                <div className="boards-table">
+                <div className="boards-table" onClick={handleopenfailmodal}>
                   <div className="div-boards-table">
                     <div className="div-boards-card">
-                      {/* <img
-                          src={Bounce}
-                          alt="Templates"
-                          className="board-img"
-                        /> */}
                       <FaExclamationTriangle className="bounced-details" />
                       <div className="data-progress">
                         <p>Bounced</p>
@@ -2347,6 +2457,36 @@ const CampaignTableNew = ({ onSelect = () => {}, className = "" }) => {
                     </div>
                   </div>
                 </div>
+
+<div className="boards-table"  onClick={handleopenunsubmodal}>
+                  <div className="div-boards-table">
+                    <div className="div-boards-card">
+
+                      <MdOutlineUnsubscribe className="unsub-details" />
+
+                      <div className="data-progress">
+                        <p>Unsubscribe</p>
+                        <div style={{ display: "flex", gap: "10px" }}>
+                          <span>
+                            <progress
+                              id="file"
+                              value={unsubRate}
+                              max="100"
+                              className="unsub-progress"
+                            >
+                              {unsubRate}%
+                            </progress>
+                          </span>
+                          <h6 className="values-progress">{unsubRate}%</h6>
+                        </div>
+                      </div>
+                    </div>
+                    <div>
+                      <p className="aside-data-value">{unsubscribe.length}</p>
+                    </div>
+                  </div>
+                </div>
+
               </div>
             </div>
           </div>
@@ -2545,12 +2685,12 @@ const CampaignTableNew = ({ onSelect = () => {}, className = "" }) => {
                 >
                   ⚠️ Bounces
                 </button>
-                {/* <button
+                <button
                         className={`toggle-button ${visible.unsubscribes ? "active" : ""}`}
                         onClick={() => toggleLine("unsubscribes")}
                     >
                         👤 Unsubscribes
-                    </button> */}
+                    </button>
               </div>
             </div>
           </div>
@@ -2590,33 +2730,33 @@ const CampaignTableNew = ({ onSelect = () => {}, className = "" }) => {
                   dot={{ r: 3 }}
                 />
               )}
+            {visible.bounces && (
+  <Line
+    type="monotone"
+    dataKey="bounces"
+    stroke="#DC2626"
+    strokeWidth={2}
+    dot={false}
+    name="Bounced"
+  />
+)}
 
-              {visible.bounces && (
-                <Line
-                  type="monotone"
-                  dataKey="bounces"
-                  stroke="#ef4444"
-                  strokeWidth={2}
-                  dot={{ r: 3 }}
-                />
-              )}
+{visible.unsubscribes && (
+  <Line
+    type="monotone"
+    dataKey="unsubscribes"
+    stroke="#8B5CF6"
+    strokeWidth={2}
+    dot={false}
+    name="Unsubscribed"
+  />
+)}
+
             </LineChart>
           </ResponsiveContainer>
 
           <div className="content-line-bar-below">
-            <div className="linebar-div">
-              <div className="linebar-content">
-                {/* <img
-                  src={delivered}
-                  alt="icons-linebar"
-                  className="icon-linebar-2"
-                /> */}
-                <FaPaperPlane className="icon-linebar-1" />
-                <p className="line-bar-title">Sent</p>
-              </div>
-              <p className="value-linebar">{campaignDetails.sendcount}</p>
-              <p className="value-linebar-content">Per:{deliveredRate}%</p>
-            </div>
+           
             <div className="linebar-div">
               <div className="linebar-content">
                 {/* <img src={mails} alt="icons-linebar" className="icon-linebar" /> */}
@@ -2647,6 +2787,19 @@ const CampaignTableNew = ({ onSelect = () => {}, className = "" }) => {
               </div>
               <p className="value-linebar">{campaignDetails.failedcount}</p>
               <p className="value-linebar-content">Per:{failedRate}%</p>
+            </div>
+             <div className="linebar-div">
+              <div className="linebar-content">
+                {/* <img
+                  src={delivered}
+                  alt="icons-linebar"
+                  className="icon-linebar-2"
+                /> */}
+                <MdOutlineUnsubscribe className="icon-linebar-1" />
+                <p className="line-bar-title">Unsubscribe</p>
+              </div>
+              <p className="value-linebar">{unsubscribe.length}</p>
+              <p className="value-linebar-content">Per:{unsubRate}%</p>
             </div>
           </div>
           <div className="show-data-line">

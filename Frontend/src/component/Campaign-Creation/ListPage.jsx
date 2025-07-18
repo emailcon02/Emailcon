@@ -62,7 +62,7 @@ const ListPage = ({ onClose }) => {
       try {
         const [groupsRes, studentsRes] = await Promise.all([
           axios.get(`${apiConfig.baseURL}/api/stud/groups/${user.id}`),
-          axios.get(`${apiConfig.baseURL}/api/stud/students`),
+          axios.get(`${apiConfig.baseURL}/api/stud/students?user=${user.id}`),
         ]);
   
         setGroups(groupsRes.data);
@@ -176,7 +176,7 @@ const ListPage = ({ onClose }) => {
   };
   const handleEditStudent = (student) => {
     // toast.success("Edit contact detail in bottom of tab");
-    console.log(student); // Debug log
+    // console.log(student); // Debug log
     setEditingStudent(student);
 
     // Clone the student object and remove `_id`
@@ -394,6 +394,10 @@ const ListPage = ({ onClose }) => {
                                 key !== "_id" &&
                                 key !== "group" &&
                                 key !== "lastSentYear" &&
+                                key !== "user" &&
+                                key !== "isUnsubscribed" &&
+                                key !== "createdAt" &&
+                                key !== "updatedAt" &&
                                 key !== "__v" // Exclude unwanted fields
                             )
                             .map((key, index) => <th key={index}>{key}</th>)}
@@ -422,6 +426,10 @@ const ListPage = ({ onClose }) => {
                                 key !== "_id" &&
                                 key !== "group" &&
                                 key !== "lastSentYear" &&
+                                key !== "user" &&
+                                key !== "isUnsubscribed" &&
+                                key !== "createdAt" &&
+                                key !== "updatedAt" &&
                                 key !== "__v"
                             )
                             .map((key, index) => (
@@ -472,6 +480,12 @@ const ListPage = ({ onClose }) => {
                       (key) =>
                         key !== "_id" &&
                         key !== "lastSentYear" &&
+                        key !== "__v" &&
+                                key !== "user" &&
+                                key !== "isUnsubscribed" &&
+                                key !== "createdAt" &&
+                                key !== "updatedAt" &&
+                                
                         key !== "group" && (
                           <div key={key} className="input-group">
                             <label htmlFor={key} className="input-label">

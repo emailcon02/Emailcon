@@ -759,6 +759,12 @@ border-bottom: 1px solid #ebe6dd;
  border-radius: 10px;
  margin-top:15px;
  width:100%;
+ cursor: pointer;
+ transition: all .3s ease-in-out;
+}
+
+.boards-table:hover{
+  transform: scale(1.02);
 }
 .cards-board-img{
  width: 8%;
@@ -804,6 +810,7 @@ border-bottom: 1px solid #ebe6dd;
  display:flex;
  justify-content: space-between;
 }
+
 .aside-data-value{
  font-weight: 450;
  margin-top: 15px;
@@ -1356,9 +1363,35 @@ border-bottom: 1px solid #ebe6dd;
 .opened-details { color: #3c82f6 !important; background-color: #e9edff ; padding:12px; border-radius: 8px;} /* green-600 */
 .clicked-details { color: #ffa201 !important;background-color: #fbf7e5 ; padding:12px; border-radius: 8px; } /* orange-500 */
 .bounced-details { color: #ef3939 !important; background-color: #fbe5e1 ; padding:12px; border-radius: 8px;} 
+.unsub-details { color:#8B5CF6 !important; background-color: #efe7ff;font-size: 22px; padding:10px; border-radius: 8px;} 
 
 
+.opened-progress {
+ width: 150px;
+ height: 8px;
+ appearance: none;
+ -webkit-appearance: none;
+ border: none;
+ background-color: #e9edff;
+ border-radius: 4px;
+ overflow: hidden;
+}
 
+/* For WebKit browsers (Chrome, Safari) */
+.opened-progress::-webkit-progress-bar {
+ background-color: #f3f4f6;
+}
+
+.opened-progress::-webkit-progress-value {
+ background-color: #3c82f6 ;
+ border-radius: 4px;
+}
+
+/* For Firefox */
+.opened-progress::-moz-progress-bar {
+ background-color: #3c82f6;
+ border-radius: 4px;
+}
 /* Custom red-colored progress bar failed */
 .failed-progress {
  width: 150px;
@@ -1474,13 +1507,41 @@ border-bottom: 1px solid #ebe6dd;
  background-color: #ffa201;
  border-radius: 4px;
 }
+.unsub-progress {
+ width: 150px;
+ height: 8px;
+ appearance: none;
+ -webkit-appearance: none;
+ border: none;
+ background-color: #f3f4f6; /* gray background */
+ border-radius: 4px;
+ overflow: hidden;
+}
+
+/* For WebKit browsers (Chrome, Safari) */
+.unsub-progress::-webkit-progress-bar {
+ background-color: #f3f4f6;
+}
+
+.unsub-progress::-webkit-progress-value {
+ background-color:#8B5CF6; /* red-600 */
+ border-radius: 4px;
+}
+
+/* For Firefox */
+.unsub-progress::-moz-progress-bar {
+ background-color: #8B5CF6;
+ border-radius: 4px;
+}
+
 
 
 .icon-linebar-1{
- color:#2563eb;
+ color:#8B5CF6;
+ font-size: 22px;
 }
 .icon-linebar-2{
- color:#16a34a;
+ color:#3B82F6;
 }
 .icon-linebar-3{
  color:#ffa201;

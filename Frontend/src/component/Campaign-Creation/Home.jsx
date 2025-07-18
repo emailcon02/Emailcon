@@ -256,24 +256,24 @@ templates.forEach((t) => {
     fetchAutomationCount();
   }, [user?.id]);
 
-  useEffect(() => {
-    const fetchContactsCount = async () => {
-      try {
-        const response = await axios.get(`${apiConfig.baseURL}/api/stud/students`);
-        const filteredContacts = response.data.filter(
-          contact => contact.group?.user === user.id
-        );
-        setTotalContacts(filteredContacts);
-      } catch (error) {
-        console.error("Error fetching contacts:", error);
-        setTotalContacts(0);
-      }
-    };
-
-    if (user?.id) {
-      fetchContactsCount();
+ useEffect(() => {
+  const fetchContactsCount = async () => {
+    try {
+      const response = await axios.get(
+        `${apiConfig.baseURL}/api/stud/students?user=${user.id}`
+      );
+      setTotalContacts(response.data);
+      // console.log("rec contact",response.data);
+    } catch (error) {
+      console.error("Error fetching contacts:", error);
+      setTotalContacts(0);
     }
-  }, [user?.id]);
+  };
+
+  if (user?.id) {
+    fetchContactsCount();
+  }
+}, [user?.id]);
 
 
 
@@ -1091,7 +1091,7 @@ templates.forEach((t) => {
           "campaign",
           JSON.stringify(response.data.campaign)
         );
-        console.log("Campaign created successfully");
+        // console.log("Campaign created successfully");
 
         setIsLoading(false);
         setShowCampaignModal(false);

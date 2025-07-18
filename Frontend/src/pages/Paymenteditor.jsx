@@ -169,7 +169,7 @@ useEffect(() => {
       const groupsResponse = await axios.get(`${apiConfig.baseURL}/api/stud/groups/${user.id}`);
       setGroups(groupsResponse.data);
 
-      const studentsResponse = await axios.get(`${apiConfig.baseURL}/api/stud/students`);
+      const studentsResponse = await axios.get(`${apiConfig.baseURL}/api/stud/students?user=${user.id}`);
       setStudents(studentsResponse.data);
     } catch (err) {
       console.log("Error fetching data:", err);

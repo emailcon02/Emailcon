@@ -629,7 +629,7 @@ const Clicksinglemainpage = () => {
       try {
         const [groupsRes, studentsRes] = await Promise.all([
           axios.get(`${apiConfig.baseURL}/api/stud/groups/${user.id}`),
-          axios.get(`${apiConfig.baseURL}/api/stud/students`),
+          axios.get(`${apiConfig.baseURL}/api/stud/students?user=${user.id}`),
         ]);
         setGroups(groupsRes.data);
         setStudents(studentsRes.data);

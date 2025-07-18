@@ -39,7 +39,7 @@ const handleGroupSelect = async (selectedId) => {
     const studentInGroup = groupStudents[0];
     if (studentInGroup) {
       const keys = Object.keys(studentInGroup).filter(
-        (key) => !["_id", "group", "groupId", "lastSentYear", "__v"].includes(key)
+        (key) => !["_id", "group", "groupId", "lastSentYear", "__v","user","isUnsubscribed","createdAt","updatedAt"].includes(key)
       );
       const form = {};
       keys.forEach((key) => (form[key] = ""));
@@ -96,6 +96,7 @@ const handleGroupSelect = async (selectedId) => {
       await axios.post(`${apiConfig.baseURL}/api/stud/students/manual`, {
         ...formattedForm,
         group: selectedGroupForUpload,
+        user:user.id
       });
 
       toast.success("Contact added!");
