@@ -109,3 +109,11 @@
     right: -400px;
   }
 }
+@media (max-width: 600px) {
+    .join-popup{
+        width: 320px !important;
+    }
+    .live-pulse-wrapper{
+        display: none !important;
+    }
+}

@@ -123,8 +123,7 @@ const LivePopup = ({ userId }) => {
                 <strong>{popupActivity.emailId}</strong>
               </p>
               <p>
-                just {popupActivity.type === "open" ? "opened" : "clicked"}{" "}
-                <strong>{popupActivity.campaignName}</strong> campaign!
+                just {popupActivity.type === "open" ? "opened" : "clicked"}{" "} from <strong>{popupActivity.campaignName}</strong> campaign!
               </p>
               
             </div>

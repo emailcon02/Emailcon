@@ -71,6 +71,8 @@ const Home = () => {
   const [showCampaignModalauto, setShowCampaignModalauto] = useState(false);
   const [campaignName, setCampaignName] = useState("");
   const [templateName, setTemplateName] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+
 
   const [showfileGroupModal, setShowfileGroupModal] = useState(false);
   const [showfilesingleGroupModal, setShowfilesingleGroupModal] =
@@ -155,7 +157,6 @@ const Home = () => {
     automation: false,
     templates: false,
   });
-  
 
   const toggleLine = (key) => {
     setVisible((prev) => ({ ...prev, [key]: !prev[key] }));
@@ -995,7 +996,7 @@ const Home = () => {
   };
   const handleCloseModalpre = () => {
     setIsPreviewOpen(false);
-    setShowtemModal(true);
+    // setShowtemModal(true);
   };
   const handleCloseModalpreauto = () => {
     setIsPreviewOpenauto(false);
@@ -2845,6 +2846,633 @@ const Home = () => {
                       </ResponsiveContainer>
                     </div>
                   </div>
+                  {/* --------------------------------- saved template new content ------------------------------------- */}
+                  <div className="saved-template-display">
+                    <div>
+                      <h2 className="header-saved-template">Saved Template</h2>
+                      <p className="header-head-para">
+                        Monitor user engagement with saved campaigns,Spot trends
+                        in saving, editing, and reusing content.
+                      </p>
+                    </div>
+                    <div className="saved-template-gallery-home">
+{templates.slice((currentPage - 1) * 6, currentPage * 6).map((template, index) => {
+   const matchingCampaigns = campaigns
+    .filter((c) => c.campaignname === template.camname)
+    .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)); // latest first
+
+  const usageCount = matchingCampaigns.length;
+  const latestCampaign = matchingCampaigns[0]; // may be undefined
+
+  // Metrics from latest matched campaign
+  const metrics = latestCampaign && campaignMetrics[latestCampaign._id]
+    ? campaignMetrics[latestCampaign._id]
+    : {};
+
+  const {
+    openCount = 0,
+    clickCount = 0,
+    bounceCount = 0,
+    unsubCount = 0,
+  } = metrics;
+
+  // Show last used date if available
+  const lastUsedDate = latestCampaign?.createdAt
+    ? new Date(latestCampaign.createdAt).toLocaleDateString()
+    : "N/A";
+      return (
+
+                        <div className="template-thumbnail-container-home">
+                          <div className="template-thumbnail-wrapper">
+                            <div
+                              className="template-thumbnail-home"
+                              style={{
+                                backgroundColor: template.bgColor || "#ffffff",
+                              }}
+                            >
+                              {template.previewContent?.map((item, idx) => (
+                                <div
+                                  key={idx}
+                                  style={{
+                                    fontSize: "12px",
+                                    marginBottom: "6px",
+                                  }}
+                                >
+                                  {/* Heading */}
+                                  {item.type === "head" && (
+                                    <div ref={dropdownRef}>
+                                      <p className="border" style={item.style}>
+                                        {item.content}
+                                      </p>
+                                    </div>
+                                  )}
+
+                                  {/* Paragraph */}
+                                  {item.type === "para" && (
+                                    <div className="border para-container">
+                                      <p
+                                        className="border-para para-gallery"
+                                        contentEditable
+                                        suppressContentEditableWarning
+                                        onClick={() => {
+                                          setSelectedIndex(index);
+                                          setIsModalOpen(true); // Open the modal
+                                        }}
+                                        style={item.style}
+                                        dangerouslySetInnerHTML={{
+                                          __html: item.content,
+                                        }}
+                                      />
+                                    </div>
+                                  )}
+
+                                  {/* Image */}
+                                  {item.type === "image" && (
+                                    <div className="border">
+                                      <img
+                                        src={
+                                          item.src ||
+                                          "https://via.placeholder.com/200"
+                                        }
+                                        alt="Preview"
+                                        className="img gallery-img-image"
+                                        style={item.style}
+                                      />
+                                    </div>
+                                  )}
+
+                                  {/* Banner*/}
+                                  {item.type === "banner" && (
+                                    <div className="border">
+                                      <img
+                                        src={
+                                          item.src ||
+                                          "https://via.placeholder.com/200"
+                                        }
+                                        alt="Preview"
+                                        className="img gallery-img-banner"
+                                        style={item.style}
+                                      />
+                                    </div>
+                                  )}
+
+                                  {/* Button */}
+                                  {item.type === "button" && (
+                                    <div className="border-btn">
+                                      <div className="border-btn">
+                                        <a
+                                          href={item.link || "#"}
+                                          target={
+                                            item.buttonType === "link"
+                                              ? "_blank"
+                                              : undefined
+                                          }
+                                          rel="noopener noreferrer"
+                                          style={item.style}
+                                          className="button-preview btn-gallery-whole"
+                                        >
+                                          {item.content ||
+                                            (item.buttonType === "whatsapp"
+                                              ? "Connect on WhatsApp"
+                                              : item.buttonType === "contact"
+                                              ? "Call Now"
+                                              : "Visit Link")}
+                                        </a>
+                                      </div>
+                                    </div>
+                                  )}
+
+                                  {/* {item.type === "link-image" && (
+ <div className="border">
+ <a
+ href={item.link || "#"}
+ onClick={(e) => handleLinkClick(e, index)}
+ >
+ <img
+ src={
+ item.src || "https://via.placeholder.com/200"
+ }
+ alt="Editable"
+ className="img"
+ style={item.style}
+ onClick={() => handleopenFiles(index, 1)}
+ title="Upload Image"
+ />
+ </a>
+ </div>
+ )} */}
+
+                                  {/* Link */}
+                                  {item.type === "link-image" && (
+                                    <div className="border">
+                                      <a
+                                        href={item.link || "#"}
+                                        onClick={(e) =>
+                                          handleLinkClick(e, index)
+                                        }
+                                      >
+                                        <img
+                                          src={
+                                            item.src ||
+                                            "https://via.placeholder.com/200"
+                                          }
+                                          alt="Editable"
+                                          className="img gallery-img-image"
+                                          style={item.style}
+                                          onClick={() =>
+                                            handleopenFiles(index, 1)
+                                          }
+                                          title="Upload Image"
+                                        />
+                                      </a>
+                                    </div>
+                                  )}
+
+                                  {/* Break Line */}
+                                  {item.type === "break" && (
+                                    <div className="border-break gallery-line">
+                                      <hr style={item.style} />
+                                    </div>
+                                  )}
+
+                                  {/* Gap/Spacing */}
+                                  {item.type === "gap" && (
+                                    <div className="border-break">
+                                      <div style={item.styles}></div>
+                                    </div>
+                                  )}
+                                  {/* 
+ {item.type === "logo" && (
+ <div className="border">
+ <img
+ src={item.src || "https://via.placeholder.com/200"}
+ alt="Editable"
+ className="logo"
+ style={item.style}
+ onClick={() => handleopenFiles(index, 1)}
+ title="Upload Image"
+ />
+ </div>
+ )} */}
+
+                                  {item.type === "cardimage" ? (
+                                    <div
+                                      className="card-image-container"
+                                      style={item.style1}
+                                    >
+                                      <img
+                                        src={
+                                          item.src1 ||
+                                          "https://via.placeholder.com/200"
+                                        }
+                                        style={item.style}
+                                        alt="Editable"
+                                        className="card-image"
+                                        title="Upload Image"
+                                        onClick={() =>
+                                          handleopenFiles(index, 1)
+                                        }
+                                      />
+                                      <p
+                                        className="card-text"
+                                        contentEditable
+                                        suppressContentEditableWarning
+                                        onClick={
+                                          () => {
+                                            setModalIndex(index);
+                                            setIsModalOpen(true);
+                                          } // Open the modal
+                                        } // Open modal for this index
+                                        style={item.style}
+                                        dangerouslySetInnerHTML={{
+                                          __html: item.content1,
+                                        }}
+                                      />
+                                    </div>
+                                  ) : null}
+
+                                  {/* Logo */}
+                                  {item.type === "logo" && (
+                                    <div className="border">
+                                      <img
+                                        src={
+                                          item.src ||
+                                          "https://via.placeholder.com/200"
+                                        }
+                                        alt="Editable"
+                                        className="logo gallery-img"
+                                        style={item.style}
+                                        onClick={() =>
+                                          handleopenFiles(index, 1)
+                                        }
+                                        title="Upload Image"
+                                      />
+                                    </div>
+                                  )}
+
+                                  {/* Image with Text */}
+                                  {item.type === "imagewithtext" && (
+                                    <div className="image-text-container">
+                                      <div
+                                        className="image-text-wrapper"
+                                        id="gallery-imagewithtext"
+                                        style={item.style1}
+                                      >
+                                        <img
+                                          src={
+                                            item.src1 ||
+                                            "https://via.placeholder.com/200"
+                                          }
+                                          alt="Preview"
+                                          className="image-item gallery-img-text-img"
+                                        />
+                                        <p
+                                          className="text-item gallery-text-img"
+                                          style={item.style}
+                                        >
+                                          {item.content1}
+                                        </p>
+                                      </div>
+                                    </div>
+                                  )}
+
+                                  {/* Text with Image */}
+                                  {item.type === "textwithimage" && (
+                                    <div className="image-text-container">
+                                      <div
+                                        className="image-text-wrapper"
+                                        id="gallery-imagewithtext"
+                                        style={item.style}
+                                      >
+                                        <p
+                                          className="text-item gallery-text-img"
+                                          style={item.style}
+                                        >
+                                          {item.content2}
+                                        </p>
+                                        <img
+                                          src={
+                                            item.src2 ||
+                                            "https://via.placeholder.com/200"
+                                          }
+                                          alt="Preview"
+                                          className="image-item gallery-img-text-img"
+                                        />
+                                      </div>
+                                    </div>
+                                  )}
+
+                                  {item.type === "multi-image" ? (
+                                    <div className="Layout-img">
+                                      <div className="Layout multi-gallery">
+                                        <img
+                                          src={
+                                            item.src1 ||
+                                            "https://via.placeholder.com/200"
+                                          }
+                                          alt="Editable"
+                                          className="multiimg gallery-img-multi"
+                                          title="Upload Image 240 x 240"
+                                          style={item.style}
+                                          onClick={() =>
+                                            handleopenFiles(index, 1)
+                                          }
+                                        />
+                                        <a
+                                          href={item.link1}
+                                          target="_blank"
+                                          className="button-preview btn-gallery"
+                                          rel="noopener noreferrer"
+                                          style={item.buttonStyle1}
+                                        >
+                                          {item.content1}
+                                        </a>
+                                      </div>
+
+                                      <div className="Layout multi-gallery">
+                                        <img
+                                          src={
+                                            item.src2 ||
+                                            "https://via.placeholder.com/200"
+                                          }
+                                          alt="Editable"
+                                          className="multiimg gallery-img-multi"
+                                          title="Upload Image 240 x 240"
+                                          style={item.style}
+                                          onClick={() =>
+                                            handleopenFiles(index, 2)
+                                          }
+                                        />
+                                        <a
+                                          href={item.link2}
+                                          target="_blank"
+                                          rel="noopener noreferrer"
+                                          className="button-preview btn-gallery"
+                                          style={item.buttonStyle2}
+                                        >
+                                          {item.content2}
+                                        </a>
+                                      </div>
+                                    </div>
+                                  ) : null}
+
+                                  {/* Multi Image Card */}
+                                  {item.type === "multi-image-card" && (
+                                    <div className="Layout-img">
+                                      <div className="Layout multi-gallery">
+                                        <img
+                                          src={
+                                            item.src1 ||
+                                            "https://via.placeholder.com/200"
+                                          }
+                                          alt="Preview"
+                                          className="multiimgcard gallery-img-multi"
+                                          style={item.style}
+                                        />
+                                        <h3 className="card-text-image text-card">
+                                          {item.title1 || " "}
+                                        </h3>
+                                        <p>
+                                          <s>
+                                            {item.originalPrice1
+                                              ? `$${item.originalPrice1}`
+                                              : " "}
+                                          </s>
+                                        </p>
+                                        <p>
+                                          {item.offerPrice1
+                                            ? `Off Price $${item.offerPrice1}`
+                                            : " "}
+                                        </p>
+                                        <a
+                                          href={item.link1}
+                                          className="button-preview btn-gallery"
+                                          style={item.buttonStyle1}
+                                        >
+                                          {item.content1}
+                                        </a>
+                                      </div>
+
+                                      <div className="Layout multi-gallery">
+                                        <img
+                                          src={
+                                            item.src2 ||
+                                            "https://via.placeholder.com/200"
+                                          }
+                                          alt="Preview"
+                                          className="multiimgcard"
+                                          style={item.style}
+                                        />
+                                        <h3 className="card-text-image text-card">
+                                          {item.title2 || " "}
+                                        </h3>
+                                        <p>
+                                          <s>
+                                            {item.originalPrice2
+                                              ? `$${item.originalPrice2}`
+                                              : " "}
+                                          </s>
+                                        </p>
+                                        <p>
+                                          {item.offerPrice2
+                                            ? `Off Price $${item.offerPrice2}`
+                                            : " "}
+                                        </p>
+                                        <a
+                                          href={item.link2}
+                                          className="button-preview btn-gallery"
+                                          style={item.buttonStyle2}
+                                        >
+                                          {item.content2}
+                                        </a>
+                                      </div>
+                                    </div>
+                                  )}
+
+                                  {/* Multiple Images */}
+                                  {item.type === "multipleimage" && (
+                                    <div className="Layout-img">
+                                      <div className="Layout multi-gallery">
+                                        <img
+                                          src={
+                                            item.src1 ||
+                                            "https://via.placeholder.com/200"
+                                          }
+                                          alt="Preview"
+                                          className="multiple-img gallery-img-multi"
+                                          style={item.style}
+                                        />
+                                      </div>
+                                      <div className="Layout multi-gallery">
+                                        <img
+                                          src={
+                                            item.src2 ||
+                                            "https://via.placeholder.com/200"
+                                          }
+                                          alt="Preview"
+                                          className="multiple-img gallery-img-multi"
+                                          style={item.style}
+                                        />
+                                      </div>
+                                    </div>
+                                  )}
+
+                                  {/* Video Icon */}
+                                  {item.type === "video-icon" && (
+                                    <div className="video-icon">
+                                      <img
+                                        src={
+                                          item.src1 ||
+                                          "https://via.placeholder.com/200"
+                                        }
+                                        alt="Preview"
+                                        className="videoimg video-img"
+                                        style={item.style}
+                                      />
+                                      <a href={item.link}>
+                                        <img
+                                          src={item.src2}
+                                          className="video-btn"
+                                          alt="Play"
+                                        />
+                                      </a>
+                                    </div>
+                                  )}
+
+                                  {/* Social Icons */}
+                                  {item.type === "icons" && (
+                                    <div
+                                      className="border"
+                                      style={item.ContentStyle}
+                                    >
+                                      <div className="icon-containers">
+                                        <a href={item.links1 || "#"}>
+                                          <img
+                                            src={item.iconsrc1}
+                                            alt="Social"
+                                            className="icon"
+                                            style={item.style1}
+                                          />
+                                        </a>
+                                        <a href={item.links2 || "#"}>
+                                          <img
+                                            src={item.iconsrc2}
+                                            alt="Social"
+                                            className="icon"
+                                            style={item.style2}
+                                          />
+                                        </a>
+                                        <a href={item.links3 || "#"}>
+                                          <img
+                                            src={item.iconsrc3}
+                                            alt="Social"
+                                            className="icon"
+                                            style={item.style3}
+                                          />
+                                        </a>
+                                        <a href={item.links4 || "#"}>
+                                          <img
+                                            src={item.iconsrc4}
+                                            alt="Social"
+                                            className="icon"
+                                            style={item.style4}
+                                          />
+                                        </a>
+                                      </div>
+                                    </div>
+                                  )}
+                                </div>
+                              ))}
+                              {/* Add overlay div */}
+                              <div className="template-overlay">
+                                <div
+                                  className="overlay-content"
+                                  onClick={() => handlePreview(template)}
+                                >
+                                  <span className="overlay-icon">
+                                    <FaEye
+                                      style={{
+                                        color: "#ffffffff",
+                                        fontSize: "15px",
+                                      }}
+                                    />
+                                  </span>
+                                  <span className="overlay-text">
+                                    View Template
+                                  </span>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                          <div className="template-bottom">
+                            <div class="inv-card-container">
+                              <div class="inv-card-header">
+                                <div>
+                                  <h4 class="inv-card-title">
+                                    {template.temname}
+                                  </h4>
+                                </div>
+                                <div>
+                                  <p class="inv-card-uses">{usageCount || 0} uses</p>
+                                </div>
+                              </div>
+            <div className="inv-card-metrics">
+            <div className="inv-card-metric">
+              <p className="inv-text-orange">{openCount}%</p>
+              <p>Open Rate</p>
+            </div>
+            <div className="inv-card-metric">
+              <p className="inv-text-green">{clickCount}%</p>
+              <p>Click Rate</p>
+            </div>
+            <div className="inv-card-metric">
+              <p className="inv-text-green">{bounceCount}%</p>
+              <p>Bounced</p>
+            </div>
+            <div className="inv-card-metric">
+              <p className="inv-text-orange">{unsubCount}</p>
+              <p>Unsubscribe</p>
+            </div>
+          </div>
+
+
+                             
+
+                              <div class="inv-card-sort">
+                                <div>last used:{lastUsedDate || "Nill"}</div>
+                                <div>
+                                  <button
+                                    className="btn-preview"
+                                    onClick={() => handlePreview(template)}
+                                  >
+                                    <FaEye
+                                      style={{
+                                        color: "#a2a1a1ff",
+                                        fontSize: "15px",
+                                      }}
+                                    />
+                                  </button>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+ );
+})}
+
+                
+                    </div>
+                    
+<div className="dot-pagination">
+                        {Array.from({ length: Math.ceil(templates.length / 6) }, (_, index) => (
+                          <span
+                            key={index}
+                            className={`dot ${currentPage === index + 1 ? "active" : ""}`}
+                            onClick={() => setCurrentPage(index + 1)}
+                          ></span>
+                        ))}
+                      </div>
+                  </div>
                 </div>
               )}
 
@@ -3320,7 +3948,7 @@ const Home = () => {
               </div>
             </div>
           )}
-{/* show livepopup toast */}
+          {/* show livepopup toast */}
           <LivePopup userId={user?.id} />
 
           {/* Show bulk add contact existing group modal */}

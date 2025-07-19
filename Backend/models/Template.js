@@ -4,7 +4,6 @@ const templateSchema = new mongoose.Schema({
     temname: {
         type: String,
         required: true,
-
     },
     camname: {
         type: String,
