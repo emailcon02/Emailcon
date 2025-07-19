@@ -48,16 +48,23 @@ import Logo from "../../Images/emailcon_svg_logo.svg";
 import FileManagerModal from "../../pages/FilemanagerModal.jsx";
 import { FaBullhorn, FaCogs, FaSave } from "react-icons/fa";
 import {
-  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  Cell,
   LineChart,
   Legend,
   Line,
-} from 'recharts';
-
+} from "recharts";
+import LivePopup from "./Livepopup.jsx";
 
 const Home = () => {
   const [view, setView] = useState("dashboard");
-    const [campaignMetrics, setCampaignMetrics] = useState({});
+  const [campaignMetrics, setCampaignMetrics] = useState({});
   const [showCampaignModal, setShowCampaignModal] = useState(false);
   const [showTemplateModal, setShowTemplateModal] = useState(false);
   const [showCampaignModalTem, setShowCampaignModalTem] = useState(false);
@@ -141,91 +148,94 @@ const Home = () => {
   const [totalAutomation, setTotalAutomation] = useState(0);
   const username = users?.username || user?.username || "User";
   const today = new Date().toLocaleDateString();
-const [timelineData, setTimelineData] = useState([]);
-const [visible, setVisible] = useState({
-  campaigns: true,
-  contacts: true,
-  automation: false,
-  templates: false,
-});
-
-const toggleLine = (key) => {
-  setVisible((prev) => ({ ...prev, [key]: !prev[key] }));
-};
-
-useEffect(() => {
-  if (!campaigns || !students || !templates) return;
-
-  const today = new Date();
-  const past10Days = Array.from({ length: 10 }).map((_, i) => {
-    const d = new Date(today);
-    d.setDate(today.getDate() - i);
-    return d.toISOString().split("T")[0]; // YYYY-MM-DD
-  }).reverse();
-
-  const dataMap = {};
-  past10Days.forEach((date) => {
-    dataMap[date] = {
-      date,
-      campaigns: 0,
-      automation: 0,
-      contacts: 0,
-      templates: 0,
-    };
+  const [timelineData, setTimelineData] = useState([]);
+  const [visible, setVisible] = useState({
+    campaigns: true,
+    contacts: true,
+    automation: false,
+    templates: false,
   });
+  
 
-campaigns.forEach((c) => {
-  if (!c.createdAt) return;
-  const created = new Date(c.createdAt);
-  if (isNaN(created)) return;
+  const toggleLine = (key) => {
+    setVisible((prev) => ({ ...prev, [key]: !prev[key] }));
+  };
 
-  const date = created.toISOString().split("T")[0];
-  const name = c.campaignname?.toLowerCase() || "";
+  useEffect(() => {
+    if (!campaigns || !students || !templates) return;
 
-  if (dataMap[date]) {
-    if (name.includes("birthday")) {
-      dataMap[date].automation += 1;
-    } else {
-      dataMap[date].campaigns += 1;
-    }
-  }
-});
+    const today = new Date();
+    const past10Days = Array.from({ length: 10 })
+      .map((_, i) => {
+        const d = new Date(today);
+        d.setDate(today.getDate() - i);
+        return d.toISOString().split("T")[0]; // YYYY-MM-DD
+      })
+      .reverse();
 
-totalContacts.forEach((s) => {
-  if (!s.createdAt) return;
-  const created = new Date(s.createdAt);
-  if (isNaN(created)) return;
+    const dataMap = {};
+    past10Days.forEach((date) => {
+      dataMap[date] = {
+        date,
+        campaigns: 0,
+        automation: 0,
+        contacts: 0,
+        templates: 0,
+      };
+    });
 
-  const date = created.toISOString().split("T")[0];
-  if (dataMap[date]) {
-    dataMap[date].contacts += 1;
-  }
-});
+    campaigns.forEach((c) => {
+      if (!c.createdAt) return;
+      const created = new Date(c.createdAt);
+      if (isNaN(created)) return;
 
-templates.forEach((t) => {
-  if (!t.createdAt) return;
-  const created = new Date(t.createdAt);
-  if (isNaN(created)) return;
+      const date = created.toISOString().split("T")[0];
+      const name = c.campaignname?.toLowerCase() || "";
 
-  const date = created.toISOString().split("T")[0];
-  if (dataMap[date]) {
-    dataMap[date].templates += 1;
-  }
-});
+      if (dataMap[date]) {
+        if (name.includes("birthday")) {
+          dataMap[date].automation += 1;
+        } else {
+          dataMap[date].campaigns += 1;
+        }
+      }
+    });
 
+    totalContacts.forEach((s) => {
+      if (!s.createdAt) return;
+      const created = new Date(s.createdAt);
+      if (isNaN(created)) return;
 
-  setTimelineData(Object.values(dataMap));
-}, [campaigns, students, templates]);
+      const date = created.toISOString().split("T")[0];
+      if (dataMap[date]) {
+        dataMap[date].contacts += 1;
+      }
+    });
 
+    templates.forEach((t) => {
+      if (!t.createdAt) return;
+      const created = new Date(t.createdAt);
+      if (isNaN(created)) return;
 
-  // dashboard total campaign  
+      const date = created.toISOString().split("T")[0];
+      if (dataMap[date]) {
+        dataMap[date].templates += 1;
+      }
+    });
+
+    setTimelineData(Object.values(dataMap));
+  }, [campaigns, students, templates]);
+
+  // dashboard total campaign
   useEffect(() => {
     const fetchCampaignsCount = async () => {
       if (!user?.id) return;
       try {
-        const response = await axios.get(`${apiConfig.baseURL}/api/stud/campaigns/${user.id}`);
+        const response = await axios.get(
+          `${apiConfig.baseURL}/api/stud/campaigns/${user.id}`
+        );
         // Filter out birthday campaigns if needed, like in CampaignTable
-        const filtered = response.data.filter(campaign => {
+        const filtered = response.data.filter((campaign) => {
           const name = campaign.campaignname?.toLowerCase() || "";
           return !name.includes("birthday campaign");
         });
@@ -237,14 +247,16 @@ templates.forEach((t) => {
     fetchCampaignsCount();
   }, [user?.id]);
 
-  // dashboard total automation  
+  // dashboard total automation
   useEffect(() => {
     const fetchAutomationCount = async () => {
       if (!user?.id) return;
       try {
-        const response = await axios.get(`${apiConfig.baseURL}/api/stud/campaigns/${user.id}`);
+        const response = await axios.get(
+          `${apiConfig.baseURL}/api/stud/campaigns/${user.id}`
+        );
         // Filter out birthday campaigns if needed, like in CampaignTable
-        const filtered = response.data.filter(campaign => {
+        const filtered = response.data.filter((campaign) => {
           const name = campaign.campaignname?.toLowerCase() || "";
           return name.includes("birthday campaign");
         });
@@ -256,26 +268,24 @@ templates.forEach((t) => {
     fetchAutomationCount();
   }, [user?.id]);
 
- useEffect(() => {
-  const fetchContactsCount = async () => {
-    try {
-      const response = await axios.get(
-        `${apiConfig.baseURL}/api/stud/students?user=${user.id}`
-      );
-      setTotalContacts(response.data);
-      // console.log("rec contact",response.data);
-    } catch (error) {
-      console.error("Error fetching contacts:", error);
-      setTotalContacts(0);
+  useEffect(() => {
+    const fetchContactsCount = async () => {
+      try {
+        const response = await axios.get(
+          `${apiConfig.baseURL}/api/stud/students?user=${user.id}`
+        );
+        setTotalContacts(response.data);
+        // console.log("rec contact",response.data);
+      } catch (error) {
+        console.error("Error fetching contacts:", error);
+        setTotalContacts(0);
+      }
+    };
+
+    if (user?.id) {
+      fetchContactsCount();
     }
-  };
-
-  if (user?.id) {
-    fetchContactsCount();
-  }
-}, [user?.id]);
-
-
+  }, [user?.id]);
 
   const handleDeleteFolder = async () => {
     try {
@@ -544,36 +554,35 @@ templates.forEach((t) => {
         setTemplates(templatesRes.data);
         setBirthTemplates(birthtemplatesRes.data);
         setPaymentdetails(paymentdetails.data);
-        
-      const metrics = {};
-      await Promise.all(
-        campaignsRes.data.map(async (campaign) => {
-          try {
-            const [openRes, clickRes] = await Promise.all([
-              axios.get(
-                `${apiConfig.baseURL}/api/stud/get-email-open-count?userId=${user.id}&campaignId=${campaign._id}`
-              ),
-              axios.get(
-                `${apiConfig.baseURL}/api/stud/get-click?userId=${user.id}&campaignId=${campaign._id}`
-              ),
-            ]);
 
-            metrics[campaign._id] = {
-              openCount: openRes.data.count || 0,
-              clickCount: clickRes.data.count || 0,
-            };
-          } catch (e) {
-            console.error(`Failed to fetch metrics for ${campaign._id}`, e);
-            metrics[campaign._id] = {
-              openCount: 0,
-              clickCount: 0,
-            };
-          }
-        })
-      );
+        const metrics = {};
+        await Promise.all(
+          campaignsRes.data.map(async (campaign) => {
+            try {
+              const [openRes, clickRes] = await Promise.all([
+                axios.get(
+                  `${apiConfig.baseURL}/api/stud/get-email-open-count?userId=${user.id}&campaignId=${campaign._id}`
+                ),
+                axios.get(
+                  `${apiConfig.baseURL}/api/stud/get-click?userId=${user.id}&campaignId=${campaign._id}`
+                ),
+              ]);
 
-      setCampaignMetrics(metrics);
+              metrics[campaign._id] = {
+                openCount: openRes.data.count || 0,
+                clickCount: clickRes.data.count || 0,
+              };
+            } catch (e) {
+              console.error(`Failed to fetch metrics for ${campaign._id}`, e);
+              metrics[campaign._id] = {
+                openCount: 0,
+                clickCount: 0,
+              };
+            }
+          })
+        );
 
+        setCampaignMetrics(metrics);
       } catch (error) {
         console.error("Error fetching student dashboard data:", {
           message: error.message,
@@ -814,8 +823,18 @@ templates.forEach((t) => {
     // Extract field names from the first student found
     const newFieldNames = filteredStudents.length
       ? Object.keys(filteredStudents[0]).filter(
-        (key) => !["_id", "group", "__v","lastSentYear","user","isUnsubscribed","createdAt","updatedAt"].includes(key)
-      )
+          (key) =>
+            ![
+              "_id",
+              "group",
+              "__v",
+              "lastSentYear",
+              "user",
+              "isUnsubscribed",
+              "createdAt",
+              "updatedAt",
+            ].includes(key)
+        )
       : [];
 
     setFieldNames(newFieldNames);
@@ -951,8 +970,8 @@ templates.forEach((t) => {
     setView("create-contact");
   };
   const handlenavigatecampaign = () => {
-    navigate('/campaigntable')
-  }
+    navigate("/campaigntable");
+  };
   const handlePreview = (template) => {
     setShowtemModal(false);
     setIsPreviewOpen(true);
@@ -993,7 +1012,6 @@ templates.forEach((t) => {
     setStep(0); // Reset steps on open
   };
 
-
   const handleopenbirthtem = () => {
     setShowbirthtemModal(true);
   };
@@ -1023,7 +1041,6 @@ templates.forEach((t) => {
   const handleaddsinglefilecontacts = () => {
     setShowfilesingleGroupModal(true);
   };
-
 
   const handleCreateButtonTem = () => {
     if (!user || !user.id) {
@@ -1498,8 +1515,9 @@ templates.forEach((t) => {
             />
             <div className="sidebar-btn-set">
               <div
-                className={`sidebar-btn-flex ${view === "dashboard" ? "active-tab" : ""
-                  }`}
+                className={`sidebar-btn-flex ${
+                  view === "dashboard" ? "active-tab" : ""
+                }`}
                 onClick={() => {
                   setView("dashboard");
                   handleDashboardView();
@@ -1511,8 +1529,9 @@ templates.forEach((t) => {
                 </button>
               </div>
               <div
-                className={`sidebar-btn-flex ${view === "campaign" ? "active-tab" : ""
-                  }`}
+                className={`sidebar-btn-flex ${
+                  view === "campaign" ? "active-tab" : ""
+                }`}
                 onClick={() => {
                   setView("campaign");
                   handleCampaignView();
@@ -1525,8 +1544,9 @@ templates.forEach((t) => {
               </div>
 
               <div
-                className={`sidebar-btn-flex ${view === "contact" ? "active-tab" : ""
-                  }`}
+                className={`sidebar-btn-flex ${
+                  view === "contact" ? "active-tab" : ""
+                }`}
                 onClick={() => {
                   setView("contact");
                   handleContactView();
@@ -1539,8 +1559,9 @@ templates.forEach((t) => {
               </div>
 
               <div
-                className={`sidebar-btn-flex ${view === "template" ? "active-tab" : ""
-                  }`}
+                className={`sidebar-btn-flex ${
+                  view === "template" ? "active-tab" : ""
+                }`}
                 onClick={() => {
                   setView("template");
                   handleTemplateView();
@@ -1553,8 +1574,9 @@ templates.forEach((t) => {
               </div>
 
               <div
-                className={`sidebar-btn-flex ${view === "remainder" ? "active-tab" : ""
-                  }`}
+                className={`sidebar-btn-flex ${
+                  view === "remainder" ? "active-tab" : ""
+                }`}
                 onClick={() => {
                   setView("remainder");
                   handleRemainderrview();
@@ -1983,15 +2005,17 @@ templates.forEach((t) => {
 
               <div className="auto-options-unique">
                 <button
-                  className={`auto-option-btn-unique ${activeOption === "birthday" ? "auto-active-unique" : ""
-                    }`}
+                  className={`auto-option-btn-unique ${
+                    activeOption === "birthday" ? "auto-active-unique" : ""
+                  }`}
                   onClick={() => setActiveOption("birthday")}
                 >
                   Birthday Remainder
                 </button>
                 <button
-                  className={`auto-option-btn-unique ${activeOption === "payment" ? "auto-active-unique" : ""
-                    }`}
+                  className={`auto-option-btn-unique ${
+                    activeOption === "payment" ? "auto-active-unique" : ""
+                  }`}
                   onClick={() => setActiveOption("payment")}
                 >
                   Payment Remainder
@@ -2136,7 +2160,7 @@ templates.forEach((t) => {
                   {/* Display Attached Files */}
                   <div className="file-list">
                     {emailData.attachments &&
-                      emailData.attachments.length > 0 ? (
+                    emailData.attachments.length > 0 ? (
                       <ol>
                         {emailData.attachments.map((file, index) => (
                           <li key={index}>
@@ -2269,7 +2293,7 @@ templates.forEach((t) => {
                   {/* Display Attached Files */}
                   <div className="file-list">
                     {emailData.attachments &&
-                      emailData.attachments.length > 0 ? (
+                    emailData.attachments.length > 0 ? (
                       <ol>
                         {emailData.attachments.map((file, index) => (
                           <li key={index}>
@@ -2503,362 +2527,454 @@ templates.forEach((t) => {
           {isEditingProfile && (
             <EditProfile users={users} handleLogout={handleLogout} />
           )}
-<div className="main-content-sub">
-
-
-          <div className="maincontent-main">
-            {view === "main" && (
-              <div className="card-grid">
-                <div className="cards" onClick={handleCampaignView}>
-                  <FaRegClipboard className="icons campaign-icon" />
-                  <span className="card-texts">Campaign</span>
-                </div>
-                <div className="cards" onClick={handleContactView}>
-                  <FaAddressBook className="icons contact-icon" />
-                  <span className="card-texts">Contact</span>
-                </div>
-              </div>
-            )}
-            {view === "dashboard" && (
-              <div className="dashboard-content">
-                <div className="dashboard-welcome-box">
-                  <div className="dashboard-welcome-left">
-                    <h2 className="dashboard-title-modern">
-                      Welcome back, {username} 👋
-                    </h2>
-                    <p className="dashboard-subtitle-modern">
-                      Today is {today}. Here's a quick summary of your
-                      campaigns.
-                    </p>
+          <div className="main-content-sub">
+            <div className="maincontent-main">
+              {view === "main" && (
+                <div className="card-grid">
+                  <div className="cards" onClick={handleCampaignView}>
+                    <FaRegClipboard className="icons campaign-icon" />
+                    <span className="card-texts">Campaign</span>
+                  </div>
+                  <div className="cards" onClick={handleContactView}>
+                    <FaAddressBook className="icons contact-icon" />
+                    <span className="card-texts">Contact</span>
                   </div>
                 </div>
-
-                <div className="Home-cards-dashboard">
-                  <div className="card-dashboard-container" >
-                    <div className="cards-dashboard" onClick={handlenavigatecampaign}>
-                      <div className="card-inner-text">
-                        <FaBullhorn />
-                      </div>
-                      <p className="card-text-content">Total Campaigns</p>
-                      <p className="card-text-highlight">{totalCampaigns}</p>
-                    </div>
-
-                    <div className="cards-dashboard" onClick={() => { setView("contact") }}>
-                      <div className="card-inner-text">
-                        <FaUsers />
-                      </div>
-                      <p className="card-text-content">Total Contacts</p>
-                      <p className="card-text-highlight">{totalContacts.length}</p>
-                    </div>
-
-                    <div className="cards-dashboard" onClick={() => { setView("remainder") }}>
-                      <div className="card-inner-text">
-                        <FaCogs />
-                      </div>
-                      <p className="card-text-content">Total Automation</p>
-                      <p className="card-text-highlight">
-                        {totalAutomation}
+              )}
+              {view === "dashboard" && (
+                <div className="dashboard-content">
+                  <div className="dashboard-welcome-box">
+                    <div className="dashboard-welcome-left">
+                      <h2 className="dashboard-title-modern">
+                        Welcome back, {username} 👋
+                      </h2>
+                      <p className="dashboard-subtitle-modern">
+                        Today is {today}. Here's a quick summary of your
+                        campaigns.
                       </p>
                     </div>
-
-                    <div className="cards-dashboard" onClick={() => { setView("template") }}>
-                      <div className="card-inner-text">
-                        <FaSave />
-                      </div>
-                      <p className="card-text-content">Saved Template</p>
-                      <p className="card-text-highlight">{templates.length}</p>
-                    </div>
                   </div>
-                 <div className="top-performers-container top-per-home">
-                <div className="top-header">
-                  <div>
-                    <h2 className="top-performers-title">Top Performers</h2>
-                    <p className="top-performers-subtitle">
-                      Best campaigns by engagement
-                    </p>
-                  </div>
-                  <FaChartBar className="icon-right" />
-                </div>
-              <div className="top-performers-container-scroll-home">
 
-                {[...campaigns]
-                  .sort((a, b) => {
-                    const aOpen = campaignMetrics[a._id]?.openCount || 0;
-                    const bOpen = campaignMetrics[b._id]?.openCount || 0;
-
-
-    const aClick = campaignMetrics[a._id]?.clickCount || 0;
-    const bClick = campaignMetrics[b._id]?.clickCount || 0;
-
-    const aTotal = a.totalcount || 1;
-    const bTotal = b.totalcount || 1;
-
-    const aAvg = ((aOpen + aClick) / (2 * aTotal)) * 100;
-    const bAvg = ((bOpen + bClick) / (2 * bTotal)) * 100;
-                    return bAvg - aAvg; 
-                  })
-                  .map((item, idx) => {
-                    const metrics = campaignMetrics[item._id] || {};
-                    const open = metrics.openCount || 0;
-                    const click = metrics.clickCount || 0;
-
-                    const openRate = (
-                      (open / (item.totalcount || 1)) *
-                      100
-                    ).toFixed(0);
-                    const clickRate = (
-                      (click / (item.totalcount || 1)) *
-                      100
-                    ).toFixed(0);
-
-                    return (
+                  <div className="Home-cards-dashboard">
+                    <div className="card-dashboard-container">
                       <div
-                        key={item._id || idx}
-                        className="campaign-row"
+                        className="cards-dashboard"
                         onClick={handlenavigatecampaign}
                       >
- <div
-  className={`rank-badge ${
-    item.status === "Failed" ? "badge-orange-light" : "badge-orange-his"
-  }`}
->
-  {idx + 1}
-</div>
-                        <div className="campaign-details">
-                          <div className="campaign-header">
-                            <p className="campaign-title">
-                              {item.campaignname || "Unnamed Campaign"}
-                            </p>
-                            <span
-                              className={`status-tag ${
-                                item.status === "Success"
-                                  ? "status-active"
-                                  : item.status === "Failed"
-                                  ? "status-paused"
-                                  : "status-completed"
-                              }`}
-                            >
-                              {item.status}
-                            </span>
-                          </div>
-                          <div className="inline-campaign-data">
-                            <div className="campaign-stats">
-                              <p>
-                                Open Rate:{" "}
-                                <span className="highlight">{openRate}%</span>
-                              </p>
-                              <p>
-                                Click Rate:{" "}
-                                <span className="highlight">{clickRate}%</span>
-                              </p>
-                            </div>
-                            <div className="campaign-stats">
-                              <p>
-                                Delivered:{" "}
-                                <span className="revenue">
-                                  {item.sendcount || 0}/{item.totalcount || 0}
-                                </span>
-                              </p>
-                              <p className="trend-camp">
-                                Failed:{" "}
-                                <span className="trend">
-                                  {item.failedcount || 0}
-                                </span>
-                              </p>
-                            </div>
-                          </div>
+                        <div className="card-inner-text">
+                          <FaBullhorn />
+                        </div>
+                        <p className="card-text-content">Total Campaigns</p>
+                        <p className="card-text-highlight">{totalCampaigns}</p>
+                      </div>
+
+                      <div
+                        className="cards-dashboard"
+                        onClick={() => {
+                          setView("contact");
+                        }}
+                      >
+                        <div className="card-inner-text">
+                          <FaUsers />
+                        </div>
+                        <p className="card-text-content">Total Contacts</p>
+                        <p className="card-text-highlight">
+                          {totalContacts.length}
+                        </p>
+                      </div>
+
+                      <div
+                        className="cards-dashboard"
+                        onClick={() => {
+                          setView("remainder");
+                        }}
+                      >
+                        <div className="card-inner-text">
+                          <FaCogs />
+                        </div>
+                        <p className="card-text-content">Total Automation</p>
+                        <p className="card-text-highlight">{totalAutomation}</p>
+                      </div>
+
+                      <div
+                        className="cards-dashboard"
+                        onClick={() => {
+                          setView("template");
+                        }}
+                      >
+                        <div className="card-inner-text">
+                          <FaSave />
+                        </div>
+                        <p className="card-text-content">Saved Template</p>
+                        <p className="card-text-highlight">
+                          {templates.length}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="top-performers-container top-per-home">
+                      <div className="top-header">
+                        <div>
+                          <h2 className="top-performers-title">
+                            Top Performers
+                          </h2>
+                          <p className="top-performers-subtitle">
+                            Best campaigns by engagement
+                          </p>
+                        </div>
+                        <FaChartBar className="icon-right" />
+                      </div>
+                      <div className="top-performers-container-scroll-home">
+                        {[...campaigns]
+                          .sort((a, b) => {
+                            const aOpen =
+                              campaignMetrics[a._id]?.openCount || 0;
+                            const bOpen =
+                              campaignMetrics[b._id]?.openCount || 0;
+
+                            const aClick =
+                              campaignMetrics[a._id]?.clickCount || 0;
+                            const bClick =
+                              campaignMetrics[b._id]?.clickCount || 0;
+
+                            const aTotal = a.totalcount || 1;
+                            const bTotal = b.totalcount || 1;
+
+                            const aAvg =
+                              ((aOpen + aClick) / (2 * aTotal)) * 100;
+                            const bAvg =
+                              ((bOpen + bClick) / (2 * bTotal)) * 100;
+                            return bAvg - aAvg;
+                          })
+                          .map((item, idx) => {
+                            const metrics = campaignMetrics[item._id] || {};
+                            const open = metrics.openCount || 0;
+                            const click = metrics.clickCount || 0;
+
+                            const openRate = (
+                              (open / (item.totalcount || 1)) *
+                              100
+                            ).toFixed(0);
+                            const clickRate = (
+                              (click / (item.totalcount || 1)) *
+                              100
+                            ).toFixed(0);
+
+                            return (
+                              <div
+                                key={item._id || idx}
+                                className="campaign-row"
+                                onClick={handlenavigatecampaign}
+                              >
+                                <div
+                                  className={`rank-badge ${
+                                    item.status === "Failed"
+                                      ? "badge-orange-light"
+                                      : "badge-orange-his"
+                                  }`}
+                                >
+                                  {idx + 1}
+                                </div>
+                                <div className="campaign-details">
+                                  <div className="campaign-header">
+                                    <p className="campaign-title">
+                                      {item.campaignname || "Unnamed Campaign"}
+                                    </p>
+                                    <span
+                                      className={`status-tag ${
+                                        item.status === "Success"
+                                          ? "status-active"
+                                          : item.status === "Failed"
+                                          ? "status-paused"
+                                          : "status-completed"
+                                      }`}
+                                    >
+                                      {item.status}
+                                    </span>
+                                  </div>
+                                  <div className="inline-campaign-data">
+                                    <div className="campaign-stats">
+                                      <p>
+                                        Open Rate:{" "}
+                                        <span className="highlight">
+                                          {openRate}%
+                                        </span>
+                                      </p>
+                                      <p>
+                                        Click Rate:{" "}
+                                        <span className="highlight">
+                                          {clickRate}%
+                                        </span>
+                                      </p>
+                                    </div>
+                                    <div className="campaign-stats">
+                                      <p>
+                                        Delivered:{" "}
+                                        <span className="revenue">
+                                          {item.sendcount || 0}/
+                                          {item.totalcount || 0}
+                                        </span>
+                                      </p>
+                                      <p className="trend-camp">
+                                        Failed:{" "}
+                                        <span className="trend">
+                                          {item.failedcount || 0}
+                                        </span>
+                                      </p>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            );
+                          })}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="graph-card-container">
+                    <div
+                      className="engagement-container"
+                      style={{ border: "none" }}
+                    >
+                      <div
+                        className="engage-boxes"
+                        style={{ marginBottom: "20px", gap: "20px" }}
+                      >
+                        <div>
+                          <h2 style={{ marginBottom: "10px" }}>
+                            Activity Timeline
+                          </h2>
+                          <p
+                            className="engage-para"
+                            style={{ fontSize: "1rem" }}
+                          >
+                            Daily trends of Campaigns, Contacts, Automations &
+                            Templates over the past 10 days
+                          </p>
+                        </div>
+
+                        <div className="button-group">
+                          <button
+                            className={`toggle-button ${
+                              visible.campaigns ? "active" : ""
+                            }`}
+                            onClick={() => toggleLine("campaigns")}
+                          >
+                            <FaBullhorn style={{ marginRight: "6px" }} />{" "}
+                            Campaigns
+                          </button>
+
+                          <button
+                            className={`toggle-button ${
+                              visible.contacts ? "active" : ""
+                            }`}
+                            onClick={() => toggleLine("contacts")}
+                          >
+                            <FaUserFriends style={{ marginRight: "6px" }} />{" "}
+                            Contacts
+                          </button>
+
+                          <button
+                            className={`toggle-button ${
+                              visible.automation ? "active" : ""
+                            }`}
+                            onClick={() => toggleLine("automation")}
+                          >
+                            <FaCog style={{ marginRight: "6px" }} /> Automation
+                          </button>
+
+                          <button
+                            className={`toggle-button ${
+                              visible.templates ? "active" : ""
+                            }`}
+                            onClick={() => toggleLine("templates")}
+                          >
+                            <FaPuzzlePiece style={{ marginRight: "6px" }} />{" "}
+                            Templates
+                          </button>
                         </div>
                       </div>
-                    );
-                  })}
+
+                      <ResponsiveContainer width="95%" height={350}>
+                        <LineChart data={timelineData}>
+                          <CartesianGrid strokeDasharray="3 3" />
+                          <XAxis
+                            dataKey="date"
+                            stroke="#64748b"
+                            fontSize={11}
+                          />
+                          <YAxis stroke="#64748b" fontSize={12} />
+                          <Tooltip />
+                          <Legend />
+                          {visible.campaigns && (
+                            <Line
+                              type="monotone"
+                              dataKey="campaigns"
+                              stroke="#3b82f6"
+                              strokeWidth={2}
+                              dot={{ r: 3 }}
+                            />
+                          )}
+                          {visible.contacts && (
+                            <Line
+                              type="monotone"
+                              dataKey="contacts"
+                              stroke="#10b981"
+                              strokeWidth={2}
+                              dot={{ r: 3 }}
+                            />
+                          )}
+                          {visible.automation && (
+                            <Line
+                              type="monotone"
+                              dataKey="automation"
+                              stroke="#f59e0b"
+                              strokeWidth={2}
+                              dot={{ r: 3 }}
+                            />
+                          )}
+                          {visible.templates && (
+                            <Line
+                              type="monotone"
+                              dataKey="templates"
+                              stroke="#8b5cf6"
+                              strokeWidth={2}
+                              dot={{ r: 3 }}
+                            />
+                          )}
+                        </LineChart>
+                      </ResponsiveContainer>
+                    </div>
                   </div>
-              </div>
                 </div>
-              
-              <div className="graph-card-container">
- <div className="engagement-container" style={{border:"none"}}>
-  <div className="engage-boxes"  style={{marginBottom:"20px",gap:"20px"}}>
- <div>
-  <h2 style={{marginBottom:"10px"}}>Activity Timeline</h2>
-  <p className="engage-para" style={{fontSize:"1rem"}}>Daily trends of Campaigns, Contacts, Automations & Templates over the past 10 days</p>
-</div>
+              )}
 
-   <div className="button-group">
-  <button
-    className={`toggle-button ${visible.campaigns ? "active" : ""}`}
-    onClick={() => toggleLine("campaigns")}
-  >
-    <FaBullhorn style={{ marginRight: "6px" }} /> Campaigns
-  </button>
+              {view === "campaign" && (
+                <div className="card-grid">
+                  <div className="cards" onClick={handleCreateCampaign}>
+                    <FaFileAlt className="icons campaign-create-icon" />
+                    <span className="card-texts">Create Campaign</span>
+                  </div>
+                  <div className="cards" onClick={handlecampaignhistory}>
+                    <FaHistory className="icons campaign-history-icon" />
+                    <span className="card-texts">Campaign History</span>
+                  </div>
+                </div>
+              )}
 
-  <button
-    className={`toggle-button ${visible.contacts ? "active" : ""}`}
-    onClick={() => toggleLine("contacts")}
-  >
-    <FaUserFriends style={{ marginRight: "6px" }} /> Contacts
-  </button>
+              {view === "template" && (
+                <div className="card-grid">
+                  <div className="cards" onClick={handleCreateTemplate}>
+                    <FaThLarge className="icons campaign-create-icon" />
+                    <span className="card-texts">Create Template</span>
+                  </div>
+                  <div className="cards" onClick={handleTemplateHistory}>
+                    <FaHistory className="icons campaign-history-icon" />
+                    <span className="card-texts">Saved Templates</span>
+                  </div>
+                </div>
+              )}
 
-  <button
-    className={`toggle-button ${visible.automation ? "active" : ""}`}
-    onClick={() => toggleLine("automation")}
-  >
-    <FaCog style={{ marginRight: "6px" }} /> Automation
-  </button>
+              {view === "remainder" && (
+                <div className="card-grid-auto">
+                  <div className="cards cards-auto" onClick={openModal}>
+                    <FaBell className="icons campaign-automation-icon" />
+                    <span className="card-texts">Create Automation</span>
+                  </div>
+                  <div
+                    className="cards cards-auto"
+                    onClick={handleselectremainder}
+                  >
+                    <FaRegFileAlt className="icons campaign-create-icon" />
+                    <span className="card-texts">
+                      Create Automation Template
+                    </span>
+                  </div>
+                  <div
+                    className="cards cards-auto"
+                    onClick={handleopenbirthtem}
+                  >
+                    <FaListAlt className="icons campaign-template-icon" />
+                    <span className="card-texts">Automation Templates</span>
+                  </div>
+                  <div
+                    className="cards cards-auto"
+                    onClick={handleremainderhistory}
+                  >
+                    <FaHistory className="icons campaign-history-icon" />
+                    <span className="card-texts">Automation History</span>
+                  </div>
+                </div>
+              )}
 
-  <button
-    className={`toggle-button ${visible.templates ? "active" : ""}`}
-    onClick={() => toggleLine("templates")}
-  >
-    <FaPuzzlePiece style={{ marginRight: "6px" }} /> Templates
-  </button>
-</div>
+              {view === "selectremainder" && (
+                <div className="card-grid">
+                  <div className="cards" onClick={handlecreatebirthdayname}>
+                    <FaBirthdayCake className="icons campaign-create-icon" />
+                    <span className="card-texts">
+                      Birthday Automation Template
+                    </span>
+                  </div>
+                </div>
+              )}
 
-  </div>
+              {view === "contact" && (
+                <div className="card-grid">
+                  <div className="cards" onClick={handleCreateContactView}>
+                    <FaUserPlus className="icons contact-create-icon" />
+                    <span className="card-texts">Create Contact</span>
+                  </div>
+                  <div className="cards" onClick={handleviewcontacts}>
+                    <FaEye className="icons contact-view-icon" />
+                    <span className="card-texts">View Contact </span>
+                  </div>
+                </div>
+              )}
 
-  <ResponsiveContainer width="95%" height={350}>
-    <LineChart data={timelineData}>
-      <CartesianGrid strokeDasharray="3 3" />
-      <XAxis dataKey="date" stroke="#64748b" fontSize={11} />
-      <YAxis stroke="#64748b" fontSize={12} />
-      <Tooltip />
-      <Legend />
-      {visible.campaigns && (
-        <Line type="monotone" dataKey="campaigns" stroke="#3b82f6" strokeWidth={2} dot={{ r: 3 }} />
-      )}
-      {visible.contacts && (
-        <Line type="monotone" dataKey="contacts" stroke="#10b981" strokeWidth={2} dot={{ r: 3 }} />
-      )}
-      {visible.automation && (
-        <Line type="monotone" dataKey="automation" stroke="#f59e0b" strokeWidth={2} dot={{ r: 3 }} />
-      )}
-      {visible.templates && (
-        <Line type="monotone" dataKey="templates" stroke="#8b5cf6" strokeWidth={2} dot={{ r: 3 }} />
-      )}
-    </LineChart>
-  </ResponsiveContainer>
-</div>
-
-</div>
-
-              </div>
-              
-            )}
-
-            {view === "campaign" && (
-              <div className="card-grid">
-                <div className="cards" onClick={handleCreateCampaign}>
-                  <FaFileAlt className="icons campaign-create-icon" />
-                  <span className="card-texts">Create Campaign</span>
+              {view === "create-contact" && (
+                <div className="card-grid">
+                  <div
+                    className="cards"
+                    onClick={() => {
+                      setShowNewGroupModal((prev) => !prev); // Toggle state
+                    }}
+                  >
+                    <FaUserPlus className="icons contact-create-icon" />
+                    <span className="card-texts">New Group</span>
+                  </div>
+                  <div className="cards" onClick={handleaddcontact}>
+                    <FaUser className="icons contact-view-icon" />
+                    <span className="card-texts">Existing Group</span>
+                  </div>
                 </div>
-                <div className="cards" onClick={handlecampaignhistory}>
-                  <FaHistory className="icons campaign-history-icon" />
-                  <span className="card-texts">Campaign History</span>
+              )}
+              {view === "addcontact" && (
+                <div className="card-grid">
+                  <div className="cards" onClick={handleaddsinglefilecontacts}>
+                    <FaUserPlus className="icons contact-create-icon" />
+                    <span className="card-texts">Add Single Contact</span>
+                  </div>
+                  <div className="cards" onClick={handleaddfilecontacts}>
+                    <FaUsers className="icons contact-view-icon" />
+                    <span className="card-texts">Add Bulk Contact</span>
+                  </div>
                 </div>
-              </div>
-            )}
-
-            {view === "template" && (
-              <div className="card-grid">
-                <div className="cards" onClick={handleCreateTemplate}>
-                  <FaThLarge className="icons campaign-create-icon" />
-                  <span className="card-texts">Create Template</span>
-                </div>
-                <div className="cards" onClick={handleTemplateHistory}>
-                  <FaHistory className="icons campaign-history-icon" />
-                  <span className="card-texts">Saved Templates</span>
-                </div>
-              </div>
-            )}
-
-            {view === "remainder" && (
-              <div className="card-grid-auto">
-                <div className="cards cards-auto" onClick={openModal}>
-                  <FaBell className="icons campaign-automation-icon" />
-                  <span className="card-texts">Create Automation</span>
-                </div>
-                <div
-                  className="cards cards-auto"
-                  onClick={handleselectremainder}
-                >
-                  <FaRegFileAlt className="icons campaign-create-icon" />
-                  <span className="card-texts">Create Automation Template</span>
-                </div>
-                <div className="cards cards-auto" onClick={handleopenbirthtem}>
-                  <FaListAlt className="icons campaign-template-icon" />
-                  <span className="card-texts">Automation Templates</span>
-                </div>
-                <div
-                  className="cards cards-auto"
-                  onClick={handleremainderhistory}
-                >
-                  <FaHistory className="icons campaign-history-icon" />
-                  <span className="card-texts">Automation History</span>
-                </div>
-              </div>
-            )}
-
-            {view === "selectremainder" && (
-              <div className="card-grid">
-                <div className="cards" onClick={handlecreatebirthdayname}>
-                  <FaBirthdayCake className="icons campaign-create-icon" />
-                  <span className="card-texts">
-                    Birthday Automation Template
-                  </span>
-                </div>
-              </div>
-            )}
-
-            {view === "contact" && (
-              <div className="card-grid">
-                <div className="cards" onClick={handleCreateContactView}>
-                  <FaUserPlus className="icons contact-create-icon" />
-                  <span className="card-texts">Create Contact</span>
-                </div>
-                <div className="cards" onClick={handleviewcontacts}>
-                  <FaEye className="icons contact-view-icon" />
-                  <span className="card-texts">View Contact </span>
-                </div>
-              </div>
-            )}
-
-            {view === "create-contact" && (
-              <div className="card-grid">
-                <div
-                  className="cards"
-                  onClick={() => {
-                    setShowNewGroupModal((prev) => !prev); // Toggle state
-                  }}
-                >
-                  <FaUserPlus className="icons contact-create-icon" />
-                  <span className="card-texts">New Group</span>
-                </div>
-                <div className="cards" onClick={handleaddcontact}>
-                  <FaUser className="icons contact-view-icon" />
-                  <span className="card-texts">Existing Group</span>
-                </div>
-              </div>
-            )}
-            {view === "addcontact" && (
-              <div className="card-grid">
-                <div className="cards" onClick={handleaddsinglefilecontacts}>
-                  <FaUserPlus className="icons contact-create-icon" />
-                  <span className="card-texts">Add Single Contact</span>
-                </div>
-                <div className="cards" onClick={handleaddfilecontacts}>
-                  <FaUsers className="icons contact-view-icon" />
-                  <span className="card-texts">Add Bulk Contact</span>
-                </div>
-              </div>
-            )}
+              )}
+            </div>
           </div>
-</div>
           {/* create Automation section */}
           {showautoModal && (
             <div className="modal-overlay-automation">
               <div className="modal-content-automation">
                 <div className="heading-automation">
                   <h2>Create Automation</h2>
-                  <span className="close-btn-automation" onClick={() => { setShowautoModal(false); }}>×</span>
+                  <span
+                    className="close-btn-automation"
+                    onClick={() => {
+                      setShowautoModal(false);
+                    }}
+                  >
+                    ×
+                  </span>
                 </div>
                 <div className="steps-container">
                   {/* Step 1 */}
@@ -3155,7 +3271,7 @@ templates.forEach((t) => {
                     {/* Display Attached Files */}
                     <div className="file-list">
                       {emailData.attachments &&
-                        emailData.attachments.length > 0 ? (
+                      emailData.attachments.length > 0 ? (
                         <ol>
                           {emailData.attachments.map((file, index) => (
                             <li key={index}>
@@ -3204,6 +3320,8 @@ templates.forEach((t) => {
               </div>
             </div>
           )}
+{/* show livepopup toast */}
+          <LivePopup userId={user?.id} />
 
           {/* Show bulk add contact existing group modal */}
           {showfileGroupModal && (
@@ -3249,7 +3367,6 @@ templates.forEach((t) => {
               </div>
             </div>
           )}
-
           {/* Modal for template Details */}
           {showtemModal && (
             <div className="modal-overlay-tem">
@@ -3260,20 +3377,509 @@ templates.forEach((t) => {
                     x
                   </button>
                 </div>
-                <ol>
-                  {templates.length > 0 ? (
-                    templates.map((template) => (
-                      <li
-                        key={template._id}
-                        onClick={() => handlePreview(template)}
+                <div className="saved-template-gallery">
+                  {templates.map((template, index) => (
+                    <div
+                      key={index}
+                      className="template-thumbnail-container"
+                      onClick={() => handlePreview(template)}
+                    >
+                      <div
+                        className="template-thumbnail"
+                        style={{
+                          backgroundColor: template.bgColor || "#ffffff",
+                          border: "1px solid #ccc",
+                          padding: "10px",
+                          margin: "10px",
+                          borderRadius: "6px",
+                          width: "250px",
+                          height: "250px",
+                          overflow: "scroll",
+                          cursor: "pointer",
+                        }}
                       >
-                        {template.temname}
-                      </li>
-                    ))
-                  ) : (
-                    <p>No templates found</p>
-                  )}
-                </ol>
+                        {template.previewContent?.map((item, idx) => (
+                          <div
+                            key={idx}
+                            style={{ fontSize: "12px", marginBottom: "6px" }}
+                          >
+                            {/* Heading */}
+                            {item.type === "head" && (
+                              <div ref={dropdownRef}>
+                                <p className="border" style={item.style}>
+                                  {item.content}
+                                </p>
+                              </div>
+                            )}
+
+                            {/* Paragraph */}
+                            {item.type === "para" && (
+                              <div className="border para-container">
+                                <p
+                                  className="border-para para-gallery"
+                                  contentEditable
+                                  suppressContentEditableWarning
+                                  onClick={() => {
+                                    setSelectedIndex(index);
+                                    setIsModalOpen(true); // Open the modal
+                                  }}
+                                  style={item.style}
+                                  dangerouslySetInnerHTML={{
+                                    __html: item.content,
+                                  }}
+                                />
+                              </div>
+                            )}
+
+                            {/* Image */}
+                            {item.type === "image" && (
+                              <div className="border">
+                                <img
+                                  src={
+                                    item.src ||
+                                    "https://via.placeholder.com/200"
+                                  }
+                                  alt="Preview"
+                                  className="img gallery-img-image"
+                                  style={item.style}
+                                />
+                              </div>
+                            )}
+
+                            {/* Banner*/}
+                            {item.type === "banner" && (
+                              <div className="border">
+                                <img
+                                  src={
+                                    item.src ||
+                                    "https://via.placeholder.com/200"
+                                  }
+                                  alt="Preview"
+                                  className="img gallery-img-banner"
+                                  style={item.style}
+                                />
+                              </div>
+                            )}
+
+                            {/* Button */}
+                            {item.type === "button" && (
+                              <div className="border-btn">
+                                <div className="border-btn">
+                                  <a
+                                    href={item.link || "#"}
+                                    target={
+                                      item.buttonType === "link"
+                                        ? "_blank"
+                                        : undefined
+                                    }
+                                    rel="noopener noreferrer"
+                                    style={item.style}
+                                    className="button-preview btn-gallery-whole"
+                                  >
+                                    {item.content ||
+                                      (item.buttonType === "whatsapp"
+                                        ? "Connect on WhatsApp"
+                                        : item.buttonType === "contact"
+                                        ? "Call Now"
+                                        : "Visit Link")}
+                                  </a>
+                                </div>
+                              </div>
+                            )}
+
+                            {/* {item.type === "link-image" && (
+ <div className="border">
+ <a
+ href={item.link || "#"}
+ onClick={(e) => handleLinkClick(e, index)}
+ >
+ <img
+ src={
+ item.src || "https://via.placeholder.com/200"
+ }
+ alt="Editable"
+ className="img"
+ style={item.style}
+ onClick={() => handleopenFiles(index, 1)}
+ title="Upload Image"
+ />
+ </a>
+ </div>
+ )} */}
+
+                            {/* Link */}
+                            {item.type === "link-image" && (
+                              <div className="border">
+                                <a
+                                  href={item.link || "#"}
+                                  onClick={(e) => handleLinkClick(e, index)}
+                                >
+                                  <img
+                                    src={
+                                      item.src ||
+                                      "https://via.placeholder.com/200"
+                                    }
+                                    alt="Editable"
+                                    className="img gallery-img-image"
+                                    style={item.style}
+                                    onClick={() => handleopenFiles(index, 1)}
+                                    title="Upload Image"
+                                  />
+                                </a>
+                              </div>
+                            )}
+
+                            {/* Break Line */}
+                            {item.type === "break" && (
+                              <div className="border-break gallery-line">
+                                <hr style={item.style} />
+                              </div>
+                            )}
+
+                            {/* Gap/Spacing */}
+                            {item.type === "gap" && (
+                              <div className="border-break">
+                                <div style={item.styles}></div>
+                              </div>
+                            )}
+                            {/* 
+ {item.type === "logo" && (
+ <div className="border">
+ <img
+ src={item.src || "https://via.placeholder.com/200"}
+ alt="Editable"
+ className="logo"
+ style={item.style}
+ onClick={() => handleopenFiles(index, 1)}
+ title="Upload Image"
+ />
+ </div>
+ )} */}
+
+                            {item.type === "cardimage" ? (
+                              <div
+                                className="card-image-container"
+                                style={item.style1}
+                              >
+                                <img
+                                  src={
+                                    item.src1 ||
+                                    "https://via.placeholder.com/200"
+                                  }
+                                  style={item.style}
+                                  alt="Editable"
+                                  className="card-image"
+                                  title="Upload Image"
+                                  onClick={() => handleopenFiles(index, 1)}
+                                />
+                                <p
+                                  className="card-text"
+                                  contentEditable
+                                  suppressContentEditableWarning
+                                  onClick={
+                                    () => {
+                                      setModalIndex(index);
+                                      setIsModalOpen(true);
+                                    } // Open the modal
+                                  } // Open modal for this index
+                                  style={item.style}
+                                  dangerouslySetInnerHTML={{
+                                    __html: item.content1,
+                                  }}
+                                />
+                              </div>
+                            ) : null}
+
+                            {/* Logo */}
+                            {item.type === "logo" && (
+                              <div className="border">
+                                <img
+                                  src={
+                                    item.src ||
+                                    "https://via.placeholder.com/200"
+                                  }
+                                  alt="Editable"
+                                  className="logo gallery-img"
+                                  style={item.style}
+                                  onClick={() => handleopenFiles(index, 1)}
+                                  title="Upload Image"
+                                />
+                              </div>
+                            )}
+
+                            {/* Image with Text */}
+                            {item.type === "imagewithtext" && (
+                              <div className="image-text-container">
+                                <div
+                                  className="image-text-wrapper"
+                                  id="gallery-imagewithtext"
+                                  style={item.style1}
+                                >
+                                  <img
+                                    src={
+                                      item.src1 ||
+                                      "https://via.placeholder.com/200"
+                                    }
+                                    alt="Preview"
+                                    className="image-item gallery-img-text-img"
+                                  />
+                                  <p
+                                    className="text-item gallery-text-img"
+                                    style={item.style}
+                                  >
+                                    {item.content1}
+                                  </p>
+                                </div>
+                              </div>
+                            )}
+
+                            {/* Text with Image */}
+                            {item.type === "textwithimage" && (
+                              <div className="image-text-container">
+                                <div
+                                  className="image-text-wrapper"
+                                  id="gallery-imagewithtext"
+                                  style={item.style}
+                                >
+                                  <p
+                                    className="text-item gallery-text-img"
+                                    style={item.style}
+                                  >
+                                    {item.content2}
+                                  </p>
+                                  <img
+                                    src={
+                                      item.src2 ||
+                                      "https://via.placeholder.com/200"
+                                    }
+                                    alt="Preview"
+                                    className="image-item gallery-img-text-img"
+                                  />
+                                </div>
+                              </div>
+                            )}
+
+                            {item.type === "multi-image" ? (
+                              <div className="Layout-img">
+                                <div className="Layout multi-gallery">
+                                  <img
+                                    src={
+                                      item.src1 ||
+                                      "https://via.placeholder.com/200"
+                                    }
+                                    alt="Editable"
+                                    className="multiimg gallery-img-multi"
+                                    title="Upload Image 240 x 240"
+                                    style={item.style}
+                                    onClick={() => handleopenFiles(index, 1)}
+                                  />
+                                  <a
+                                    href={item.link1}
+                                    target="_blank"
+                                    className="button-preview btn-gallery"
+                                    rel="noopener noreferrer"
+                                    style={item.buttonStyle1}
+                                  >
+                                    {item.content1}
+                                  </a>
+                                </div>
+
+                                <div className="Layout multi-gallery">
+                                  <img
+                                    src={
+                                      item.src2 ||
+                                      "https://via.placeholder.com/200"
+                                    }
+                                    alt="Editable"
+                                    className="multiimg gallery-img-multi"
+                                    title="Upload Image 240 x 240"
+                                    style={item.style}
+                                    onClick={() => handleopenFiles(index, 2)}
+                                  />
+                                  <a
+                                    href={item.link2}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="button-preview btn-gallery"
+                                    style={item.buttonStyle2}
+                                  >
+                                    {item.content2}
+                                  </a>
+                                </div>
+                              </div>
+                            ) : null}
+
+                            {/* Multi Image Card */}
+                            {item.type === "multi-image-card" && (
+                              <div className="Layout-img">
+                                <div className="Layout multi-gallery">
+                                  <img
+                                    src={
+                                      item.src1 ||
+                                      "https://via.placeholder.com/200"
+                                    }
+                                    alt="Preview"
+                                    className="multiimgcard gallery-img-multi"
+                                    style={item.style}
+                                  />
+                                  <h3 className="card-text-image text-card">
+                                    {item.title1 || " "}
+                                  </h3>
+                                  <p>
+                                    <s>
+                                      {item.originalPrice1
+                                        ? `$${item.originalPrice1}`
+                                        : " "}
+                                    </s>
+                                  </p>
+                                  <p>
+                                    {item.offerPrice1
+                                      ? `Off Price $${item.offerPrice1}`
+                                      : " "}
+                                  </p>
+                                  <a
+                                    href={item.link1}
+                                    className="button-preview btn-gallery"
+                                    style={item.buttonStyle1}
+                                  >
+                                    {item.content1}
+                                  </a>
+                                </div>
+
+                                <div className="Layout multi-gallery">
+                                  <img
+                                    src={
+                                      item.src2 ||
+                                      "https://via.placeholder.com/200"
+                                    }
+                                    alt="Preview"
+                                    className="multiimgcard"
+                                    style={item.style}
+                                  />
+                                  <h3 className="card-text-image text-card">
+                                    {item.title2 || " "}
+                                  </h3>
+                                  <p>
+                                    <s>
+                                      {item.originalPrice2
+                                        ? `$${item.originalPrice2}`
+                                        : " "}
+                                    </s>
+                                  </p>
+                                  <p>
+                                    {item.offerPrice2
+                                      ? `Off Price $${item.offerPrice2}`
+                                      : " "}
+                                  </p>
+                                  <a
+                                    href={item.link2}
+                                    className="button-preview btn-gallery"
+                                    style={item.buttonStyle2}
+                                  >
+                                    {item.content2}
+                                  </a>
+                                </div>
+                              </div>
+                            )}
+
+                            {/* Multiple Images */}
+                            {item.type === "multipleimage" && (
+                              <div className="Layout-img">
+                                <div className="Layout multi-gallery">
+                                  <img
+                                    src={
+                                      item.src1 ||
+                                      "https://via.placeholder.com/200"
+                                    }
+                                    alt="Preview"
+                                    className="multiple-img gallery-img-multi"
+                                    style={item.style}
+                                  />
+                                </div>
+                                <div className="Layout multi-gallery">
+                                  <img
+                                    src={
+                                      item.src2 ||
+                                      "https://via.placeholder.com/200"
+                                    }
+                                    alt="Preview"
+                                    className="multiple-img gallery-img-multi"
+                                    style={item.style}
+                                  />
+                                </div>
+                              </div>
+                            )}
+
+                            {/* Video Icon */}
+                            {item.type === "video-icon" && (
+                              <div className="video-icon">
+                                <img
+                                  src={
+                                    item.src1 ||
+                                    "https://via.placeholder.com/200"
+                                  }
+                                  alt="Preview"
+                                  className="videoimg video-img"
+                                  style={item.style}
+                                />
+                                <a href={item.link}>
+                                  <img
+                                    src={item.src2}
+                                    className="video-btn"
+                                    alt="Play"
+                                  />
+                                </a>
+                              </div>
+                            )}
+
+                            {/* Social Icons */}
+                            {item.type === "icons" && (
+                              <div className="border" style={item.ContentStyle}>
+                                <div className="icon-containers">
+                                  <a href={item.links1 || "#"}>
+                                    <img
+                                      src={item.iconsrc1}
+                                      alt="Social"
+                                      className="icon"
+                                      style={item.style1}
+                                    />
+                                  </a>
+                                  <a href={item.links2 || "#"}>
+                                    <img
+                                      src={item.iconsrc2}
+                                      alt="Social"
+                                      className="icon"
+                                      style={item.style2}
+                                    />
+                                  </a>
+                                  <a href={item.links3 || "#"}>
+                                    <img
+                                      src={item.iconsrc3}
+                                      alt="Social"
+                                      className="icon"
+                                      style={item.style3}
+                                    />
+                                  </a>
+                                  <a href={item.links4 || "#"}>
+                                    <img
+                                      src={item.iconsrc4}
+                                      alt="Social"
+                                      className="icon"
+                                      style={item.style4}
+                                    />
+                                  </a>
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                      <div className="template-name">
+                        <h4>{template.temname}</h4>
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
           )}
@@ -3657,7 +4263,7 @@ templates.forEach((t) => {
                                         <span>Add</span> Variable
                                       </p>
                                       {fieldNames[index] &&
-                                        fieldNames[index].length > 0 ? (
+                                      fieldNames[index].length > 0 ? (
                                         <div>
                                           {fieldNames[index].map(
                                             (field, idx) => (
@@ -4318,7 +4924,7 @@ templates.forEach((t) => {
                                         <span>Add</span> Variable
                                       </p>
                                       {fieldNames[index] &&
-                                        fieldNames[index].length > 0 ? (
+                                      fieldNames[index].length > 0 ? (
                                         <div>
                                           {fieldNames[index].map(
                                             (field, idx) => (
@@ -5046,7 +5652,7 @@ templates.forEach((t) => {
                                         <span>Add</span> Variable
                                       </p>
                                       {fieldNames[index] &&
-                                        fieldNames[index].length > 0 ? (
+                                      fieldNames[index].length > 0 ? (
                                         <div>
                                           {fieldNames[index].map(
                                             (field, idx) => (
@@ -5591,7 +6197,6 @@ templates.forEach((t) => {
             theme="light" // Optional: Choose theme ('light', 'dark', 'colored')
           />
         </div>
-
       </div>
       <div className="dwn-menu">
         <div className="mobile-menu">
