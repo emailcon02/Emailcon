@@ -1982,10 +1982,10 @@
 
 .saved-template-gallery-home {
   display: grid;
-  grid-template-columns: auto auto auto;
-  padding:20px 30px;
-  gap:6%;
-  width: 33%;
+  grid-template-columns:32% 32% 32%;
+  padding:10px;
+  gap:2%;
+  /* width: 33%; */
   /* margin-left: 5%; */
   margin-top: 2%;
 }

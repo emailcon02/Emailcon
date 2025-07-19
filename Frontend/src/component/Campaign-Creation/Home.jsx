@@ -2848,7 +2848,7 @@ const Home = () => {
                   </div>
                   {/* --------------------------------- saved template new content ------------------------------------- */}
                   <div className="saved-template-display">
-                    <div style={{padding:"0px 20px"}}>
+                    <div >
                       <h2 className="header-saved-template">Saved Template</h2>
                       <p className="header-head-para">
                         Monitor user engagement with saved campaigns,Spot trends
