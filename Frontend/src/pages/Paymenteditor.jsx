@@ -111,7 +111,11 @@ const handleGroupChange = (e, index) => {
 
   const newFieldNames = sampleStudent
     ? Object.keys(sampleStudent).filter(
-        (key) => key !== "_id" && key !== "group" && key !== "__v"
+        (key) => key !== "_id" && key !== "group" && key !== "__v" && key !== "lastSentYear" &&
+                                key !== "user" &&
+                                key !== "isUnsubscribed" &&
+                                key !== "createdAt" &&
+                                key !== "updatedAt" 
       )
     : [];
 

@@ -529,7 +529,7 @@ templates.forEach((t) => {
         ] = await Promise.all([
           axios.get(`${apiConfig.baseURL}/api/stud/campaigns/${user.id}`),
           axios.get(`${apiConfig.baseURL}/api/stud/groups/${user.id}`),
-          axios.get(`${apiConfig.baseURL}/api/stud/students`),
+          axios.get(`${apiConfig.baseURL}/api/stud/students?user=${user.id}`),
           axios.get(`${apiConfig.baseURL}/api/stud/templates/${user.id}`),
           axios.get(`${apiConfig.baseURL}/api/stud/birthtemplates/${user.id}`),
           axios.get(`${apiConfig.baseURL}/api/stud/userdata/${user.id}`),
@@ -814,7 +814,7 @@ templates.forEach((t) => {
     // Extract field names from the first student found
     const newFieldNames = filteredStudents.length
       ? Object.keys(filteredStudents[0]).filter(
-        (key) => !["_id", "group", "__v"].includes(key)
+        (key) => !["_id", "group", "__v","lastSentYear","user","isUnsubscribed","createdAt","updatedAt"].includes(key)
       )
       : [];
 

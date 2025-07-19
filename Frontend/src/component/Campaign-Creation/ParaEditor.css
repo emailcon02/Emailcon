@@ -23,7 +23,7 @@
 .dropdown-container-para {
   position: absolute;
   left: 5px; /* Position the dropdown to the left */
-  top: -220px !important;
+  top: -180px !important;
   background: #fff;
   border: 1px solid #ccc;
   padding: 10px;

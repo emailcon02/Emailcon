@@ -76,7 +76,11 @@ const ParaEditor = ({ isOpen, content, onSave, onClose }) => {
 
     const newFieldNames = sampleStudent
       ? Object.keys(sampleStudent).filter(
-          (key) => key !== "_id" && key !== "group" && key !== "__v"
+          (key) => key !== "_id" && key !== "group" && key !== "__v" && key !== "lastSentYear" &&
+                                key !== "user" &&
+                                key !== "isUnsubscribed" &&
+                                key !== "createdAt" &&
+                                key !== "updatedAt" 
         )
       : [];
 
@@ -212,7 +216,7 @@ const ParaEditor = ({ isOpen, content, onSave, onClose }) => {
             </select>
 
             {selectedGroup && (
-              <div className="dropdown-container">
+              <div className="dropdown-container-para">
                 <p className="template-title">
                   <span>Add</span> Variable
                 </p>
