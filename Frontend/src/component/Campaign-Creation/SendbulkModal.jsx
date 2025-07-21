@@ -8,7 +8,7 @@ import { useNavigate } from "react-router-dom";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 
-const SendbulkModal = ({ isOpen, onClose, previewContent = [], bgColor }) => {
+const SendbulkModal = ({ isOpen, onClose, previewContent = [], bgColor,temname }) => {
   const [groups, setGroups] = useState([]);
   const [selectedGroup, setSelectedGroup] = useState("");
   const [message, setMessage] = useState("");
@@ -255,6 +255,11 @@ const SendbulkModal = ({ isOpen, onClose, previewContent = [], bgColor }) => {
       toast.warning("No preview content available.");
       return;
     }
+     if (!temname) {
+  toast.warning("Please save your template before proceeding.");
+  return;
+}
+
     // Check for missing links and show individual toasts
        let hasInvalidLink = false;
        previewContent.forEach((item, index) => {
@@ -330,6 +335,7 @@ const SendbulkModal = ({ isOpen, onClose, previewContent = [], bgColor }) => {
       // Store initial campaign history with "Pending" status
       const campaignHistoryData = {
         campaignname: campaign.camname,
+        temname:temname,
         groupname: groups.find((group) => group._id === selectedGroup)?.name, // Get the group name from the groups array
         totalcount: students.length,
         recipients: "no mail",
@@ -375,6 +381,11 @@ const handleSend = async () => {
       toast.warning("No preview content available.");
       return;
     }
+    if (!temname) {
+  toast.warning("Please save your template before proceeding.");
+  return;
+}
+
     // Check for missing links and show individual toasts
        let hasInvalidLink = false;
        previewContent.forEach((item, index) => {
@@ -450,6 +461,7 @@ const handleSend = async () => {
     // Prepare payload
     const payload = {
       campaignname: campaign.camname,
+      temname:temname,
       groupname: groups.find((group) => group._id === selectedGroup)?.name,
       totalcount: students.length,
       subject: message,

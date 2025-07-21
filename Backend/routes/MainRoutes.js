@@ -787,10 +787,12 @@ router.post('/start-campaign', async (req, res) => {
   let campaignId = null;
   let transporter = null;
 
+
   try {
     const {
       campaignname,
       groupname,
+      temname,
       subject,
       attachments,
       previewtext,
@@ -826,6 +828,7 @@ router.post('/start-campaign', async (req, res) => {
     // Create initial campaign record
     const campaignData = {
       campaignname,
+      temname,
       groupname,
       totalcount: students.length,
       recipients: "no mail",
@@ -3127,6 +3130,38 @@ router.get('/templates/:userId', async (req, res) => {
     });
   }
 });
+// delete mutilple templates
+router.post("/templates/delete-multiple", async (req, res) => {
+  const { ids } = req.body;
+
+  if (!Array.isArray(ids) || ids.length === 0) {
+    return res.status(400).json({ error: "No template IDs provided" });
+  }
+
+  try {
+    await Template.deleteMany({ _id: { $in: ids } });
+    res.json({ success: true, deleted: ids });
+  } catch (err) {
+    console.error("Delete error:", err);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+// delete mutilple birth templates
+router.post("/birth-templates/delete-multiple", async (req, res) => {
+  const { ids } = req.body;
+
+  if (!Array.isArray(ids) || ids.length === 0) {
+    return res.status(400).json({ error: "No template IDs provided" });
+  }
+
+  try {
+    await BirthdayTemplate.deleteMany({ _id: { $in: ids } });
+    res.json({ success: true, deleted: ids });
+  } catch (err) {
+    console.error("Delete error:", err);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
 //Save birthday template
 router.post('/birthtemplate', async (req, res) => {
   const {
@@ -3228,6 +3263,7 @@ router.post("/camhistory", async (req, res) => {
     const {
       campaignname,
       groupname,
+      temname,
       totalcount,
       sendcount,
       failedcount,
@@ -3252,6 +3288,7 @@ router.post("/camhistory", async (req, res) => {
       campaignname,
       recipients,
       groupname,
+      temname,
       totalcount,
       sendcount,
       failedcount,

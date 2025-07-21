@@ -296,6 +296,7 @@ button[data-tooltip]:hover::after {
     z-index: 99999 !important; /* Even higher if needed */
 }
 
+
 .modal-content-file {
   background: white;
   width: 70%;

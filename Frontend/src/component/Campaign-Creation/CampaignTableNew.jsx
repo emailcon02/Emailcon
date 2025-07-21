@@ -798,13 +798,19 @@ useEffect(() => {
 }, [campaignDetails?.groupId]);
 
   const fetchUnsubscribeCount= async () => {
+    // console.log("Fetching unsubscribe details for groupId:", campaignDetails.groupId);
+    if (!campaignDetails.groupId) { 
+      console.warn("No groupId found in campaignDetails");
+      setUnsubscribe([]);
+      return;
+    }
     try {
       const res = await axios.get(
         `${apiConfig.baseURL}/api/stud/groups/${campaignDetails.groupId}/unsubscribe-student`
       );
       const newEmails = res.data || [];
       setUnsubscribe(newEmails); 
-      //console.log("unsub mail",newEmails)
+      // console.log("unsub mail",newEmails)
     } catch (err) {
       console.error("Error fetching unsubscribe details", err);
       setUnsubscribe([]);
@@ -1353,18 +1359,32 @@ useEffect(() => {
                         return (
                           <span key={campaignId} className="selected-tag">
                             <FaRegChartBar className="campaign-icon-rep" />
-                            {campaign?.campaignname || "Unknown Campaign"}
+                            {campaign?.campaignname || "Unknown Campaign"}{" "}
+                            {campaign?.temname && (
+                              <span style={{ color: "#888", fontSize: "0.85em" }}>
+                                (Template: {campaign?.temname})
+                              </span>
+                            ) }
                           </span>
                         );
                       })}
                     </div>
                   ) : (
-                    <span className="placeholder">
-                      <FaRegChartBar className="campaign-icon-rep" />
-                      {Array.isArray(campaigns) && campaigns.length > 0
-                        ? campaigns[0].campaignname
-                        : "No campaigns available"}
-                    </span>
+                   <span className="placeholder">
+  <FaRegChartBar className="campaign-icon-rep" />
+  {Array.isArray(campaigns) && campaigns.length > 0 ? (
+    <>
+      {campaigns[0].campaignname}{" "}
+      <span style={{ color: "#888", fontSize: "0.85em" }}>
+        (Template: {campaigns[0].temname})
+      </span>
+    </>
+  ) : (
+    "No campaigns available"
+  )}
+</span>
+
+
                   )}
                 </div>
 

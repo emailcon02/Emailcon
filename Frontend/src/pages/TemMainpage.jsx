@@ -42,6 +42,7 @@ import "react-datepicker/dist/react-datepicker.css";
 import FileManagerModal from "./FilemanagerModal.jsx";
 import ParaEditorbutton from "../component/Campaign-Creation/ParaEditorbutton.jsx";
 import ColorPalettePicker from "./ColorPalettePicker.jsx";
+import WarningModal from "./WarningModal.jsx";
 
 const TemMainpage = () => {
   const [activeTab, setActiveTab] = useState("button1");
@@ -130,6 +131,49 @@ const TemMainpage = () => {
     window.addEventListener("resize", handleResizecolor);
     return () => window.removeEventListener("resize", handleResizecolor);
   }, []);
+  const [showWarningModal, setShowWarningModal] = useState(false);
+      const [shouldRefresh, setShouldRefresh] = useState(false);
+    
+      useEffect(() => {
+        const handleBeforeUnload = (e) => {
+          e.preventDefault(); // Needed for some browsers
+          e.returnValue = ""; // Show default browser message (won't appear if using custom modal)
+          setShowWarningModal(true);
+          return ""; // This is required for Chrome
+        };
+    
+        const handleKeyPress = (e) => {
+          if (
+            (e.key === "F5") || // F5
+            (e.ctrlKey && e.key === "r") || // Ctrl+R
+            (e.metaKey && e.key === "r") // Cmd+R (Mac)
+          ) {
+            e.preventDefault();
+            setShowWarningModal(true);
+            setShouldRefresh(true);
+          }
+        };
+    
+        window.addEventListener("beforeunload", handleBeforeUnload);
+        window.addEventListener("keydown", handleKeyPress);
+    
+        return () => {
+          window.removeEventListener("beforeunload", handleBeforeUnload);
+          window.removeEventListener("keydown", handleKeyPress);
+        };
+      }, []);
+    
+      const handleConfirmRefresh = () => {
+        setShowWarningModal(false);
+        window.removeEventListener("beforeunload", () => {}); // Optional cleanup
+        window.location.reload(); // Now refresh
+      };
+    
+      const handleCancel = () => {
+        setShowWarningModal(false);
+        setShouldRefresh(false);
+      };
+  
 
   function convertToWhatsAppText(html) {
     const tempDiv = document.createElement("div");
@@ -662,6 +706,18 @@ const TemMainpage = () => {
       });
     }
   };
+
+  const handleopensentoptions = () => {
+    if (previewContent.length === 0) {
+      toast.error("Please add content before sending.");
+      return;
+    }
+    if (!templateName) {
+      toast.error("Please save template before sending.");
+      return;
+    }
+      setIsOpen(true);
+    }
 
   useEffect(() => {
     const handleResize = () => {
@@ -1377,6 +1433,10 @@ const TemMainpage = () => {
       toast.warning("No preview content available.");
       return;
     }
+     if(!templateName) {
+          toast.warning("Please save the template before scheduling.");
+          return;
+        }
     // Check for missing links and show individual toasts
     let hasInvalidLink = false;
     previewContent.forEach((item, index) => {
@@ -1442,6 +1502,7 @@ const TemMainpage = () => {
       // Store campaign history with uploaded file data
       const campaignHistoryData = {
         campaignname: campaign.camname,
+        temname: templateName,
         groupname: "No Group",
         totalcount: recipients.length,
         recipients: emailData.recipient,
@@ -1486,6 +1547,10 @@ const TemMainpage = () => {
       toast.warning("No preview content available.");
       return;
     }
+     if(!templateName) {
+          toast.warning("Please save the template before sending.");
+          return;
+        }
     // Check for missing links and show individual toasts
     let hasInvalidLink = false;
     previewContent.forEach((item, index) => {
@@ -1555,6 +1620,7 @@ const TemMainpage = () => {
       // Store initial campaign history with "Pending" status
       const campaignHistoryData = {
         campaignname: campaign.camname,
+        temname: templateName,
         groupname: "No Group",
         totalcount: recipients.length,
         recipients: "no mail",
@@ -1813,7 +1879,7 @@ const TemMainpage = () => {
               )}
 
               <button
-                onClick={() => setIsOpen(true)}
+                onClick={handleopensentoptions}
                 className="navbar-button-send"
               >
                 <span className="Nav-icons">
@@ -7469,12 +7535,21 @@ const TemMainpage = () => {
             </div>
           )}
 
+          {/* Show Warning Modal */}
+          
+                     <WarningModal
+                  isOpen={showWarningModal}
+                  onConfirm={handleConfirmRefresh}
+                  onCancel={handleCancel}
+                />
+
           {/* Show SendBulkModal when button is clicked */}
           {showSendModal && (
             <SendbulkModal
               isOpen={showSendModal}
               onClose={() => setShowSendModal(false)}
               bgColor={bgColor}
+              temname={templateName}
               previewContent={previewContent} // Pass previewContent to Sendbulkmail
             />
           )}
@@ -7485,6 +7560,7 @@ const TemMainpage = () => {
               isOpen={showSendexcelModal}
               onClose={() => setShowSendexcelModal(false)}
               bgColor={bgColor}
+              temname={templateName}
               previewContent={previewContent} // Pass previewContent to Sendexcelmail
             />
           )}

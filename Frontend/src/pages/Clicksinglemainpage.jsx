@@ -42,6 +42,7 @@ import "react-datepicker/dist/react-datepicker.css";
 import FileManagerModal from "./FilemanagerModal.jsx";
 import ParaEditorbutton from "../component/Campaign-Creation/ParaEditorbutton.jsx";
 import ColorPalettePicker from "./ColorPalettePicker.jsx";
+import WarningModal from "./WarningModal.jsx";
 
 const Clicksinglemainpage = () => {
   const [activeTab, setActiveTab] = useState("button1");
@@ -129,6 +130,50 @@ const Clicksinglemainpage = () => {
     return () => window.removeEventListener("resize", handleResizecolor);
   }, []);
 
+  const [showWarningModal, setShowWarningModal] = useState(false);
+      const [shouldRefresh, setShouldRefresh] = useState(false);
+    
+      useEffect(() => {
+        const handleBeforeUnload = (e) => {
+          e.preventDefault(); // Needed for some browsers
+          e.returnValue = ""; // Show default browser message (won't appear if using custom modal)
+          setShowWarningModal(true);
+          return ""; // This is required for Chrome
+        };
+    
+        const handleKeyPress = (e) => {
+          if (
+            (e.key === "F5") || // F5
+            (e.ctrlKey && e.key === "r") || // Ctrl+R
+            (e.metaKey && e.key === "r") // Cmd+R (Mac)
+          ) {
+            e.preventDefault();
+            setShowWarningModal(true);
+            setShouldRefresh(true);
+          }
+        };
+    
+        window.addEventListener("beforeunload", handleBeforeUnload);
+        window.addEventListener("keydown", handleKeyPress);
+    
+        return () => {
+          window.removeEventListener("beforeunload", handleBeforeUnload);
+          window.removeEventListener("keydown", handleKeyPress);
+        };
+      }, []);
+    
+      const handleConfirmRefresh = () => {
+        setShowWarningModal(false);
+        window.removeEventListener("beforeunload", () => {}); // Optional cleanup
+        window.location.reload(); // Now refresh
+      };
+    
+      const handleCancel = () => {
+        setShowWarningModal(false);
+        setShouldRefresh(false);
+      };
+  
+
   function convertToWhatsAppText(html) {
     const tempDiv = document.createElement("div");
     tempDiv.innerHTML = html;
@@ -172,6 +217,18 @@ const Clicksinglemainpage = () => {
   function formatPreviewContent(message) {
     return message; // Don't strip HTML here
   }
+
+  const handleopensentoptions = () => {
+    if (previewContent.length === 0) {
+      toast.error("Please add content before sending.");
+      return;
+    }
+    if (!templateName) {
+      toast.error("Please save template before sending.");
+      return;
+    }
+      setIsOpen(true);
+    }
 
   const handleDeleteFolder = async () => {
     try {
@@ -1392,6 +1449,10 @@ const Clicksinglemainpage = () => {
       toast.warning("No preview content available.");
       return;
     }
+    if (!templateName) {
+      toast.warning("Please save the template before scheduling.");
+      return; 
+    }
     // Check for missing links and show individual toasts
     let hasInvalidLink = false;
     previewContent.forEach((item, index) => {
@@ -1473,6 +1534,7 @@ const Clicksinglemainpage = () => {
       // Store campaign history with uploaded file data
       const campaignHistoryData = {
         campaignname: campaignName.trim(),
+        temname: templateName || "No Template",
         groupname: "No Group",
         totalcount: recipients.length,
         recipients: recipients.join(","), // Convert array to a single string
@@ -1517,6 +1579,11 @@ const Clicksinglemainpage = () => {
       toast.warning("No preview content available.");
       return;
     }
+    if(!templateName) {
+      toast.warning("Please save the template before sending.");
+      return; 
+    }
+
     // Check for missing links and show individual toasts
     let hasInvalidLink = false;
     previewContent.forEach((item, index) => {
@@ -1607,6 +1674,7 @@ const Clicksinglemainpage = () => {
       // Store initial campaign history with "Pending" status
       const campaignHistoryData = {
         campaignname: campaignName.trim(),
+        temname: templateName || "No Template",
         groupname: "No Group",
         totalcount: recipients.length,
         recipients: "no mail",
@@ -1891,7 +1959,7 @@ const Clicksinglemainpage = () => {
               )}
 
               <button
-                onClick={() => setModalOpen(true)}
+                onClick={handleopensentoptions}
                 className="navbar-button-send"
               >
                 <span className="Nav-icons">
@@ -2025,13 +2093,20 @@ const Clicksinglemainpage = () => {
                     )}
                   </div>
                 )}
-                <button className="navbar-button-send">
-                  <span className="Nav-icons">
-                    <MdSend />
-                  </span>{" "}
-                  <span className="nav-names">Send Mail</span>
-                </button>
-
+                <button
+                                              onClick={() => {
+                                                handleopensentoptions();
+                                                if (window.innerWidth < 768) {
+                                                  setIsNavOpen(false); // Close toggle only in mobile view
+                                                }
+                                              }}
+                                              className="navbar-button-send"
+                                            >
+                                              <span className="Nav-icons">
+                                                <MdSend />
+                                              </span>{" "}
+                                              <span className="nav-names">Send Mail</span>
+                                            </button>
                 <button onClick={handlebackcampaign} className="navbar-button">
                   <span className="Nav-icons">
                     <FaArrowLeft />
@@ -7487,9 +7562,19 @@ const Clicksinglemainpage = () => {
               isOpen={showSendModal}
               onClose={() => setShowSendModal(false)}
               bgColor={bgColor}
+              temname={templateName}
               previewContent={previewContent} // Pass previewContent to Sendbulkmail
             />
           )}
+
+{/* Show Warning Modal */}
+
+           <WarningModal
+        isOpen={showWarningModal}
+        onConfirm={handleConfirmRefresh}
+        onCancel={handleCancel}
+      />
+
 
           {/* Show Sendexcelmail when button is clicked */}
           {showSendexcelModal && (
@@ -7497,6 +7582,7 @@ const Clicksinglemainpage = () => {
               isOpen={showSendexcelModal}
               onClose={() => setShowSendexcelModal(false)}
               bgColor={bgColor}
+              temname={templateName}
               previewContent={previewContent} // Pass previewContent to Sendexcelmail
             />
           )}

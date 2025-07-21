@@ -5,6 +5,9 @@ const camhistorySchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  temname: {
+        type: String,
+  },
   groupname: {
     type: String,
     required: true,

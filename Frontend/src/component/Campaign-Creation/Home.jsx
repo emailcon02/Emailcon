@@ -60,7 +60,7 @@ import {
   Legend,
   Line,
 } from "recharts";
-import LivePopup from "./Livepopup.jsx";
+import LivePopup from "./LivePopup.jsx";
 
 const Home = () => {
   const [view, setView] = useState("dashboard");
@@ -72,6 +72,7 @@ const Home = () => {
   const [campaignName, setCampaignName] = useState("");
   const [templateName, setTemplateName] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
+const [isFromSavedTemplate, setIsFromSavedTemplate] = useState(false);
 
 
   const [showfileGroupModal, setShowfileGroupModal] = useState(false);
@@ -157,6 +158,63 @@ const Home = () => {
     automation: false,
     templates: false,
   });
+  const [selectedTemplates, setSelectedTemplates] = useState([]);
+const [selectAll, setSelectAll] = useState(false);
+const [showDeleteModaltemall, setShowDeleteModaltemall] = useState(false);
+const [showDeleteModalbirthtemall, setShowDeleteModalbirthtemall] = useState(false);
+const handleSelectTemplate = (id) => {
+  setSelectedTemplates(prev =>
+    prev.includes(id) ? prev.filter(_id => _id !== id) : [...prev, id]
+  );
+};
+
+const handleSelectAll = () => {
+  if (selectAll) {
+    setSelectedTemplates([]);
+  } else {
+    setSelectedTemplates(templates.map(t => t._id));
+  }
+  setSelectAll(!selectAll);
+};
+
+
+const handleDeleteTemplates = async () => {
+  try {
+    await axios.post(`${apiConfig.baseURL}/api/stud/templates/delete-multiple`, {
+      ids: selectedTemplates
+    });
+
+    setTemplates(prev => prev.filter(t => !selectedTemplates.includes(t._id)));
+    setSelectedTemplates([]);
+    setSelectAll(false);
+    setShowDeleteModaltemall(false);
+
+    toast.success("Templates deleted successfully!");
+  } catch (err) {
+    console.error('Delete failed', err);
+    toast.error("Failed to delete templates. Please try again.");
+  }
+};
+
+const handleDeleteTemplatesbirth = async () => {
+  try {
+    await axios.post(`${apiConfig.baseURL}/api/stud/birth-templates/delete-multiple`, {
+      ids: selectedTemplates
+    });
+
+    setTemplates(prev => prev.filter(t => !selectedTemplates.includes(t._id)));
+    setSelectedTemplates([]);
+    setSelectAll(false);
+    setShowDeleteModalbirthtemall(false);
+
+    toast.success("Templates deleted successfully!");
+  } catch (err) {
+    console.error('Delete failed', err);
+    toast.error("Failed to delete templates. Please try again.");
+  }
+};
+
+
 
   const toggleLine = (key) => {
     setVisible((prev) => ({ ...prev, [key]: !prev[key] }));
@@ -552,8 +610,13 @@ const Home = () => {
         setCampaigns(campaignsRes.data);
         setGroups(groupsRes.data);
         setStudents(studentsRes.data);
-        setTemplates(templatesRes.data);
-        setBirthTemplates(birthtemplatesRes.data);
+setTemplates(
+  templatesRes.data.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+);
+setBirthTemplates(
+  birthtemplatesRes.data.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+);
+
         setPaymentdetails(paymentdetails.data);
 
         const metrics = {};
@@ -973,20 +1036,22 @@ const Home = () => {
   const handlenavigatecampaign = () => {
     navigate("/campaigntable");
   };
-  const handlePreview = (template) => {
-    setShowtemModal(false);
-    setIsPreviewOpen(true);
-    setSelectedTemplatepre(template);
-    setBgColortem(template.bgColor || "#ffffff"); // Update background color
-    setPreviewContenttem(template.previewContent || []); // Update previewContent
-  };
-  const handlePreviewbirth = (template) => {
-    setShowbirthtemModal(false);
-    setIsBirthPreviewOpen(true);
-    setSelectedTemplatepre(template);
-    setBgColortem(template.bgColor || "#ffffff"); // Update background color
-    setPreviewContenttem(template.previewContent || []); // Update previewContent
-  };
+const handlePreview = (template, fromSavedTemplate = false) => {
+  setIsPreviewOpen(true);
+  setSelectedTemplatepre(template);
+  setBgColortem(template.bgColor || "#ffffff");
+  setPreviewContenttem(template.previewContent || []);
+  setIsFromSavedTemplate(fromSavedTemplate); // update state
+};
+
+
+  // const handlePreviewbirth = (template) => {
+  //   setShowbirthtemModal(false);
+  //   setIsBirthPreviewOpen(true);
+  //   setSelectedTemplatepre(template);
+  //   setBgColortem(template.bgColor || "#ffffff"); // Update background color
+  //   setPreviewContenttem(template.previewContent || []); // Update previewContent
+  // };
   const handlePreviewautomate = (template) => {
     setIsPreviewOpenauto(true);
     setSelectedTemplatepre(template);
@@ -994,10 +1059,15 @@ const Home = () => {
     setPreviewContenttem(template.previewContent || []); // Update previewContent
     setBdyCampaignname(template.camname);
   };
-  const handleCloseModalpre = () => {
-    setIsPreviewOpen(false);
-    // setShowtemModal(true);
-  };
+const handleCloseModalpre = () => {
+  setIsPreviewOpen(false);
+
+  if (isFromSavedTemplate) {
+    setShowtemModal(true);  // only if preview was from saved template modal
+    setIsFromSavedTemplate(false); // reset after use
+  }
+};
+
   const handleCloseModalpreauto = () => {
     setIsPreviewOpenauto(false);
   };
@@ -2857,14 +2927,13 @@ const Home = () => {
                     </div>
                     <div className="saved-template-gallery-home">
 {templates.slice((currentPage - 1) * 6, currentPage * 6).map((template, index) => {
-   const matchingCampaigns = campaigns
-    .filter((c) => c.campaignname === template.camname)
+  const matchingCampaigns = campaigns
+    .filter((c) => c.temname === template.temname)
     .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)); // latest first
 
   const usageCount = matchingCampaigns.length;
-  const latestCampaign = matchingCampaigns[0]; // may be undefined
+  const latestCampaign = matchingCampaigns[0];
 
-  // Metrics from latest matched campaign
   const metrics = latestCampaign && campaignMetrics[latestCampaign._id]
     ? campaignMetrics[latestCampaign._id]
     : {};
@@ -2872,14 +2941,23 @@ const Home = () => {
   const {
     openCount = 0,
     clickCount = 0,
-    bounceCount = 0,
-    unsubCount = 0,
   } = metrics;
 
-  // Show last used date if available
+
+  const totalCount = parseInt(latestCampaign?.totalcount || 0);
+  const sendCount = parseInt(latestCampaign?.sendcount || 0);
+  const failedCount = parseInt(latestCampaign?.failedcount || 0);
+
+  const openRate = sendCount > 0 ? ((openCount / totalCount) * 100).toFixed(0) : 0;
+  const clickRate = sendCount > 0 ? ((clickCount / totalCount) * 100).toFixed(0) : 0;
+  const failRate = sendCount > 0 ? ((failedCount / totalCount) * 100).toFixed(0) : 0;
+  const sendRate = sendCount > 0 ? ((sendCount / totalCount) * 100).toFixed(0) : 0;
+
   const lastUsedDate = latestCampaign?.createdAt
     ? new Date(latestCampaign.createdAt).toLocaleDateString()
     : "N/A";
+
+
       return (
 
                         <div className="template-thumbnail-container-home">
@@ -3384,10 +3462,11 @@ const Home = () => {
                                 </div>
                               ))}
                               {/* Add overlay div */}
-                              <div className="template-overlay">
+                              <div className="template-overlay"
+                              onClick={() => handlePreview(template,false)}
+>
                                 <div
                                   className="overlay-content"
-                                  onClick={() => handlePreview(template)}
                                 >
                                   <span className="overlay-icon">
                                     <FaEye
@@ -3417,22 +3496,23 @@ const Home = () => {
                                 </div>
                               </div>
             <div className="inv-card-metrics">
+              <div className="inv-card-metric">
+              <p className="inv-text-green">{sendRate}%</p>
+              <p>Send Rate</p>
+            </div>
             <div className="inv-card-metric">
-              <p className="inv-text-orange">{openCount}%</p>
+              <p className="inv-text-orange">{openRate}%</p>
               <p>Open Rate</p>
             </div>
             <div className="inv-card-metric">
-              <p className="inv-text-green">{clickCount}%</p>
+              <p className="inv-text-green">{clickRate}%</p>
               <p>Click Rate</p>
             </div>
             <div className="inv-card-metric">
-              <p className="inv-text-green">{bounceCount}%</p>
+              <p className="inv-text-orange">{failRate}%</p>
               <p>Bounced</p>
             </div>
-            <div className="inv-card-metric">
-              <p className="inv-text-orange">{unsubCount}</p>
-              <p>Unsubscribe</p>
-            </div>
+            
           </div>
 
 
@@ -3443,7 +3523,7 @@ const Home = () => {
                                 <div>
                                   <button
                                     className="btn-preview"
-                                    onClick={() => handlePreview(template)}
+                                    onClick={() => handlePreview(template,false)}
                                   >
                                     <FaEye
                                       style={{
@@ -4005,12 +4085,588 @@ const Home = () => {
                     x
                   </button>
                 </div>
+
+<div className="template-actions-delete">
+
+        <p className="select-all-tem">
+           <input
+            type="checkbox"
+            checked={selectAll}
+            onChange={handleSelectAll}
+          />
+          {" "}Select All
+        </p>
+        <button 
+  onClick={() => {
+    if (selectedTemplates.length === 0) {
+      toast.warning("No template selected for deletion.");
+    } else {
+       setShowDeleteModaltemall(true);
+    }
+  }} 
+  className="delete-all-btn-tem"
+>
+ <FaTrash />
+ </button>
+      </div>
+
+
                 <div className="saved-template-gallery">
                   {templates.map((template, index) => (
                     <div
                       key={index}
                       className="template-thumbnail-container"
-                      onClick={() => handlePreview(template)}
+                      onClick={() => handlePreview(template,true)}
+                    >
+                       
+                      <div
+                        className="template-thumbnail"
+                        style={{
+                          backgroundColor: template.bgColor || "#ffffff",
+                          border: "1px solid #ccc",
+                          padding: "10px",
+                          margin: "10px",
+                          borderRadius: "6px",
+                          width: "250px",
+                          height: "250px",
+                          overflow: "scroll",
+                          cursor: "pointer",
+                        }}
+                      >
+                        {template.previewContent?.map((item, idx) => (
+                          <div
+                            key={idx}
+                            style={{ fontSize: "12px", marginBottom: "6px" }}
+                          >
+                            {/* Heading */}
+                            {item.type === "head" && (
+                              <div ref={dropdownRef}>
+                                <p className="border" style={item.style}>
+                                  {item.content}
+                                </p>
+                              </div>
+                            )}
+
+                            {/* Paragraph */}
+                            {item.type === "para" && (
+                              <div className="border para-container">
+                                <p
+                                  className="border-para para-gallery"
+                                  contentEditable
+                                  suppressContentEditableWarning
+                                  onClick={() => {
+                                    setSelectedIndex(index);
+                                    setIsModalOpen(true); // Open the modal
+                                  }}
+                                  style={item.style}
+                                  dangerouslySetInnerHTML={{
+                                    __html: item.content,
+                                  }}
+                                />
+                              </div>
+                            )}
+
+                            {/* Image */}
+                            {item.type === "image" && (
+                              <div className="border">
+                                <img
+                                  src={
+                                    item.src ||
+                                    "https://via.placeholder.com/200"
+                                  }
+                                  alt="Preview"
+                                  className="img gallery-img-image"
+                                  style={item.style}
+                                />
+                              </div>
+                            )}
+
+                            {/* Banner*/}
+                            {item.type === "banner" && (
+                              <div className="border">
+                                <img
+                                  src={
+                                    item.src ||
+                                    "https://via.placeholder.com/200"
+                                  }
+                                  alt="Preview"
+                                  className="img gallery-img-banner"
+                                  style={item.style}
+                                />
+                              </div>
+                            )}
+
+                            {/* Button */}
+                            {item.type === "button" && (
+                              <div className="border-btn">
+                                <div className="border-btn">
+                                  <a
+                                    href={item.link || "#"}
+                                    target={
+                                      item.buttonType === "link"
+                                        ? "_blank"
+                                        : undefined
+                                    }
+                                    rel="noopener noreferrer"
+                                    style={item.style}
+                                    className="button-preview btn-gallery-whole"
+                                  >
+                                    {item.content ||
+                                      (item.buttonType === "whatsapp"
+                                        ? "Connect on WhatsApp"
+                                        : item.buttonType === "contact"
+                                        ? "Call Now"
+                                        : "Visit Link")}
+                                  </a>
+                                </div>
+                              </div>
+                            )}
+
+                            {/* {item.type === "link-image" && (
+ <div className="border">
+ <a
+ href={item.link || "#"}
+ onClick={(e) => handleLinkClick(e, index)}
+ >
+ <img
+ src={
+ item.src || "https://via.placeholder.com/200"
+ }
+ alt="Editable"
+ className="img"
+ style={item.style}
+ onClick={() => handleopenFiles(index, 1)}
+ title="Upload Image"
+ />
+ </a>
+ </div>
+ )} */}
+
+                            {/* Link */}
+                            {item.type === "link-image" && (
+                              <div className="border">
+                                <a
+                                  href={item.link || "#"}
+                                  onClick={(e) => handleLinkClick(e, index)}
+                                >
+                                  <img
+                                    src={
+                                      item.src ||
+                                      "https://via.placeholder.com/200"
+                                    }
+                                    alt="Editable"
+                                    className="img gallery-img-image"
+                                    style={item.style}
+                                    onClick={() => handleopenFiles(index, 1)}
+                                    title="Upload Image"
+                                  />
+                                </a>
+                              </div>
+                            )}
+
+                            {/* Break Line */}
+                            {item.type === "break" && (
+                              <div className="border-break gallery-line">
+                                <hr style={item.style} />
+                              </div>
+                            )}
+
+                            {/* Gap/Spacing */}
+                            {item.type === "gap" && (
+                              <div className="border-break">
+                                <div style={item.styles}></div>
+                              </div>
+                            )}
+                            {/* 
+ {item.type === "logo" && (
+ <div className="border">
+ <img
+ src={item.src || "https://via.placeholder.com/200"}
+ alt="Editable"
+ className="logo"
+ style={item.style}
+ onClick={() => handleopenFiles(index, 1)}
+ title="Upload Image"
+ />
+ </div>
+ )} */}
+
+                            {item.type === "cardimage" ? (
+                              <div
+                                className="card-image-container"
+                                style={item.style1}
+                              >
+                                <img
+                                  src={
+                                    item.src1 ||
+                                    "https://via.placeholder.com/200"
+                                  }
+                                  style={item.style}
+                                  alt="Editable"
+                                  className="card-image"
+                                  title="Upload Image"
+                                  onClick={() => handleopenFiles(index, 1)}
+                                />
+                                <p
+                                  className="card-text"
+                                  contentEditable
+                                  suppressContentEditableWarning
+                                  onClick={
+                                    () => {
+                                      setModalIndex(index);
+                                      setIsModalOpen(true);
+                                    } // Open the modal
+                                  } // Open modal for this index
+                                  style={item.style}
+                                  dangerouslySetInnerHTML={{
+                                    __html: item.content1,
+                                  }}
+                                />
+                              </div>
+                            ) : null}
+
+                            {/* Logo */}
+                            {item.type === "logo" && (
+                              <div className="border">
+                                <img
+                                  src={
+                                    item.src ||
+                                    "https://via.placeholder.com/200"
+                                  }
+                                  alt="Editable"
+                                  className="logo gallery-img"
+                                  style={item.style}
+                                  onClick={() => handleopenFiles(index, 1)}
+                                  title="Upload Image"
+                                />
+                              </div>
+                            )}
+
+                            {/* Image with Text */}
+                            {item.type === "imagewithtext" && (
+                              <div className="image-text-container">
+                                <div
+                                  className="image-text-wrapper"
+                                  id="gallery-imagewithtext"
+                                  style={item.style1}
+                                >
+                                  <img
+                                    src={
+                                      item.src1 ||
+                                      "https://via.placeholder.com/200"
+                                    }
+                                    alt="Preview"
+                                    className="image-item gallery-img-text-img"
+                                  />
+                                  <p
+                                    className="text-item gallery-text-img"
+                                    style={item.style}
+                                  >
+                                    {item.content1}
+                                  </p>
+                                </div>
+                              </div>
+                            )}
+
+                            {/* Text with Image */}
+                            {item.type === "textwithimage" && (
+                              <div className="image-text-container">
+                                <div
+                                  className="image-text-wrapper"
+                                  id="gallery-imagewithtext"
+                                  style={item.style}
+                                >
+                                  <p
+                                    className="text-item gallery-text-img"
+                                    style={item.style}
+                                  >
+                                    {item.content2}
+                                  </p>
+                                  <img
+                                    src={
+                                      item.src2 ||
+                                      "https://via.placeholder.com/200"
+                                    }
+                                    alt="Preview"
+                                    className="image-item gallery-img-text-img"
+                                  />
+                                </div>
+                              </div>
+                            )}
+
+                            {item.type === "multi-image" ? (
+                              <div className="Layout-img">
+                                <div className="Layout multi-gallery">
+                                  <img
+                                    src={
+                                      item.src1 ||
+                                      "https://via.placeholder.com/200"
+                                    }
+                                    alt="Editable"
+                                    className="multiimg gallery-img-multi"
+                                    title="Upload Image 240 x 240"
+                                    style={item.style}
+                                    onClick={() => handleopenFiles(index, 1)}
+                                  />
+                                  <a
+                                    href={item.link1}
+                                    target="_blank"
+                                    className="button-preview btn-gallery"
+                                    rel="noopener noreferrer"
+                                    style={item.buttonStyle1}
+                                  >
+                                    {item.content1}
+                                  </a>
+                                </div>
+
+                                <div className="Layout multi-gallery">
+                                  <img
+                                    src={
+                                      item.src2 ||
+                                      "https://via.placeholder.com/200"
+                                    }
+                                    alt="Editable"
+                                    className="multiimg gallery-img-multi"
+                                    title="Upload Image 240 x 240"
+                                    style={item.style}
+                                    onClick={() => handleopenFiles(index, 2)}
+                                  />
+                                  <a
+                                    href={item.link2}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="button-preview btn-gallery"
+                                    style={item.buttonStyle2}
+                                  >
+                                    {item.content2}
+                                  </a>
+                                </div>
+                              </div>
+                            ) : null}
+
+                            {/* Multi Image Card */}
+                            {item.type === "multi-image-card" && (
+                              <div className="Layout-img">
+                                <div className="Layout multi-gallery">
+                                  <img
+                                    src={
+                                      item.src1 ||
+                                      "https://via.placeholder.com/200"
+                                    }
+                                    alt="Preview"
+                                    className="multiimgcard gallery-img-multi"
+                                    style={item.style}
+                                  />
+                                  <h3 className="card-text-image text-card">
+                                    {item.title1 || " "}
+                                  </h3>
+                                  <p>
+                                    <s>
+                                      {item.originalPrice1
+                                        ? `$${item.originalPrice1}`
+                                        : " "}
+                                    </s>
+                                  </p>
+                                  <p>
+                                    {item.offerPrice1
+                                      ? `Off Price $${item.offerPrice1}`
+                                      : " "}
+                                  </p>
+                                  <a
+                                    href={item.link1}
+                                    className="button-preview btn-gallery"
+                                    style={item.buttonStyle1}
+                                  >
+                                    {item.content1}
+                                  </a>
+                                </div>
+
+                                <div className="Layout multi-gallery">
+                                  <img
+                                    src={
+                                      item.src2 ||
+                                      "https://via.placeholder.com/200"
+                                    }
+                                    alt="Preview"
+                                    className="multiimgcard"
+                                    style={item.style}
+                                  />
+                                  <h3 className="card-text-image text-card">
+                                    {item.title2 || " "}
+                                  </h3>
+                                  <p>
+                                    <s>
+                                      {item.originalPrice2
+                                        ? `$${item.originalPrice2}`
+                                        : " "}
+                                    </s>
+                                  </p>
+                                  <p>
+                                    {item.offerPrice2
+                                      ? `Off Price $${item.offerPrice2}`
+                                      : " "}
+                                  </p>
+                                  <a
+                                    href={item.link2}
+                                    className="button-preview btn-gallery"
+                                    style={item.buttonStyle2}
+                                  >
+                                    {item.content2}
+                                  </a>
+                                </div>
+                              </div>
+                            )}
+
+                            {/* Multiple Images */}
+                            {item.type === "multipleimage" && (
+                              <div className="Layout-img">
+                                <div className="Layout multi-gallery">
+                                  <img
+                                    src={
+                                      item.src1 ||
+                                      "https://via.placeholder.com/200"
+                                    }
+                                    alt="Preview"
+                                    className="multiple-img gallery-img-multi"
+                                    style={item.style}
+                                  />
+                                </div>
+                                <div className="Layout multi-gallery">
+                                  <img
+                                    src={
+                                      item.src2 ||
+                                      "https://via.placeholder.com/200"
+                                    }
+                                    alt="Preview"
+                                    className="multiple-img gallery-img-multi"
+                                    style={item.style}
+                                  />
+                                </div>
+                              </div>
+                            )}
+
+                            {/* Video Icon */}
+                            {item.type === "video-icon" && (
+                              <div className="video-icon">
+                                <img
+                                  src={
+                                    item.src1 ||
+                                    "https://via.placeholder.com/200"
+                                  }
+                                  alt="Preview"
+                                  className="videoimg video-img"
+                                  style={item.style}
+                                />
+                                <a href={item.link}>
+                                  <img
+                                    src={item.src2}
+                                    className="video-btn"
+                                    alt="Play"
+                                  />
+                                </a>
+                              </div>
+                            )}
+
+                            {/* Social Icons */}
+                            {item.type === "icons" && (
+                              <div className="border" style={item.ContentStyle}>
+                                <div className="icon-containers">
+                                  <a href={item.links1 || "#"}>
+                                    <img
+                                      src={item.iconsrc1}
+                                      alt="Social"
+                                      className="icon"
+                                      style={item.style1}
+                                    />
+                                  </a>
+                                  <a href={item.links2 || "#"}>
+                                    <img
+                                      src={item.iconsrc2}
+                                      alt="Social"
+                                      className="icon"
+                                      style={item.style2}
+                                    />
+                                  </a>
+                                  <a href={item.links3 || "#"}>
+                                    <img
+                                      src={item.iconsrc3}
+                                      alt="Social"
+                                      className="icon"
+                                      style={item.style3}
+                                    />
+                                  </a>
+                                  <a href={item.links4 || "#"}>
+                                    <img
+                                      src={item.iconsrc4}
+                                      alt="Social"
+                                      className="icon"
+                                      style={item.style4}
+                                    />
+                                  </a>
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                      <div className="template-name">
+                        <input
+  type="checkbox"
+  checked={selectedTemplates.includes(template._id)}
+  onClick={(e) => e.stopPropagation()} // stop click bubbling
+  onChange={() => handleSelectTemplate(template._id)} // handle state
+  className="template-checkbox"
+/>
+
+  <h4>{template.temname}</h4>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Modal for birthday template Details */}
+          {showbirthtemModal && (
+            <div className="modal-overlay-tem">
+ <div className="modal-content-tem">
+                <div className="modal-nav-previews">
+                  <h2>Saved Birthday Templates</h2>
+                  <button className="close-button-tem" onClick={handlebirthtemclose}>
+                    x
+                  </button>
+                </div>
+                <div className="template-actions-delete">
+
+        <p className="select-all-tem">
+           <input
+            type="checkbox"
+            checked={selectAll}
+            onChange={handleSelectAll}
+          />
+          {" "}Select All
+        </p>
+        <button 
+  onClick={() => {
+    if (selectedTemplates.length === 0) {
+      toast.warning("No template selected for deletion.");
+    } else {
+       setShowDeleteModalbirthtemall(true);
+    }
+  }} 
+  className="delete-all-btn-tem"
+>
+ <FaTrash />
+ </button>
+      </div>
+
+                <div className="saved-template-gallery">
+                  {birthtemplates.map((template, index) => (
+                    <div
+                      key={index}
+                      className="template-thumbnail-container"
+                      onClick={() => handlePreview(template,false)}
                     >
                       <div
                         className="template-thumbnail"
@@ -4503,42 +5159,18 @@ const Home = () => {
                         ))}
                       </div>
                       <div className="template-name">
+                         <input
+  type="checkbox"
+  checked={selectedTemplates.includes(template._id)}
+  onClick={(e) => e.stopPropagation()} // stop click bubbling
+  onChange={() => handleSelectTemplate(template._id)} // handle state
+  className="template-checkbox"
+/>
                         <h4>{template.temname}</h4>
                       </div>
                     </div>
                   ))}
                 </div>
-              </div>
-            </div>
-          )}
-
-          {/* Modal for birthday template Details */}
-          {showbirthtemModal && (
-            <div className="modal-overlay-tem">
-              <div className="modal-content-tem">
-                <div className="modal-nav-previews">
-                  <h2 className="birthday-head">Saved Birthday Templates</h2>
-                  <button
-                    className="close-button-tem"
-                    onClick={handlebirthtemclose}
-                  >
-                    x
-                  </button>
-                </div>
-                <ol>
-                  {birthtemplates.length > 0 ? (
-                    birthtemplates.map((template) => (
-                      <li
-                        key={template._id}
-                        onClick={() => handlePreviewbirth(template)}
-                      >
-                        {template.temname}
-                      </li>
-                    ))
-                  ) : (
-                    <p>No templates found</p>
-                  )}
-                </ol>
               </div>
             </div>
           )}
@@ -6678,6 +7310,138 @@ const Home = () => {
             </div>
           )}
 
+           {showDeleteModaltemall && (
+            <div
+              style={{
+                position: "fixed",
+                top: 0,
+                left: 0,
+                width: "100vw",
+                height: "100vh",
+                background: "rgba(0,0,0,0.4)",
+                zIndex: 9999,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <div
+                style={{
+                  background: "#fff",
+                  borderRadius: 8,
+                  padding: 32,
+                  minWidth: 320,
+                  boxShadow: "0 2px 16px rgba(0,0,0,0.2)",
+                  textAlign: "center",
+                }}
+              >
+                <div style={{ fontSize: 18, marginBottom: 20 }}>
+                  Are you sure you want to delete this template?
+                </div>
+                <div
+                  style={{ display: "flex", justifyContent: "center", gap: 16 }}
+                >
+                  <button
+                    style={{
+                      background: "#f48c06",
+                      color: "#fff",
+                      border: "none",
+                      padding: "8px 24px",
+                      borderRadius: 4,
+                      cursor: "pointer",
+                    }}
+                    onClick={handleDeleteTemplates}
+                    disabled={isDeleting}
+                  >
+                    {isDeleting ? (
+                      <span className="loader-create"></span>
+                    ) : (
+                      "Delete"
+                    )}
+                  </button>
+                  <button
+                    style={{
+                      background: "#2f327d",
+                      color: "#fff",
+                      border: "none",
+                      padding: "8px 24px",
+                      borderRadius: 4,
+                      cursor: "pointer",
+                    }}
+                   onClick={() => setShowDeleteModaltemall(false)}                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* delete birth template all */}
+{showDeleteModalbirthtemall && (
+            <div
+              style={{
+                position: "fixed",
+                top: 0,
+                left: 0,
+                width: "100vw",
+                height: "100vh",
+                background: "rgba(0,0,0,0.4)",
+                zIndex: 9999,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <div
+                style={{
+                  background: "#fff",
+                  borderRadius: 8,
+                  padding: 32,
+                  minWidth: 320,
+                  boxShadow: "0 2px 16px rgba(0,0,0,0.2)",
+                  textAlign: "center",
+                }}
+              >
+                <div style={{ fontSize: 18, marginBottom: 20 }}>
+                  Are you sure you want to delete this template?
+                </div>
+                <div
+                  style={{ display: "flex", justifyContent: "center", gap: 16 }}
+                >
+                  <button
+                    style={{
+                      background: "#f48c06",
+                      color: "#fff",
+                      border: "none",
+                      padding: "8px 24px",
+                      borderRadius: 4,
+                      cursor: "pointer",
+                    }}
+                    onClick={handleDeleteTemplatesbirth}
+                    disabled={isDeleting}
+                  >
+                    {isDeleting ? (
+                      <span className="loader-create"></span>
+                    ) : (
+                      "Delete"
+                    )}
+                  </button>
+                  <button
+                    style={{
+                      background: "#2f327d",
+                      color: "#fff",
+                      border: "none",
+                      padding: "8px 24px",
+                      borderRadius: 4,
+                      cursor: "pointer",
+                    }}
+                   onClick={() => setShowDeleteModalbirthtemall(false)}                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
           {/* Modal for Creating Campaign */}
           {showCampaignModal && (
             <div className="campaign-modal-overlay">

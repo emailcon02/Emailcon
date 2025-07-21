@@ -11,7 +11,7 @@ import { useNavigate } from "react-router-dom";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 
-const ExcelModal = ({ isOpen, onClose, previewContent = [], bgColor }) => {
+const ExcelModal = ({ isOpen, onClose, previewContent = [], bgColor,temname }) => {
   const [excelData, setExcelData] = useState([]);
   const [fileName, setFileName] = useState("");
   const [message, setMessage] = useState("");
@@ -216,6 +216,11 @@ const ExcelModal = ({ isOpen, onClose, previewContent = [], bgColor }) => {
           toast.warning("No preview content available.");
           return;
         }
+        if (!temname) {
+  toast.warning("Please save your template before proceeding.");
+  return;
+}
+
         // Check for missing links and show individual toasts
            let hasInvalidLink = false;
            previewContent.forEach((item, index) => {
@@ -320,6 +325,7 @@ const ExcelModal = ({ isOpen, onClose, previewContent = [], bgColor }) => {
       // Store initial campaign history with "Pending" status
       const campaignHistoryData = {
         campaignname: campaign.camname,
+        temname:temname,
         groupname: "Instant Send",
         totalcount: rows.filter((row) => row[emailIndex]).length, // Count non-empty emails
         sendcount: 0,
@@ -363,6 +369,11 @@ const ExcelModal = ({ isOpen, onClose, previewContent = [], bgColor }) => {
           toast.warning("No preview content available.");
           return;
         }
+        if (!temname) {
+  toast.warning("Please save your template before proceeding.");
+  return;
+}
+
         // Check for missing links and show individual toasts
            let hasInvalidLink = false;
            previewContent.forEach((item, index) => {
@@ -445,6 +456,7 @@ const ExcelModal = ({ isOpen, onClose, previewContent = [], bgColor }) => {
 
     const payload = {
       campaignname: campaign.camname,
+      temname:temname,
       groupname: "Instant Send",
       totalcount: totalEmails,
       subject: message,

@@ -5,132 +5,107 @@ import "./LivePopup.css";
 
 const LivePopup = ({ userId }) => {
   const [popupActivity, setPopupActivity] = useState(null);
-  const [campaignName, setCampaignName] = useState("");
-  const [emailData, setEmailData] = useState([]);
-  const [clickedUrls, setClickedUrls] = useState([]);
-  const [campaignId, setCampaignId] = useState(null);
   const [showPopup, setShowPopup] = useState(false);
+  const [campaignMap, setCampaignMap] = useState([]); // Store all campaigns
 
-  // fetch latest campaign ID and name
-  const fetchLatestCampaign = async () => {
+  // Fetch all campaigns
+  const fetchCampaigns = async () => {
     try {
-      const res = await axios.get(
-        `${apiConfig.baseURL}/api/stud/campaigns/${userId}?t=${Date.now()}`
-      );
-      const sorted = res.data.sort(
-        (a, b) => new Date(b.senddate) - new Date(a.senddate)
-      );
-      const latest = sorted[0];
-      if (latest) {
-        setCampaignId(latest._id);
-        setCampaignName(latest.campaignname || "Unnamed Campaign");
-      }
+      const res = await axios.get(`${apiConfig.baseURL}/api/stud/campaigns/${userId}?t=${Date.now()}`);
+      const sorted = res.data.sort((a, b) => new Date(b.senddate) - new Date(a.senddate));
+      setCampaignMap(sorted); // store all
     } catch (err) {
-      console.error("Failed to fetch latest campaign", err);
+      console.error("Failed to fetch campaigns", err);
     }
   };
 
-  // fetch open & click data
-  const fetchActivityData = async (id) => {
-    try {
-      const [openRes, clickRes] = await Promise.all([
-        axios.get(
-          `${apiConfig.baseURL}/api/stud/get-email-open-count?userId=${userId}&campaignId=${id}`
-        ),
-        axios.get(
-          `${apiConfig.baseURL}/api/stud/get-click?userId=${userId}&campaignId=${id}`
-        ),
-      ]);
-      setEmailData(openRes.data.emails || []);
-      setClickedUrls(clickRes.data.urls || []);
-    } catch (err) {
-      console.error("Failed to fetch activity", err);
-    }
-  };
+  // Fetch activity for all campaigns
+  const fetchAllActivity = async () => {
+    const allActivity = [];
 
-  const getLatestActivity = () => {
-    const opens = emailData.map((item) => ({
-      type: "open",
-      emailId: item.emailId,
-      timestamp: new Date(item.timestamp),
-    }));
+    await Promise.all(
+      campaignMap.map(async (campaign) => {
+        try {
+          const [openRes, clickRes] = await Promise.all([
+            axios.get(`${apiConfig.baseURL}/api/stud/get-email-open-count?userId=${userId}&campaignId=${campaign._id}`),
+            axios.get(`${apiConfig.baseURL}/api/stud/get-click?userId=${userId}&campaignId=${campaign._id}`),
+          ]);
 
-    const clicks = [];
-    clickedUrls.forEach((url) => {
-      url.clicks.forEach((click) => {
-        clicks.push({
-          type: "click",
-          emailId: click.emailId,
-          timestamp: new Date(click.timestamp),
-        });
-      });
-    });
+          const opens = (openRes.data.emails || []).map((item) => ({
+            type: "open",
+            emailId: item.emailId,
+            timestamp: new Date(item.timestamp).getTime(),
+            campaignName: campaign.campaignname || "Unnamed Campaign",
+          }));
 
-    const all = [...opens, ...clicks].sort(
-      (a, b) => b.timestamp - a.timestamp
+          const clicks = [];
+          (clickRes.data.urls || []).forEach((url) => {
+            (url.clicks || []).forEach((click) => {
+              clicks.push({
+                type: "click",
+                emailId: click.emailId,
+                timestamp: new Date(click.timestamp).getTime(),
+                campaignName: campaign.campaignname || "Unnamed Campaign",
+              });
+            });
+          });
+
+          allActivity.push(...opens, ...clicks);
+        } catch (err) {
+          console.error("Activity fetch failed for campaign", campaign._id, err);
+        }
+      })
     );
-    return all[0] || null;
+
+    return allActivity.sort((a, b) => b.timestamp - a.timestamp);
   };
 
-  // First load: get latest campaign
+  // Initial fetch of campaigns
   useEffect(() => {
-    if (!userId) return;
-    fetchLatestCampaign();
+    if (userId) fetchCampaigns();
   }, [userId]);
 
-  // After getting campaignId, load activity data
+  // Refresh activity every 8 seconds
   useEffect(() => {
-    if (!campaignId) return;
-    fetchActivityData(campaignId);
-  }, [campaignId]);
+    if (!campaignMap.length) return;
 
-  // Show popup every 13s, hide it after 3s
-  useEffect(() => {
-    const interval = setInterval(() => {
-      const latest = getLatestActivity();
+    const interval = setInterval(async () => {
+      const activities = await fetchAllActivity();
+      const latest = activities[0];
+
       if (
         latest &&
         (!popupActivity || latest.timestamp > popupActivity.timestamp)
       ) {
-        setPopupActivity({ ...latest, campaignName }); // new data
+        setPopupActivity(latest);
       }
+
       setShowPopup(true);
-      setTimeout(() => setShowPopup(false), 4000); // hide after 4s
+      setTimeout(() => setShowPopup(false), 3000); // hide after 3s
     }, 8000);
 
     return () => clearInterval(interval);
-  }, [emailData, clickedUrls, popupActivity]);
-
-  // Refresh data every 30s (optional)
-  useEffect(() => {
-    const refresh = setInterval(() => {
-      if (campaignId) fetchActivityData(campaignId);
-    }, 30000);
-    return () => clearInterval(refresh);
-  }, [campaignId]);
+  }, [campaignMap, popupActivity]);
 
   return (
     <>
       {showPopup && popupActivity && (
         <div className="join-popup">
           <div className="join-popup-content">
-<div className="join-popup-avatar">
-  👤
-  
-</div>
+            <div className="join-popup-avatar">👤</div>
             <div className="join-popup-text">
               <p>
                 <strong>{popupActivity.emailId}</strong>
               </p>
               <p>
-                just {popupActivity.type === "open" ? "opened" : "clicked"}{" "} from <strong>{popupActivity.campaignName}</strong> campaign!
+                just {popupActivity.type === "open" ? "opened" : "clicked"}{" "}
+                from <strong>{popupActivity.campaignName}</strong> campaign!
               </p>
-              
             </div>
             <span className="live-pulse-wrapper">
-    <span className="live-pulse-circle"></span>
-    <span className="live-pulse-dot"></span>
-  </span>
+              <span className="live-pulse-circle"></span>
+              <span className="live-pulse-dot"></span>
+            </span>
           </div>
         </div>
       )}

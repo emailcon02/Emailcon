@@ -38,6 +38,7 @@ import DatePicker from "react-datepicker";
 import FileManagerModal from "./FilemanagerModal.jsx";
 import ParaEditorbutton from "../component/Campaign-Creation/ParaEditorbutton";
 import ColorPalettePicker from "./ColorPalettePicker.jsx";
+import WarningModal from "./WarningModal.jsx";
 
 const Birthdayeditor = () => {
   const [activeTab, setActiveTab] = useState("button1");
@@ -123,6 +124,49 @@ const Birthdayeditor = () => {
     window.addEventListener("resize", handleResizecolor);
     return () => window.removeEventListener("resize", handleResizecolor);
   }, []);
+
+   const [showWarningModal, setShowWarningModal] = useState(false);
+    const [shouldRefresh, setShouldRefresh] = useState(false);
+  
+    useEffect(() => {
+      const handleBeforeUnload = (e) => {
+        e.preventDefault(); // Needed for some browsers
+        e.returnValue = ""; // Show default browser message (won't appear if using custom modal)
+        setShowWarningModal(true);
+        return ""; // This is required for Chrome
+      };
+  
+      const handleKeyPress = (e) => {
+        if (
+          (e.key === "F5") || // F5
+          (e.ctrlKey && e.key === "r") || // Ctrl+R
+          (e.metaKey && e.key === "r") // Cmd+R (Mac)
+        ) {
+          e.preventDefault();
+          setShowWarningModal(true);
+          setShouldRefresh(true);
+        }
+      };
+  
+      window.addEventListener("beforeunload", handleBeforeUnload);
+      window.addEventListener("keydown", handleKeyPress);
+  
+      return () => {
+        window.removeEventListener("beforeunload", handleBeforeUnload);
+        window.removeEventListener("keydown", handleKeyPress);
+      };
+    }, []);
+  
+    const handleConfirmRefresh = () => {
+      setShowWarningModal(false);
+      window.removeEventListener("beforeunload", () => {}); // Optional cleanup
+      window.location.reload(); // Now refresh
+    };
+  
+    const handleCancel = () => {
+      setShowWarningModal(false);
+      setShouldRefresh(false);
+    };
 
   function convertToWhatsAppText(html) {
     const tempDiv = document.createElement("div");
@@ -7427,6 +7471,14 @@ const Birthdayeditor = () => {
               </div>
             </div>
           )}
+
+          {/* Show Warning Modal */}
+          
+                     <WarningModal
+                  isOpen={showWarningModal}
+                  onConfirm={handleConfirmRefresh}
+                  onCancel={handleCancel}
+                />
 
           {/* Show SendBulkModal when button is clicked */}
           {showSendModal && (
