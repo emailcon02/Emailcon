@@ -2040,8 +2040,8 @@
   align-items: center;
   align-content: center;
   transition: transform 0.3s ease;
-  margin-left: 0px auto !important;
-  /* width: 280px; */
+  margin-left: 10px auto !important;
+  width: 280px;
   height: 190px;
   cursor: pointer;
   border-top-left-radius: 8px;
@@ -2054,7 +2054,7 @@
   position: absolute;
   top: 0;
   left: 0;
-  width: 100%;
+  width: 110%;
   height: 100%;
   background-color: rgba(0, 0, 0, 0.5);
   display: flex;
@@ -2062,6 +2062,7 @@
   align-items: center;
   opacity: 0;
   transition: opacity 0.3s ease;
+
 }
 
 .template-thumbnail-wrapper:hover .template-overlay {
@@ -2077,6 +2078,7 @@
   flex-direction: column;
   align-items: center;
   gap: 8px;
+
 }
 
 .overlay-icon {
@@ -2142,7 +2144,7 @@
 /* ---------------------------------cards Design-------------------------------------- */
 
  .inv-card-container {
-      width: 220px;
+      /* width: 220px; */
       border-radius: 12px;
       padding: 10px 12px 0px 16px;
       color: #1f2d3d;
