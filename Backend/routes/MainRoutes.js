@@ -816,12 +816,15 @@ router.post('/start-campaign', async (req, res) => {
     
 
     // Filter out students with invalid emails before processing
-    const validStudents = students.filter(student => 
-      student?.Email && isValidEmail(student.Email)
-    );
-    const invalidEmails = students
-      .filter(student => !student?.Email || !isValidEmail(student.Email))
-      .map(student => student?.Email || 'missing');
+    const isValidEmail = email => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email?.trim());
+const validStudents = students
+  .filter(s => s?.Email)
+  .map(s => ({ ...s, Email: s.Email.trim() }))
+  .filter(s => isValidEmail(s.Email));
+const invalidEmails = students
+  .map(s => ({ ...s, Email: s.Email?.trim?.() }))
+  .filter(student => !student?.Email || !isValidEmail(student.Email))
+  .map(student => student?.Email || 'missing');
 
     // Create initial campaign record
     const campaignData = {
@@ -2629,11 +2632,18 @@ router.get('/aliasname/:userId', async (req, res) => {
   }
 });
 
-//add student to selected group through excel
+
+// Add student to selected group through excel
 router.post("/students/upload", async (req, res) => {
   try {
-    // console.log("Received data:", req.body); // Debugging
-    await Student.insertMany(req.body);
+    // console.log("Received data:", req.body); 
+
+    const cleanedStudents = req.body.map((student) => ({
+      ...student,
+      Email: student.Email?.trim(), // Trim & lowercase
+    }));
+// console.log("Cleaned students:", cleanedStudents); 
+    await Student.insertMany(cleanedStudents);
     res.status(201).send("Students uploaded successfully");
   } catch (error) {
     console.error("Error inserting students:", error);
@@ -2641,11 +2651,23 @@ router.post("/students/upload", async (req, res) => {
   }
 });
 
+
+
 //add manually student to selected group
 router.post("/students/manual", async (req, res) => {
-  const student = new Student(req.body);
-  await student.save();
-  res.status(201).send(student);
+  try {
+    const cleanedData = {
+      ...req.body,
+      Email: student.Email?.trim(), // Trim & lowercase
+    };
+
+    const student = new Student(cleanedData);
+    await student.save();
+    res.status(201).send(student);
+  } catch (error) {
+    console.error("Error saving student manually:", error);
+    res.status(500).send("Error saving student");
+  }
 });
 
 router.get('/students', async (req, res) => {
@@ -2857,10 +2879,15 @@ router.delete('/students', async (req, res) => {
 // 5. PUT route to edit a student's details
 router.put("/students/:id", async (req, res) => {
   try {
+    // Sanitize email: remove spaces if email exists in the body
+    if (req.body.Email) {
+      req.body.Email = req.body.Email.replace(/\s+/g, '').trim();
+    }
+
     const updatedStudent = await Student.findByIdAndUpdate(
       req.params.id,
-      { $set: req.body }, // Automatically update all fields, including dynamic ones
-      { new: true, runValidators: true } // Return updated student and validate fields
+      { $set: req.body },
+      { new: true, runValidators: true }
     );
 
     if (!updatedStudent) {

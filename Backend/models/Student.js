@@ -9,6 +9,7 @@ const studentSchema = new mongoose.Schema({
     },
     Email: {
         type: String,
+        set: (v) => v.trim(),
     },
     additionalFields: {
         type: Map,
