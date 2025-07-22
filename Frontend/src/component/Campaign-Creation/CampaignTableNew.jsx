@@ -2511,19 +2511,19 @@ useEffect(() => {
             </div>
           </div>
           <div className="content-container-Activity">
-            <div class="live-activity-box">
-              <div class="live-activity-header">
-                <div class="live-title">
-                  <span class="status-dot"></span>
+            <div className="live-activity-box">
+              <div className="live-activity-header">
+                <div className="live-title">
+                  <span className="status-dot"></span>
                   <h4 className="live-title">Live Activity</h4>
                 </div>
                 <i
                   onClick={handlereadDetails}
-                  class="fas fa-up-right-from-square icon-right"
+                  className="fas fa-up-right-from-square icon-right"
                 ></i>
               </div>
               <div className="live-activity-box-scroll">
-                <div class="activity-list">
+                <div className="activity-list">
                   {activityFeed.map((item, idx) => (
                     <div className="activity-item" key={idx}>
                       <div className="activity-icon">

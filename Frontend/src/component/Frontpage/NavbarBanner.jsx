@@ -109,7 +109,7 @@ const NavbarBanner = ({ onOpenModal }) => {
         </div>
         <div className="Banner-Image">
           <img className="ban-img" src={BannerImg} alt="ban-img" />
-          <div class="shadow"></div>
+          <div className="shadow"></div>
         </div>
       </header>
     </div>

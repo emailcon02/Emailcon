@@ -517,7 +517,6 @@ if (attachments && attachments.length > 0) {
           `Subject: ${emailData.subject}`,
           'MIME-Version: 1.0',
           'Content-Type: multipart/mixed; boundary="boundary_string"',
-          `List-Unsubscribe: <${unsubscribeLink}>`,   
           '',
           '--boundary_string',
           'Content-Type: text/html; charset="UTF-8"',
@@ -589,7 +588,6 @@ if (attachments && attachments.length > 0) {
           headers: {
             'X-Campaign-ID': campaignId,
             'X-User-ID': userId,
-            'List-Unsubscribe': `<${unsubscribeLink}>` 
 
           }
         });
@@ -1084,7 +1082,8 @@ async function createTransporter(user, aliasName) {
         }
       }
     };
-  } else {
+  } 
+else {
     // Hostinger SMTP
     const config = {
       auth: {

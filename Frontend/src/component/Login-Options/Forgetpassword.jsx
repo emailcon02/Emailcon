@@ -77,9 +77,9 @@ const handleBackCampaign = () => {
     
   return (
     
-    <div class="unique-container">      
-    <div class="unique-left-block">         
-      <div class="unique-form-box">
+    <div className="unique-container">      
+    <div className="unique-left-block">         
+      <div className="unique-form-box">
            <button onClick={handleBackCampaign} className="report-nav-btn">
                     <span className="admin-nav-icons">
                       <FaArrowLeft />
@@ -109,7 +109,7 @@ const handleBackCampaign = () => {
       </div>
     </div>
 
-    <div class="unique-right-image">
+    <div className="unique-right-image">
      <img src={img1} alt="forget password" />
     </div>
         <ToastContainer

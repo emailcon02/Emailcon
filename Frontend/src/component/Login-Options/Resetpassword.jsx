@@ -55,10 +55,10 @@ function Resetpasswords() {
       };
     
   return (
-    <div class="unique-container">
+    <div className="unique-container">
             
-        <div class="unique-left-block">
-          <div class="unique-form-box">
+        <div className="unique-left-block">
+          <div className="unique-form-box">
             <h2>Reset <span style={{color: "#f48c06"}}>Password</span></h2>
            <div className='unique-content' style={{ position: 'relative' }}>
       <div className='unique-label'>
@@ -120,7 +120,7 @@ function Resetpasswords() {
           </div>
         </div>
     
-        <div class="unique-right-image">
+        <div className="unique-right-image">
             <img src={imgs1} alt="Reset password"/>
             <h2 className='unique-heads-con'>Reset <span style={{color: "#f48c06"}}>Password</span></h2>
             <p className='unique-para-con'>Forgot your password? Reset it now to regain access to your account.</p>
