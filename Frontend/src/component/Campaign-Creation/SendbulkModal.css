@@ -24,6 +24,26 @@
   border-radius: 5px;
   z-index: 1000;
 }
+.spam-check-container{
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+}
+
+.spam-check-button {
+  padding: 5px;
+  background-color:rgb(230, 227, 227);
+  color: black;
+  border: 1px solid rgb(209, 209, 209);
+  border-radius: 4px;
+  cursor: pointer;
+  height: 41px;
+  
+}
+.spam-check-button:hover {
+  background-color: rgb(211, 210, 210);
+}
+
 
 .dropdown-container-sub h4 {
   font-size: 14px;

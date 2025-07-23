@@ -124,7 +124,7 @@ cron.schedule('*/10 * * * *', async () => {
               const personalizedItem = { ...item };
               if (item.content) {
                 Object.entries(student).forEach(([key, value]) => {
-                  const regex = new RegExp(`\\{?${key}\\}?`, "g");
+                  const regex = new RegExp(`\\{${key}\\}`, "gi");
                   personalizedItem.content = personalizedItem.content.replace(
                     regex,
                     value != null ? String(value).trim() : ""
@@ -137,7 +137,7 @@ cron.schedule('*/10 * * * *', async () => {
             // Personalize subject
             let personalizedSubject = camhistory.subject;
             Object.entries(student).forEach(([key, value]) => {
-              const regex = new RegExp(`\\{?${key}\\}?`, "g");
+              const regex = new RegExp(`\\{${key}\\}`, "gi");
               personalizedSubject = personalizedSubject.replace(
                 regex,
                 value != null ? String(value).trim() : ""

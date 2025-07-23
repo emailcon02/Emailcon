@@ -911,7 +911,7 @@ const invalidEmails = students
             const personalizedItem = { ...item };
             if (item.content) {
               Object.entries(student).forEach(([key, value]) => {
-                const regex = new RegExp(`\\{?${key}\\}?`, "g");
+                const regex = new RegExp(`\\{${key}\\}`, "gi");
                 personalizedItem.content = personalizedItem.content.replace(
                   regex,
                   value != null ? String(value).trim() : ""
@@ -924,7 +924,7 @@ const invalidEmails = students
           // Personalize subject
           let personalizedSubject = subject;
           Object.entries(student).forEach(([key, value]) => {
-            const regex = new RegExp(`\\{?${key}\\}?`, "g");
+            const regex = new RegExp(`\\{${key}\\}`, "gi");
             personalizedSubject = personalizedSubject.replace(
               regex,
               value != null ? String(value).trim() : ""

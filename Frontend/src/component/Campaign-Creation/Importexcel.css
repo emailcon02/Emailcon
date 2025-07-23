@@ -101,7 +101,7 @@
   font-size: 14px;
   border: 1px solid #ccc;
   border-radius: 4px;
-  width: 95%;
+  width: 98% !important;
 }
 .btn-download-sample {
   padding: 10px 15px;

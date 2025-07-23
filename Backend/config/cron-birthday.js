@@ -91,7 +91,7 @@ cron.schedule('*/30 * * * *', async () => {
             await Promise.allSettled(birthdayStudents.map(async (student) => {
                 let personalizedSubject = camhistory.subject;
                 Object.entries(student).forEach(([key, value]) => {
-                    const regex = new RegExp(`\\{?${key}\\}?`, "g");
+                    const regex = new RegExp(`\\{${key}\\}`, "gi");
                     personalizedSubject = personalizedSubject.replace(regex, value != null ? String(value).trim() : "");
                 });
 
@@ -99,7 +99,7 @@ cron.schedule('*/30 * * * *', async () => {
                     if (!item.content) return item;
                     let updatedContent = item.content;
                     Object.entries(student).forEach(([key, value]) => {
-                        const regex = new RegExp(`\\{?${key}\\}?`, "g");
+                        const regex = new RegExp(`\\{${key}\\}`, "gi");
                         updatedContent = updatedContent.replace(regex, value != null ? String(value).trim() : "");
                     });
                     return { ...item, content: updatedContent };
