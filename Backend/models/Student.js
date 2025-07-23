@@ -9,7 +9,7 @@ const studentSchema = new mongoose.Schema({
     },
     Email: {
         type: String,
-        set: (v) => v.trim(),
+        set: (v) => v.trim().toLowerCase(), // Ensure email is trimmed and lowercase
     },
     additionalFields: {
         type: Map,

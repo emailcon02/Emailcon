@@ -2640,7 +2640,7 @@ router.post("/students/upload", async (req, res) => {
 
     const cleanedStudents = req.body.map((student) => ({
       ...student,
-      Email: student.Email?.trim(), // Trim & lowercase
+      Email: student.Email?.trim().toLowerCase(), // Trim & lowercase
     }));
 // console.log("Cleaned students:", cleanedStudents); 
     await Student.insertMany(cleanedStudents);
@@ -2652,13 +2652,12 @@ router.post("/students/upload", async (req, res) => {
 });
 
 
-
 //add manually student to selected group
 router.post("/students/manual", async (req, res) => {
   try {
     const cleanedData = {
       ...req.body,
-      Email: student.Email?.trim(), // Trim & lowercase
+      Email: student.Email?.trim().toLowerCase(), // Trim & lowercase
     };
 
     const student = new Student(cleanedData);
@@ -2881,7 +2880,7 @@ router.put("/students/:id", async (req, res) => {
   try {
     // Sanitize email: remove spaces if email exists in the body
     if (req.body.Email) {
-      req.body.Email = req.body.Email.replace(/\s+/g, '').trim();
+      req.body.Email = req.body.Email.replace(/\s+/g, '').trim().toLowerCase();
     }
 
     const updatedStudent = await Student.findByIdAndUpdate(
