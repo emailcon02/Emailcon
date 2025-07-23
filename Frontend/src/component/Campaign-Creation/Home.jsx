@@ -64,6 +64,7 @@ import LivePopup from "./LivePopup.jsx";
 import { businessTemplate } from "./SavedTemplates/BusinessTemplate.jsx";
 import { educationalTemplate } from "./SavedTemplates/EducationTemplate.jsx";
 import { agricultureTemplate } from "./SavedTemplates/AgricultureTemplate.jsx";
+import { pharmacyTemplate } from "./SavedTemplates/PharmacyTemplate.jsx";
 
 const Home = () => {
   const [view, setView] = useState("dashboard");
@@ -624,6 +625,7 @@ const Home = () => {
           businessTemplate,
           educationalTemplate,
           agricultureTemplate,
+          pharmacyTemplate,
           ...templatesRes.data.sort(
             (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
           ),
