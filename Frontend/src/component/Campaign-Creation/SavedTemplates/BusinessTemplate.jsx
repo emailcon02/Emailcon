@@ -308,7 +308,7 @@ export const businessTemplate = {
       },
        {
       type: "para",
-      content: "© 2025 Your Company. All rights reserved.You received this email because you subscribed to our newsletter.",
+      content: "© 2025 Your Company. All rights reserved.You received this email because you subscribed to our service.",
       style: {
           fontSize: "14px",
           borderRadius: "0px",

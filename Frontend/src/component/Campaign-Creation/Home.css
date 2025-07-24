@@ -58,9 +58,9 @@
   background: white;
   padding: 0px;
   border-radius: 8px;
-  width: 80%;
+  width: 75%;
   height: 90%;
-  overflow: auto;
+  overflow-y: auto;
   overflow-x: hidden;
   position: relative;
 }
@@ -248,9 +248,8 @@
 
 .saved-template-gallery {
   display: grid;
-  grid-template-columns: auto auto auto;
+  grid-template-columns: 33% 33% 33%;
   padding: 10px;
-  width: 250px;
 }
 
 .template-thumbnail {
@@ -2175,7 +2174,7 @@
   position: absolute;
   top: 0;
   left: 0;
-  width: 110%;
+  width: 115%;
   height: 100%;
   background-color: rgba(0, 0, 0, 0.5);
   display: flex;
