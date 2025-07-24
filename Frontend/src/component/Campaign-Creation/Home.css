@@ -337,7 +337,6 @@
   display: flex;
   justify-content: center;
   align-content: center;
-  width: 70% !important;
 }
 
 .gallery-img-image {
@@ -352,18 +351,18 @@
 }
 
 .multi-gallery img {
-  width: 80% !important;
+  width: 100% !important;
   height: 80% !important;
 }
 
 .btn-gallery-whole {
-  width: 60% !important;
+  /* width: 100% !important; */
   font-size: 12px !important;
   /* height:50% !important; */
 }
 
 .btn-gallery {
-  width: 50% !important;
+  /* width: 50% !important; */
   font-size: 12px !important;
   padding: 5px 10px !important;
   /* height:50% !important; */

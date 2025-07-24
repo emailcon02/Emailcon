@@ -33,6 +33,9 @@ const SendbulkModal = ({ isOpen, onClose, previewContent = [], bgColor,temname }
   const campaign = JSON.parse(localStorage.getItem("campaign"));
   const navigate = useNavigate();
   const dropdownRef=useRef(null);
+  const [spamResult, setSpamResult] = useState(null); 
+const [spamWordsFound, setSpamWordsFound] = useState([]);
+
   
     useEffect(() => {
       const handleClickOutside = (event) => {
@@ -67,13 +70,14 @@ const SendbulkModal = ({ isOpen, onClose, previewContent = [], bgColor,temname }
   
       fetchaliasname();
     }, [user?.id, navigate]); // Ensure useEffect is dependent on `user` and `navigate`
-  
-   const handleSpamCheck = () => {
-    if(!message || message.trim() === "") {
-              toast.warning("Please enter a subject to check for spam.");
-              return;
-            }
-  const spamWords = [
+  const handleSpamCheck = () => {
+  if (!message || message.trim() === "") {
+    setSpamResult("empty");
+    setSpamWordsFound([]);
+    return;
+  }
+
+const spamWords = [
   // Promotions / Urgency
   "free", "winner", "cash", "prize", "click here", "urgent", "money", "guaranteed",
   "offer", "buy now", "unsubscribe", "earn", "credit card", "lottery", "investment",
@@ -99,18 +103,19 @@ const SendbulkModal = ({ isOpen, onClose, previewContent = [], bgColor,temname }
   // Scam tactics
   "as seen on", "100% free", "credit repair", "hidden charges", "order today",
   "satisfaction guaranteed", "meet singles", "eliminate bad credit", "amazing stuff"
-];
-
-
-  const lowerCaseMessage = message.toLowerCase();
+];  const lowerCaseMessage = message.toLowerCase();
   const foundSpamWords = spamWords.filter(word => lowerCaseMessage.includes(word));
 
   if (foundSpamWords.length > 0) {
-    toast.warning(`Spam content found: ${foundSpamWords.join(", ")}`);
+    setSpamResult("spam");
+    setSpamWordsFound(foundSpamWords);
   } else {
-    toast.success("No spam detected!");
+    setSpamResult("clean");
+    setSpamWordsFound([]);
   }
 };
+
+
 
     const handleAddAlias = () => {
       if (!user || !user.id) {
@@ -675,6 +680,24 @@ const handleSend = async () => {
             onChange={(e) => setMessage(e.target.value)}
             placeholder="Enter your message here"
           />
+          {spamResult === "empty" && (
+  <div className="spam-check-message warning">
+    ⚠️ Please enter a subject to check for spam.
+  </div>
+)}
+
+{spamResult === "spam" && (
+  <div className="spam-check-message warning">
+    ⚠️ Spam content found: <strong>{spamWordsFound.join(", ")}</strong> 
+  </div>
+)}
+
+{spamResult === "clean" && (
+  <div className="spam-check-message success">
+    ✅ No spam detected!
+  </div>
+)}
+
            <div className="select-group-container-sub" ref={dropdownRef}>
             <div className="spam-check-container">
          

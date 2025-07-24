@@ -119,6 +119,8 @@ const Mainpage = () => {
   const [showMoveConfirmModal, setShowMoveConfirmModal] = useState(false);
    const [showWarningModal, setShowWarningModal] = useState(false);
   const [shouldRefresh, setShouldRefresh] = useState(false);
+    const [spamResult, setSpamResult] = useState(null); 
+  const [spamWordsFound, setSpamWordsFound] = useState([]);
 
   useEffect(() => {
     const handleBeforeUnload = (e) => {
@@ -764,7 +766,7 @@ const handleopensentoptions = () => {
           textAlign: "left",
           color: "#000000",
           backgroundColor: "#f4f4f4",
-          padding: "10px 10px",
+          padding: "20px 30px",
         },
       },
     ]);
@@ -1239,49 +1241,55 @@ const handleopensentoptions = () => {
       setPreviewContent(nextState); // Reapply the redo state
     }
   };
+
  const handleSpamCheck = () => {
-          if(!emailData.subject || emailData.subject.trim() === "") {
-            toast.warning("Please enter a subject to check for spam.");
-            return;
-          }
-          const spamWords = [
-          // Promotions / Urgency
-          "free", "winner", "cash", "prize", "click here", "urgent", "money", "guaranteed",
-          "offer", "buy now", "unsubscribe", "earn", "credit card", "lottery", "investment",
-          "act now", "apply now", "limited time", "order now", "get started", "exclusive deal",
-          "instant access", "risk-free", "don't delete", "this isn't spam", "urgent response needed",
-        
-          // Financial
-          "congratulations", "no cost", "lowest price", "double your income", "extra income",
-          "get out of debt", "increase sales", "increase traffic", "make money", "online biz opportunity",
-          "financial freedom", "while you sleep", "work from home", "save big money", "fast cash",
-          "zero cost", "hidden charges", "guaranteed income",
-        
-          // Scams / Tricks
-          "act immediately", "this won’t last", "winner", "you are selected", "pre-approved",
-          "no obligation", "easy terms", "no strings attached", "trial offer", "miracle", "access now",
-          "free gift", "free info", "get paid", "cash bonus", "exclusive deal",
-        
-          // Shady behavior
-          "bulk email", "this is not spam", "why pay more", "you have been selected", "important information",
-          "claim now", "increase your income", "stop snoring", "lose weight", "viagra", "cheap meds",
-          "refinance", "get loan", "click below", "act quickly", "special promotion",
-        
-          // Scam tactics
-          "as seen on", "100% free", "credit repair", "hidden charges", "order today",
-          "satisfaction guaranteed", "meet singles", "eliminate bad credit", "amazing stuff"
-        ];
-        
-        
-          const lowerCaseMessage = emailData.subject.toLowerCase();
-          const foundSpamWords = spamWords.filter(word => lowerCaseMessage.includes(word));
-        
-          if (foundSpamWords.length > 0) {
-            toast.warning(`Spam content found: ${foundSpamWords.join(", ")}`);
-          } else {
-            toast.success("No spam detected!");
-          }
-        };
+  if (!emailData.subject || emailData.subject.trim() === "") {
+    setSpamResult("empty");
+    setSpamWordsFound([]);
+    return;
+  }
+
+const spamWords = [
+  // Promotions / Urgency
+  "free", "winner", "cash", "prize", "click here", "urgent", "money", "guaranteed",
+  "offer", "buy now", "unsubscribe", "earn", "credit card", "lottery", "investment",
+  "act now", "apply now", "limited time", "order now", "get started", "exclusive deal",
+  "instant access", "risk-free", "don't delete", "this isn't spam", "urgent response needed",
+
+  // Financial
+  "congratulations", "no cost", "lowest price", "double your income", "extra income",
+  "get out of debt", "increase sales", "increase traffic", "make money", "online biz opportunity",
+  "financial freedom", "while you sleep", "work from home", "save big money", "fast cash",
+  "zero cost", "hidden charges", "guaranteed income",
+
+  // Scams / Tricks
+  "act immediately", "this won’t last", "winner", "you are selected", "pre-approved",
+  "no obligation", "easy terms", "no strings attached", "trial offer", "miracle", "access now",
+  "free gift", "free info", "get paid", "cash bonus", "exclusive deal",
+
+  // Shady behavior
+  "bulk email", "this is not spam", "why pay more", "you have been selected", "important information",
+  "claim now", "increase your income", "stop snoring", "lose weight", "viagra", "cheap meds",
+  "refinance", "get loan", "click below", "act quickly", "special promotion",
+
+  // Scam tactics
+  "as seen on", "100% free", "credit repair", "hidden charges", "order today",
+  "satisfaction guaranteed", "meet singles", "eliminate bad credit", "amazing stuff"
+]; 
+ const lowerCaseMessage = emailData.subject.toLowerCase();
+  const foundSpamWords = spamWords.filter(word => lowerCaseMessage.includes(word));
+
+  if (foundSpamWords.length > 0) {
+    setSpamResult("spam");
+    setSpamWordsFound(foundSpamWords);
+  } else {
+    setSpamResult("clean");
+    setSpamWordsFound([]);
+  }
+};
+
+
+
   const handleSaveasButton = () => {
     if (!user || !user.id) {
       toast.error("Please ensure the user is valid");
@@ -2754,6 +2762,34 @@ const handleopensentoptions = () => {
                                     selectedIndex={selectedIndex}
                                     updateContent={updateContent}
                                   />
+                                  <label>Border Radius (%):</label>
+                                  <input
+                                    type="range"
+                                    min="0"
+                                    max="50"
+                                    value={parseInt(
+                                      previewContent[
+                                        selectedIndex
+                                      ].style.borderRadius.replace("px", "")
+                                    )}
+                                    onChange={(e) =>
+                                      updateContent(selectedIndex, {
+                                        style: {
+                                          ...previewContent[selectedIndex]
+                                            .style,
+                                          borderRadius: `${e.target.value}px`,
+                                        },
+                                      })
+                                    }
+                                  />
+                                  <span>
+                                    {parseInt(
+                                      previewContent[
+                                        selectedIndex
+                                      ].style.borderRadius.replace("%", "")
+                                    )}
+                                    %
+                                  </span>
                                   <label>Text Alignment:</label>
                                   <select
                                     value={
@@ -4497,6 +4533,34 @@ const handleopensentoptions = () => {
                                 }
                               />
                             </div>
+                            <label>Border Radius (%):</label>
+                                  <input
+                                    type="range"
+                                    min="0"
+                                    max="50"
+                                    value={parseInt(
+                                      previewContent[
+                                        selectedIndex
+                                      ].style.borderRadius.replace("px", "")
+                                    )}
+                                    onChange={(e) =>
+                                      updateContent(selectedIndex, {
+                                        style: {
+                                          ...previewContent[selectedIndex]
+                                            .style,
+                                          borderRadius: `${e.target.value}px`,
+                                        },
+                                      })
+                                    }
+                                  />
+                                  <span>
+                                    {parseInt(
+                                      previewContent[
+                                        selectedIndex
+                                      ].style.borderRadius.replace("%", "")
+                                    )}
+                                    %
+                                  </span>
                             <label>Text Alignment:</label>
                             <select
                               value={
@@ -4517,6 +4581,8 @@ const handleopensentoptions = () => {
                             </select>
                           </>
                         )}
+
+                        
                         {previewContent[selectedIndex].type === "button" && (
                           <>
                             <div className="button-type-selector">
@@ -7746,6 +7812,23 @@ const handleopensentoptions = () => {
                     setEmailData({ ...emailData, subject: e.target.value })
                   }
                 />
+                        {spamResult === "empty" && (
+  <div className="spam-check-message warning">
+    ⚠️ Please enter a subject to check for spam.
+  </div>
+)}
+
+{spamResult === "spam" && (
+  <div className="spam-check-message warning">
+    ⚠️ Spam content found: <strong>{spamWordsFound.join(", ")}</strong> 
+  </div>
+)}
+
+{spamResult === "clean" && (
+  <div className="spam-check-message success">
+    ✅ No spam detected!
+  </div>
+)}
                 <div className="alias-container-add-button">
       <button type="button"onClick={handleSpamCheck}>
          Spam Check

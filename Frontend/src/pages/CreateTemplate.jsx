@@ -756,7 +756,7 @@ const [showWarningModal, setShowWarningModal] = useState(false);
           textAlign: "left",
           color: "#000000",
           backgroundColor: "#f4f4f4",
-          padding: "10px 10px",
+          padding: "20px 30px",
         },
       },
     ]);
@@ -2693,6 +2693,34 @@ const [showWarningModal, setShowWarningModal] = useState(false);
                                     selectedIndex={selectedIndex}
                                     updateContent={updateContent}
                                   />
+                                  <label>Border Radius (%):</label>
+                                  <input
+                                    type="range"
+                                    min="0"
+                                    max="50"
+                                    value={parseInt(
+                                      previewContent[
+                                        selectedIndex
+                                      ].style.borderRadius.replace("px", "")
+                                    )}
+                                    onChange={(e) =>
+                                      updateContent(selectedIndex, {
+                                        style: {
+                                          ...previewContent[selectedIndex]
+                                            .style,
+                                          borderRadius: `${e.target.value}px`,
+                                        },
+                                      })
+                                    }
+                                  />
+                                  <span>
+                                    {parseInt(
+                                      previewContent[
+                                        selectedIndex
+                                      ].style.borderRadius.replace("%", "")
+                                    )}
+                                    %
+                                  </span>
                                   <label>Text Alignment:</label>
                                   <select
                                     value={
@@ -4436,6 +4464,34 @@ const [showWarningModal, setShowWarningModal] = useState(false);
                                 }
                               />
                             </div>
+                            <label>Border Radius (%):</label>
+                                  <input
+                                    type="range"
+                                    min="0"
+                                    max="50"
+                                    value={parseInt(
+                                      previewContent[
+                                        selectedIndex
+                                      ].style.borderRadius.replace("px", "")
+                                    )}
+                                    onChange={(e) =>
+                                      updateContent(selectedIndex, {
+                                        style: {
+                                          ...previewContent[selectedIndex]
+                                            .style,
+                                          borderRadius: `${e.target.value}px`,
+                                        },
+                                      })
+                                    }
+                                  />
+                                  <span>
+                                    {parseInt(
+                                      previewContent[
+                                        selectedIndex
+                                      ].style.borderRadius.replace("%", "")
+                                    )}
+                                    %
+                                  </span>
                             <label>Text Alignment:</label>
                             <select
                               value={

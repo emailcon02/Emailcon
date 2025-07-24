@@ -756,7 +756,7 @@ const Birthdayeditor = () => {
           textAlign: "left",
           color: "#000000",
           backgroundColor: "#f4f4f4",
-          padding: "10px 10px",
+          padding: "20px 30px",
         },
       },
     ]);
@@ -2685,6 +2685,34 @@ const Birthdayeditor = () => {
                                     selectedIndex={selectedIndex}
                                     updateContent={updateContent}
                                   />
+                                  <label>Border Radius (%):</label>
+                                  <input
+                                    type="range"
+                                    min="0"
+                                    max="50"
+                                    value={parseInt(
+                                      previewContent[
+                                        selectedIndex
+                                      ].style.borderRadius.replace("px", "")
+                                    )}
+                                    onChange={(e) =>
+                                      updateContent(selectedIndex, {
+                                        style: {
+                                          ...previewContent[selectedIndex]
+                                            .style,
+                                          borderRadius: `${e.target.value}px`,
+                                        },
+                                      })
+                                    }
+                                  />
+                                  <span>
+                                    {parseInt(
+                                      previewContent[
+                                        selectedIndex
+                                      ].style.borderRadius.replace("%", "")
+                                    )}
+                                    %
+                                  </span>
                                   <label>Text Alignment:</label>
                                   <select
                                     value={
@@ -4349,6 +4377,56 @@ const Birthdayeditor = () => {
                             </span>
                           </>
                         )}
+                         {previewContent[selectedIndex].type === "banner" && (
+                          <>
+                            <label>Border Radius (%):</label>
+                            <input
+                              type="range"
+                              min="0"
+                              max="50"
+                              value={parseInt(
+                                previewContent[
+                                  selectedIndex
+                                ].style.borderRadius.replace("px", "")
+                              )}
+                              onChange={(e) =>
+                                updateContent(selectedIndex, {
+                                  style: {
+                                    ...previewContent[selectedIndex].style,
+                                    borderRadius: `${e.target.value}px`,
+                                  },
+                                })
+                              }
+                            />
+                            <span>
+                              {parseInt(
+                                previewContent[
+                                  selectedIndex
+                                ].style.borderRadius.replace("%", "")
+                              )}
+                              %
+                            </span>
+
+                            <div className="editor-bg">
+                              Image Background
+                              <input
+                                type="color"
+                                value={
+                                  previewContent[selectedIndex].style
+                                    .backgroundColor || "#ffffff"
+                                }
+                                onChange={(e) =>
+                                  updateContent(selectedIndex, {
+                                    style: {
+                                      ...previewContent[selectedIndex].style,
+                                      backgroundColor: e.target.value,
+                                    },
+                                  })
+                                }
+                              />
+                            </div>
+                          </>
+                        )}
 
                         {previewContent[selectedIndex].type ===
                           "multipleimage" && (
@@ -4428,6 +4506,34 @@ const Birthdayeditor = () => {
                                 }
                               />
                             </div>
+                            <label>Border Radius (%):</label>
+                                  <input
+                                    type="range"
+                                    min="0"
+                                    max="50"
+                                    value={parseInt(
+                                      previewContent[
+                                        selectedIndex
+                                      ].style.borderRadius.replace("px", "")
+                                    )}
+                                    onChange={(e) =>
+                                      updateContent(selectedIndex, {
+                                        style: {
+                                          ...previewContent[selectedIndex]
+                                            .style,
+                                          borderRadius: `${e.target.value}px`,
+                                        },
+                                      })
+                                    }
+                                  />
+                                  <span>
+                                    {parseInt(
+                                      previewContent[
+                                        selectedIndex
+                                      ].style.borderRadius.replace("%", "")
+                                    )}
+                                    %
+                                  </span>
                             <label>Text Alignment:</label>
                             <select
                               value={
@@ -7263,19 +7369,7 @@ const Birthdayeditor = () => {
                               </div>
                             ) : null}
 
-                            {item.type === "banner" && (
-                              <div className="border">
-                                <img
-                                  src={
-                                    item.src ||
-                                    "https://via.placeholder.com/200"
-                                  }
-                                  alt="Editable"
-                                  className="img"
-                                  style={item.style}
-                                />
-                              </div>
-                            )}
+                           
 
                             {item.type === "logo" && (
                               <div className="border">

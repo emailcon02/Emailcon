@@ -64,7 +64,7 @@ import LivePopup from "./LivePopup.jsx";
 import { businessTemplate } from "./SavedTemplates/BusinessTemplate.jsx";
 import { educationalTemplate } from "./SavedTemplates/EducationTemplate.jsx";
 import { agricultureTemplate } from "./SavedTemplates/AgricultureTemplate.jsx";
-import { pharmacyTemplate } from "./SavedTemplates/PharmacyTemplate.jsx";
+// import { pharmacyTemplate } from "./SavedTemplates/PharmacyTemplate.jsx";
 
 const Home = () => {
   const [view, setView] = useState("dashboard");
@@ -625,7 +625,7 @@ const Home = () => {
           businessTemplate,
           educationalTemplate,
           agricultureTemplate,
-          pharmacyTemplate,
+          // pharmacyTemplate,
           ...templatesRes.data.sort(
             (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
           ),
@@ -3358,13 +3358,13 @@ const Home = () => {
                                             <p>
                                               <s>
                                                 {item.originalPrice1
-                                                  ? `$${item.originalPrice1}`
+                                                  ? `₹${item.originalPrice1}`
                                                   : " "}
                                               </s>
                                             </p>
                                             <p>
                                               {item.offerPrice1
-                                                ? `Off Price $${item.offerPrice1}`
+                                                ? `Off Price ₹${item.offerPrice1}`
                                                 : " "}
                                             </p>
                                             <a
@@ -3392,13 +3392,13 @@ const Home = () => {
                                             <p>
                                               <s>
                                                 {item.originalPrice2
-                                                  ? `$${item.originalPrice2}`
+                                                  ? `₹${item.originalPrice2}`
                                                   : " "}
                                               </s>
                                             </p>
                                             <p>
                                               {item.offerPrice2
-                                                ? `Off Price $${item.offerPrice2}`
+                                                ? `Off Price ₹${item.offerPrice2}`
                                                 : " "}
                                             </p>
                                             <a
@@ -4519,13 +4519,13 @@ const Home = () => {
                                   <p>
                                     <s>
                                       {item.originalPrice1
-                                        ? `$${item.originalPrice1}`
+                                        ? `₹${item.originalPrice1}`
                                         : " "}
                                     </s>
                                   </p>
                                   <p>
                                     {item.offerPrice1
-                                      ? `Off Price $${item.offerPrice1}`
+                                      ? `Off Price ₹${item.offerPrice1}`
                                       : " "}
                                   </p>
                                   <a
@@ -4553,13 +4553,13 @@ const Home = () => {
                                   <p>
                                     <s>
                                       {item.originalPrice2
-                                        ? `$${item.originalPrice2}`
+                                        ? `₹${item.originalPrice2}`
                                         : " "}
                                     </s>
                                   </p>
                                   <p>
                                     {item.offerPrice2
-                                      ? `Off Price $${item.offerPrice2}`
+                                      ? `Off Price ₹${item.offerPrice2}`
                                       : " "}
                                   </p>
                                   <a
@@ -5070,13 +5070,13 @@ const Home = () => {
                                   <p>
                                     <s>
                                       {item.originalPrice1
-                                        ? `$${item.originalPrice1}`
+                                        ? `₹${item.originalPrice1}`
                                         : " "}
                                     </s>
                                   </p>
                                   <p>
                                     {item.offerPrice1
-                                      ? `Off Price $${item.offerPrice1}`
+                                      ? `Off Price ₹${item.offerPrice1}`
                                       : " "}
                                   </p>
                                   <a
@@ -5104,13 +5104,13 @@ const Home = () => {
                                   <p>
                                     <s>
                                       {item.originalPrice2
-                                        ? `$${item.originalPrice2}`
+                                        ? `₹${item.originalPrice2}`
                                         : " "}
                                     </s>
                                   </p>
                                   <p>
                                     {item.offerPrice2
-                                      ? `Off Price $${item.offerPrice2}`
+                                      ? `Off Price ₹${item.offerPrice2}`
                                       : " "}
                                   </p>
                                   <a
@@ -5318,13 +5318,13 @@ const Home = () => {
                                 <p>
                                   <s>
                                     {item.originalPrice1
-                                      ? `$${item.originalPrice1}`
+                                      ? `₹${item.originalPrice1}`
                                       : " "}
                                   </s>
                                 </p>
                                 <p>
                                   {item.offerPrice1
-                                    ? `Off Price $${item.offerPrice1}`
+                                    ? `Off Price ₹${item.offerPrice1}`
                                     : " "}
                                 </p>
                                 <a
@@ -5356,13 +5356,13 @@ const Home = () => {
                                 <p>
                                   <s>
                                     {item.originalPrice2
-                                      ? `$${item.originalPrice2}`
+                                      ? `₹${item.originalPrice2}`
                                       : " "}
                                   </s>
                                 </p>
                                 <p>
                                   {item.offerPrice2
-                                    ? `Off Price $${item.offerPrice2}`
+                                    ? `Off Price ₹${item.offerPrice2}`
                                     : " "}
                                 </p>
                                 <a
@@ -5979,13 +5979,13 @@ const Home = () => {
                                 <p>
                                   <s>
                                     {item.originalPrice1
-                                      ? `$${item.originalPrice1}`
+                                      ? `₹${item.originalPrice1}`
                                       : " "}
                                   </s>
                                 </p>
                                 <p>
                                   {item.offerPrice1
-                                    ? `Off Price $${item.offerPrice1}`
+                                    ? `Off Price ₹${item.offerPrice1}`
                                     : " "}
                                 </p>
                                 <a
@@ -6017,13 +6017,13 @@ const Home = () => {
                                 <p>
                                   <s>
                                     {item.originalPrice2
-                                      ? `$${item.originalPrice2}`
+                                      ? `₹${item.originalPrice2}`
                                       : " "}
                                   </s>
                                 </p>
                                 <p>
                                   {item.offerPrice2
-                                    ? `Off Price $${item.offerPrice2}`
+                                    ? `Off Price ₹${item.offerPrice2}`
                                     : " "}
                                 </p>
                                 <a
@@ -6707,13 +6707,13 @@ const Home = () => {
                                 <p>
                                   <s>
                                     {item.originalPrice1
-                                      ? `$${item.originalPrice1}`
+                                      ? `₹${item.originalPrice1}`
                                       : " "}
                                   </s>
                                 </p>
                                 <p>
                                   {item.offerPrice1
-                                    ? `Off Price $${item.offerPrice1}`
+                                    ? `Off Price ₹${item.offerPrice1}`
                                     : " "}
                                 </p>
                                 <a
@@ -6745,13 +6745,13 @@ const Home = () => {
                                 <p>
                                   <s>
                                     {item.originalPrice2
-                                      ? `$${item.originalPrice2}`
+                                      ? `₹${item.originalPrice2}`
                                       : " "}
                                   </s>
                                 </p>
                                 <p>
                                   {item.offerPrice2
-                                    ? `Off Price $${item.offerPrice2}`
+                                    ? `Off Price ₹${item.offerPrice2}`
                                     : " "}
                                 </p>
                                 <a

@@ -43,6 +43,25 @@
 .spam-check-button:hover {
   background-color: rgb(211, 210, 210);
 }
+.spam-check-message {
+  margin: 5px 5px 10px 5px;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 0.9rem;
+}
+
+.spam-check-message.warning {
+  background-color: #fff4e5;
+  color: #a15b00;
+  border: 1px solid #ffc107;
+}
+
+.spam-check-message.success {
+  background-color: #e6ffed;
+  color: #2e7d32;
+  border: 1px solid #81c784;
+}
+
 
 
 .dropdown-container-sub h4 {
@@ -105,7 +124,7 @@
 .send-modal-form select,
 .send-modal-form textarea,
 .send-modal-form input {
-  margin-bottom: 15px;
+  margin-bottom: 5px;
   padding: 10px;
   font-size: 14px;
   border: 1px solid #cccccc;

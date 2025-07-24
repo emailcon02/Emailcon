@@ -1,5 +1,5 @@
 export const educationalTemplate = {
-  temname: "Educational Template",
+  temname: "Educational template",
   previewContent: [
   
     {
@@ -14,23 +14,124 @@ export const educationalTemplate = {
         },
     },
     {
+        type: "head",
+        content: "Build Skills. Shape Your Future.",
+        style: {
+          fontSize: "25px",
+          borderRadius: "0px",
+          textAlign: "center",
+          color: "#2c69dbff",
+          padding: "10px 0px 0px 5px",
+          fontWeight: "bold",
+        },
+      },
+       {
+      type: "para",
+      content: "Take the next step in your learning journey with industry-relevant courses.Gain practical skills that prepare you for real-world success.",
+      style: {
+          fontSize: "15px",
+          borderRadius: "0px",
+          textAlign: "center",
+          color: "#000000",
+          backgroundColor: "#ffffffff",
+          padding: "10px 10px",
+        },
+    },
+    {
         type: "imagewithtext",
-        src1: "https://ik.imagekit.io/w1dqqzgef/Screenshot%202025-07-23%20at%203.56.11%E2%80%AFPM.png?updatedAt=1753266388010", // Default image source
+        src1: "https://ik.imagekit.io/w1dqqzgef/girls-watching-laptop-happily.jpg?updatedAt=1753338151177", // Default image source
         content1:
-          "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.", // Default paragraph text
+          "Enrolling in the right course can open doors to new skills, better opportunities, and personal growth.Whether you're a student shaping your path or a professional aiming higher, education empowers you.Courses today are more flexible and practical, designed to fit your pace and goals.From coding to marketing, design to data – there's a course for every passion and ambition.Investing in learning isn't just about a certificate; it's about transforming your future.Start now, because the best time to grow is always today.", // Default paragraph text
         style1: {
           color: "#000000",
           backgroundColor: "#ffffffff",
+          textAlign:"justify",
+          fontSize:"14px"
         },
       },
       {
+        type: "head",
+        content: "Future-Proof Your Career.",
+        style: {
+          fontSize: "20px",
+          borderRadius: "0px",
+          textAlign: "center",
+          color: "#2c69dbff",
+          padding: "5px 0px 0px 5px",
+          fontWeight: "bold",
+        },
+      },
+       {
+      type: "para",
+      content: "Learn from experts, grow with confidence, and secure your professional future.",
+      style: {
+          fontSize: "15px",
+          borderRadius: "0px",
+          textAlign: "center",
+          color: "#000000",
+          backgroundColor: "#ffffffff",
+          padding: "5px 10px",
+        },
+    },
+      {
+      type: "multipleimage",
+      src1: "https://ik.imagekit.io/w1dqqzgef/teenagers-reading-near-friend-choosing-book.jpg?updatedAt=1753334698243",
+      src2: "https://ik.imagekit.io/w1dqqzgef/discussing-video-course.jpg?updatedAt=1753334674080",
+      style: {
+        width: "100%",
+        height: "100%",
+        objectFit: "cover",
+        borderRadius: "10px",
+        textAlign: "center",
+      },
+    },
+    {
+      type: "multipleimage",
+      src1: "https://ik.imagekit.io/w1dqqzgef/college-mates-studying-together.jpg?updatedAt=1753336069171",
+      src2: "https://ik.imagekit.io/w1dqqzgef/teen-couple-with-tablet-studying-library.jpg?updatedAt=1753336091573",
+      style: {
+        width: "100%",
+        height: "100%",
+        objectFit: "cover",
+        borderRadius: "10px",
+        textAlign: "center",
+      },
+    },
+     {
+        type: "head",
+        content: "Upgrade Your Mind. Elevate Your Life.",
+        style: {
+          fontSize: "25px",
+          borderRadius: "0px",
+          textAlign: "center",
+          color: "#2c69dbff",
+          padding: "10px 0px 0px 5px",
+          fontWeight: "bold",
+        },
+      },
+    //    {
+    //   type: "para",
+    //   content: "Are you ready to take the next step in your journey? Whether you're looking to upgrade your skills, switch careers, or explore a new passion, our expertly designed courses offer the perfect path to success. With flexible learning, hands-on experience, and guidance from industry experts, this is more than just education — it's your gateway to a brighter future. Enroll now and invest in yourself!",
+    //   style: {
+    //       fontSize: "15px",
+    //       borderRadius: "0px",
+    //       textAlign: "center",
+    //       color: "#000000",
+    //       backgroundColor: "#ffffffff",
+    //       padding: "10px 10px",
+    //     },
+    // },
+
+      {
         type: "textwithimage",
-        src2: "https://ik.imagekit.io/w1dqqzgef/Screenshot%202025-07-23%20at%203.59.09%E2%80%AFPM.png?updatedAt=1753266566679", // Default image source
+        src2: "https://ik.imagekit.io/w1dqqzgef/Screenshot%202025-07-24%20at%2011.51.50%E2%80%AFAM.png?updatedAt=1753338168783", // Default image source
         content2:
-          "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.", // Default paragraph text
+          "Taking a course helps you discover your strengths and turn them into real skills.Whether you want to start a new career or level up in your current one, learning is the way forward.Courses today are designed to be flexible, engaging, and focused on real-world results.You get access to expert mentors, structured content, and hands-on projects that make a difference.It's not just about gaining knowledge—it’s about applying it with confidence.So why wait? Start learning today and move one step closer to your goals.", // Default paragraph text
         style: {
           color: "#000000",
           backgroundColor: "#ffffffff",
+          textAlign:"justify",
+          fontSize:"14px"
         },
       },
     

@@ -188,9 +188,9 @@ if (student.isUnsubscribed) {
 
     const emailContent = previewContent.map((item) => {
       if (item.type === 'para') {
-        return `<div class="para" style="border-radius:${item.style.borderRadius};font-size:${item.style.fontSize};padding:10px; color:${item.style.color}; margin-top:20px; background-color:${item.style.backgroundColor}">${item.content}</div>`;
+        return `<div class="para" style="border-radius:${item.style.borderRadius};font-size:${item.style.fontSize};padding:10px 35px; color:${item.style.color}; margin-top:20px; background-color:${item.style.backgroundColor}">${item.content}</div>`;
       } else if (item.type === 'head') {
-        return `<p class="head" style="font-size:${item.style.fontSize};border-radius:10px;margin-top:10px;padding:10px;font-weight:bold;color:${item.style.color};text-align:${item.style.textAlign};background-color:${item.style.backgroundColor}">${item.content}</p>`;
+        return `<p class="head" style="font-size:${item.style.fontSize};border-radius:${item.style.borderRadius};margin-top:20px;padding:10px;font-weight:bold;color:${item.style.color};text-align:${item.style.textAlign};background-color:${item.style.backgroundColor}">${item.content}</p>`;
       } else if (item.type === 'logo') {
         return `<div style="text-align:${item.style.textAlign};margin:10px auto !important">
         <img src="${item.src}" style="width:${item.style.width};height:${item.style.height};border-radius:${item.style.borderRadius};pointer-events:none;margin:${item.style.margin};background-color:${item.style.backgroundColor};"/>
@@ -240,7 +240,7 @@ if (student.isUnsubscribed) {
         return `<table class="multi" style="width:100%; border-collapse:collapse;margin:10px auto !important;">
         <tr>
             <td style="width:50%;text-align:center;padding:8px; vertical-align:top;">
-                <img src="${item.src1}" style="border-radius:10px;object-fit:contain;height:230px !important;width:100%;pointer-events:none !important; object-fit:cover;" alt="image"/>
+                <img src="${item.src1}" style="border-radius:10px;object-fit:contain;height:230px !important;width:100%;pointer-events:none !important;" alt="image"/>
                     <a class = "img-btn"
                     href="${generateTrackingLink(item.link1, userId, campaignId, emailData.recipient)}"
                     target = "_blank"
@@ -249,7 +249,7 @@ if (student.isUnsubscribed) {
                     </a>
             </td>
             <td style="width:50%;text-align:center;padding:8px; vertical-align:top;">
-                <img src="${item.src2}" style="border-radius:10px;object-fit:contain;height:230px !important;width:100%;pointer-events:none !important; object-fit:cover;" alt="image"/>
+                <img src="${item.src2}" style="border-radius:10px;object-fit:contain;height:230px !important;width:100%;pointer-events:none !important;" alt="image"/>
                     <a class = "img-btn"
                     href="${generateTrackingLink(item.link2, userId, campaignId, emailData.recipient)}"
                     target = "_blank"
@@ -266,10 +266,10 @@ if (student.isUnsubscribed) {
         return `<table class="multi" style="width:100%; border-collapse:collapse;margin:10px auto !important;">
         <tr>
             <td style="width:50%;text-align:center;padding:8px; vertical-align:top;">
-                <img src="${item.src1}" style="border-radius:10px;object-fit:contain;height:230px !important;width:100%;pointer-events:none !important; object-fit:cover;" alt="image"/>
+                <img src="${item.src1}" style="border-radius:10px;object-fit:contain;height:230px !important;width:100%;pointer-events:none !important;" alt="image"/>
             </td>
             <td style="width:50%;text-align:center;padding:8px; vertical-align:top;">
-                <img src="${item.src2}" style="border-radius:10px;object-fit:contain;height:230px !important;width:100%;pointer-events:none !important; object-fit:cover;" alt="image"/>
+                <img src="${item.src2}" style="border-radius:10px;object-fit:contain;height:230px !important;width:100%;pointer-events:none !important; " alt="image"/>
             </td>
         </tr>
     </table>`
@@ -332,7 +332,7 @@ if (student.isUnsubscribed) {
 
       else if (item.type ==='banner') {
         return `<div>
-        <img src="${item.src}" style="margin-top:10px;width:${item.style.width};pointer-events:none;height:${item.style.height};border-radius:${item.style.borderRadius};background-color:${item.style.backgroundColor}"/>
+        <img src="${item.src}" style="margin-top:20px;width:${item.style.width};pointer-events:none;height:${item.style.height};border-radius:${item.style.borderRadius};background-color:${item.style.backgroundColor}"/>
         </div>`;
       }
 
@@ -343,7 +343,7 @@ else if (item.type === 'multi-image-card') {
         return `<table class="multi" style="width:100%; border-collapse:collapse;margin:10px auto !important;">
     <tr>
       <td style="width:50%;text-align:center;padding:8px; vertical-align:top;">
-        <img src="${item.src1}" style="border-radius:10px;object-fit:contain;height:230px !important;width:100%;pointer-events:none !important; object-fit:cover;" alt="image"/>
+        <img src="${item.src1}" style="border-radius:10px;object-fit:contain;height:230px !important;width:100%;pointer-events:none !important; " alt="image"/>
         <h3 style="margin:10px 0;">${item.title1 || 'Name of the product'}</h3>
         <p style="margin:5px 0;"><s>${item.originalPrice1 ? `₹${item.originalPrice1}` : '₹9000'}</s></p>
         <p style="margin:5px 0;">${item.offerPrice1 ? `Off Price ₹${item.offerPrice1}` : 'Off Price ₹5999'}</p>
@@ -355,7 +355,7 @@ else if (item.type === 'multi-image-card') {
         </a>
       </td>
       <td style="width:50%;text-align:center;padding:8px; vertical-align:top;">
-        <img src="${item.src2}" style="border-radius:10px;object-fit:contain;height:230px !important;width:100%;pointer-events:none !important; object-fit:cover;" alt="image"/>
+        <img src="${item.src2}" style="border-radius:10px;object-fit:contain;height:230px !important;width:100%;pointer-events:none !important;" alt="image"/>
         <h3 style="margin:10px 0;">${item.title2 || 'Name of the product'}</h3>
         <p style="margin:5px 0;"><s>${item.originalPrice2 ? `₹${item.originalPrice2}` : '₹8000'}</s></p>
         <p style="margin:5px 0;">${item.offerPrice2 ? `Off Price ₹${item.offerPrice2}` : 'Off Price ₹4999'}</p>
@@ -422,43 +422,74 @@ else if (item.type === 'multi-image-card') {
       <html>
         <head>
           <style>
-            body { font-family: Arial, sans-serif; margin: 0; padding: 0; }
-            @media(max-width:768px) {
-              .main { width: 330px !important; }
-              .img-case { width: 330px !important; }
-              .para{ font-size:15px !important; }
-              .img-para{ font-size:15px !important; }
-              .image-text{ width:330px !important;}
-              .image-text tr{
-                display: flex !important;
-                flex-wrap: nowrap !important;
-                justify-content: space-between !important;
+              body { font-family: Arial, sans-serif; margin: 0; padding: 0; }
+              
+             .img-case {
+  margin:0 auto !important;
+  text-align:center !important;
+  display:block;
+  width:100%;
+  max-width: 650px; /* Adjust as needed */
+}
+
+.img-case img {
+  display: block;
+  margin: 0 auto; /* Ensures the image is centered */
+  max-width: 100%;
+  height: auto; /* Ensures the image maintains its aspect ratio */
+}
+           
+
+              @media(max-width:768px) {
+                .main { width: 330px !important; }
+                .img-case { width: 330px !important; }
+                .img-para{
+                  font-size:12px !important;
+                }
+                  .image-text tr{
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    justify-content: space-between !important;
+  }
+                
+  /* Keep images inline on small screens */
+  .multi tr {
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    justify-content: space-between !important;
+  }
+  .multi tr td {
+    width: 48% !important; /* Ensures images stay side by side */
+    padding: 5px !important;
+  }
+  .multi tr td img {
+    height: 150px !important; /* Adjust image height for better fit */
+    width: 100% !important;
+    object-fit: cover !important;
+  } 
+
+                // .multimain td{
+                //   padding:5px 8px 0px 0px !important;
+                // }
+                // .multi-img{
+                //   width:100% !important;
+                //   max-width:170px !important;
+                //   height:auto !important;
+                //   object-fit: contain !important; 
+
+                // }
+                 .img-btn{
+                  width:85% !important;
+                  margin:20px auto !important;
+                  font-size:10px !important;
+                  padding:10px !important;
+                  
+                }
+                .head{
+                  font-size:20px !important;
+                }
               }
-              .multi tr {
-                display: flex !important;
-                flex-wrap: nowrap !important;
-                justify-content: space-between !important;
-              }
-              .multi tr td {
-                width: 48% !important;
-                padding: 5px !important;
-              }
-              .multi tr td img {
-                height: 150px !important;
-                width: 100% !important;
-                object-fit: cover !important;
-              }
-              .img-btn{
-                width:85% !important;
-                margin:20px auto !important;
-                font-size:10px !important;
-                padding:10px !important;
-              }
-              .head{
-                font-size:20px !important;
-              }
-            }
-          </style>
+            </style>
         </head>
         <body>
           <div style="display:none !important; max-height:0px; max-width:0px; opacity:0; overflow:hidden;">
@@ -1359,7 +1390,7 @@ case 'break':
   </table>`;
 
     case 'banner':
-          return `<div style="margin:10px auto !important;${styleString};">
+          return `<div style="margin:20px auto !important;${styleString};">
        <img src="${src}" style="${styleString};margin-top:10px;" alt="image" />
        </div>`;
 
@@ -1367,7 +1398,7 @@ case 'break':
       return `<table class="multi" style="width:100%; border-collapse:collapse;margin:10px auto !important;">
     <tr>
       <td style="width:50%;text-align:center;padding:8px; vertical-align:top;">
-        <img src="${src1}" style="border-radius:10px;object-fit:contain;height:230px !important;width:100%;pointer-events:none !important; object-fit:cover;" alt="image"/>
+        <img src="${src1}" style="border-radius:10px;object-fit:contain;height:230px !important;width:100%;pointer-events:none !important;" alt="image"/>
         <h3 style="margin:10px 0;">${title1 || 'Name of the product'}</h3>
         <p style="margin:5px 0;"><s>${originalPrice1 ? `₹${originalPrice1}` : '₹9000'}</s></p>
         <p style="margin:5px 0;">${offerPrice1 ? `Off Price ₹${offerPrice1}` : 'Off Price ₹5999'}</p>
@@ -1379,7 +1410,7 @@ case 'break':
         </a>
       </td>
       <td style="width:50%;text-align:center;padding:8px; vertical-align:top;">
-        <img src="${src2}" style="border-radius:10px;object-fit:contain;height:230px !important;width:100%;pointer-events:none !important; object-fit:cover;" alt="image"/>
+        <img src="${src2}" style="border-radius:10px;object-fit:contain;height:230px !important;width:100%;pointer-events:none !important;" alt="image"/>
         <h3 style="margin:10px 0;">${title2 || 'Name of the product'}</h3>
         <p style="margin:5px 0;"><s>${originalPrice2 ? `₹${originalPrice2}` : '₹8000'}</s></p>
         <p style="margin:5px 0;">${offerPrice2 ? `Off Price ₹${offerPrice2}` : 'Off Price ₹4999'}</p>
@@ -1498,13 +1529,13 @@ case 'break':
           return `<table class="multi" style="width:100%; border-collapse:collapse;margin:10px auto !important;">
           <tr>
               <td style="width:50%;text-align:center;padding:8px; vertical-align:top;">
-                  <img src="${src1}" style="border-radius:10px;object-fit:contain;height:230px !important;width:100%;pointer-events:none !important; object-fit:cover; ${styleString}" alt="image"/>
+                  <img src="${src1}" style="border-radius:10px;object-fit:contain;height:230px !important;width:100%;pointer-events:none !important;  ${styleString}" alt="image"/>
                   <a class="img-btn" href="${generateTrackingLink(link1, userId, campaignId, recipientEmail)}"  target="_blank" style="${stylebuttonString1}; display:inline-block;margin-top:20px; padding:12px 25px; text-decoration:none;">
                       ${content1}
                   </a>
               </td>
               <td style="width:50%;text-align:center;padding:8px; vertical-align:top;">
-                  <img src="${src2}" style="border-radius:10px;object-fit:contain;height:230px !important;width:100%;pointer-events:none !important; object-fit:cover;${styleString}" alt="image"/>
+                  <img src="${src2}" style="border-radius:10px;object-fit:contain;height:230px !important;width:100%;pointer-events:none !important; ${styleString}" alt="image"/>
                   <a class="img-btn" href="${generateTrackingLink(link2, userId, campaignId, recipientEmail)}" target="_blank" style="${stylebuttonString2}; display:inline-block;margin-top:20px; padding:12px 25px; text-decoration:none;">
                       ${content2}
                   </a>
@@ -1516,18 +1547,18 @@ case 'break':
           return `<table class="multi" style="width:100%; border-collapse:collapse;margin:10px auto !important;">
           <tr>
               <td style="width:50%;text-align:center;padding:8px; vertical-align:top;">
-                  <img src="${src1}" style="border-radius:10px;object-fit:contain;height:230px !important;width:100%;pointer-events:none !important; object-fit:cover;" alt="image"/>
+                  <img src="${src1}" style="border-radius:10px;object-fit:contain;height:230px !important;width:100%;pointer-events:none !important;" alt="image"/>
               </td>
               <td style="width:50%;text-align:center;padding:8px; vertical-align:top;">
-                  <img src="${src2}" style="border-radius:10px;object-fit:contain;height:230px !important;width:100%;pointer-events:none !important; object-fit:cover;" alt="image"/>
+                  <img src="${src2}" style="border-radius:10px;object-fit:contain;height:230px !important;width:100%;pointer-events:none !important;" alt="image"/>
               </td>
           </tr>
       </table>`
 
         case 'head':
-          return `<p class="head" style="${styleString};border-radius:10px;margin-top:10px;padding:10px;font-weight:bold;">${content}</p>`;
+          return `<p class="head" style="${styleString};margin-top:20px;padding:10px;font-weight:bold;">${content}</p>`;
         case 'para':
-          return `<div style="${styleString};margin-top:20px;padding:10px 40px;">${content}</div>`;
+          return `<div style="${styleString};margin-top:20px;padding:10px 35px;">${content}</div>`;
         case 'button':
           return `<div style="margin:20px auto 0 auto;text-align:center;">
                   <a href = "${generateTrackingLink(link, userId, campaignId, recipientEmail)}"
@@ -1675,7 +1706,7 @@ case 'break':
   </table>`;
 
     case 'banner':
-          return `<div style="margin:10px auto !important;${styleString};">
+          return `<div style="margin:20px auto !important;${styleString};">
        <img src="${src}" style="${styleString};margin-top:10px;" alt="image" />
        </div>`;
 
@@ -1838,9 +1869,9 @@ case 'break':
       </table>`
 
         case 'head':
-          return `<p class="head" style="${styleString};border-radius:10px;margin-top:10px;padding:10px;font-weight:bold;">${content}</p>`;
+          return `<p class="head" style="${styleString};margin-top:20px;padding:10px;font-weight:bold;">${content}</p>`;
         case 'para':
-          return `<div style="${styleString};margin-top:20px;padding:10px 40px; white-space: pre-line;
+          return `<div style="${styleString};margin-top:20px;padding:10px 35px; white-space: pre-line;
   word-break: break-word;">${content}</div>`;
         case 'button':
           return `<div style="margin:20px auto 0 auto;text-align:center;">
@@ -2095,7 +2126,7 @@ case 'break':
   </table>`;
 
     case 'banner':
-          return `<div style="margin:10px auto !important;${styleString};">
+          return `<div style="margin:20px auto !important;${styleString};">
        <img src="${src}" style="${styleString};margin-top:10px;" alt="image" />
        </div>`;
 
@@ -2103,7 +2134,7 @@ case 'break':
       return `<table class="multi" style="width:100%; border-collapse:collapse;margin:10px auto !important;">
     <tr>
       <td style="width:50%;text-align:center;padding:8px; vertical-align:top;">
-        <img src="${src1}" style="border-radius:10px;object-fit:contain;height:230px !important;width:100%;pointer-events:none !important; object-fit:cover;" alt="image"/>
+        <img src="${src1}" style="border-radius:10px;object-fit:contain;height:230px !important;width:100%;pointer-events:none !important;" alt="image"/>
         <h3 style="margin:10px 0;">${title1 || 'Name of the product'}</h3>
         <p style="margin:5px 0;"><s>${originalPrice1 ? `₹${originalPrice1}` : '₹9000'}</s></p>
         <p style="margin:5px 0;">${offerPrice1 ? `Off Price ₹${offerPrice1}` : 'Off Price ₹5999'}</p>
@@ -2115,7 +2146,7 @@ case 'break':
         </a>
       </td>
       <td style="width:50%;text-align:center;padding:8px; vertical-align:top;">
-        <img src="${src2}" style="border-radius:10px;object-fit:contain;height:230px !important;width:100%;pointer-events:none !important; object-fit:cover;" alt="image"/>
+        <img src="${src2}" style="border-radius:10px;object-fit:contain;height:230px !important;width:100%;pointer-events:none !important;" alt="image"/>
         <h3 style="margin:10px 0;">${title2 || 'Name of the product'}</h3>
         <p style="margin:5px 0;"><s>${originalPrice2 ? `₹${originalPrice2}` : '₹8000'}</s></p>
         <p style="margin:5px 0;">${offerPrice2 ? `Off Price ₹${offerPrice2}` : 'Off Price ₹4999'}</p>
@@ -2234,13 +2265,13 @@ case 'break':
           return `<table class="multi" style="width:100%; border-collapse:collapse;margin:10px auto !important;">
           <tr>
               <td style="width:50%;text-align:center;padding:8px; vertical-align:top;">
-                  <img src="${src1}" style="border-radius:10px;object-fit:contain;height:230px !important;width:100%;pointer-events:none !important; object-fit:cover; ${styleString}" alt="image"/>
+                  <img src="${src1}" style="border-radius:10px;object-fit:contain;height:230px !important;width:100%;pointer-events:none !important;  ${styleString}" alt="image"/>
                   <a class="img-btn" href="${generateTrackingLink(link1, userId, campaignId, recipientEmail)}"  target="_blank" style="${stylebuttonString1}; display:inline-block;margin-top:20px; padding:12px 25px; text-decoration:none;">
                       ${content1}
                   </a>
               </td>
               <td style="width:50%;text-align:center;padding:8px; vertical-align:top;">
-                  <img src="${src2}" style="border-radius:10px;object-fit:contain;height:230px !important;width:100%;pointer-events:none !important; object-fit:cover;${styleString}" alt="image"/>
+                  <img src="${src2}" style="border-radius:10px;object-fit:contain;height:230px !important;width:100%;pointer-events:none !important;${styleString}" alt="image"/>
                   <a class="img-btn" href="${generateTrackingLink(link2, userId, campaignId, recipientEmail)}" target="_blank" style="${stylebuttonString2}; display:inline-block;margin-top:20px; padding:12px 25px; text-decoration:none;">
                       ${content2}
                   </a>
@@ -2252,18 +2283,18 @@ case 'break':
           return `<table class="multi" style="width:100%; border-collapse:collapse;margin:10px auto !important;">
           <tr>
               <td style="width:50%;text-align:center;padding:8px; vertical-align:top;">
-                  <img src="${src1}" style="border-radius:10px;object-fit:contain;height:230px !important;width:100%;pointer-events:none !important; object-fit:cover;" alt="image"/>
+                  <img src="${src1}" style="border-radius:10px;object-fit:contain;height:230px !important;width:100%;pointer-events:none !important;" alt="image"/>
               </td>
               <td style="width:50%;text-align:center;padding:8px; vertical-align:top;">
-                  <img src="${src2}" style="border-radius:10px;object-fit:contain;height:230px !important;width:100%;pointer-events:none !important; object-fit:cover;" alt="image"/>
+                  <img src="${src2}" style="border-radius:10px;object-fit:contain;height:230px !important;width:100%;pointer-events:none !important;" alt="image"/>
               </td>
           </tr>
       </table>`
 
         case 'head':
-          return `<p class="head" style="${styleString};border-radius:10px;margin-top:10px;padding:10px;font-weight:bold;">${content}</p>`;
+          return `<p class="head" style="${styleString};margin-top:20px;padding:10px;font-weight:bold;">${content}</p>`;
         case 'para':
-          return `<div style="${styleString};margin-top:20px;padding:10px 40px; white-space: pre-line;
+          return `<div style="${styleString};margin-top:20px;padding:10px 35px; white-space: pre-line;
   word-break: break-word;">${content}</div>`;
         case 'button':
           return `<div style="margin:20px auto 0 auto;text-align:center;">
@@ -2288,43 +2319,74 @@ case 'break':
       <html>
         <head>
           <style>
-            body { font-family: Arial, sans-serif; margin: 0; padding: 0; }
-            @media(max-width:768px) {
-              .main { width: 330px !important; }
-              .img-case { width: 330px !important; }
-              .para{ font-size:15px !important; }
-              .img-para{ font-size:15px !important; }
-              .image-text{ width:330px !important;}
-              .image-text tr{
-                display: flex !important;
-                flex-wrap: nowrap !important;
-                justify-content: space-between !important;
+              body { font-family: Arial, sans-serif; margin: 0; padding: 0; }
+              
+             .img-case {
+  margin:0 auto !important;
+  text-align:center !important;
+  display:block;
+  width:100%;
+  max-width: 650px; /* Adjust as needed */
+}
+
+.img-case img {
+  display: block;
+  margin: 0 auto; /* Ensures the image is centered */
+  max-width: 100%;
+  height: auto; /* Ensures the image maintains its aspect ratio */
+}
+           
+
+              @media(max-width:768px) {
+                .main { width: 330px !important; }
+                .img-case { width: 330px !important; }
+                .img-para{
+                  font-size:12px !important;
+                }
+                  .image-text tr{
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    justify-content: space-between !important;
+  }
+                
+  /* Keep images inline on small screens */
+  .multi tr {
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    justify-content: space-between !important;
+  }
+  .multi tr td {
+    width: 48% !important; /* Ensures images stay side by side */
+    padding: 5px !important;
+  }
+  .multi tr td img {
+    height: 150px !important; /* Adjust image height for better fit */
+    width: 100% !important;
+    object-fit: cover !important;
+  } 
+
+                // .multimain td{
+                //   padding:5px 8px 0px 0px !important;
+                // }
+                // .multi-img{
+                //   width:100% !important;
+                //   max-width:170px !important;
+                //   height:auto !important;
+                //   object-fit: contain !important; 
+
+                // }
+                 .img-btn{
+                  width:85% !important;
+                  margin:20px auto !important;
+                  font-size:10px !important;
+                  padding:10px !important;
+                  
+                }
+                .head{
+                  font-size:20px !important;
+                }
               }
-              .multi tr {
-                display: flex !important;
-                flex-wrap: nowrap !important;
-                justify-content: space-between !important;
-              }
-              .multi tr td {
-                width: 48% !important;
-                padding: 5px !important;
-              }
-              .multi tr td img {
-                height: 150px !important;
-                width: 100% !important;
-                object-fit: cover !important;
-              }
-              .img-btn{
-                width:85% !important;
-                margin:20px auto !important;
-                font-size:10px !important;
-                padding:10px !important;
-              }
-              .head{
-                font-size:20px !important;
-              }
-            }
-          </style>
+            </style>
         </head>
         <body>
             <div style="display:none !important; max-height:0px; max-width:0px; opacity:0; overflow:hidden;">
