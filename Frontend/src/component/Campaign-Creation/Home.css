@@ -2141,13 +2141,14 @@
 }
 
 .new-item-gallery-item{
-  margin-left: 15%;
+  padding:10px 5px 10px 20px;
+  margin-left: 5%;
 }
 
 
 .saved-template-gallery-home {
   display: grid;
-  grid-template-columns: 30% 30% 30%;
+  grid-template-columns: 29% 29% 29%;
   padding: 15px;
   gap: 4%;
   justify-content: center;
@@ -2175,7 +2176,7 @@
   position: absolute;
   top: 0;
   left: 0;
-  width: 100%;
+  width: 110%;
   height: 100%;
   background-color: rgba(0, 0, 0, 0.5);
   display: flex;
