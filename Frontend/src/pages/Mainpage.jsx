@@ -6388,7 +6388,7 @@ const spamWords = [
                           <div className="Layout">
                             <img
                               src={
-                                item.src1 || "https://via.placeholder.com/200"
+                                item.src1
                               }
                               alt="Editable"
                               className="multiimgcard"

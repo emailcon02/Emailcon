@@ -75,8 +75,8 @@ export const educationalTemplate = {
     },
       {
       type: "multipleimage",
-      src1: "https://ik.imagekit.io/w1dqqzgef/teenagers-reading-near-friend-choosing-book.jpg?updatedAt=1753334698243",
-      src2: "https://ik.imagekit.io/w1dqqzgef/discussing-video-course.jpg?updatedAt=1753334674080",
+      src1:"https://ik.imagekit.io/w1dqqzgef/teenager-choosing-book-near-reading-friends.jpg",
+      src2: "https://ik.imagekit.io/w1dqqzgef/teen-couple-with-tablet-studying-library.jpg?updatedAt=1753336091573",
       style: {
         width: "100%",
         height: "100%",
@@ -87,8 +87,9 @@ export const educationalTemplate = {
     },
     {
       type: "multipleimage",
-      src1: "https://ik.imagekit.io/w1dqqzgef/college-mates-studying-together.jpg?updatedAt=1753336069171",
-      src2: "https://ik.imagekit.io/w1dqqzgef/teen-couple-with-tablet-studying-library.jpg?updatedAt=1753336091573",
+            src1: "https://ik.imagekit.io/w1dqqzgef/discussing-video-course.jpg?updatedAt=1753334674080",
+
+      src2: "https://ik.imagekit.io/w1dqqzgef/college-mates-studying-together.jpg?updatedAt=1753336069171",
       style: {
         width: "100%",
         height: "100%",
@@ -122,19 +123,7 @@ export const educationalTemplate = {
     //     },
     // },
 
-      {
-        type: "textwithimage",
-        src2: "https://ik.imagekit.io/w1dqqzgef/Screenshot%202025-07-24%20at%2011.51.50%E2%80%AFAM.png?updatedAt=1753338168783", // Default image source
-        content2:
-          "Taking a course helps you discover your strengths and turn them into real skills.Whether you want to start a new career or level up in your current one, learning is the way forward.Courses today are designed to be flexible, engaging, and focused on real-world results.You get access to expert mentors, structured content, and hands-on projects that make a difference.It's not just about gaining knowledge—it’s about applying it with confidence.So why wait? Start learning today and move one step closer to your goals.", // Default paragraph text
-        style: {
-          color: "#000000",
-          backgroundColor: "#ffffffff",
-          textAlign:"justify",
-          fontSize:"14px"
-        },
-      },
-    
+     
       {
         type: "image",
         src: "https://ik.imagekit.io/w1dqqzgef/Screenshot%202025-07-23%20at%204.42.25%E2%80%AFPM.png?updatedAt=1753269172690", // Default image source
@@ -147,6 +136,19 @@ export const educationalTemplate = {
           margin: "5px auto",
         },
       },
+       {
+        type: "textwithimage",
+        src2:"https://ik.imagekit.io/w1dqqzgef/three-students-studying-doing-homework-together.jpg",
+        content2:
+          "Taking a course helps you discover your strengths and turn them into real skills.Whether you want to start a new career or level up in your current one, learning is the way forward.Courses today are designed to be flexible, engaging, and focused on real-world results.You get access to expert mentors, structured content, and hands-on projects that make a difference.It's not just about gaining knowledge—it’s about applying it with confidence.So why wait? Start learning today and move one step closer to your goals.", // Default paragraph text
+        style: {
+          color: "#000000",
+          backgroundColor: "#ffffffff",
+          textAlign:"justify",
+          fontSize:"14px"
+        },
+      },
+    
       {
         type: "head",
         content: "Unlock Your Future with the Right Course",

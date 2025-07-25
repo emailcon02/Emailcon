@@ -61,10 +61,12 @@ import {
   Line,
 } from "recharts";
 import LivePopup from "./LivePopup.jsx";
-import { businessTemplate } from "./SavedTemplates/BusinessTemplate.jsx";
+import { foodTemplate } from "./SavedTemplates/FoodTemplate.jsx";
 import { educationalTemplate } from "./SavedTemplates/EducationTemplate.jsx";
 import { agricultureTemplate } from "./SavedTemplates/AgricultureTemplate.jsx";
-// import { pharmacyTemplate } from "./SavedTemplates/PharmacyTemplate.jsx";
+import { travelTemplate } from "./SavedTemplates/TravelTemplate.jsx";
+import { pharmacyTemplate } from "./SavedTemplates/PharmacyTemplate.jsx";
+import { gymTemplate } from "./SavedTemplates/GymTemplate.jsx";
 
 const Home = () => {
   const [view, setView] = useState("dashboard");
@@ -622,10 +624,12 @@ const Home = () => {
         setGroups(groupsRes.data);
         setStudents(studentsRes.data);
         setTemplates([
-          businessTemplate,
           educationalTemplate,
+          foodTemplate,         
+          travelTemplate,
           agricultureTemplate,
-          // pharmacyTemplate,
+          pharmacyTemplate,
+          gymTemplate,
           ...templatesRes.data.sort(
             (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
           ),
@@ -3003,10 +3007,7 @@ const Home = () => {
                               <div className="template-thumbnail-wrapper">
                                 <div
                                   className="template-thumbnail-home"
-                                  style={{
-                                    backgroundColor:
-                                      template.bgColor || "#ffffff",
-                                  }}
+                                 
                                 >
                                   {template.previewContent?.map((item, idx) => (
                                     <div
@@ -3014,7 +3015,10 @@ const Home = () => {
                                       style={{
                                         fontSize: "12px",
                                         marginBottom: "6px",
+                                        backgroundColor:
+                                      template.bgColor || "#ffffff",
                                       }}
+                                      
                                       className="new-item-gallery-item"
                                     >
                                       {/* Heading */}
@@ -7277,23 +7281,27 @@ const Home = () => {
                   >
                     Cancel
                   </button>
-                  <button
-                    className="preview-create-button"
-                    disabled={isDeleting}
-                    onClick={() => {
-                      setDeleteTemplateId(selectedTemplatepre._id);
-                      setShowDeleteModal(true);
-                    }}
-                  >
-                    {isDeleting ? (
-                      <span
-                        style={{ color: "#ffffff" }}
-                        className="loader-create"
-                      ></span>
-                    ) : (
-                      "Delete"
-                    )}
-                  </button>
+                 {selectedTemplatepre && 
+   ![foodTemplate, educationalTemplate, agricultureTemplate,travelTemplate,pharmacyTemplate,gymTemplate].includes(selectedTemplatepre) && (
+    <button
+      className="preview-create-button"
+      disabled={isDeleting}
+      onClick={() => {
+        setDeleteTemplateId(selectedTemplatepre._id);
+        setShowDeleteModal(true);
+      }}
+    >
+      {isDeleting ? (
+        <span
+          style={{ color: "#ffffff" }}
+          className="loader-create"
+        ></span>
+      ) : (
+        "Delete"
+      )}
+    </button>
+  )}
+
                 </div>
               </div>
             </div>

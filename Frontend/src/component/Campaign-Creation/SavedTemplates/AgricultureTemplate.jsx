@@ -35,10 +35,22 @@ export const agricultureTemplate = {
         fontWeight: "bold",
       },
     },
+    
+    {
+      type: "textwithimage",
+      src2: "https://ik.imagekit.io/w1dqqzgef/download%20(1).jpg?updatedAt=1750138526223", // Default image source
+      content2:
+        "Farming in plains is widely practiced due to the availability of flat and fertile land, which makes it easier to use machinery and irrigation systems. Crops like wheat, rice, sugarcane, and maize are commonly grown in these areas. The soil in plains is usually deep and rich in nutrients, ideal for large-scale cultivation. Because of the flat terrain, water can be distributed evenly, and transportation of goods is easier and more economical. Farming in plains often supports high yields and is the backbone of food production in many countries.", // Default paragraph text
+             style: {
+        color: "#000000",
+        borderTopLeftRadius: "10px",
+        borderBottomLeftRadius: "10px",
+             },
+    },
     {
       type: "multipleimage",
-      src1: "https://ik.imagekit.io/w1dqqzgef/photo-1625246333195-78d9c38ad449.jpg?updatedAt=1750137126973",
-      src2: "https://ik.imagekit.io/w1dqqzgef/4275406415.jpg?updatedAt=1750137200408",
+      src1: "https://ik.imagekit.io/w1dqqzgef/2148200478.jpg",
+      src2: "https://ik.imagekit.io/w1dqqzgef/12740.jpg",
       style: {
         width: "100%",
         height: "100%",
@@ -80,23 +92,56 @@ export const agricultureTemplate = {
       content1:"Hill station farming refers to agricultural practices carried out in hilly or mountainous regions, where the terrain, climate, and soil are quite different from plains. This type of farming often involves terrace cultivation, a method in which steps or flat areas are carved into the slopes to prevent soil erosion and manage water flow. The cool climate and abundant rainfall in hill stations make them ideal for growing a variety of crops such as tea, coffee, spices (like cardamom and pepper), fruits (like apples, plums, and oranges), and vegetables. Many hill areas also support floriculture, dairy farming, and organic farming due to their pollution-free environment and fertile land.", // Default paragraph text
       style1: {
         color: "#000000",
-        // borderTopLeftRadius: '10px',
-        // borderBottomLeftRadius: '10px',
         borderRadius: "10px",
-        // backgroundColor: "#f4f4f4",
       },
     },
 
-    {
-      type: "textwithimage",
-      src2: "https://ik.imagekit.io/w1dqqzgef/download%20(1).jpg?updatedAt=1750138526223", // Default image source
-      content2:
-        "Farming in plains is widely practiced due to the availability of flat and fertile land, which makes it easier to use machinery and irrigation systems. Crops like wheat, rice, sugarcane, and maize are commonly grown in these areas. The soil in plains is usually deep and rich in nutrients, ideal for large-scale cultivation. Because of the flat terrain, water can be distributed evenly, and transportation of goods is easier and more economical. Farming in plains often supports high yields and is the backbone of food production in many countries.", // Default paragraph text
-        color: "#000000",
-        // backgroundColor: "#f4f4f4",
-        borderTopLeftRadius: "10px",
-        borderBottomLeftRadius: "10px",
-    },
+
+     {
+        type: "multi-image-card",
+        src2:"https://ik.imagekit.io/w1dqqzgef/2148175897.jpg",
+        src1:"https://ik.imagekit.io/w1dqqzgef/2148175897.jpg",
+        link1: "",
+        link2: "",
+        title1: "Organic Plant", // Title for the first section
+        title2: "Organic Plant", // Title for the second section
+        originalPrice1: "150", // Original price for the first section
+        originalPrice2: "180", // Original price for the second section
+        offerPrice1: "100", // Offer price for the first section
+        offerPrice2: "120", // Offer price for the second section
+        buttonStyle1: {
+          textAlign: "center",
+          padding:"12px 15px", // Adjust padding based on screen size
+          backgroundColor: "#256433",
+          color: "#ffffff",
+          width: "80%", // Full width for buttons
+          marginTop: "20px",
+          alignItems: "center",
+          borderRadius: "12px",
+          fontWeight: "bold",
+          fontSize: "15px",
+        },
+        buttonStyle2: {
+          textAlign: "center",
+          padding:"12px 15px", // Adjust padding based on screen size
+          backgroundColor: "#256433",
+          color: "#ffffff",
+          width: "80%", // Full width for buttons
+          marginTop: "20px",
+          alignItems: "center",
+          borderRadius: "12px",
+          fontWeight: "bold",
+          fontSize: "15px",
+        },
+        content1: "Buy Now", 
+        content2: "Buy Now", 
+        style: {
+          width: "100%", 
+          height: "auto",
+          borderRadius: "0px",
+          textAlign: "center",
+        },
+      },
     {
       type: "icons",
       iconsrc1:
@@ -118,6 +163,18 @@ export const agricultureTemplate = {
         "https://res.cloudinary.com/diytyjnla/image/upload/v1748582471/youtube_egb71v.png",
       style4: { width: "30px", height: "30px" },
       links4: "https://www.youtube.com",
+    },
+     {
+      type: "para",
+      content:
+        "© 2025 Your Company. All rights reserved. You received this email because you're subscribed to travel updates.",
+      style: {
+        fontSize: "14px",
+        color: "#444",
+        textAlign: "center",
+        backgroundColor: "#ffffff",
+        padding: "10px",
+      },
     },
   ],
   

@@ -1,4 +1,4 @@
-export const businessTemplate = {
+export const foodTemplate = {
   temname: "Food Template",
   previewContent: [
   
@@ -23,18 +23,18 @@ export const businessTemplate = {
           textAlign: "center",
         },
       },
-      {
-        type: "image",
-        src: "https://ik.imagekit.io/w1dqqzgef/Screenshot%202025-07-23%20at%2012.14.09%E2%80%AFPM.png?updatedAt=1753253156835", // Default image source
-        url: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTjCoUtOal33JWLqals1Wq7p6GGCnr3o-lwpQ&s", // Default image source
-        style: {
-          width: "100%",
-          height: "auto",
-          borderRadius: "0px",
-          textAlign: "center",
-          margin: "5px auto",
+       {
+        type: "imagewithtext",
+        src1:"https://ik.imagekit.io/w1dqqzgef/407801457_63378f21-e274-4597-8154-77207915e234-removebg-preview.png?updatedAt=1753437291892",
+        content1:"In every dish we serve, from aromatic spicy curries to soft, buttery parathas, you’ll find the warmth of a mother’s touch and the essence of traditional home cooking. Our meals are crafted with love, using time-honored recipes and fresh ingredients that remind you of simpler times, shared meals, and family conversations around the table. At the heart of our kitchen is the belief that comfort food should not only satisfy your hunger but also your soul. From our kitchen to your heart, we bring the flavors of home — no matter where you are.",
+        style1: {
+          color: "#66717c",
+          backgroundColor: "#ffffffff",
+          textAlign:"justify",
+          fontSize:"14px"
         },
       },
+      
       {
         type: "head",
         content: "Comfort food made with love.",
@@ -54,7 +54,7 @@ export const businessTemplate = {
           fontSize: "15px",
           borderRadius: "0px",
           textAlign: "center",
-          color: "#000000",
+          color: "#66717c",
           backgroundColor: "#ffffffff",
           padding: "10px 10px",
         },
@@ -143,12 +143,12 @@ export const businessTemplate = {
       
       {
         type: "multi-image-card",
-        src1: "https://ik.imagekit.io/w1dqqzgef/Screenshot%202025-07-24%20at%202.06.01%E2%80%AFPM.png?updatedAt=1753346956167",
-        src2: "https://ik.imagekit.io/w1dqqzgef/Screenshot%202025-07-24%20at%202.08.27%E2%80%AFPM.png?updatedAt=1753346955787",
+        src1:"https://ik.imagekit.io/w1dqqzgef/151588.jpg",
+        src2:"https://ik.imagekit.io/w1dqqzgef/2151182540.jpg",
         link1: "",
         link2: "",
-        title1: "Dum Hyderbad Briyani", // Title for the first section
-        title2: "Stuffed Paratha", // Title for the second section
+        title1: "Special Veg Briyani", // Title for the first section
+        title2: "Special Dum Briyani", // Title for the second section
         originalPrice1: "389", // Original price for the first section
         originalPrice2: "150", // Original price for the second section
         offerPrice1: "250", // Offer price for the first section
@@ -188,12 +188,12 @@ export const businessTemplate = {
       },
       {
         type: "multi-image-card",
-        src1: "https://ik.imagekit.io/w1dqqzgef/Screenshot%202025-07-24%20at%202.11.30%E2%80%AFPM.png?updatedAt=1753346956941",
-        src2: "https://ik.imagekit.io/w1dqqzgef/Screenshot%202025-07-24%20at%202.10.16%E2%80%AFPM.png?updatedAt=1753346956861",
+        src1:"https://ik.imagekit.io/w1dqqzgef/61705.jpg",
+        src2:"https://ik.imagekit.io/w1dqqzgef/19997.jpg",
         link1: "",
         link2: "",
         title1: "Tandoori Chicken", // Title for the first section
-        title2: "Chicken Raw Grilled Chicken", // Title for the second section
+        title2: "White Chicken tikka ", // Title for the second section
         originalPrice1: "400", // Original price for the first section
         originalPrice2: "555", // Original price for the second section
         offerPrice1: "350", // Offer price for the first section
@@ -233,12 +233,12 @@ export const businessTemplate = {
       },
       {
         type: "multi-image-card",
-        src1: "https://ik.imagekit.io/w1dqqzgef/Screenshot%202025-07-24%20at%202.17.04%E2%80%AFPM.png?updatedAt=1753346955043",
-        src2: "https://ik.imagekit.io/w1dqqzgef/Screenshot%202025-07-24%20at%202.32.16%E2%80%AFPM.png?updatedAt=1753347760120",
+        src2:"https://ik.imagekit.io/w1dqqzgef/155.jpg",
+        src1:"https://ik.imagekit.io/w1dqqzgef/1797.jpg",
         link1: "",
         link2: "",
         title1: "Green Apple Mojito", // Title for the first section
-        title2: "Blueberry Show Mojito", // Title for the second section
+        title2: "Blue Show Mojito", // Title for the second section
         originalPrice1: "150", // Original price for the first section
         originalPrice2: "180", // Original price for the second section
         offerPrice1: "100", // Offer price for the first section
