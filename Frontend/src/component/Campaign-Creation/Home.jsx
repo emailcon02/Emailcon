@@ -3057,8 +3057,7 @@ const Home = () => {
                                         <div className="border">
                                           <img
                                             src={
-                                              item.src ||
-                                              "https://via.placeholder.com/200"
+                                              item.src 
                                             }
                                             alt="Preview"
                                             className="img gallery-img-image"
@@ -3072,8 +3071,7 @@ const Home = () => {
                                         <div className="border">
                                           <img
                                             src={
-                                              item.src ||
-                                              "https://via.placeholder.com/200"
+                                              item.src 
                                             }
                                             alt="Preview"
                                             className="img gallery-img-banner "
@@ -3140,8 +3138,7 @@ const Home = () => {
                                           >
                                             <img
                                               src={
-                                                item.src ||
-                                                "https://via.placeholder.com/200"
+                                                item.src 
                                               }
                                               alt="Editable"
                                               className="img gallery-img-image"
@@ -3189,8 +3186,7 @@ const Home = () => {
                                         >
                                           <img
                                             src={
-                                              item.src1 ||
-                                              "https://via.placeholder.com/200"
+                                              item.src1 
                                             }
                                             style={item.style}
                                             alt="Editable"
@@ -3223,8 +3219,7 @@ const Home = () => {
                                         <div className="border">
                                           <img
                                             src={
-                                              item.src ||
-                                              "https://via.placeholder.com/200"
+                                              item.src 
                                             }
                                             alt="Editable"
                                             className="logo gallery-img"
@@ -3247,8 +3242,7 @@ const Home = () => {
                                           >
                                             <img
                                               src={
-                                                item.src1 ||
-                                                "https://via.placeholder.com/200"
+                                                item.src1 
                                               }
                                               alt="Preview"
                                               className="image-item gallery-img-text-img"
@@ -3279,8 +3273,7 @@ const Home = () => {
                                             </p>
                                             <img
                                               src={
-                                                item.src2 ||
-                                                "https://via.placeholder.com/200"
+                                                item.src2 
                                               }
                                               alt="Preview"
                                               className="image-item gallery-img-text-img"
@@ -3294,8 +3287,7 @@ const Home = () => {
                                           <div className="Layout multi-gallery">
                                             <img
                                               src={
-                                                item.src1 ||
-                                                "https://via.placeholder.com/200"
+                                                item.src1 
                                               }
                                               alt="Editable"
                                               className="multiimg gallery-img-multi"
@@ -3319,8 +3311,7 @@ const Home = () => {
                                           <div className="Layout multi-gallery">
                                             <img
                                               src={
-                                                item.src2 ||
-                                                "https://via.placeholder.com/200"
+                                                item.src2 
                                               }
                                               alt="Editable"
                                               className="multiimg gallery-img-multi"
@@ -3349,8 +3340,7 @@ const Home = () => {
                                           <div className="Layout multi-gallery">
                                             <img
                                               src={
-                                                item.src1 ||
-                                                "https://via.placeholder.com/200"
+                                                item.src1 
                                               }
                                               alt="Preview"
                                               className="multiimgcard gallery-img-multi"
@@ -3383,8 +3373,7 @@ const Home = () => {
                                           <div className="Layout multi-gallery">
                                             <img
                                               src={
-                                                item.src2 ||
-                                                "https://via.placeholder.com/200"
+                                                item.src2 
                                               }
                                               alt="Preview"
                                               className="multiimgcard"
@@ -3422,8 +3411,7 @@ const Home = () => {
                                           <div className="Layout multi-gallery">
                                             <img
                                               src={
-                                                item.src1 ||
-                                                "https://via.placeholder.com/200"
+                                                item.src1 
                                               }
                                               alt="Preview"
                                               className="multiple-img gallery-img-multi"
@@ -3433,8 +3421,7 @@ const Home = () => {
                                           <div className="Layout multi-gallery">
                                             <img
                                               src={
-                                                item.src2 ||
-                                                "https://via.placeholder.com/200"
+                                                item.src2 
                                               }
                                               alt="Preview"
                                               className="multiple-img gallery-img-multi"
@@ -3449,8 +3436,7 @@ const Home = () => {
                                         <div className="video-icon">
                                           <img
                                             src={
-                                              item.src1 ||
-                                              "https://via.placeholder.com/200"
+                                              item.src1 
                                             }
                                             alt="Preview"
                                             className="videoimg video-img"
@@ -4231,8 +4217,7 @@ const Home = () => {
                               <div className="border">
                                 <img
                                   src={
-                                    item.src ||
-                                    "https://via.placeholder.com/200"
+                                    item.src 
                                   }
                                   alt="Preview"
                                   className="img gallery-img-image"
@@ -4246,8 +4231,7 @@ const Home = () => {
                               <div className="border">
                                 <img
                                   src={
-                                    item.src ||
-                                    "https://via.placeholder.com/200"
+                                    item.src 
                                   }
                                   alt="Preview"
                                   className="img gallery-img-banner"
@@ -4311,8 +4295,7 @@ const Home = () => {
                                 >
                                   <img
                                     src={
-                                      item.src ||
-                                      "https://via.placeholder.com/200"
+                                      item.src 
                                     }
                                     alt="Editable"
                                     className="img gallery-img-image"
@@ -4358,8 +4341,7 @@ const Home = () => {
                               >
                                 <img
                                   src={
-                                    item.src1 ||
-                                    "https://via.placeholder.com/200"
+                                    item.src1 
                                   }
                                   style={item.style}
                                   alt="Editable"
@@ -4390,8 +4372,7 @@ const Home = () => {
                               <div className="border">
                                 <img
                                   src={
-                                    item.src ||
-                                    "https://via.placeholder.com/200"
+                                    item.src 
                                   }
                                   alt="Editable"
                                   className="logo gallery-img"
@@ -4412,8 +4393,7 @@ const Home = () => {
                                 >
                                   <img
                                     src={
-                                      item.src1 ||
-                                      "https://via.placeholder.com/200"
+                                      item.src1 
                                     }
                                     alt="Preview"
                                     className="image-item gallery-img-text-img"
@@ -4444,8 +4424,7 @@ const Home = () => {
                                   </p>
                                   <img
                                     src={
-                                      item.src2 ||
-                                      "https://via.placeholder.com/200"
+                                      item.src2 
                                     }
                                     alt="Preview"
                                     className="image-item gallery-img-text-img"
@@ -4459,8 +4438,7 @@ const Home = () => {
                                 <div className="Layout multi-gallery">
                                   <img
                                     src={
-                                      item.src1 ||
-                                      "https://via.placeholder.com/200"
+                                      item.src1 
                                     }
                                     alt="Editable"
                                     className="multiimg gallery-img-multi"
@@ -4482,8 +4460,7 @@ const Home = () => {
                                 <div className="Layout multi-gallery">
                                   <img
                                     src={
-                                      item.src2 ||
-                                      "https://via.placeholder.com/200"
+                                      item.src2 
                                     }
                                     alt="Editable"
                                     className="multiimg gallery-img-multi"
@@ -4510,8 +4487,7 @@ const Home = () => {
                                 <div className="Layout multi-gallery">
                                   <img
                                     src={
-                                      item.src1 ||
-                                      "https://via.placeholder.com/200"
+                                      item.src1 
                                     }
                                     alt="Preview"
                                     className="multiimgcard gallery-img-multi"
@@ -4544,8 +4520,7 @@ const Home = () => {
                                 <div className="Layout multi-gallery">
                                   <img
                                     src={
-                                      item.src2 ||
-                                      "https://via.placeholder.com/200"
+                                      item.src2 
                                     }
                                     alt="Preview"
                                     className="multiimgcard"
@@ -4583,8 +4558,7 @@ const Home = () => {
                                 <div className="Layout multi-gallery">
                                   <img
                                     src={
-                                      item.src1 ||
-                                      "https://via.placeholder.com/200"
+                                      item.src1 
                                     }
                                     alt="Preview"
                                     className="multiple-img gallery-img-multi"
@@ -4594,8 +4568,7 @@ const Home = () => {
                                 <div className="Layout multi-gallery">
                                   <img
                                     src={
-                                      item.src2 ||
-                                      "https://via.placeholder.com/200"
+                                      item.src2 
                                     }
                                     alt="Preview"
                                     className="multiple-img gallery-img-multi"
@@ -4610,8 +4583,7 @@ const Home = () => {
                               <div className="video-icon">
                                 <img
                                   src={
-                                    item.src1 ||
-                                    "https://via.placeholder.com/200"
+                                    item.src1 
                                   }
                                   alt="Preview"
                                   className="videoimg video-img"
@@ -4782,8 +4754,7 @@ const Home = () => {
                               <div className="border">
                                 <img
                                   src={
-                                    item.src ||
-                                    "https://via.placeholder.com/200"
+                                    item.src 
                                   }
                                   alt="Preview"
                                   className="img gallery-img-image"
@@ -4797,8 +4768,7 @@ const Home = () => {
                               <div className="border">
                                 <img
                                   src={
-                                    item.src ||
-                                    "https://via.placeholder.com/200"
+                                    item.src 
                                   }
                                   alt="Preview"
                                   className="img gallery-img-banner"
@@ -4862,8 +4832,7 @@ const Home = () => {
                                 >
                                   <img
                                     src={
-                                      item.src ||
-                                      "https://via.placeholder.com/200"
+                                      item.src 
                                     }
                                     alt="Editable"
                                     className="img gallery-img-image"
@@ -4909,8 +4878,7 @@ const Home = () => {
                               >
                                 <img
                                   src={
-                                    item.src1 ||
-                                    "https://via.placeholder.com/200"
+                                    item.src1 
                                   }
                                   style={item.style}
                                   alt="Editable"
@@ -4941,8 +4909,7 @@ const Home = () => {
                               <div className="border">
                                 <img
                                   src={
-                                    item.src ||
-                                    "https://via.placeholder.com/200"
+                                    item.src 
                                   }
                                   alt="Editable"
                                   className="logo gallery-img"
@@ -4963,8 +4930,7 @@ const Home = () => {
                                 >
                                   <img
                                     src={
-                                      item.src1 ||
-                                      "https://via.placeholder.com/200"
+                                      item.src1 
                                     }
                                     alt="Preview"
                                     className="image-item gallery-img-text-img"
@@ -4995,8 +4961,7 @@ const Home = () => {
                                   </p>
                                   <img
                                     src={
-                                      item.src2 ||
-                                      "https://via.placeholder.com/200"
+                                      item.src2 
                                     }
                                     alt="Preview"
                                     className="image-item gallery-img-text-img"
@@ -5010,8 +4975,7 @@ const Home = () => {
                                 <div className="Layout multi-gallery">
                                   <img
                                     src={
-                                      item.src1 ||
-                                      "https://via.placeholder.com/200"
+                                      item.src1 
                                     }
                                     alt="Editable"
                                     className="multiimg gallery-img-multi"
@@ -5033,8 +4997,7 @@ const Home = () => {
                                 <div className="Layout multi-gallery">
                                   <img
                                     src={
-                                      item.src2 ||
-                                      "https://via.placeholder.com/200"
+                                      item.src2 
                                     }
                                     alt="Editable"
                                     className="multiimg gallery-img-multi"
@@ -5061,8 +5024,7 @@ const Home = () => {
                                 <div className="Layout multi-gallery">
                                   <img
                                     src={
-                                      item.src1 ||
-                                      "https://via.placeholder.com/200"
+                                      item.src1 
                                     }
                                     alt="Preview"
                                     className="multiimgcard gallery-img-multi"
@@ -5095,8 +5057,7 @@ const Home = () => {
                                 <div className="Layout multi-gallery">
                                   <img
                                     src={
-                                      item.src2 ||
-                                      "https://via.placeholder.com/200"
+                                      item.src2 
                                     }
                                     alt="Preview"
                                     className="multiimgcard"
@@ -5134,8 +5095,7 @@ const Home = () => {
                                 <div className="Layout multi-gallery">
                                   <img
                                     src={
-                                      item.src1 ||
-                                      "https://via.placeholder.com/200"
+                                      item.src1 
                                     }
                                     alt="Preview"
                                     className="multiple-img gallery-img-multi"
@@ -5145,8 +5105,7 @@ const Home = () => {
                                 <div className="Layout multi-gallery">
                                   <img
                                     src={
-                                      item.src2 ||
-                                      "https://via.placeholder.com/200"
+                                      item.src2 
                                     }
                                     alt="Preview"
                                     className="multiple-img gallery-img-multi"
@@ -5161,8 +5120,7 @@ const Home = () => {
                               <div className="video-icon">
                                 <img
                                   src={
-                                    item.src1 ||
-                                    "https://via.placeholder.com/200"
+                                    item.src1 
                                   }
                                   alt="Preview"
                                   className="videoimg video-img"
@@ -5307,8 +5265,7 @@ const Home = () => {
                               <div className="Layout">
                                 <img
                                   src={
-                                    item.src1 ||
-                                    "https://via.placeholder.com/200"
+                                    item.src1 
                                   }
                                   alt="Editable"
                                   className="multiimgcard"
@@ -5345,8 +5302,7 @@ const Home = () => {
                               <div className="Layout">
                                 <img
                                   src={
-                                    item.src2 ||
-                                    "https://via.placeholder.com/200"
+                                    item.src2 
                                   }
                                   alt="Editable"
                                   className="multiimgcard"
@@ -5387,8 +5343,7 @@ const Home = () => {
                               <div className="Layout">
                                 <img
                                   src={
-                                    item.src1 ||
-                                    "https://via.placeholder.com/200"
+                                    item.src1 
                                   }
                                   alt="Editable"
                                   className="multiple-img"
@@ -5401,8 +5356,7 @@ const Home = () => {
                               <div className="Layout">
                                 <img
                                   src={
-                                    item.src2 ||
-                                    "https://via.placeholder.com/200"
+                                    item.src2 
                                   }
                                   alt="Editable"
                                   className="multiple-img"
@@ -5419,8 +5373,7 @@ const Home = () => {
                               <div className="Layout">
                                 <img
                                   src={
-                                    item.src1 ||
-                                    "https://via.placeholder.com/200"
+                                    item.src1 
                                   }
                                   alt="Editable"
                                   className="multiimg"
@@ -5442,8 +5395,7 @@ const Home = () => {
                               <div className="Layout">
                                 <img
                                   src={
-                                    item.src2 ||
-                                    "https://via.placeholder.com/200"
+                                    item.src2 
                                   }
                                   alt="Editable"
                                   className="multiimg"
@@ -5468,7 +5420,7 @@ const Home = () => {
                             <div className="video-icon">
                               <img
                                 src={
-                                  item.src1 || "https://via.placeholder.com/200"
+                                  item.src1 
                                 }
                                 alt="Editable"
                                 className="videoimg"
@@ -5497,7 +5449,7 @@ const Home = () => {
                             >
                               <img
                                 src={
-                                  item.src1 || "https://via.placeholder.com/200"
+                                  item.src1 
                                 }
                                 style={item.style}
                                 alt="Editable"
@@ -5622,8 +5574,7 @@ const Home = () => {
                               >
                                 <img
                                   src={
-                                    item.src ||
-                                    "https://via.placeholder.com/200"
+                                    item.src 
                                   }
                                   alt="Editable"
                                   className="img"
@@ -5638,7 +5589,7 @@ const Home = () => {
                             <div className="border">
                               <img
                                 src={
-                                  item.src || "https://via.placeholder.com/200"
+                                  item.src 
                                 }
                                 alt="Editable"
                                 className="img"
@@ -5743,8 +5694,7 @@ const Home = () => {
                               >
                                 <img
                                   src={
-                                    item.src1 ||
-                                    "https://via.placeholder.com/200"
+                                    item.src1 
                                   }
                                   alt="Editable"
                                   className="image-item"
@@ -5782,7 +5732,7 @@ const Home = () => {
                             <div className="border">
                               <img
                                 src={
-                                  item.src || "https://via.placeholder.com/200"
+                                  item.src 
                                 }
                                 alt="Editable"
                                 className="img"
@@ -5810,8 +5760,7 @@ const Home = () => {
                                 />
                                 <img
                                   src={
-                                    item.src2 ||
-                                    "https://via.placeholder.com/200"
+                                    item.src2 
                                   }
                                   alt="Editable"
                                   className="image-item"
@@ -5839,7 +5788,7 @@ const Home = () => {
                             <div className="border">
                               <img
                                 src={
-                                  item.src || "https://via.placeholder.com/200"
+                                  item.src 
                                 }
                                 alt="Editable"
                                 className="logo"
@@ -5968,8 +5917,7 @@ const Home = () => {
                               <div className="Layout">
                                 <img
                                   src={
-                                    item.src1 ||
-                                    "https://via.placeholder.com/200"
+                                    item.src1 
                                   }
                                   alt="Editable"
                                   className="multiimgcard"
@@ -6006,8 +5954,7 @@ const Home = () => {
                               <div className="Layout">
                                 <img
                                   src={
-                                    item.src2 ||
-                                    "https://via.placeholder.com/200"
+                                    item.src2 
                                   }
                                   alt="Editable"
                                   className="multiimgcard"
@@ -6048,8 +5995,7 @@ const Home = () => {
                               <div className="Layout">
                                 <img
                                   src={
-                                    item.src1 ||
-                                    "https://via.placeholder.com/200"
+                                    item.src1 
                                   }
                                   alt="Editable"
                                   className="multiple-img"
@@ -6062,8 +6008,7 @@ const Home = () => {
                               <div className="Layout">
                                 <img
                                   src={
-                                    item.src2 ||
-                                    "https://via.placeholder.com/200"
+                                    item.src2 
                                   }
                                   alt="Editable"
                                   className="multiple-img"
@@ -6080,8 +6025,7 @@ const Home = () => {
                               <div className="Layout">
                                 <img
                                   src={
-                                    item.src1 ||
-                                    "https://via.placeholder.com/200"
+                                    item.src1 
                                   }
                                   alt="Editable"
                                   className="multiimg"
@@ -6103,8 +6047,7 @@ const Home = () => {
                               <div className="Layout">
                                 <img
                                   src={
-                                    item.src2 ||
-                                    "https://via.placeholder.com/200"
+                                    item.src2 
                                   }
                                   alt="Editable"
                                   className="multiimg"
@@ -6129,7 +6072,7 @@ const Home = () => {
                             <div className="video-icon">
                               <img
                                 src={
-                                  item.src1 || "https://via.placeholder.com/200"
+                                  item.src1 
                                 }
                                 alt="Editable"
                                 className="videoimg"
@@ -6158,7 +6101,7 @@ const Home = () => {
                             >
                               <img
                                 src={
-                                  item.src1 || "https://via.placeholder.com/200"
+                                  item.src1 
                                 }
                                 style={item.style}
                                 alt="Editable"
@@ -6283,8 +6226,7 @@ const Home = () => {
                               >
                                 <img
                                   src={
-                                    item.src ||
-                                    "https://via.placeholder.com/200"
+                                    item.src 
                                   }
                                   alt="Editable"
                                   className="img"
@@ -6299,7 +6241,7 @@ const Home = () => {
                             <div className="border">
                               <img
                                 src={
-                                  item.src || "https://via.placeholder.com/200"
+                                  item.src 
                                 }
                                 alt="Editable"
                                 className="img"
@@ -6404,8 +6346,7 @@ const Home = () => {
                               >
                                 <img
                                   src={
-                                    item.src1 ||
-                                    "https://via.placeholder.com/200"
+                                    item.src1 
                                   }
                                   alt="Editable"
                                   className="image-item"
@@ -6443,7 +6384,7 @@ const Home = () => {
                             <div className="border">
                               <img
                                 src={
-                                  item.src || "https://via.placeholder.com/200"
+                                  item.src 
                                 }
                                 alt="Editable"
                                 className="img"
@@ -6471,8 +6412,7 @@ const Home = () => {
                                 />
                                 <img
                                   src={
-                                    item.src2 ||
-                                    "https://via.placeholder.com/200"
+                                    item.src2 
                                   }
                                   alt="Editable"
                                   className="image-item"
@@ -6500,7 +6440,7 @@ const Home = () => {
                             <div className="border">
                               <img
                                 src={
-                                  item.src || "https://via.placeholder.com/200"
+                                  item.src 
                                 }
                                 alt="Editable"
                                 className="logo"
@@ -6696,8 +6636,7 @@ const Home = () => {
                               <div className="Layout">
                                 <img
                                   src={
-                                    item.src1 ||
-                                    "https://via.placeholder.com/200"
+                                    item.src1 
                                   }
                                   alt="Editable"
                                   className="multiimgcard"
@@ -6734,8 +6673,7 @@ const Home = () => {
                               <div className="Layout">
                                 <img
                                   src={
-                                    item.src2 ||
-                                    "https://via.placeholder.com/200"
+                                    item.src2 
                                   }
                                   alt="Editable"
                                   className="multiimgcard"
@@ -6776,8 +6714,7 @@ const Home = () => {
                               <div className="Layout">
                                 <img
                                   src={
-                                    item.src1 ||
-                                    "https://via.placeholder.com/200"
+                                    item.src1 
                                   }
                                   alt="Editable"
                                   className="multiple-img"
@@ -6790,8 +6727,7 @@ const Home = () => {
                               <div className="Layout">
                                 <img
                                   src={
-                                    item.src2 ||
-                                    "https://via.placeholder.com/200"
+                                    item.src2 
                                   }
                                   alt="Editable"
                                   className="multiple-img"
@@ -6808,8 +6744,7 @@ const Home = () => {
                               <div className="Layout">
                                 <img
                                   src={
-                                    item.src1 ||
-                                    "https://via.placeholder.com/200"
+                                    item.src1 
                                   }
                                   alt="Editable"
                                   className="multiimg"
@@ -6831,8 +6766,7 @@ const Home = () => {
                               <div className="Layout">
                                 <img
                                   src={
-                                    item.src2 ||
-                                    "https://via.placeholder.com/200"
+                                    item.src2 
                                   }
                                   alt="Editable"
                                   className="multiimg"
@@ -6857,7 +6791,7 @@ const Home = () => {
                             <div className="video-icon">
                               <img
                                 src={
-                                  item.src1 || "https://via.placeholder.com/200"
+                                  item.src1 
                                 }
                                 alt="Editable"
                                 className="videoimg"
@@ -6886,7 +6820,7 @@ const Home = () => {
                             >
                               <img
                                 src={
-                                  item.src1 || "https://via.placeholder.com/200"
+                                  item.src1 
                                 }
                                 style={item.style}
                                 alt="Editable"
@@ -7011,8 +6945,7 @@ const Home = () => {
                               >
                                 <img
                                   src={
-                                    item.src ||
-                                    "https://via.placeholder.com/200"
+                                    item.src 
                                   }
                                   alt="Editable"
                                   className="img"
@@ -7027,7 +6960,7 @@ const Home = () => {
                             <div className="border">
                               <img
                                 src={
-                                  item.src || "https://via.placeholder.com/200"
+                                  item.src 
                                 }
                                 alt="Editable"
                                 className="img"
@@ -7132,8 +7065,7 @@ const Home = () => {
                               >
                                 <img
                                   src={
-                                    item.src1 ||
-                                    "https://via.placeholder.com/200"
+                                    item.src1 
                                   }
                                   alt="Editable"
                                   className="image-item"
@@ -7171,7 +7103,7 @@ const Home = () => {
                             <div className="border">
                               <img
                                 src={
-                                  item.src || "https://via.placeholder.com/200"
+                                  item.src 
                                 }
                                 alt="Editable"
                                 className="img"
@@ -7199,8 +7131,7 @@ const Home = () => {
                                 />
                                 <img
                                   src={
-                                    item.src2 ||
-                                    "https://via.placeholder.com/200"
+                                    item.src2
                                   }
                                   alt="Editable"
                                   className="image-item"
@@ -7228,7 +7159,7 @@ const Home = () => {
                             <div className="border">
                               <img
                                 src={
-                                  item.src || "https://via.placeholder.com/200"
+                                  item.src 
                                 }
                                 alt="Editable"
                                 className="logo"
