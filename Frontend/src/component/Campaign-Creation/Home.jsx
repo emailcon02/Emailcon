@@ -273,7 +273,7 @@ const Home = () => {
       }
     });
 
-    totalContacts.forEach((s) => {
+    students.forEach((s) => {
       if (!s.createdAt) return;
       const created = new Date(s.createdAt);
       if (isNaN(created)) return;
@@ -344,10 +344,11 @@ const Home = () => {
     const fetchContactsCount = async () => {
       try {
         const response = await axios.get(
-          `${apiConfig.baseURL}/api/stud/students?user=${user.id}`
+          `${apiConfig.baseURL}/api/stud/studentscount?user=${user.id}`
         );
-        setTotalContacts(response.data);
+        setTotalContacts(response.data.count || 0);
         // console.log("rec contact",response.data);
+
       } catch (error) {
         console.error("Error fetching contacts:", error);
         setTotalContacts(0);
@@ -592,95 +593,86 @@ const Home = () => {
     return () => clearInterval(interval);
   }, []);
 
-  useEffect(() => {
-    const fetchAllStudentData = async () => {
-      if (!user?.id) {
-        console.warn("User ID is missing. Skipping data fetch.");
-        return;
-      }
+useEffect(() => {
+  if (!user?.id) return;
 
-      try {
-        const [
-          campaignsRes,
-          groupsRes,
-          studentsRes,
-          templatesRes,
-          birthtemplatesRes,
-          userdata,
-          paymentdetails,
-        ] = await Promise.all([
-          axios.get(`${apiConfig.baseURL}/api/stud/campaigns/${user.id}`),
-          axios.get(`${apiConfig.baseURL}/api/stud/groups/${user.id}`),
-          axios.get(`${apiConfig.baseURL}/api/stud/students?user=${user.id}`),
-          axios.get(`${apiConfig.baseURL}/api/stud/templates/${user.id}`),
-          axios.get(`${apiConfig.baseURL}/api/stud/birthtemplates/${user.id}`),
-          axios.get(`${apiConfig.baseURL}/api/stud/userdata/${user.id}`),
-          axios.get(
-            `${apiConfig.baseURL}/api/stud/payment-history-latest/${user.id}`
-          ),
-        ]);
-        setUsers(userdata.data);
-        setCampaigns(campaignsRes.data);
-        setGroups(groupsRes.data);
-        setStudents(studentsRes.data);
-        setTemplates([
-          educationalTemplate,
-          foodTemplate,         
-          travelTemplate,
-          agricultureTemplate,
-          pharmacyTemplate,
-          gymTemplate,
-          ...templatesRes.data.sort(
-            (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
-          ),
-        ]);
-        setBirthTemplates(
-          birthtemplatesRes.data.sort(
-            (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
-          )
-        );
+  // Fetch students with pagination (limit first 50)
+  axios
+    .get(`${apiConfig.baseURL}/api/stud/students?user=${user.id}`)
+    .then((res) => setStudents(res.data))
+    .catch((err) => console.error("Students fetch error", err));
 
-        setPaymentdetails(paymentdetails.data);
+  // Fetch templates separately with pagination
+  axios
+    .get(`${apiConfig.baseURL}/api/stud/templates/${user.id}`)
+    .then((res) => {
+      setTemplates([
+        educationalTemplate,
+        foodTemplate,
+        travelTemplate,
+        agricultureTemplate,
+        pharmacyTemplate,
+        gymTemplate,
+        ...res.data.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)),
+      ]);
+    })
+    .catch((err) => console.error("Template fetch error", err));
 
-        const metrics = {};
-        await Promise.all(
-          campaignsRes.data.map(async (campaign) => {
-            try {
-              const [openRes, clickRes] = await Promise.all([
-                axios.get(
-                  `${apiConfig.baseURL}/api/stud/get-email-open-count?userId=${user.id}&campaignId=${campaign._id}`
-                ),
-                axios.get(
-                  `${apiConfig.baseURL}/api/stud/get-click?userId=${user.id}&campaignId=${campaign._id}`
-                ),
-              ]);
+  // Fetch other data
+  Promise.all([
+    axios.get(`${apiConfig.baseURL}/api/stud/campaigns/${user.id}`),
+    axios.get(`${apiConfig.baseURL}/api/stud/groups/${user.id}`),
+    axios.get(`${apiConfig.baseURL}/api/stud/birthtemplates/${user.id}`),
+    axios.get(`${apiConfig.baseURL}/api/stud/userdata/${user.id}`),
+    axios.get(`${apiConfig.baseURL}/api/stud/payment-history-latest/${user.id}`),
+  ])
+    .then(([campaignsRes, groupsRes, birthtemplatesRes, userdataRes, paymentdetailsRes]) => {
+      setCampaigns(campaignsRes.data);
+      setGroups(groupsRes.data);
+      setBirthTemplates(
+        birthtemplatesRes.data.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+      );
+      setUsers(userdataRes.data);
+      setPaymentdetails(paymentdetailsRes.data);
+    })
+    .catch((err) => console.error("Init dashboard fetch error", err));
+}, [user?.id]);
 
-              metrics[campaign._id] = {
-                openCount: openRes.data.count || 0,
-                clickCount: clickRes.data.count || 0,
-              };
-            } catch (e) {
-              console.error(`Failed to fetch metrics for ${campaign._id}`, e);
-              metrics[campaign._id] = {
-                openCount: 0,
-                clickCount: 0,
-              };
-            }
-          })
-        );
+// Lazy load metrics
+useEffect(() => {
+  if (!campaigns.length || !user?.id) return;
 
-        setCampaignMetrics(metrics);
-      } catch (error) {
-        console.error("Error fetching student dashboard data:", {
-          message: error.message,
-          stack: error.stack,
-          response: error.response?.data,
-        });
-      }
-    };
+  const timeout = setTimeout(async () => {
+    const metrics = {};
 
-    fetchAllStudentData();
-  }, [user?.id]);
+    await Promise.all(
+      campaigns.map(async (campaign) => {
+        try {
+          const [openRes, clickRes] = await Promise.all([
+            axios.get(`${apiConfig.baseURL}/api/stud/get-email-open-count?userId=${user.id}&campaignId=${campaign._id}`),
+            axios.get(`${apiConfig.baseURL}/api/stud/get-click?userId=${user.id}&campaignId=${campaign._id}`),
+          ]);
+
+          metrics[campaign._id] = {
+            openCount: openRes.data.count || 0,
+            clickCount: clickRes.data.count || 0,
+          };
+        } catch (e) {
+          console.error(`Failed to fetch metrics for ${campaign._id}`, e);
+          metrics[campaign._id] = {
+            openCount: 0,
+            clickCount: 0,
+          };
+        }
+      })
+    );
+
+    setCampaignMetrics(metrics);
+  }, 3000); // delay metrics fetch to avoid blocking UI
+
+  return () => clearTimeout(timeout);
+}, [campaigns, user?.id]);
+
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -2672,7 +2664,7 @@ const Home = () => {
                         </div>
                         <p className="card-text-content">Total Contacts</p>
                         <p className="card-text-highlight">
-                          {totalContacts.length}
+                          {totalContacts}
                         </p>
                       </div>
 
@@ -3107,26 +3099,7 @@ const Home = () => {
                                         </div>
                                       )}
 
-                                      {/* {item.type === "link-image" && (
- <div className="border">
- <a
- href={item.link || "#"}
- onClick={(e) => handleLinkClick(e, index)}
- >
- <img
- src={
- item.src || "https://via.placeholder.com/200"
- }
- alt="Editable"
- className="img"
- style={item.style}
- onClick={() => handleopenFiles(index, 1)}
- title="Upload Image"
- />
- </a>
- </div>
- )} */}
-
+                                    
                                       {/* Link */}
                                       {item.type === "link-image" && (
                                         <div className="border">
@@ -3165,19 +3138,7 @@ const Home = () => {
                                           <div style={item.styles}></div>
                                         </div>
                                       )}
-                                      {/* 
- {item.type === "logo" && (
- <div className="border">
- <img
- src={item.src || "https://via.placeholder.com/200"}
- alt="Editable"
- className="logo"
- style={item.style}
- onClick={() => handleopenFiles(index, 1)}
- title="Upload Image"
- />
- </div>
- )} */}
+                                     
 
                                       {item.type === "cardimage" ? (
                                         <div
@@ -4078,7 +4039,7 @@ const Home = () => {
             </div>
           )}
           {/* show livepopup toast */}
-          <LivePopup userId={user?.id} />
+          {/* <LivePopup userId={user?.id} /> */}
 
           {/* Show bulk add contact existing group modal */}
           {showfileGroupModal && (
@@ -4266,25 +4227,7 @@ const Home = () => {
                               </div>
                             )}
 
-                            {/* {item.type === "link-image" && (
- <div className="border">
- <a
- href={item.link || "#"}
- onClick={(e) => handleLinkClick(e, index)}
- >
- <img
- src={
- item.src || "https://via.placeholder.com/200"
- }
- alt="Editable"
- className="img"
- style={item.style}
- onClick={() => handleopenFiles(index, 1)}
- title="Upload Image"
- />
- </a>
- </div>
- )} */}
+                           
 
                             {/* Link */}
                             {item.type === "link-image" && (
@@ -4320,20 +4263,7 @@ const Home = () => {
                                 <div style={item.styles}></div>
                               </div>
                             )}
-                            {/* 
- {item.type === "logo" && (
- <div className="border">
- <img
- src={item.src || "https://via.placeholder.com/200"}
- alt="Editable"
- className="logo"
- style={item.style}
- onClick={() => handleopenFiles(index, 1)}
- title="Upload Image"
- />
- </div>
- )} */}
-
+                           
                             {item.type === "cardimage" ? (
                               <div
                                 className="card-image-container"
@@ -4803,25 +4733,7 @@ const Home = () => {
                               </div>
                             )}
 
-                            {/* {item.type === "link-image" && (
- <div className="border">
- <a
- href={item.link || "#"}
- onClick={(e) => handleLinkClick(e, index)}
- >
- <img
- src={
- item.src || "https://via.placeholder.com/200"
- }
- alt="Editable"
- className="img"
- style={item.style}
- onClick={() => handleopenFiles(index, 1)}
- title="Upload Image"
- />
- </a>
- </div>
- )} */}
+                           
 
                             {/* Link */}
                             {item.type === "link-image" && (
@@ -4857,19 +4769,7 @@ const Home = () => {
                                 <div style={item.styles}></div>
                               </div>
                             )}
-                            {/* 
- {item.type === "logo" && (
- <div className="border">
- <img
- src={item.src || "https://via.placeholder.com/200"}
- alt="Editable"
- className="logo"
- style={item.style}
- onClick={() => handleopenFiles(index, 1)}
- title="Upload Image"
- />
- </div>
- )} */}
+                           
 
                             {item.type === "cardimage" ? (
                               <div

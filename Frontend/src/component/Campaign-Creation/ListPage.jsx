@@ -5,6 +5,7 @@ import "react-toastify/dist/ReactToastify.css";
 import "./ListPage.css";
 import { FiEdit, FiTrash2,FiEye } from "react-icons/fi"; // Importing icons
 import apiConfig from "../../apiconfig/apiConfig";
+import { use } from "react";
 
 const ConfirmationModal = ({ isOpen, onClose, onConfirm, message }) => {
   if (!isOpen) return null;
@@ -53,32 +54,52 @@ const ListPage = ({ onClose }) => {
   }, [groups, selectedGroup]); 
 
   useEffect(() => {
-    const fetchAllStudentData = async () => {
-      if (!user?.id) {
-        console.warn("User ID is missing. Skipping data fetch.");
-        return;
-      }
-  
-      try {
-        const [groupsRes, studentsRes] = await Promise.all([
-          axios.get(`${apiConfig.baseURL}/api/stud/groups/${user.id}`),
-          axios.get(`${apiConfig.baseURL}/api/stud/students?user=${user.id}`),
-        ]);
-  
-        setGroups(groupsRes.data);
-        setStudents(studentsRes.data);
-      } catch (error) {
-        console.error("Error fetching student dashboard data:", {
-          message: error.message,
-          stack: error.stack,
-          response: error.response?.data,
-        });
-      }
-    };
-  
-    fetchAllStudentData();
+  if (!user?.id) {
+    console.warn("User ID is missing. Skipping data fetch.");
+    return;
+  }
+
+  fetchGroups();
+}, [user?.id]);
+  const fetchGroups = async () => {
+    try {
+      const response = await axios.get(`${apiConfig.baseURL}/api/stud/groups/${user.id}`);
+      setGroups(response.data);
+     
+    } catch (error) {
+      console.error("Error fetching groups:", {
+        message: error.message,
+        stack: error.stack,
+        response: error.response?.data,
+      });
+      toast.error("Failed to fetch groups");
+    }
+  };
+  //fetch all student data
+  useEffect(() => {
+    if (!user?.id) {
+      console.warn("User ID is missing. Skipping data fetch.");
+      return;
+    }
+    const fetchstudents = async () => {
+    try {
+      const response = await axios.get(`${apiConfig.baseURL}/api/stud/students?user=${user.id}`);
+      setStudents(response.data);
+     
+    } 
+    catch (error) {
+      console.error("Error fetching students:", {
+        message: error.message,
+        stack: error.stack,
+        response: error.response?.data,
+      });
+      // Show error toast with detailed information
+      toast.error("Failed to fetch groups");
+    }
+  };
+    fetchstudents();
   }, [user?.id]);
-  
+
 
   // Delete a group
   const handleDeleteGroup = (groupId) => {

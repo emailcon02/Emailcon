@@ -2752,6 +2752,22 @@ router.get('/students', async (req, res) => {
   }
 });
 
+// GET /studentscount?user=USER_ID
+router.get('/studentscount', async (req, res) => {
+  try {
+    const { user } = req.query;
+
+    // Direct count based on user ID field in Student schema
+    const count = await Student.countDocuments({ user });
+
+    res.json({ count }); // optional: wrap in an object for clarity
+  } catch (error) {
+    console.error("Error fetching student count:", error);
+    res.status(500).json({ message: 'Error fetching student count' });
+  }
+});
+
+
 //getting all groups
 router.get('/groups/:userId', async (req, res) => {
   try {
