@@ -4042,7 +4042,7 @@ useEffect(() => {
             </div>
           )}
           {/* show livepopup toast */}
-          {/* <LivePopup userId={user?.id} /> */}
+          <LivePopup userId={user?.id} />
 
           {/* Show bulk add contact existing group modal */}
           {showfileGroupModal && (
