@@ -617,17 +617,20 @@ useEffect(() => {
       ]);
     })
     .catch((err) => console.error("Template fetch error", err));
+//fetch campaigns
+    axios
+    .get(`${apiConfig.baseURL}/api/stud/campaigns/${user.id}`)
+    .then((res) => setCampaigns(res.data))
+    .catch((err) => console.error("Campaigns fetch error", err));
 
   // Fetch other data
   Promise.all([
-    axios.get(`${apiConfig.baseURL}/api/stud/campaigns/${user.id}`),
     axios.get(`${apiConfig.baseURL}/api/stud/groups/${user.id}`),
     axios.get(`${apiConfig.baseURL}/api/stud/birthtemplates/${user.id}`),
     axios.get(`${apiConfig.baseURL}/api/stud/userdata/${user.id}`),
     axios.get(`${apiConfig.baseURL}/api/stud/payment-history-latest/${user.id}`),
   ])
-    .then(([campaignsRes, groupsRes, birthtemplatesRes, userdataRes, paymentdetailsRes]) => {
-      setCampaigns(campaignsRes.data);
+    .then(([groupsRes, birthtemplatesRes, userdataRes, paymentdetailsRes]) => {
       setGroups(groupsRes.data);
       setBirthTemplates(
         birthtemplatesRes.data.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))

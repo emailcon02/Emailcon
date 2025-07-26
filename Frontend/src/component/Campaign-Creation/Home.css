@@ -1746,6 +1746,9 @@
   .card-text-highlight {
     font-size: 32px;
   }
+  .modal-content-tem{
+  width: 95%;
+}
 
   .dashboard-welcome-box {
     flex-direction: column;
@@ -2062,11 +2065,13 @@
 
   }
 
-  .dashboard-content {
+  /* .dashboard-content {
     margin-top: 5%;
     padding-left: 5%;
-  }
-
+  } */
+.modal-content-tem{
+  width: 90%;
+}
   .maincontent-main {
     height: 70vh;
     overflow-y: auto;
