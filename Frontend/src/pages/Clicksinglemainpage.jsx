@@ -926,7 +926,7 @@ const Clicksinglemainpage = () => {
           textAlign: "left",
           color: "#000000",
           backgroundColor: "#f4f4f4",
-          padding: "20px 30px",
+          padding: "10px 0px 10px 10px",
         },
       },
     ]);
@@ -1135,7 +1135,7 @@ const Clicksinglemainpage = () => {
           height: "auto",
           borderRadius: "0px",
           textAlign: "center",
-          margin: "5px auto",
+          margin: "0px auto",
         },
       },
     ]);
@@ -1153,7 +1153,7 @@ const Clicksinglemainpage = () => {
           height: "auto",
           borderRadius: "0px",
           textAlign: "center",
-          margin: "5px auto",
+          margin: "0px auto",
         },
       },
     ]);
@@ -1209,7 +1209,7 @@ const Clicksinglemainpage = () => {
           height: "auto",
           borderRadius: "0px",
           textAlign: "center",
-          margin: "5px auto",
+          margin: "0px auto",
         },
         link: "",
       },
@@ -1294,7 +1294,7 @@ const Clicksinglemainpage = () => {
           height: isMobile ? "230px" : "350px", // Adjust height based on screen size
           borderRadius: "0px",
           textAlign: "center",
-          margin: "5px auto",
+          margin: "0px auto",
         },
       },
     ]);
@@ -7979,6 +7979,11 @@ const Clicksinglemainpage = () => {
                             className="content-item-preview"
                             style={item.style}
                           >
+                             {item.type === "break" && (
+                        <div className="border-break">
+                          <hr style={item.style} />
+                        </div>
+                      )}
                             {item.type === "para" && (
                               <>
                                 <p

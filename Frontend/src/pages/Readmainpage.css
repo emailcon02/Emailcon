@@ -405,7 +405,7 @@ button[data-tooltip]:hover::after {
     width: 100%;
     max-width: 750px;
     margin-top: 20px;
-    padding: 20px;
+    padding: 20px 40px 20px 20px;
     background-color: #f9f9f9;
     border-radius: 10px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
@@ -417,18 +417,20 @@ button[data-tooltip]:hover::after {
     width: 100%;
     margin: 0 auto;
     background-color: white;
-    padding: 20px;
+    /* padding: 20px; */
     border-radius: 10px;
     /* border: 1px solid rgb(231, 230, 230); */
 }
 
 .content-item {
-    margin-bottom: 10px;
+    /* margin-bottom: 10px; */
     display: flex;
-    padding: 10px;
+    /* padding: 10px; */
     background-color: transparent !important;
     width: 100%;
     touch-action: manipulation;
+        border: 2px solid transparent;
+
 
 }
 .content-item-preview {
@@ -442,22 +444,24 @@ button[data-tooltip]:hover::after {
 .content-item :where(p, div) {
     width: 100%;
 }
-
-.delete-btn {
-    background-color: rgb(247, 244, 244);
-    color: red;
+.drag-icon-main {
+ display: none !important;
+    background-color:#e9e9ff;
+    color:#0000FF;
     border: none;
     padding: 5px;
     cursor: pointer;
-    border-radius: 5px;
-    font-size: 15px;
-    width: 35px;
-    height: 35px;
-    margin-top: 20px;
+    border-radius: 50%;
+    font-size: 14px;
+    width: 32px;
+    height: 32px;
 }
+.drag-icon-main:hover{
+        background-color: #ddddfc;
 
-.delete-btn:hover {
-    background-color: rgb(226, 226, 226);
+}
+.content-item:hover .drag-icon-main{
+    display: block !important;
 }
 
 .modal {
@@ -593,6 +597,7 @@ button[data-tooltip]:hover::after {
 .content-item:active,
 .content-item:hover {
     border: 2px solid blue;
+
 }
 
 
@@ -968,45 +973,46 @@ button[data-tooltip]:hover::after {
 } 
 
 .del-edit-btn {
-    width: 15%;
+    width: 15px;
     display: flex;
     flex-direction: column;
-    margin-left: 20px;
 }
 
 .edit-con-btn {
     display: none;
-    background-color: rgb(247, 244, 244);
-    color: red;
+    background-color:#e9e9ff;
+    color:#0000FF;
     border: none;
     padding: 5px;
     cursor: pointer;
-    border-radius: 5px;
-    font-size: 15px;
-    width: 35px;
-    height: 35px;
+    border-radius: 50%;
+    font-size: 14px;
+    width: 32px;
+    height: 32px;
     margin-top: 10px;
 }
+.edit-con-btn:hover,.edit-desktop-btn:hover{
+        background-color: #ddddfc;
 
-.edit-con-btn:hover {
-    background-color: rgb(226, 226, 226);
 }
+
 .edit-desktop-btn{
-    background-color: rgb(247, 244, 244);
-    color: red;
+    display: none;
+    background-color:#e9e9ff;
+    color:#0000FF;
     border: none;
     padding: 5px;
     cursor: pointer;
-    border-radius: 5px;
-    font-size: 15px;
-    width: 35px;
-    height: 35px;
+    border-radius: 50%;
+    font-size: 14px;
+    width: 32px;
+    height: 32px;
     margin-top: 10px;
 }
-
-.edit-desktop-btn:hover {
-    background-color: rgb(226, 226, 226);
+.content-item:hover .edit-desktop-btn{
+    display: block;
 }
+
 /* Modal Styles */
 .campaign-modal-overlay-tem {
     position: fixed;
@@ -1669,7 +1675,7 @@ input:checked+.slider-send:before {
         overflow: hidden;
     }
 
-    .edit-con-btn {
+   .content-item:hover .edit-con-btn{
         display: block;
     }
 
@@ -1689,10 +1695,7 @@ input:checked+.slider-send:before {
         width: 80%;
     }
 
-    .preview-card {
-        padding: 10px;
-    }
-
+    
     .content-tab {
         grid-template-columns: auto auto auto;
         margin-left: 10px;
@@ -1717,9 +1720,7 @@ input:checked+.slider-send:before {
         width: 100% !important;
     }
 
-    .delete-btn {
-        margin-top: 0px;
-    }
+  
 
     .editor-button {
         width: 90px;
@@ -2505,9 +2506,7 @@ input:checked+.slider-send:before {
         margin-top: 20px !important;
     }
 
-    .delete-btn {
-        margin-top: 0px;
-    }
+  
 
     .editor-button {
         width: 90px;

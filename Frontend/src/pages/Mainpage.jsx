@@ -4,10 +4,12 @@ import "./Mainpage.css";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import {
+  FaArrowsAlt,
   FaBars,
   FaCheckCircle,
   FaFileExport,
   FaFolderOpen,
+  FaGripLines,
   FaTable,
   FaTimes,
   FaTrash,
@@ -628,23 +630,23 @@ const Mainpage = () => {
     setIsOpentemplate((prev) => !prev);
   };
   const styleControlsRef = useRef(null);
-
-  useEffect(() => {
-    if (selectedIndex !== null && styleControlsRef.current) {
+useEffect(() => {
+  if (selectedIndex !== null) {
+    setTimeout(() => {
       const editorContainer = document.querySelector(".editor");
       const styleControlsElement = styleControlsRef.current;
 
       if (editorContainer && styleControlsElement) {
-        const scrollTop =
-          styleControlsElement.offsetTop - editorContainer.offsetTop;
-
+        const scrollTop = styleControlsElement.offsetTop - editorContainer.offsetTop;
         editorContainer.scrollTo({
           top: scrollTop,
           behavior: "smooth",
         });
       }
-    }
-  }, [selectedIndex]);
+    }, 200); // delay to ensure rendering
+  }
+}, [selectedIndex]);
+
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -787,7 +789,7 @@ const Mainpage = () => {
           textAlign: "left",
           color: "#000000",
           backgroundColor: "#f4f4f4",
-          padding: "20px 30px",
+          padding: "10px 0px 10px 10px",
         },
       },
     ]);
@@ -1027,7 +1029,7 @@ const Mainpage = () => {
           height: "auto",
           borderRadius: "0px",
           textAlign: "center",
-          margin: "5px auto",
+          margin: "0px auto",
         },
       },
     ]);
@@ -1045,7 +1047,7 @@ const Mainpage = () => {
           height: "auto",
           borderRadius: "0px",
           textAlign: "center",
-          margin: "5px auto",
+          margin: "0px auto",
         },
       },
     ]);
@@ -1093,7 +1095,7 @@ const Mainpage = () => {
           height: "auto",
           borderRadius: "0px",
           textAlign: "center",
-          margin: "5px auto",
+          margin: "0px auto",
         },
         link: "",
       },
@@ -1145,10 +1147,10 @@ const Mainpage = () => {
         link: "",
         style: {
           width: "100%",
-          height: isMobile ? "230px" : "350px", // Adjust height based on screen size
+          height: isMobile ? "230px" : "355px", // Adjust height based on screen size
           borderRadius: "0px",
           textAlign: "center",
-          margin: "5px auto",
+          margin: "0px auto",
         },
       },
     ]);
@@ -1257,7 +1259,7 @@ const Mainpage = () => {
           backgroundColor: "#000000",
           color: "#ffffff",
           width: "auto",
-          marginTop: "5px",
+          marginTop: "0px",
           fontWeight: "bold",
           fontSize: "15px",
           alignItem: "center",
@@ -6769,14 +6771,15 @@ const Mainpage = () => {
                                   })
                                 }
                               />
-                              <GradientBackgroundPicker
+                              
+                            </div>
+                            <GradientBackgroundPicker
                                 label="Gradient Background"
                                 objectKey="style.backgroundColor"
                                 previewContent={previewContent}
                                 selectedIndex={selectedIndex}
                                 updateContent={updateContent}
                               />
-                            </div>
                           </>
                         )}
 
@@ -7845,15 +7848,26 @@ const Mainpage = () => {
                         </div>
                       )}
                       <div className="del-edit-btn">
+                  <button
+    draggable
+    onDragStart={() => handleDragStart(index)}
+    title="Drag"
+    className="drag-icon-main"
+    
+  >
+   <FaArrowsAlt/>
+                          </button>
                         <button
                           className="delete-btn"
                           onClick={() => deleteContent(index)}
+                          title="Delete"
                         >
                           <FiTrash2 />
                         </button>
                         <button
                           className="edit-desktop-btn"
-                          onClick={() => handleItemClickdesktop(index)}
+                          onClick={() => handleItemClick(index)}
+                          title="Edit"
                         >
                           <FiEdit />
                         </button>
@@ -7903,6 +7917,11 @@ const Mainpage = () => {
                             className="content-item-preview"
                             style={item.style}
                           >
+                             {item.type === "break" && (
+                        <div className="border-break">
+                          <hr style={item.style} />
+                        </div>
+                      )}
                             {item.type === "para" && (
                               <>
                                 <p
