@@ -1311,6 +1311,9 @@ useEffect(() => {
       console.log("Emails resent successfully!");
     } catch (error) {
       console.error("Error resending emails:", error);
+      if (error.response) {
+        toast.error(`Failed to resend emails: ${error.response.data.message}`);
+      }
     }
   };
 

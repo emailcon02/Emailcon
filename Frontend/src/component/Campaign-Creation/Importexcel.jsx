@@ -281,7 +281,7 @@ const spamWords = [
                  toast.error(`Please fill in Link 2 in ${item.type}`);
                  hasInvalidLink = true;
                }
-             } else if (item.type === "video-icon" || item.type === "button") {
+             } else if (item.type === "video-icon" || item.type === "button" || item.type === "cardbtn") {
                if (!item.link?.trim()) {
                  toast.error(`Please fill in the Link in ${item.type}`);
                  hasInvalidLink = true;
@@ -434,7 +434,7 @@ const spamWords = [
                  toast.error(`Please fill in Link 2 in ${item.type}`);
                  hasInvalidLink = true;
                }
-             } else if (item.type === "video-icon" || item.type === "button") {
+             } else if (item.type === "video-icon" || item.type === "button" || item.type === "cardbtn") {
                if (!item.link?.trim()) {
                  toast.error(`Please fill in the Link in ${item.type}`);
                  hasInvalidLink = true;

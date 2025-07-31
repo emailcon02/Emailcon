@@ -160,25 +160,6 @@ router.post('/sendtestmail', async (req, res) => {
           return res.status(404).send('User not found');
     }
 
-// Find the student by email and check ownership directly
-const student = await Student.findOne({ Email: emailData.recipient,user: userId });
-
-if (!student) {
-  return res.status(404).json({ message: 'Student not found' });
-}
-
-// ✅ Check if student belongs to the current user
-if (student.user.toString() !== userId) {
-  return res.status(403).json({ message: 'Unauthorized access to student' });
-}
-
-// ✅ Check if unsubscribed
-if (student.isUnsubscribed) {
-  console.log(`❌ Skipping email for unsubscribed recipient: ${emailData.recipient}`);
-  return res.status(200).json({ message: 'User has unsubscribed. Email not sent.' });
-}
-
-
     const {email}= user;
 
     const generateTrackingLink = (originalUrl, userId, campaignId, recipientEmail) => {
@@ -189,9 +170,71 @@ if (student.isUnsubscribed) {
     const emailContent = previewContent.map((item) => {
       if (item.type === 'para') {
         return `<div class="para" style="border-radius:${item.style.borderRadius};font-size:${item.style.fontSize};padding:10px 35px; color:${item.style.color}; margin-top:20px; background-color:${item.style.backgroundColor}">${item.content}</div>`;
-      } else if (item.type === 'head') {
-        return `<p class="head" style="font-size:${item.style.fontSize};border-radius:${item.style.borderRadius};margin-top:20px;padding:10px;font-weight:bold;color:${item.style.color};text-align:${item.style.textAlign};background-color:${item.style.backgroundColor}">${item.content}</p>`;
-      } else if (item.type === 'logo') {
+      }else if (item.type === 'head') {
+  return `<div class="head" style="font-size:${item.style.fontSize};border-radius:${item.style.borderRadius};margin-top:20px;padding:10px;font-weight:bold;color:${item.style.color};text-align:${item.style.textAlign};background-color:${item.style.backgroundColor}; white-space:pre-wrap;">${item.content}</div>`;
+}
+
+else if (item.type === 'table') {
+  return `
+    <div style="max-width: 600px; max-height: 200px
+    ; overflow: auto; margin: 10px auto;">
+      <table style="width: 100%; border-collapse: collapse;">
+        <tbody>
+          ${item.content.map((row, rowIndex) => `
+            <tr>
+              ${row.map((cell, cellIndex) => {
+                const isHeader = rowIndex === 0;
+                const Tag = isHeader ? 'th' : 'td';
+
+                const cellStyle = isHeader 
+                  ? `
+                     background-color: ${item.headerStyle?.backgroundColor || '#f4f4f4'};
+                     color: ${item.headerStyle?.color || '#000000'};
+                     padding: 8px;
+                     border: 1px solid #ccc;
+                     text-align: left;
+                     `
+                  : `
+                     background-color: ${item.cellStyle?.backgroundColor || '#ffffff'};
+                     color: ${item.cellStyle?.color || '#000000'};
+                     padding: 8px;
+                     border: 1px solid #ccc;
+                     text-align: left;
+                     `;
+
+                return `<${Tag} style="${cellStyle}">${cell}</${Tag}>`;
+              }).join('')}
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+    </div>
+  `;
+}
+
+else if (item.type === 'cardbtn') {
+  return `
+    <table role="presentation" align="center" width="${item.style?.width || '100%'}" 
+      style="border-collapse: separate; border-spacing: 0;padding:10px;margin:px auto !important;background-color:${item.style.backgroundColor || 'white'}; border-radius:${item.style.borderRadius || '10px'};">
+      <tr>
+        <td align="center" width="${item.style?.width || '100%'}" 
+            style="vertical-align: top; border-radius: ${item.style?.borderRadius || '10px'}; padding: ${item.style?.padding || '10px'};">
+          
+          <!-- Image -->
+          <img src="${item.src1}" 
+               width="${item.style?.width || '100%'}" style="display: block; width: 100%; height: auto; max-width: ${item.style?.width || '100%'}; border-radius: ${item.style?.borderRadius || '10px'};object-fit: cover;"alt="Editable"/>
+          <!-- Button -->
+          <a href="${item.link}" target="_blank" rel="noopener noreferrer"
+             style="display: inline-block; padding: ${item.buttonStyle?.padding || '12px 25px'};margin-top: ${item.buttonStyle?.marginTop || '20px'}; font-weight: bold; font-size: ${item.buttonStyle?.fontSize || '18px'};width: ${item.buttonStyle?.width || 'auto'};color: ${item.buttonStyle?.color || '#000'};text-decoration: none;background-color: ${item.buttonStyle?.backgroundColor || '#f0f0f0'};text-align: ${item.buttonStyle?.textAlign || 'center'}; border-radius: ${item.buttonStyle?.borderRadius || '5px'};">
+             ${item.content || 'Click Here'}
+          </a>
+          
+        </td>
+      </tr>
+    </table>
+  `;
+}
+ else if (item.type === 'logo') {
         return `<div style="text-align:${item.style.textAlign};margin:10px auto !important">
         <img src="${item.src}" style="width:${item.style.width};height:${item.style.height};border-radius:${item.style.borderRadius};pointer-events:none;margin:${item.style.margin};background-color:${item.style.backgroundColor};"/>
         </div>`
@@ -816,7 +859,6 @@ router.post('/start-campaign', async (req, res) => {
   let campaignId = null;
   let transporter = null;
 
-
   try {
     const {
       campaignname,
@@ -844,20 +886,17 @@ router.post('/start-campaign', async (req, res) => {
     if (!previewContent || previewContent.length === 0) {
       return res.status(400).json({ error: "No preview content available." });
     }
-    
 
-    // Filter out students with invalid emails before processing
     const isValidEmail = email => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email?.trim());
-const validStudents = students
-  .filter(s => s?.Email)
-  .map(s => ({ ...s, Email: s.Email.trim() }))
-  .filter(s => isValidEmail(s.Email));
-const invalidEmails = students
-  .map(s => ({ ...s, Email: s.Email?.trim?.() }))
-  .filter(student => !student?.Email || !isValidEmail(student.Email))
-  .map(student => student?.Email || 'missing');
+    const validStudents = students
+      .filter(s => s?.Email)
+      .map(s => ({ ...s, Email: s.Email.trim() }))
+      .filter(s => isValidEmail(s.Email));
+    const invalidEmails = students
+      .map(s => ({ ...s, Email: s.Email?.trim?.() }))
+      .filter(student => !student?.Email || !isValidEmail(student.Email))
+      .map(student => student?.Email || 'missing');
 
-    // Create initial campaign record
     const campaignData = {
       campaignname,
       temname,
@@ -887,68 +926,59 @@ const invalidEmails = students
     const newCampaign = await Camhistory.create(campaignData);
     campaignId = newCampaign._id;
 
-    // Create common transporter
     const user = await User.findById(userId);
-    if (!user) {
-      throw new Error('User not found');
-    }
+    if (!user) throw new Error('User not found');
 
-    transporter = await createTransporter(user,aliasName);
+    transporter = await createTransporter(user, aliasName);
 
-    // Configure delay settings (in milliseconds)
-    const DELAY_BETWEEN_EMAILS = 1000; // 1 seconds between each email
-    const DELAY_BETWEEN_BATCHES = 2000; // 2 second between batches
-    const BATCH_SIZE = 10; // Number of emails to send in each batch
+    const DELAY_BETWEEN_EMAILS = 1000;
+    const DELAY_BETWEEN_BATCHES = 2000;
+    const BATCH_SIZE = 10;
 
-    // Split students into batches
     const batches = [];
     let sentEmails = [];
     let failedEmails = [...invalidEmails];
-    
+
     for (let i = 0; i < validStudents.length; i += BATCH_SIZE) {
       batches.push(validStudents.slice(i, i + BATCH_SIZE));
     }
 
-    // Process batches sequentially with delay
     for (let batchIndex = 0; batchIndex < batches.length; batchIndex++) {
       const batch = batches[batchIndex];
       const batchSent = [];
       const batchFailed = [];
 
-      // Process emails within batch sequentially with delay
       for (const student of batch) {
         try {
+          const dbStudent = await Student.findOne({ Email: student.Email, user: userId });
+          if (!dbStudent || dbStudent.user.toString() !== userId || dbStudent.isUnsubscribed) {
+            console.log(`⛔ Skipping: ${student.Email}`);
+            continue;
+          }
 
-   const dbStudent = await Student.findOne({ Email: student.Email,user: userId });
+          // Prepare rowData for template replacement
+          const rowData = { ...student };
 
-    if (!dbStudent) {
-      console.log(`❌ Student not found: ${student.Email}`);
-      continue;
-    }
+          // Personalize blocks
+          const itemArray = [...previewContent];
+          const personalizedBlocks = itemArray.map((item) => {
+            const personalizedItem = JSON.parse(JSON.stringify(item));
 
-    if (!dbStudent.user || dbStudent.user.toString() !== userId) {
-      console.log(`🚫 Unauthorized or invalid user for: ${student.Email}`);
-      continue;
-    }
-
-    if (dbStudent.isUnsubscribed) {
-      console.log(`⛔ Skipping unsubscribed user: ${student.Email}`);
-      continue;
-    }
-
-
-          // Personalize content
-          const personalizedContent = previewContent.map((item) => {
-            const personalizedItem = { ...item };
-            if (item.content) {
-              Object.entries(student).forEach(([key, value]) => {
-                const regex = new RegExp(`\\{${key}\\}`, "gi");
-                personalizedItem.content = personalizedItem.content.replace(
-                  regex,
-                  value != null ? String(value).trim() : ""
-                );
+            if (typeof personalizedItem.content === 'string') {
+              personalizedItem.content = personalizedItem.content.replace(/{{\s*([^}]+)\s*}}/g, (_, key) => {
+                return rowData[key] || '';
               });
+            } else if (Array.isArray(personalizedItem.content)) {
+              personalizedItem.content = personalizedItem.content.map(row =>
+                row.map(cell => {
+                  if (typeof cell === 'string') {
+                    return cell.replace(/{{\s*([^}]+)\s*}}/g, (_, key) => rowData[key] || '');
+                  }
+                  return cell;
+                })
+              );
             }
+
             return personalizedItem;
           });
 
@@ -956,10 +986,7 @@ const invalidEmails = students
           let personalizedSubject = subject;
           Object.entries(student).forEach(([key, value]) => {
             const regex = new RegExp(`\\{${key}\\}`, "gi");
-            personalizedSubject = personalizedSubject.replace(
-              regex,
-              value != null ? String(value).trim() : ""
-            );
+            personalizedSubject = personalizedSubject.replace(regex, value != null ? String(value).trim() : "");
           });
 
           // Prepare mail options
@@ -972,31 +999,27 @@ const invalidEmails = students
             previewtext,
             aliasName,
             replyTo,
-            previewContent: personalizedContent,
+            previewContent: personalizedBlocks,
             bgColor,
             userEmail: user.email
           });
 
-          // Send with retry logic
           await sendWithRetry(transporter, mailOptions);
           batchSent.push(student.Email);
-          
-          // Add delay between individual emails
+
           if (student !== batch[batch.length - 1]) {
             await new Promise(resolve => setTimeout(resolve, DELAY_BETWEEN_EMAILS));
           }
-          
+
         } catch (error) {
           console.error(`❌ Error sending to ${student.Email}:`, error);
           batchFailed.push(student.Email);
         }
       }
 
-      // Update sent and failed emails
       sentEmails = [...sentEmails, ...batchSent];
       failedEmails = [...failedEmails, ...batchFailed];
 
-      // Update progress after each batch
       const currentProgress = Math.round(((batchIndex + 1) / batches.length) * 100);
       await Camhistory.findByIdAndUpdate(campaignId, {
         progress: currentProgress,
@@ -1007,16 +1030,16 @@ const invalidEmails = students
         status: "Processing",
       });
 
-      // Add delay between batches (except after last batch)
       if (batchIndex < batches.length - 1) {
         await new Promise(resolve => setTimeout(resolve, DELAY_BETWEEN_BATCHES));
       }
     }
-    // Final update after all batches are processed
+
     const finalStatus = failedEmails.length > 0 ? "Failed" : "Success";
     const finalProgress = failedEmails.length > 0
-        ? Math.round((failedEmails.length / (sentEmails.length + failedEmails.length)) * 100)
-        : 100;
+      ? Math.round((sentEmails.length / (sentEmails.length + failedEmails.length)) * 100)
+      : 100;
+
     await Camhistory.findByIdAndUpdate(campaignId, {
       status: finalStatus,
       progress: finalProgress,
@@ -1034,6 +1057,7 @@ const invalidEmails = students
       failedCount: failedEmails.length,
       invalidEmailsCount: invalidEmails.length,
     });
+
   } catch (error) {
     console.error("Error processing campaign:", error);
 
@@ -1048,8 +1072,9 @@ const invalidEmails = students
       error: "Failed to process campaign",
       details: error.message,
     });
-  } 
+  }
 });
+
 
 // Helper function to create transporter with minimal logging
 async function createTransporter(user, aliasName) {
@@ -1320,6 +1345,8 @@ function generateHtml(element, userId, campaignId, recipientEmail) {
         content,
         content1,
         content2,
+        headerStyle,
+        cellStyle,        
         src1,
         src2,
         src,
@@ -1330,6 +1357,7 @@ function generateHtml(element, userId, campaignId, recipientEmail) {
         iconsrc1, iconsrc2, iconsrc3, iconsrc4,
         link2,
         link1,
+        buttonStyle,
         buttonStyle1,
         buttonStyle2,
         title1,title2,offerPrice1,offerPrice2,originalPrice1,originalPrice2,
@@ -1519,6 +1547,26 @@ case 'break':
             </td>
         </tr>
     </table>`;
+    case 'cardbtn':
+  return `
+    <table role="presentation" align="center" width="${style?.width || '100%'}" 
+      style="border-collapse: separate; border-spacing: 0;padding:10px;margin:px auto !important;background-color:${style.backgroundColor || 'white'}; border-radius:${style.borderRadius || '10px'};">
+      <tr>
+        <td align="center" width="${style?.width || '100%'}" 
+            style="vertical-align: top; border-radius: ${style?.borderRadius || '10px'}; padding: ${style?.padding || '10px'};">
+          <!-- Image -->
+          <img src="${src1}" 
+               width="${style?.width || '100%'}" style="display: block; width: 100%; height: auto; max-width: ${style?.width || '100%'}; border-radius: ${style?.borderRadius || '10px'};object-fit: cover;" alt="Editable"/>
+          <!-- Button -->
+          <a href="${generateTrackingLink(link, userId, campaignId, recipientEmail)}" target="_blank" rel="noopener noreferrer"
+             style="display: inline-block; padding: ${buttonStyle?.padding || '12px 25px'}; margin-top: ${buttonStyle?.marginTop || '20px'}; font-weight: bold; font-size: ${buttonStyle?.fontSize || '18px'}; width: ${buttonStyle?.width || 'auto'}; color: ${buttonStyle?.color || '#000'}; text-decoration: none; background-color: ${buttonStyle?.backgroundColor || '#f0f0f0'}; text-align: ${buttonStyle?.textAlign || 'center'}; border-radius: ${buttonStyle?.borderRadius || '5px'};">
+             ${content || 'Click Here'}
+          </a>
+        </td>
+      </tr>
+    </table>
+  `;
+
 
         case 'link-image':
           return `<div class="img-case" style="margin:10px auto !important;${styleString};">
@@ -1554,12 +1602,49 @@ case 'break':
               </td>
           </tr>
       </table>`
+case 'table':
+  return `
+    <div style="max-width: 600px; max-height: 200px; overflow: auto; margin: 10px auto;">
+      <table style="width: 100%; border-collapse: collapse;">
+        <tbody>
+          ${content.map((row, rowIndex) => `
+            <tr>
+              ${row.map((cell, cellIndex) => {
+                const isHeader = rowIndex === 0;
+                const Tag = isHeader ? 'th' : 'td';
+
+                const cellStyleStr = isHeader 
+                  ? `
+                    background-color: ${headerStyle?.backgroundColor || '#f4f4f4'};
+                    color: ${headerStyle?.color || '#000000'};
+                    padding: 8px;
+                    border: 1px solid #ccc;
+                    text-align: left;
+                    `
+                  : `
+                    background-color: ${cellStyle?.backgroundColor || '#ffffff'};
+                    color: ${cellStyle?.color || '#000000'};
+                    padding: 8px;
+                    border: 1px solid #ccc;
+                    text-align: left;
+                    `;
+
+                return `<${Tag} style="${cellStyleStr}">${cell}</${Tag}>`;
+              }).join('')}
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+    </div>
+  `;
 
         case 'head':
-          return `<p class="head" style="${styleString};margin-top:20px;padding:10px;font-weight:bold;">${content}</p>`;
+          return `<p class="head" style="${styleString};margin-top:20px;padding:10px;font-weight:bold;white-space:pre-wrap">${content}</p>`;
         case 'para':
           return `<div style="${styleString};margin-top:20px;padding:10px 35px;">${content}</div>`;
-        case 'button':
+      
+       
+          case 'button':
           return `<div style="margin:20px auto 0 auto;text-align:center;">
                   <a href = "${generateTrackingLink(link, userId, campaignId, recipientEmail)}"
                   target = "_blank"
@@ -2069,6 +2154,7 @@ if (student.isUnsubscribed) {
         iconsrc1, iconsrc2, iconsrc3, iconsrc4,
         link2,
         link1,
+        buttonStyle,
         buttonStyle1,
         buttonStyle2,
         title1,title2,offerPrice1,offerPrice2,originalPrice1,originalPrice2,
@@ -2256,6 +2342,42 @@ case 'break':
         </tr>
     </table>`;
 
+    case 'table':
+  return `
+    <div style="max-width: 600px; max-height: 200px; overflow: auto; margin: 10px auto;">
+      <table style="width: 100%; border-collapse: collapse;">
+        <tbody>
+          ${content.map((row, rowIndex) => `
+            <tr>
+              ${row.map((cell, cellIndex) => {
+                const isHeader = rowIndex === 0;
+                const Tag = isHeader ? 'th' : 'td';
+
+                const cellStyleStr = isHeader 
+                  ? `
+                    background-color: ${headerStyle?.backgroundColor || '#f4f4f4'};
+                    color: ${headerStyle?.color || '#000000'};
+                    padding: 8px;
+                    border: 1px solid #ccc;
+                    text-align: left;
+                    `
+                  : `
+                    background-color: ${cellStyle?.backgroundColor || '#ffffff'};
+                    color: ${cellStyle?.color || '#000000'};
+                    padding: 8px;
+                    border: 1px solid #ccc;
+                    text-align: left;
+                    `;
+
+                return `<${Tag} style="${cellStyleStr}">${cell}</${Tag}>`;
+              }).join('')}
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+    </div>
+  `;
+
         case 'link-image':
           return `<div class="img-case" style="margin:10px auto !important;${styleString};">
         <a href ="${generateTrackingLink(link, userId, campaignId, recipientEmail)}" target = "_blank" style="text-decoration:none;"><img src="${src}" style="${styleString};margin-top:10px;" alt="image"/></a>
@@ -2290,9 +2412,28 @@ case 'break':
               </td>
           </tr>
       </table>`
+    case 'cardbtn':
+  return `
+    <table role="presentation" align="center" width="${style?.width || '100%'}" 
+      style="border-collapse: separate; border-spacing: 0;padding:10px;margin:px auto !important;background-color:${style.backgroundColor || 'white'}; border-radius:${style.borderRadius || '10px'};">
+      <tr>
+        <td align="center" width="${style?.width || '100%'}" 
+            style="vertical-align: top; border-radius: ${style?.borderRadius || '10px'}; padding: ${style?.padding || '10px'};">
+          <!-- Image -->
+          <img src="${src1}" 
+               width="${style?.width || '100%'}" style="display: block; width: 100%; height: auto; max-width: ${style?.width || '100%'}; border-radius: ${style?.borderRadius || '10px'};object-fit: cover;" alt="Editable"/>
+          <!-- Button -->
+          <a href="${generateTrackingLink(link, userId, campaignId, recipientEmail)}" target="_blank" rel="noopener noreferrer"
+             style="display: inline-block; padding: ${buttonStyle?.padding || '12px 25px'}; margin-top: ${buttonStyle?.marginTop || '20px'}; font-weight: bold; font-size: ${buttonStyle?.fontSize || '18px'}; width: ${buttonStyle?.width || 'auto'}; color: ${buttonStyle?.color || '#000'}; text-decoration: none; background-color: ${buttonStyle?.backgroundColor || '#f0f0f0'}; text-align: ${buttonStyle?.textAlign || 'center'}; border-radius: ${buttonStyle?.borderRadius || '5px'};">
+             ${content || 'Click Here'}
+          </a>
+        </td>
+      </tr>
+    </table>
+  `;
 
         case 'head':
-          return `<p class="head" style="${styleString};margin-top:20px;padding:10px;font-weight:bold;">${content}</p>`;
+          return `<p class="head" style="${styleString};margin-top:20px;padding:10px;font-weight:bold;white-space:pre-wrap">${content}</p>`;
         case 'para':
           return `<div style="${styleString};margin-top:20px;padding:10px 35px; white-space: pre-line;
   word-break: break-word;">${content}</div>`;
@@ -3338,6 +3479,40 @@ router.get('/campaigns/:userId', async (req, res) => {
     });
   }
 });
+
+// GET /api/stud/campaignscount/:userId
+router.get('/campaignscount/:userId', async (req, res) => {
+  try {
+    const userId = req.params.userId;
+
+    // Fetch campaigns excluding those with "birthday campaign" in their name
+    const count = await Camhistory.countDocuments({
+      user: userId,
+      campaignname: { $not: /birthday campaign/i } // Case-insensitive regex
+    });
+
+    res.json({ count });
+  } catch (error) {
+    res.status(500).json({ message: 'Error counting campaigns' });
+  }
+});
+// GET /api/stud/automationcount/:userId
+router.get('/automationcount/:userId', async (req, res) => {
+  try {
+    const userId = req.params.userId;
+
+    // Filter to count only campaigns with "birthday campaign" in the name
+    const count = await Camhistory.countDocuments({
+      user: userId,
+      campaignname: /birthday campaign/i // Case-insensitive regex
+    });
+
+    res.json({ count });
+  } catch (error) {
+    res.status(500).json({ message: 'Error counting automation campaigns' });
+  }
+});
+
 
 router.get("/groups/:groupId/unsubscribe-student", async (req, res) => {
   const { groupId } = req.params;

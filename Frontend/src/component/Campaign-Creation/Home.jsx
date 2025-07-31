@@ -300,45 +300,35 @@ const Home = () => {
 
   // dashboard total campaign
   useEffect(() => {
-    const fetchCampaignsCount = async () => {
-      if (!user?.id) return;
-      try {
-        const response = await axios.get(
-          `${apiConfig.baseURL}/api/stud/campaigns/${user.id}`
-        );
-        // Filter out birthday campaigns if needed, like in CampaignTable
-        const filtered = response.data.filter((campaign) => {
-          const name = campaign.campaignname?.toLowerCase() || "";
-          return !name.includes("birthday campaign");
-        });
-        setTotalCampaigns(filtered.length);
-      } catch (error) {
-        setTotalCampaigns(0);
-      }
-    };
-    fetchCampaignsCount();
-  }, [user?.id]);
+  const fetchCampaignsCount = async () => {
+    if (!user?.id) return;
+    try {
+      const response = await axios.get(
+        `${apiConfig.baseURL}/api/stud/campaignscount/${user.id}`
+      );
+      setTotalCampaigns(response.data.count); // Use direct count
+    } catch (error) {
+      setTotalCampaigns(0);
+    }
+  };
+  fetchCampaignsCount();
+}, [user?.id]);
 
   // dashboard total automation
   useEffect(() => {
-    const fetchAutomationCount = async () => {
-      if (!user?.id) return;
-      try {
-        const response = await axios.get(
-          `${apiConfig.baseURL}/api/stud/campaigns/${user.id}`
-        );
-        // Filter out birthday campaigns if needed, like in CampaignTable
-        const filtered = response.data.filter((campaign) => {
-          const name = campaign.campaignname?.toLowerCase() || "";
-          return name.includes("birthday campaign");
-        });
-        setTotalAutomation(filtered.length);
-      } catch (error) {
-        setTotalAutomation(0);
-      }
-    };
-    fetchAutomationCount();
-  }, [user?.id]);
+  const fetchAutomationCount = async () => {
+    if (!user?.id) return;
+    try {
+      const response = await axios.get(
+        `${apiConfig.baseURL}/api/stud/automationcount/${user.id}`
+      );
+      setTotalAutomation(response.data.count); // Use direct count
+    } catch (error) {
+      setTotalAutomation(0);
+    }
+  };
+  fetchAutomationCount();
+}, [user?.id]);
 
   useEffect(() => {
     const fetchContactsCount = async () => {
@@ -359,6 +349,14 @@ const Home = () => {
       fetchContactsCount();
     }
   }, [user?.id]);
+  const resolveBackgroundStyle = (style = {}) => {
+  const isGradient = style.backgroundColor?.includes("linear-gradient");
+  return {
+    ...style,
+    background: isGradient ? style.backgroundColor : undefined,
+    backgroundColor: !isGradient ? style.backgroundColor : undefined,
+  };
+};
 
   const handleDeleteFolder = async () => {
     try {
@@ -3018,15 +3016,79 @@ useEffect(() => {
                                     >
                                       {/* Heading */}
                                       {item.type === "head" && (
-                                        <div ref={dropdownRef}>
-                                          <p
-                                            className="border"
-                                            style={item.style}
-                                          >
-                                            {item.content}
-                                          </p>
-                                        </div>
+                                        <p
+    className="border-head"
+    contentEditable
+    suppressContentEditableWarning
+    style={{
+      whiteSpace: "pre-wrap", 
+      ...resolveBackgroundStyle(item.style),
+    }}
+    
+    dangerouslySetInnerHTML={{ __html: item.content }} // ✅ render saved HTML
+  />
+
                                       )}
+                                       {item.type === "table" && (
+  <>
+  <div className="table-component">
+
+  
+                              <table style={item.style}>
+                                <tbody>
+                                  {item.content.map((row, rowIndex) => (
+                                    <tr key={rowIndex}>
+                                      {row.map((cell, cellIndex) => {
+                                        const isHeader = rowIndex === 0;
+                                        const cellStyleToUse = isHeader ? item.headerStyle : item.cellStyle;
+                                        const CellTag = isHeader ? "th" : "td";
+
+                                        return (
+                                          <CellTag
+                                            key={cellIndex}
+                                            style={cellStyleToUse}
+                                            contentEditable
+                                            suppressContentEditableWarning
+                                            onBlur={(e) => {
+                                              const newContent = [...item.content];
+                                              newContent[rowIndex][cellIndex] = e.target.textContent;
+                                              updateContent(index, { content: newContent });
+                                            }}
+                                          >
+                                            {cell}
+                                          </CellTag>
+                                        );
+                                      })}
+                                    </tr>
+                                  ))}
+                                </tbody>
+                              </table>
+                              </div>
+                              </>
+                            )}
+                                      {item.type === "cardbtn" && (
+                        <div className="card-btn-container" style={item.style}>
+                          <img
+                            src={item.src1}
+                            style={item.style}
+                            alt="Editable"
+                            className="card-image"
+                            title="Upload Image"
+                           
+                          />
+
+                          <a
+                            href={item.link}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="button-preview card-btn"
+                            style={item.buttonStyle}
+                          >
+                            {item.content}
+                          </a>
+                        </div>
+                      )}
+
 
                                       {/* Paragraph */}
                                       {item.type === "para" && (
@@ -3036,10 +3098,10 @@ useEffect(() => {
                                             contentEditable
                                             suppressContentEditableWarning
                                             onClick={() => {
-                                              setSelectedIndex(index);
+                                              // setSelectedIndex(index);
                                               setIsModalOpen(true); // Open the modal
                                             }}
-                                            style={item.style}
+                                            style={resolveBackgroundStyle(item.style)}
                                             dangerouslySetInnerHTML={{
                                               __html: item.content,
                                             }}
@@ -3056,7 +3118,7 @@ useEffect(() => {
                                             }
                                             alt="Preview"
                                             className="img gallery-img-image"
-                                            style={item.style}
+                                            style={resolveBackgroundStyle(item.style)}
                                           />
                                         </div>
                                       )}
@@ -3070,7 +3132,7 @@ useEffect(() => {
                                             }
                                             alt="Preview"
                                             className="img gallery-img-banner "
-                                            style={item.style}
+                                            style={resolveBackgroundStyle(item.style)}
                                           />
                                         </div>
                                       )}
@@ -3118,7 +3180,7 @@ useEffect(() => {
                                               }
                                               alt="Editable"
                                               className="img gallery-img-image"
-                                              style={item.style}
+                                              style={resolveBackgroundStyle(item.style)}
                                               onClick={() =>
                                                 handleopenFiles(index, 1)
                                               }
@@ -3187,7 +3249,7 @@ useEffect(() => {
                                             }
                                             alt="Editable"
                                             className="logo gallery-img"
-                                            style={item.style}
+                                            style={resolveBackgroundStyle(item.style)}
                                             onClick={() =>
                                               handleopenFiles(index, 1)
                                             }
@@ -4041,6 +4103,7 @@ useEffect(() => {
               </div>
             </div>
           )}
+
           {/* show livepopup toast */}
           <LivePopup userId={user?.id} />
 
@@ -4151,11 +4214,79 @@ useEffect(() => {
                             {/* Heading */}
                             {item.type === "head" && (
                               <div ref={dropdownRef}>
-                                <p className="border" style={item.style}>
-                                  {item.content}
-                                </p>
+                                 <p
+    className="border-head"
+    contentEditable
+    suppressContentEditableWarning
+    style={{
+      whiteSpace: "pre-wrap", 
+      ...resolveBackgroundStyle(item.style),
+    }}
+    
+    dangerouslySetInnerHTML={{ __html: item.content }} 
+  />
                               </div>
                             )}
+ {item.type === "table" && (
+  <>
+  <div className="table-component">
+
+  
+                              <table style={item.style}>
+                                <tbody>
+                                  {item.content.map((row, rowIndex) => (
+                                    <tr key={rowIndex}>
+                                      {row.map((cell, cellIndex) => {
+                                        const isHeader = rowIndex === 0;
+                                        const cellStyleToUse = isHeader ? item.headerStyle : item.cellStyle;
+                                        const CellTag = isHeader ? "th" : "td";
+
+                                        return (
+                                          <CellTag
+                                            key={cellIndex}
+                                            style={cellStyleToUse}
+                                            contentEditable
+                                            suppressContentEditableWarning
+                                            onBlur={(e) => {
+                                              const newContent = [...item.content];
+                                              newContent[rowIndex][cellIndex] = e.target.textContent;
+                                              updateContent(index, { content: newContent });
+                                            }}
+                                          >
+                                            {cell}
+                                          </CellTag>
+                                        );
+                                      })}
+                                    </tr>
+                                  ))}
+                                </tbody>
+                              </table>
+                              </div>
+                              </>
+                            )}
+                            {item.type === "cardbtn" && (
+                        <div className="card-btn-container" style={item.style}>
+                          <img
+                            src={item.src1}
+                            style={item.style}
+                            alt="Editable"
+                            className="card-image"
+                            title="Upload Image"
+                           
+                          />
+
+                          <a
+                            href={item.link}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="button-preview card-btn"
+                            style={item.buttonStyle}
+                          >
+                            {item.content}
+                          </a>
+                        </div>
+                      )}
+
 
                             {/* Paragraph */}
                             {item.type === "para" && (
@@ -4165,10 +4296,10 @@ useEffect(() => {
                                   contentEditable
                                   suppressContentEditableWarning
                                   onClick={() => {
-                                    setSelectedIndex(index);
+                                    // setSelectedIndex(index);
                                     setIsModalOpen(true); // Open the modal
                                   }}
-                                  style={item.style}
+                                  style={resolveBackgroundStyle(item.style)}
                                   dangerouslySetInnerHTML={{
                                     __html: item.content,
                                   }}
@@ -4185,7 +4316,7 @@ useEffect(() => {
                                   }
                                   alt="Preview"
                                   className="img gallery-img-image"
-                                  style={item.style}
+                                  style={resolveBackgroundStyle(item.style)}
                                 />
                               </div>
                             )}
@@ -4199,7 +4330,7 @@ useEffect(() => {
                                   }
                                   alt="Preview"
                                   className="img gallery-img-banner"
-                                  style={item.style}
+                                  style={resolveBackgroundStyle(item.style)}
                                 />
                               </div>
                             )}
@@ -4245,7 +4376,7 @@ useEffect(() => {
                                     }
                                     alt="Editable"
                                     className="img gallery-img-image"
-                                    style={item.style}
+                                    style={resolveBackgroundStyle(item.style)}
                                     onClick={() => handleopenFiles(index, 1)}
                                     title="Upload Image"
                                   />
@@ -4309,7 +4440,7 @@ useEffect(() => {
                                   }
                                   alt="Editable"
                                   className="logo gallery-img"
-                                  style={item.style}
+                                  style={resolveBackgroundStyle(item.style)}
                                   onClick={() => handleopenFiles(index, 1)}
                                   title="Upload Image"
                                 />
@@ -4657,11 +4788,80 @@ useEffect(() => {
                             {/* Heading */}
                             {item.type === "head" && (
                               <div ref={dropdownRef}>
-                                <p className="border" style={item.style}>
-                                  {item.content}
-                                </p>
+                                <p
+    className="border-head"
+    contentEditable
+    suppressContentEditableWarning
+    style={{
+      whiteSpace: "pre-wrap", // ✅ preserves line breaks and spacing
+      ...resolveBackgroundStyle(item.style),
+    }}
+    
+    dangerouslySetInnerHTML={{ __html: item.content }} // ✅ render saved HTML
+  />
                               </div>
                             )}
+ {item.type === "table" && (
+  <>
+  <div className="table-component">
+
+  
+                              <table style={item.style}>
+                                <tbody>
+                                  {item.content.map((row, rowIndex) => (
+                                    <tr key={rowIndex}>
+                                      {row.map((cell, cellIndex) => {
+                                        const isHeader = rowIndex === 0;
+                                        const cellStyleToUse = isHeader ? item.headerStyle : item.cellStyle;
+                                        const CellTag = isHeader ? "th" : "td";
+
+                                        return (
+                                          <CellTag
+                                            key={cellIndex}
+                                            style={cellStyleToUse}
+                                            contentEditable
+                                            suppressContentEditableWarning
+                                            onBlur={(e) => {
+                                              const newContent = [...item.content];
+                                              newContent[rowIndex][cellIndex] = e.target.textContent;
+                                              updateContent(index, { content: newContent });
+                                            }}
+                                          >
+                                            {cell}
+                                          </CellTag>
+                                        );
+                                      })}
+                                    </tr>
+                                  ))}
+                                </tbody>
+                              </table>
+                              </div>
+                              </>
+                            )}
+                             {item.type === "cardbtn" && (
+                        <div className="card-btn-container" style={item.style}>
+                          <img
+                            src={item.src1}
+                            style={item.style}
+                            alt="Editable"
+                            className="card-image"
+                            title="Upload Image"
+                           
+                          />
+
+                          <a
+                            href={item.link}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="button-preview card-btn"
+                            style={item.buttonStyle}
+                          >
+                            {item.content}
+                          </a>
+                        </div>
+                      )}
+
+
 
                             {/* Paragraph */}
                             {item.type === "para" && (
@@ -4671,10 +4871,10 @@ useEffect(() => {
                                   contentEditable
                                   suppressContentEditableWarning
                                   onClick={() => {
-                                    setSelectedIndex(index);
+                                    // setSelectedIndex(index);
                                     setIsModalOpen(true); // Open the modal
                                   }}
-                                  style={item.style}
+                                  style={resolveBackgroundStyle(item.style)}
                                   dangerouslySetInnerHTML={{
                                     __html: item.content,
                                   }}
@@ -4691,7 +4891,7 @@ useEffect(() => {
                                   }
                                   alt="Preview"
                                   className="img gallery-img-image"
-                                  style={item.style}
+                                  style={resolveBackgroundStyle(item.style)}
                                 />
                               </div>
                             )}
@@ -4705,7 +4905,7 @@ useEffect(() => {
                                   }
                                   alt="Preview"
                                   className="img gallery-img-banner"
-                                  style={item.style}
+                                  style={resolveBackgroundStyle(item.style)}
                                 />
                               </div>
                             )}
@@ -4751,7 +4951,7 @@ useEffect(() => {
                                     }
                                     alt="Editable"
                                     className="img gallery-img-image"
-                                    style={item.style}
+                                    style={resolveBackgroundStyle(item.style)}
                                     onClick={() => handleopenFiles(index, 1)}
                                     title="Upload Image"
                                   />
@@ -4816,7 +5016,7 @@ useEffect(() => {
                                   }
                                   alt="Editable"
                                   className="logo gallery-img"
-                                  style={item.style}
+                                  style={resolveBackgroundStyle(item.style)}
                                   onClick={() => handleopenFiles(index, 1)}
                                   title="Upload Image"
                                 />
@@ -5130,6 +5330,65 @@ useEffect(() => {
                           style={item.style}
                           key={index}
                         >
+                           {item.type === "table" && (
+  <>
+  <div className="table-component">
+
+  
+                              <table style={item.style}>
+                                <tbody>
+                                  {item.content.map((row, rowIndex) => (
+                                    <tr key={rowIndex}>
+                                      {row.map((cell, cellIndex) => {
+                                        const isHeader = rowIndex === 0;
+                                        const cellStyleToUse = isHeader ? item.headerStyle : item.cellStyle;
+                                        const CellTag = isHeader ? "th" : "td";
+
+                                        return (
+                                          <CellTag
+                                            key={cellIndex}
+                                            style={cellStyleToUse}
+                                            contentEditable
+                                            suppressContentEditableWarning
+                                            onBlur={(e) => {
+                                              const newContent = [...item.content];
+                                              newContent[rowIndex][cellIndex] = e.target.textContent;
+                                              updateContent(index, { content: newContent });
+                                            }}
+                                          >
+                                            {cell}
+                                          </CellTag>
+                                        );
+                                      })}
+                                    </tr>
+                                  ))}
+                                </tbody>
+                              </table>
+                              </div>
+                              </>
+                            )}
+                          {item.type === "cardbtn" && (
+                        <div className="card-btn-container" style={item.style}>
+                          <img
+                            src={item.src1}
+                            style={item.style}
+                            alt="Editable"
+                            className="card-image"
+                            title="Upload Image"
+                          />
+
+                          <a
+                            href={item.link}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="button-preview card-btn"
+                            style={item.buttonStyle}
+                          >
+                            {item.content}
+                          </a>
+                        </div>
+                      )}
+
                           {item.type === "para" && (
                             <>
                               <p
@@ -5137,11 +5396,11 @@ useEffect(() => {
                                 contentEditable
                                 suppressContentEditableWarning
                                 onClick={() => {
-                                  setSelectedIndex(index);
+                                  // setSelectedIndex(index);
                                   setSelectedContent(item.content); // Store the correct content
                                   setIsModalOpen(true); // Open the modal
                                 }}
-                                style={item.style}
+                                style={resolveBackgroundStyle(item.style)}
                                 dangerouslySetInnerHTML={{
                                   __html: item.content,
                                 }}
@@ -5389,24 +5648,17 @@ useEffect(() => {
 
                           {item.type === "head" && (
                             <div ref={dropdownRef}>
-                              <p
-                                className="border"
-                                contentEditable
-                                suppressContentEditableWarning
-                                onBlur={(e) =>
-                                  updateContent(index, {
-                                    content: e.target.textContent,
-                                  })
-                                }
-                                onMouseUp={(e) =>
-                                  handleCursorPosition(e, index)
-                                }
-                                onSelect={(e) => handleCursorPosition(e, index)}
-                                style={item.style}
-                              >
-                                {item.content}
-                              </p>
-
+                             <p
+    className="border-head"
+    contentEditable
+    suppressContentEditableWarning
+    style={{
+      whiteSpace: "pre-wrap", // ✅ preserves line breaks and spacing
+      ...resolveBackgroundStyle(item.style),
+    }}
+    
+    dangerouslySetInnerHTML={{ __html: item.content }} // ✅ render saved HTML
+  />
                               {/* Local state for each heading */}
                               <div className="select-group-container">
                                 {/* Select Group */}
@@ -5481,7 +5733,7 @@ useEffect(() => {
                                   }
                                   alt="Editable"
                                   className="img"
-                                  style={item.style}
+                                  style={resolveBackgroundStyle(item.style)}
                                   onClick={() => handleopenFiles(index, 1)}
                                   title="Upload Image"
                                 />
@@ -5496,7 +5748,7 @@ useEffect(() => {
                                 }
                                 alt="Editable"
                                 className="img"
-                                style={item.style}
+                                style={resolveBackgroundStyle(item.style)}
                                 onClick={() => handleopenFiles(index, 1)}
                                 title="Upload Image"
                               />
@@ -5639,7 +5891,7 @@ useEffect(() => {
                                 }
                                 alt="Editable"
                                 className="img"
-                                style={item.style}
+                                style={resolveBackgroundStyle(item.style)}
                                 onClick={() => handleopenFiles(index, 1)}
                               />
                             </div>
@@ -5695,7 +5947,7 @@ useEffect(() => {
                                 }
                                 alt="Editable"
                                 className="logo"
-                                style={item.style}
+                                style={resolveBackgroundStyle(item.style)}
                                 onClick={() => handleopenFiles(index, 1)}
                                 title="Upload Image"
                               />
@@ -5782,6 +6034,65 @@ useEffect(() => {
                           style={item.style}
                           key={index}
                         >
+                           {item.type === "table" && (
+  <>
+  <div className="table-component">
+
+  
+                              <table style={item.style}>
+                                <tbody>
+                                  {item.content.map((row, rowIndex) => (
+                                    <tr key={rowIndex}>
+                                      {row.map((cell, cellIndex) => {
+                                        const isHeader = rowIndex === 0;
+                                        const cellStyleToUse = isHeader ? item.headerStyle : item.cellStyle;
+                                        const CellTag = isHeader ? "th" : "td";
+
+                                        return (
+                                          <CellTag
+                                            key={cellIndex}
+                                            style={cellStyleToUse}
+                                            contentEditable
+                                            suppressContentEditableWarning
+                                            onBlur={(e) => {
+                                              const newContent = [...item.content];
+                                              newContent[rowIndex][cellIndex] = e.target.textContent;
+                                              updateContent(index, { content: newContent });
+                                            }}
+                                          >
+                                            {cell}
+                                          </CellTag>
+                                        );
+                                      })}
+                                    </tr>
+                                  ))}
+                                </tbody>
+                              </table>
+                              </div>
+                              </>
+                            )}
+                          {item.type === "cardbtn" && (
+                        <div className="card-btn-container" style={item.style}>
+                          <img
+                            src={item.src1}
+                            style={item.style}
+                            alt="Editable"
+                            className="card-image"
+                            title="Upload Image"
+                          />
+
+                          <a
+                            href={item.link}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="button-preview card-btn"
+                            style={item.buttonStyle}
+                          >
+                            {item.content}
+                          </a>
+                        </div>
+                      )}
+
                           {item.type === "para" && (
                             <>
                               <p
@@ -5789,11 +6100,11 @@ useEffect(() => {
                                 contentEditable
                                 suppressContentEditableWarning
                                 onClick={() => {
-                                  setSelectedIndex(index);
+                                  // setSelectedIndex(index);
                                   setSelectedContent(item.content); // Store the correct content
                                   setIsModalOpen(true); // Open the modal
                                 }}
-                                style={item.style}
+                                style={resolveBackgroundStyle(item.style)}
                                 dangerouslySetInnerHTML={{
                                   __html: item.content,
                                 }}
@@ -6041,24 +6352,17 @@ useEffect(() => {
 
                           {item.type === "head" && (
                             <div ref={dropdownRef}>
-                              <p
-                                className="border"
-                                contentEditable
-                                suppressContentEditableWarning
-                                onBlur={(e) =>
-                                  updateContent(index, {
-                                    content: e.target.textContent,
-                                  })
-                                }
-                                onMouseUp={(e) =>
-                                  handleCursorPosition(e, index)
-                                }
-                                onSelect={(e) => handleCursorPosition(e, index)}
-                                style={item.style}
-                              >
-                                {item.content}
-                              </p>
-
+                               <p
+    className="border-head"
+    contentEditable
+    suppressContentEditableWarning
+    style={{
+      whiteSpace: "pre-wrap", // ✅ preserves line breaks and spacing
+      ...resolveBackgroundStyle(item.style),
+    }}
+    
+    dangerouslySetInnerHTML={{ __html: item.content }} // ✅ render saved HTML
+  />
                               {/* Local state for each heading */}
                               <div className="select-group-container">
                                 {/* Select Group */}
@@ -6133,7 +6437,7 @@ useEffect(() => {
                                   }
                                   alt="Editable"
                                   className="img"
-                                  style={item.style}
+                                  style={resolveBackgroundStyle(item.style)}
                                   onClick={() => handleopenFiles(index, 1)}
                                   title="Upload Image"
                                 />
@@ -6148,7 +6452,7 @@ useEffect(() => {
                                 }
                                 alt="Editable"
                                 className="img"
-                                style={item.style}
+                                style={resolveBackgroundStyle(item.style)}
                                 onClick={() => handleopenFiles(index, 1)}
                                 title="Upload Image"
                               />
@@ -6291,7 +6595,7 @@ useEffect(() => {
                                 }
                                 alt="Editable"
                                 className="img"
-                                style={item.style}
+                                style={resolveBackgroundStyle(item.style)}
                                 onClick={() => handleopenFiles(index, 1)}
                               />
                             </div>
@@ -6347,7 +6651,7 @@ useEffect(() => {
                                 }
                                 alt="Editable"
                                 className="logo"
-                                style={item.style}
+                                style={resolveBackgroundStyle(item.style)}
                                 onClick={() => handleopenFiles(index, 1)}
                                 title="Upload Image"
                               />
@@ -6501,6 +6805,65 @@ useEffect(() => {
                           style={item.style}
                           key={index}
                         >
+                           {item.type === "table" && (
+  <>
+  <div className="table-component">
+
+  
+                              <table style={item.style}>
+                                <tbody>
+                                  {item.content.map((row, rowIndex) => (
+                                    <tr key={rowIndex}>
+                                      {row.map((cell, cellIndex) => {
+                                        const isHeader = rowIndex === 0;
+                                        const cellStyleToUse = isHeader ? item.headerStyle : item.cellStyle;
+                                        const CellTag = isHeader ? "th" : "td";
+
+                                        return (
+                                          <CellTag
+                                            key={cellIndex}
+                                            style={cellStyleToUse}
+                                            contentEditable
+                                            suppressContentEditableWarning
+                                            onBlur={(e) => {
+                                              const newContent = [...item.content];
+                                              newContent[rowIndex][cellIndex] = e.target.textContent;
+                                              updateContent(index, { content: newContent });
+                                            }}
+                                          >
+                                            {cell}
+                                          </CellTag>
+                                        );
+                                      })}
+                                    </tr>
+                                  ))}
+                                </tbody>
+                              </table>
+                              </div>
+                              </>
+                            )}
+                          {item.type === "cardbtn" && (
+                        <div className="card-btn-container" style={item.style}>
+                          <img
+                            src={item.src1}
+                            style={item.style}
+                            alt="Editable"
+                            className="card-image"
+                            title="Upload Image"
+                          />
+
+                          <a
+                            href={item.link}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="button-preview card-btn"
+                            style={item.buttonStyle}
+                          >
+                            {item.content}
+                          </a>
+                        </div>
+                      )}
+
                           {item.type === "para" && (
                             <>
                               <p
@@ -6508,11 +6871,11 @@ useEffect(() => {
                                 contentEditable
                                 suppressContentEditableWarning
                                 onClick={() => {
-                                  setSelectedIndex(index);
+                                  // setSelectedIndex(index);
                                   setSelectedContent(item.content); // Store the correct content
                                   setIsModalOpen(true); // Open the modal
                                 }}
-                                style={item.style}
+                                style={resolveBackgroundStyle(item.style)}
                                 dangerouslySetInnerHTML={{
                                   __html: item.content,
                                 }}
@@ -6761,23 +7124,16 @@ useEffect(() => {
                           {item.type === "head" && (
                             <div ref={dropdownRef}>
                               <p
-                                className="border"
-                                contentEditable
-                                suppressContentEditableWarning
-                                onBlur={(e) =>
-                                  updateContent(index, {
-                                    content: e.target.textContent,
-                                  })
-                                }
-                                onMouseUp={(e) =>
-                                  handleCursorPosition(e, index)
-                                }
-                                onSelect={(e) => handleCursorPosition(e, index)}
-                                style={item.style}
-                              >
-                                {item.content}
-                              </p>
-
+    className="border-head"
+    contentEditable
+    suppressContentEditableWarning
+    style={{
+      whiteSpace: "pre-wrap", // ✅ preserves line breaks and spacing
+      ...resolveBackgroundStyle(item.style),
+    }}
+    
+    dangerouslySetInnerHTML={{ __html: item.content }} // ✅ render saved HTML
+  />
                               {/* Local state for each heading */}
                               <div className="select-group-container">
                                 {/* Select Group */}
@@ -6852,7 +7208,7 @@ useEffect(() => {
                                   }
                                   alt="Editable"
                                   className="img"
-                                  style={item.style}
+                                  style={resolveBackgroundStyle(item.style)}
                                   onClick={() => handleopenFiles(index, 1)}
                                   title="Upload Image"
                                 />
@@ -6867,7 +7223,7 @@ useEffect(() => {
                                 }
                                 alt="Editable"
                                 className="img"
-                                style={item.style}
+                                style={resolveBackgroundStyle(item.style)}
                                 onClick={() => handleopenFiles(index, 1)}
                                 title="Upload Image"
                               />
@@ -7010,7 +7366,7 @@ useEffect(() => {
                                 }
                                 alt="Editable"
                                 className="img"
-                                style={item.style}
+                                style={resolveBackgroundStyle(item.style)}
                                 onClick={() => handleopenFiles(index, 1)}
                               />
                             </div>
@@ -7066,7 +7422,7 @@ useEffect(() => {
                                 }
                                 alt="Editable"
                                 className="logo"
-                                style={item.style}
+                                style={resolveBackgroundStyle(item.style)}
                                 onClick={() => handleopenFiles(index, 1)}
                                 title="Upload Image"
                               />

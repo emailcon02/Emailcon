@@ -56,7 +56,6 @@ app.get('/auth/google', (req, res) => {
   res.redirect(authUrl);
 });
 // Modified /oauth2callback endpoint
-// Modified /oauth2callback endpoint
 app.get('/oauth2callback', async (req, res) => {
   try {
     const { code, state } = req.query;

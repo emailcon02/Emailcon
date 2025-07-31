@@ -43,6 +43,7 @@ import FileManagerModal from "./FilemanagerModal.jsx";
 import ParaEditorbutton from "../component/Campaign-Creation/ParaEditorbutton.jsx";
 import ColorPalettePicker from "./ColorPalettePicker.jsx";
 import WarningModal from "./WarningModal.jsx";
+import GradientBackgroundPicker from "./GradientBackgroundPicker.jsx";
 
 const Readmainpage = () => {
   const [activeTab, setActiveTab] = useState("button1");
@@ -131,50 +132,49 @@ const Readmainpage = () => {
   }, []);
 
   const [showWarningModal, setShowWarningModal] = useState(false);
-      const [shouldRefresh, setShouldRefresh] = useState(false);
-        const [spamResult, setSpamResult] = useState(null); 
-      const [spamWordsFound, setSpamWordsFound] = useState([]);
-    
-      useEffect(() => {
-        const handleBeforeUnload = (e) => {
-          e.preventDefault(); // Needed for some browsers
-          e.returnValue = ""; // Show default browser message (won't appear if using custom modal)
-          setShowWarningModal(true);
-          return ""; // This is required for Chrome
-        };
-    
-        const handleKeyPress = (e) => {
-          if (
-            (e.key === "F5") || // F5
-            (e.ctrlKey && e.key === "r") || // Ctrl+R
-            (e.metaKey && e.key === "r") // Cmd+R (Mac)
-          ) {
-            e.preventDefault();
-            setShowWarningModal(true);
-            setShouldRefresh(true);
-          }
-        };
-    
-        window.addEventListener("beforeunload", handleBeforeUnload);
-        window.addEventListener("keydown", handleKeyPress);
-    
-        return () => {
-          window.removeEventListener("beforeunload", handleBeforeUnload);
-          window.removeEventListener("keydown", handleKeyPress);
-        };
-      }, []);
-    
-      const handleConfirmRefresh = () => {
-        setShowWarningModal(false);
-        window.removeEventListener("beforeunload", () => {}); // Optional cleanup
-        window.location.reload(); // Now refresh
-      };
-    
-      const handleCancel = () => {
-        setShowWarningModal(false);
-        setShouldRefresh(false);
-      };
-  
+  const [shouldRefresh, setShouldRefresh] = useState(false);
+  const [spamResult, setSpamResult] = useState(null);
+  const [spamWordsFound, setSpamWordsFound] = useState([]);
+
+  useEffect(() => {
+    const handleBeforeUnload = (e) => {
+      e.preventDefault(); // Needed for some browsers
+      e.returnValue = ""; // Show default browser message (won't appear if using custom modal)
+      setShowWarningModal(true);
+      return ""; // This is required for Chrome
+    };
+
+    const handleKeyPress = (e) => {
+      if (
+        e.key === "F5" || // F5
+        (e.ctrlKey && e.key === "r") || // Ctrl+R
+        (e.metaKey && e.key === "r") // Cmd+R (Mac)
+      ) {
+        e.preventDefault();
+        setShowWarningModal(true);
+        setShouldRefresh(true);
+      }
+    };
+
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    window.addEventListener("keydown", handleKeyPress);
+
+    return () => {
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+      window.removeEventListener("keydown", handleKeyPress);
+    };
+  }, []);
+
+  const handleConfirmRefresh = () => {
+    setShowWarningModal(false);
+    window.removeEventListener("beforeunload", () => {}); // Optional cleanup
+    window.location.reload(); // Now refresh
+  };
+
+  const handleCancel = () => {
+    setShowWarningModal(false);
+    setShouldRefresh(false);
+  };
 
   function convertToWhatsAppText(html) {
     const tempDiv = document.createElement("div");
@@ -522,17 +522,17 @@ const Readmainpage = () => {
     fetchreplyto();
   }, [user?.id, navigate]); // Ensure useEffect is dependent on `user` and `navigate`
 
-const handleopensentoptions = () => {
-  if (previewContent.length === 0) {
-    toast.error("Please add content before sending.");
-    return;
-  }
-  if (!templateName) {
-    toast.error("Please save template before sending.");
-    return;
-  }
+  const handleopensentoptions = () => {
+    if (previewContent.length === 0) {
+      toast.error("Please add content before sending.");
+      return;
+    }
+    if (!templateName) {
+      toast.error("Please save template before sending.");
+      return;
+    }
     setIsOpen(true);
-  }
+  };
 
   const handleAddReply = () => {
     if (!user || !user.id) {
@@ -612,11 +612,15 @@ const handleopensentoptions = () => {
 
     const newFieldNames = sampleStudent
       ? Object.keys(sampleStudent).filter(
-          (key) => key !== "_id" && key !== "group" && key !== "__v" && key !== "lastSentYear" &&
-                                key !== "user" &&
-                                key !== "isUnsubscribed" &&
-                                key !== "createdAt" &&
-                                key !== "updatedAt" 
+          (key) =>
+            key !== "_id" &&
+            key !== "group" &&
+            key !== "__v" &&
+            key !== "lastSentYear" &&
+            key !== "user" &&
+            key !== "isUnsubscribed" &&
+            key !== "createdAt" &&
+            key !== "updatedAt"
         )
       : [];
 
@@ -681,12 +685,28 @@ const handleopensentoptions = () => {
 
   useEffect(() => {
     if (selectedIndex !== null && styleControlsRef.current) {
-      styleControlsRef.current.scrollIntoView({
-        behavior: "smooth",
-        block: "center",
-      });
+      const editorContainer = document.querySelector(".editor");
+      const styleControlsElement = styleControlsRef.current;
+
+      if (editorContainer && styleControlsElement) {
+        const scrollTop =
+          styleControlsElement.offsetTop - editorContainer.offsetTop;
+
+        editorContainer.scrollTo({
+          top: scrollTop,
+          behavior: "smooth",
+        });
+      }
     }
   }, [selectedIndex]);
+  const resolveBackgroundStyle = (style = {}) => {
+    const isGradient = style.backgroundColor?.includes("linear-gradient");
+    return {
+      ...style,
+      background: isGradient ? style.backgroundColor : undefined,
+      backgroundColor: !isGradient ? style.backgroundColor : undefined,
+    };
+  };
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -880,6 +900,37 @@ const handleopensentoptions = () => {
         style1: {
           color: "#000000",
           backgroundColor: "#f4f4f4",
+        },
+      },
+    ]);
+  };
+  const addTable = () => {
+    setPreviewContent([
+      ...previewContent,
+      {
+        type: "table",
+        content: [
+          ["Header 1", "Header 2", "Header 3"], // Initial headers
+          ["Row 1 Cell 1", "Row 1 Cell 2", "Row 1 Cell 3"], // Initial row
+        ],
+        style: {
+          width: "100%",
+          borderCollapse: "collapse",
+          margin: "10px 0",
+          textAlign: "left",
+        },
+        cellStyle: {
+          border: "1px solid #ddd",
+          padding: "8px",
+          backgroundColor: "#ffffff",
+          color: "#000000",
+        },
+        headerStyle: {
+          backgroundColor: "#f4f4f4",
+          color: "#000000",
+          fontWeight: "bold",
+          border: "1px solid #ddd",
+          padding: "8px",
         },
       },
     ]);
@@ -1100,6 +1151,37 @@ const handleopensentoptions = () => {
       },
     ]);
   };
+  const addCardBtn = () => {
+    setPreviewContent([
+      ...previewContent,
+      {
+        type: "cardbtn",
+        style: {
+          width: "70%",
+          height: "auto",
+          margin: "0px auto",
+          backgroundColor: "#e3e3e3ff",
+          borderRadius: "0px",
+        },
+        src1: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTjCoUtOal33JWLqals1Wq7p6GGCnr3o-lwpQ&s",
+        content: "Click Here",
+        link: "",
+        buttonStyle: {
+          textAlign: "center",
+          padding: "12px 30px", // Adjust padding based on screen size
+          backgroundColor: "#000000",
+          color: "#ffffff",
+          width: "50%", // Full width for buttons
+          marginTop: "20px",
+          alignItems: "center",
+          borderRadius: "0px",
+          fontWeight: "bold",
+          fontSize: "15px",
+        },
+      },
+    ]);
+  };
+
   //add video with icon
   const addVideo = () => {
     const isMobile = window.innerWidth <= 600; // Check if screen width is 600px or less
@@ -1248,14 +1330,16 @@ const handleopensentoptions = () => {
     setSelectedIndex(index); // Set the selected index when an item is clicked
     // Scroll to style controls after a short delay to ensure rendering
     setTimeout(() => {
+      const container = document.querySelector(".editor");
       const styleControlsElement = document.querySelector(".style-controls");
-      if (styleControlsElement) {
-        styleControlsElement.scrollIntoView({
+
+      if (container && styleControlsElement) {
+        container.scrollTo({
+          top: styleControlsElement.offsetTop - container.offsetTop,
           behavior: "smooth",
-          block: "center",
         });
       }
-    }, 100);
+    }, 1000);
   };
   const handleItemClickdesktop = (index) => {
     setSelectedIndex(index); // Set the selected index when an item is clicked
@@ -1319,7 +1403,11 @@ const handleopensentoptions = () => {
           toast.error(`Please fill in Link 2 in ${item.type}`);
           hasInvalidLink = true;
         }
-      } else if (item.type === "video-icon" || item.type === "button") {
+      } else if (
+        item.type === "video-icon" ||
+        item.type === "button" ||
+        item.type === "cardbtn"
+      ) {
         if (!item.link?.trim()) {
           toast.error(`Please fill in the Link in ${item.type}`);
           hasInvalidLink = true;
@@ -1338,7 +1426,7 @@ const handleopensentoptions = () => {
           userId: user.id,
           previewContent,
           bgColor,
-          camname:readcampaigns?.campaignname || "",
+          camname: readcampaigns?.campaignname || "",
         })
         .then((res) => {
           console.log("Template saved successfully:", res.data);
@@ -1390,7 +1478,11 @@ const handleopensentoptions = () => {
           toast.error(`Please fill in Link 2 in ${item.type}`);
           hasInvalidLink = true;
         }
-      } else if (item.type === "video-icon" || item.type === "button") {
+      } else if (
+        item.type === "video-icon" ||
+        item.type === "button" ||
+        item.type === "cardbtn"
+      ) {
         if (!item.link?.trim()) {
           toast.error(`Please fill in the Link in ${item.type}`);
           hasInvalidLink = true;
@@ -1427,7 +1519,7 @@ const handleopensentoptions = () => {
           {
             previewContent,
             bgColor,
-            camname:readcampaigns?.campaignname|| "",
+            camname: readcampaigns?.campaignname || "",
           }
         );
         toast.success("Template updated successfully.");
@@ -1452,7 +1544,7 @@ const handleopensentoptions = () => {
     previewContent,
     templateName,
     bgColor,
-    readcampaigns?.campaignname|| "",
+    readcampaigns?.campaignname || "",
     fetchTemplates,
   ]);
 
@@ -1468,57 +1560,128 @@ const handleopensentoptions = () => {
   }, [handleSaveButton]);
 
   const handleSpamCheck = () => {
-  if (!emailData.subject || emailData.subject.trim() === "") {
-    setSpamResult("empty");
-    setSpamWordsFound([]);
-    return;
-  }
+    if (!emailData.subject || emailData.subject.trim() === "") {
+      setSpamResult("empty");
+      setSpamWordsFound([]);
+      return;
+    }
 
-const spamWords = [
-  // Promotions / Urgency
-  "free", "winner", "cash", "prize", "click here", "urgent", "money", "guaranteed",
-  "offer", "buy now", "unsubscribe", "earn", "credit card", "lottery", "investment",
-  "act now", "apply now", "limited time", "order now", "get started", "exclusive deal",
-  "instant access", "risk-free", "don't delete", "this isn't spam", "urgent response needed",
+    const spamWords = [
+      // Promotions / Urgency
+      "free",
+      "winner",
+      "cash",
+      "prize",
+      "click here",
+      "urgent",
+      "money",
+      "guaranteed",
+      "offer",
+      "buy now",
+      "unsubscribe",
+      "earn",
+      "credit card",
+      "lottery",
+      "investment",
+      "act now",
+      "apply now",
+      "limited time",
+      "order now",
+      "get started",
+      "exclusive deal",
+      "instant access",
+      "risk-free",
+      "don't delete",
+      "this isn't spam",
+      "urgent response needed",
 
-  // Financial
-  "congratulations", "no cost", "lowest price", "double your income", "extra income",
-  "get out of debt", "increase sales", "increase traffic", "make money", "online biz opportunity",
-  "financial freedom", "while you sleep", "work from home", "save big money", "fast cash",
-  "zero cost", "hidden charges", "guaranteed income",
+      // Financial
+      "congratulations",
+      "no cost",
+      "lowest price",
+      "double your income",
+      "extra income",
+      "get out of debt",
+      "increase sales",
+      "increase traffic",
+      "make money",
+      "online biz opportunity",
+      "financial freedom",
+      "while you sleep",
+      "work from home",
+      "save big money",
+      "fast cash",
+      "zero cost",
+      "hidden charges",
+      "guaranteed income",
 
-  // Scams / Tricks
-  "act immediately", "this won’t last", "winner", "you are selected", "pre-approved",
-  "no obligation", "easy terms", "no strings attached", "trial offer", "miracle", "access now",
-  "free gift", "free info", "get paid", "cash bonus", "exclusive deal",
+      // Scams / Tricks
+      "act immediately",
+      "this won’t last",
+      "winner",
+      "you are selected",
+      "pre-approved",
+      "no obligation",
+      "easy terms",
+      "no strings attached",
+      "trial offer",
+      "miracle",
+      "access now",
+      "free gift",
+      "free info",
+      "get paid",
+      "cash bonus",
+      "exclusive deal",
 
-  // Shady behavior
-  "bulk email", "this is not spam", "why pay more", "you have been selected", "important information",
-  "claim now", "increase your income", "stop snoring", "lose weight", "viagra", "cheap meds",
-  "refinance", "get loan", "click below", "act quickly", "special promotion",
+      // Shady behavior
+      "bulk email",
+      "this is not spam",
+      "why pay more",
+      "you have been selected",
+      "important information",
+      "claim now",
+      "increase your income",
+      "stop snoring",
+      "lose weight",
+      "viagra",
+      "cheap meds",
+      "refinance",
+      "get loan",
+      "click below",
+      "act quickly",
+      "special promotion",
 
-  // Scam tactics
-  "as seen on", "100% free", "credit repair", "hidden charges", "order today",
-  "satisfaction guaranteed", "meet singles", "eliminate bad credit", "amazing stuff"
-];  const lowerCaseMessage = emailData.subject.toLowerCase();
-  const foundSpamWords = spamWords.filter(word => lowerCaseMessage.includes(word));
+      // Scam tactics
+      "as seen on",
+      "100% free",
+      "credit repair",
+      "hidden charges",
+      "order today",
+      "satisfaction guaranteed",
+      "meet singles",
+      "eliminate bad credit",
+      "amazing stuff",
+    ];
+    const lowerCaseMessage = emailData.subject.toLowerCase();
+    const foundSpamWords = spamWords.filter((word) =>
+      lowerCaseMessage.includes(word)
+    );
 
-  if (foundSpamWords.length > 0) {
-    setSpamResult("spam");
-    setSpamWordsFound(foundSpamWords);
-  } else {
-    setSpamResult("clean");
-    setSpamWordsFound([]);
-  }
-};
-
+    if (foundSpamWords.length > 0) {
+      setSpamResult("spam");
+      setSpamWordsFound(foundSpamWords);
+    } else {
+      setSpamResult("clean");
+      setSpamWordsFound([]);
+    }
+  };
 
   const sendscheduleEmail = async () => {
     if (!previewContent || previewContent.length === 0) {
       toast.warning("No preview content available.");
       return;
     }
-    if(!templateName){
+    if (!templateName) {
       toast.warning("Please save the template before scheduling.");
       return;
     }
@@ -1534,7 +1697,11 @@ const spamWords = [
           toast.error(`Please fill in Link 2 in ${item.type}`);
           hasInvalidLink = true;
         }
-      } else if (item.type === "video-icon" || item.type === "button") {
+      } else if (
+        item.type === "video-icon" ||
+        item.type === "button" ||
+        item.type === "cardbtn"
+      ) {
         if (!item.link?.trim()) {
           toast.error(`Please fill in the Link in ${item.type}`);
           hasInvalidLink = true;
@@ -1648,10 +1815,10 @@ const spamWords = [
       toast.warning("No preview content available.");
       return;
     }
-     if(!templateName) {
-          toast.warning("Please save the template before sending.");
-          return;
-        }
+    if (!templateName) {
+      toast.warning("Please save the template before sending.");
+      return;
+    }
     // Check for missing links and show individual toasts
     let hasInvalidLink = false;
     previewContent.forEach((item, index) => {
@@ -1664,7 +1831,11 @@ const spamWords = [
           toast.error(`Please fill in Link 2 in ${item.type}`);
           hasInvalidLink = true;
         }
-      } else if (item.type === "video-icon" || item.type === "button") {
+      } else if (
+        item.type === "video-icon" ||
+        item.type === "button" ||
+        item.type === "cardbtn"
+      ) {
         if (!item.link?.trim()) {
           toast.error(`Please fill in the Link in ${item.type}`);
           hasInvalidLink = true;
@@ -1867,6 +2038,7 @@ const spamWords = [
     const type = dragIndex.current;
     if (type === "para") addText();
     else if (type === "head") addHeading();
+    else if (type === "table") addTable();
     else if (type === "image") addImage();
     else if (type === "logo") addLogo();
     else if (type === "button") addButton();
@@ -1875,6 +2047,7 @@ const spamWords = [
     else if (type === "imagewithtext") addImageText();
     else if (type === "textwithimage") addTextImage();
     else if (type === "video-icon") addVideo();
+    else if (type === "cardbtn") addCardBtn();
     else if (type === "icons") addSocialMedia();
     else if (type === "multipleimage") addMultipleImage();
     else if (type === "cardimage") addCardImage();
@@ -2159,19 +2332,19 @@ const spamWords = [
                   </div>
                 )}
                 <button
-                                              onClick={() => {
-                                                handleopensentoptions();
-                                                if (window.innerWidth < 768) {
-                                                  setIsNavOpen(false); // Close toggle only in mobile view
-                                                }
-                                              }}
-                                              className="navbar-button-send"
-                                            >
-                                              <span className="Nav-icons">
-                                                <MdSend />
-                                              </span>{" "}
-                                              <span className="nav-names">Send Mail</span>
-                                            </button>
+                  onClick={() => {
+                    handleopensentoptions();
+                    if (window.innerWidth < 768) {
+                      setIsNavOpen(false); // Close toggle only in mobile view
+                    }
+                  }}
+                  className="navbar-button-send"
+                >
+                  <span className="Nav-icons">
+                    <MdSend />
+                  </span>{" "}
+                  <span className="nav-names">Send Mail</span>
+                </button>
 
                 <button onClick={handlebackcampaign} className="navbar-button">
                   <span className="Nav-icons">
@@ -2269,6 +2442,14 @@ const spamWords = [
                   <FaImage /> Multi-Image
                 </button>
                 <button
+                  onClick={addCardBtn}
+                  className="editor-button"
+                  draggable
+                  onDragStart={(e) => handleDragStart("cardbtn")}
+                >
+                  <FaIdCard /> Image-Button
+                </button>
+                <button
                   onClick={addCardImage}
                   className="editor-button"
                   draggable
@@ -2276,7 +2457,15 @@ const spamWords = [
                 >
                   <FaIdCard /> Image-Card
                 </button>
-
+                <button
+                  onClick={addTable}
+                  className="editor-button"
+                  draggable
+                  onDragStart={(e) => handleDragStart("table")}
+                >
+                  <FaTable />
+                  Table
+                </button>
                 <button
                   onClick={addTextImage}
                   className="editor-button"
@@ -2790,6 +2979,13 @@ const spamWords = [
                                     selectedIndex={selectedIndex}
                                     updateContent={updateContent}
                                   />
+                                  <GradientBackgroundPicker
+                                    label="Gradient Text Background"
+                                    objectKey="style.backgroundColor"
+                                    previewContent={previewContent}
+                                    selectedIndex={selectedIndex}
+                                    updateContent={updateContent}
+                                  />
                                   <label>Border Radius (%):</label>
                                   <input
                                     type="range"
@@ -2845,6 +3041,290 @@ const spamWords = [
                                   </h3>
                                 </>
                               )}
+                              {previewContent[selectedIndex].type ===
+                                "cardbtn" && (
+                                <>
+                                  <label>Card Size (%):</label>
+                                  <input
+                                    type="range"
+                                    min="70"
+                                    max="100"
+                                    value={parseInt(
+                                      previewContent[
+                                        selectedIndex
+                                      ].style.width.replace("%", "")
+                                    )}
+                                    onChange={(e) => {
+                                      const newSize = e.target.value;
+                                      updateContent(selectedIndex, {
+                                        style: {
+                                          ...previewContent[selectedIndex]
+                                            .style,
+                                          width: `${newSize}%`,
+                                        },
+                                      });
+                                    }}
+                                  />
+                                  <span>
+                                    {parseInt(
+                                      previewContent[
+                                        selectedIndex
+                                      ].style.width.replace("%", "")
+                                    )}
+                                    %
+                                  </span>
+                                  <div className="editor-bg">
+                                    <label>Card Background Color:</label>
+                                    <input
+                                      type="color"
+                                      value={
+                                        previewContent[selectedIndex].style
+                                          .backgroundColor
+                                      }
+                                      onChange={(e) =>
+                                        updateContent(selectedIndex, {
+                                          style: {
+                                            ...previewContent[selectedIndex]
+                                              .style,
+                                            backgroundColor: e.target.value,
+                                          },
+                                        })
+                                      }
+                                    />
+                                  </div>
+
+                                  <label>Card Border Radius (%):</label>
+                                  <input
+                                    type="range"
+                                    min="0"
+                                    max="50"
+                                    value={parseInt(
+                                      previewContent[
+                                        selectedIndex
+                                      ].style.borderRadius.replace("px", "")
+                                    )}
+                                    onChange={(e) =>
+                                      updateContent(selectedIndex, {
+                                        style: {
+                                          ...previewContent[selectedIndex]
+                                            .style,
+                                          borderRadius: `${e.target.value}px`,
+                                        },
+                                      })
+                                    }
+                                  />
+
+                                  <label>Button Text:</label>
+                                  <input
+                                    type="text"
+                                    value={
+                                      previewContent[selectedIndex].content
+                                    }
+                                    onChange={(e) =>
+                                      updateContent(selectedIndex, {
+                                        content: e.target.value,
+                                      })
+                                    }
+                                  />
+
+                                  <div className="editor-bg">
+                                    <label>Button Text Color:</label>
+                                    <input
+                                      type="color"
+                                      value={
+                                        previewContent[selectedIndex]
+                                          .buttonStyle.color
+                                      }
+                                      onChange={(e) =>
+                                        updateContent(selectedIndex, {
+                                          buttonStyle: {
+                                            ...previewContent[selectedIndex]
+                                              .buttonStyle,
+                                            color: e.target.value,
+                                          },
+                                        })
+                                      }
+                                    />
+                                  </div>
+
+                                  <div className="editor-bg">
+                                    <label>Button Background:</label>
+                                    <input
+                                      type="color"
+                                      value={
+                                        previewContent[selectedIndex]
+                                          .buttonStyle.backgroundColor
+                                      }
+                                      onChange={(e) =>
+                                        updateContent(selectedIndex, {
+                                          buttonStyle: {
+                                            ...previewContent[selectedIndex]
+                                              .buttonStyle,
+                                            backgroundColor: e.target.value,
+                                          },
+                                        })
+                                      }
+                                    />
+                                  </div>
+
+                                  <label>Button Link:</label>
+                                  <input
+                                    type="text"
+                                    value={previewContent[selectedIndex].link}
+                                    onChange={(e) =>
+                                      updateContent(selectedIndex, {
+                                        link: e.target.value,
+                                      })
+                                    }
+                                  />
+
+                                  <label>Button Border Radius (%):</label>
+                                  <input
+                                    type="range"
+                                    min="0"
+                                    max="50"
+                                    value={parseInt(
+                                      previewContent[
+                                        selectedIndex
+                                      ].buttonStyle.borderRadius.replace(
+                                        "px",
+                                        ""
+                                      )
+                                    )}
+                                    onChange={(e) =>
+                                      updateContent(selectedIndex, {
+                                        buttonStyle: {
+                                          ...previewContent[selectedIndex]
+                                            .buttonStyle,
+                                          borderRadius: `${e.target.value}px`,
+                                        },
+                                      })
+                                    }
+                                  />
+                                </>
+                              )}
+                              {previewContent[selectedIndex].type ===
+                                "table" && (
+                                <>
+                                  {/* Header Controls */}
+                                  <h4>Header Styles</h4>
+                                  <ColorPicker
+                                    label="Header Text Color"
+                                    objectKey="headerStyle.color"
+                                    previewContent={previewContent}
+                                    selectedIndex={selectedIndex}
+                                    updateContent={updateContent}
+                                  />
+                                  <ColorPicker
+                                    label="Header Background"
+                                    objectKey="headerStyle.backgroundColor"
+                                    previewContent={previewContent}
+                                    selectedIndex={selectedIndex}
+                                    updateContent={updateContent}
+                                  />
+
+                                  {/* Cell Controls */}
+                                  <h4>Cell Styles</h4>
+                                  <ColorPicker
+                                    label="Cell Text Color"
+                                    objectKey="cellStyle.color"
+                                    previewContent={previewContent}
+                                    selectedIndex={selectedIndex}
+                                    updateContent={updateContent}
+                                  />
+                                  <ColorPicker
+                                    label="Cell Background"
+                                    objectKey="cellStyle.backgroundColor"
+                                    previewContent={previewContent}
+                                    selectedIndex={selectedIndex}
+                                    updateContent={updateContent}
+                                  />
+
+                                  {/* Row/Column Controls */}
+                                  <div className="table-edit-controls">
+                                    {/* Row Controls */}
+                                    <div className="table-edit-row-controls">
+                                      <button
+                                        className="table-edit-btn"
+                                        title="Add Row"
+                                        onClick={() => {
+                                          const newContent = [
+                                            ...previewContent[selectedIndex]
+                                              .content,
+                                          ];
+                                          const newRow = Array(
+                                            newContent[0]?.length || 1
+                                          ).fill("New Cell");
+                                          updateContent(selectedIndex, {
+                                            content: [...newContent, newRow],
+                                          });
+                                        }}
+                                      >
+                                        ➕ Row
+                                      </button>
+                                      <button
+                                        className="table-edit-btn"
+                                        title="Delete Row"
+                                        onClick={() => {
+                                          const newContent = [
+                                            ...previewContent[selectedIndex]
+                                              .content,
+                                          ];
+                                          if (newContent.length > 1) {
+                                            newContent.pop();
+                                            updateContent(selectedIndex, {
+                                              content: newContent,
+                                            });
+                                          }
+                                        }}
+                                      >
+                                        ➖ Row
+                                      </button>
+                                    </div>
+
+                                    {/* Column Controls */}
+                                    <div className="table-edit-column-controls">
+                                      <button
+                                        className="table-edit-btn"
+                                        title="Add Column"
+                                        onClick={() => {
+                                          const newContent = previewContent[
+                                            selectedIndex
+                                          ].content.map((row) => [
+                                            ...row,
+                                            "New Column",
+                                          ]);
+                                          updateContent(selectedIndex, {
+                                            content: newContent,
+                                          });
+                                        }}
+                                      >
+                                        ➕ Column
+                                      </button>
+                                      <button
+                                        className="table-edit-btn"
+                                        title="Delete Column"
+                                        onClick={() => {
+                                          const currentContent =
+                                            previewContent[selectedIndex]
+                                              .content;
+                                          if (currentContent[0]?.length > 1) {
+                                            const newContent =
+                                              currentContent.map((row) =>
+                                                row.slice(0, -1)
+                                              );
+                                            updateContent(selectedIndex, {
+                                              content: newContent,
+                                            });
+                                          }
+                                        }}
+                                      >
+                                        ➖ Column
+                                      </button>
+                                    </div>
+                                  </div>
+                                </>
+                              )}
 
                               {previewContent[selectedIndex].type ===
                                 "head" && (
@@ -2876,6 +3356,13 @@ const spamWords = [
                                   />
                                   <ColorPicker
                                     label="Text Background"
+                                    objectKey="style.backgroundColor"
+                                    previewContent={previewContent}
+                                    selectedIndex={selectedIndex}
+                                    updateContent={updateContent}
+                                  />
+                                  <GradientBackgroundPicker
+                                    label="Gradient Text Background"
                                     objectKey="style.backgroundColor"
                                     previewContent={previewContent}
                                     selectedIndex={selectedIndex}
@@ -4123,6 +4610,13 @@ const spamWords = [
                                     selectedIndex={selectedIndex}
                                     updateContent={updateContent}
                                   />
+                                  <GradientBackgroundPicker
+                                    label="Gradient Background"
+                                    objectKey="style.backgroundColor"
+                                    previewContent={previewContent}
+                                    selectedIndex={selectedIndex}
+                                    updateContent={updateContent}
+                                  />
 
                                   <label>Link:</label>
                                   <input
@@ -4207,6 +4701,13 @@ const spamWords = [
 
                                   <ColorPicker
                                     label="Image Background"
+                                    objectKey="style.backgroundColor"
+                                    previewContent={previewContent}
+                                    selectedIndex={selectedIndex}
+                                    updateContent={updateContent}
+                                  />
+                                  <GradientBackgroundPicker
+                                    label="Gradient Background"
                                     objectKey="style.backgroundColor"
                                     previewContent={previewContent}
                                     selectedIndex={selectedIndex}
@@ -4423,6 +4924,13 @@ const spamWords = [
                                     selectedIndex={selectedIndex}
                                     updateContent={updateContent}
                                   />
+                                  <GradientBackgroundPicker
+                                    label="Gradient Background"
+                                    objectKey="style.backgroundColor"
+                                    previewContent={previewContent}
+                                    selectedIndex={selectedIndex}
+                                    updateContent={updateContent}
+                                  />
                                 </>
                               )}
 
@@ -4495,6 +5003,13 @@ const spamWords = [
                                     selectedIndex={selectedIndex}
                                     updateContent={updateContent}
                                   />
+                                  <GradientBackgroundPicker
+                                    label="Gradient Background"
+                                    objectKey="style.backgroundColor"
+                                    previewContent={previewContent}
+                                    selectedIndex={selectedIndex}
+                                    updateContent={updateContent}
+                                  />
                                 </>
                               )}
                             </div>
@@ -4506,7 +5021,7 @@ const spamWords = [
                     <div className="style-controls" ref={styleControlsRef}>
                       <h3>Style Controls</h3>
                       <div className="style-item">
-                         {previewContent[selectedIndex].type === "banner" && (
+                        {previewContent[selectedIndex].type === "banner" && (
                           <>
                             <label>Border Radius (%):</label>
                             <input
@@ -4554,6 +5069,13 @@ const spamWords = [
                                 }
                               />
                             </div>
+                            <GradientBackgroundPicker
+                              label="Gradient Background"
+                              objectKey="style.backgroundColor"
+                              previewContent={previewContent}
+                              selectedIndex={selectedIndex}
+                              updateContent={updateContent}
+                            />
                           </>
                         )}
                         {previewContent[selectedIndex].type === "para" && (
@@ -4593,6 +5115,13 @@ const spamWords = [
                                 }
                               />
                             </div>
+                            <GradientBackgroundPicker
+                              label="Gradient Text Background"
+                              objectKey="style.backgroundColor"
+                              previewContent={previewContent}
+                              selectedIndex={selectedIndex}
+                              updateContent={updateContent}
+                            />
                             <label>Border Radius(%):</label>
                             <input
                               type="range"
@@ -4644,6 +5173,276 @@ const spamWords = [
                             <h3 className="no-style">
                               No Style Available For Break
                             </h3>
+                          </>
+                        )}
+                        {previewContent[selectedIndex].type === "cardbtn" && (
+                          <>
+                            <label>Card Size (%):</label>
+                            <input
+                              type="range"
+                              min="70"
+                              max="100"
+                              value={parseInt(
+                                previewContent[
+                                  selectedIndex
+                                ].style.width.replace("%", "")
+                              )}
+                              onChange={(e) => {
+                                const newSize = e.target.value;
+                                updateContent(selectedIndex, {
+                                  style: {
+                                    ...previewContent[selectedIndex].style,
+                                    width: `${newSize}%`,
+                                  },
+                                });
+                              }}
+                            />
+                            <span>
+                              {parseInt(
+                                previewContent[
+                                  selectedIndex
+                                ].style.width.replace("%", "")
+                              )}
+                              %
+                            </span>
+                            <div className="editor-bg">
+                              <label>Card Background Color:</label>
+                              <input
+                                type="color"
+                                value={
+                                  previewContent[selectedIndex].style
+                                    .backgroundColor
+                                }
+                                onChange={(e) =>
+                                  updateContent(selectedIndex, {
+                                    style: {
+                                      ...previewContent[selectedIndex].style,
+                                      backgroundColor: e.target.value,
+                                    },
+                                  })
+                                }
+                              />
+                            </div>
+
+                            <label>Card Border Radius (%):</label>
+                            <input
+                              type="range"
+                              min="0"
+                              max="50"
+                              value={parseInt(
+                                previewContent[
+                                  selectedIndex
+                                ].style.borderRadius.replace("px", "")
+                              )}
+                              onChange={(e) =>
+                                updateContent(selectedIndex, {
+                                  style: {
+                                    ...previewContent[selectedIndex].style,
+                                    borderRadius: `${e.target.value}px`,
+                                  },
+                                })
+                              }
+                            />
+
+                            <label>Button Text:</label>
+                            <input
+                              type="text"
+                              value={previewContent[selectedIndex].content}
+                              onChange={(e) =>
+                                updateContent(selectedIndex, {
+                                  content: e.target.value,
+                                })
+                              }
+                            />
+
+                            <div className="editor-bg">
+                              <label>Button Text Color:</label>
+                              <input
+                                type="color"
+                                value={
+                                  previewContent[selectedIndex].buttonStyle
+                                    .color
+                                }
+                                onChange={(e) =>
+                                  updateContent(selectedIndex, {
+                                    buttonStyle: {
+                                      ...previewContent[selectedIndex]
+                                        .buttonStyle,
+                                      color: e.target.value,
+                                    },
+                                  })
+                                }
+                              />
+                            </div>
+
+                            <div className="editor-bg">
+                              <label>Button Background:</label>
+                              <input
+                                type="color"
+                                value={
+                                  previewContent[selectedIndex].buttonStyle
+                                    .backgroundColor
+                                }
+                                onChange={(e) =>
+                                  updateContent(selectedIndex, {
+                                    buttonStyle: {
+                                      ...previewContent[selectedIndex]
+                                        .buttonStyle,
+                                      backgroundColor: e.target.value,
+                                    },
+                                  })
+                                }
+                              />
+                            </div>
+
+                            <label>Button Link:</label>
+                            <input
+                              type="text"
+                              value={previewContent[selectedIndex].link}
+                              onChange={(e) =>
+                                updateContent(selectedIndex, {
+                                  link: e.target.value,
+                                })
+                              }
+                            />
+
+                            <label>Button Border Radius (%):</label>
+                            <input
+                              type="range"
+                              min="0"
+                              max="50"
+                              value={parseInt(
+                                previewContent[
+                                  selectedIndex
+                                ].buttonStyle.borderRadius.replace("px", "")
+                              )}
+                              onChange={(e) =>
+                                updateContent(selectedIndex, {
+                                  buttonStyle: {
+                                    ...previewContent[selectedIndex]
+                                      .buttonStyle,
+                                    borderRadius: `${e.target.value}px`,
+                                  },
+                                })
+                              }
+                            />
+                          </>
+                        )}
+                        {previewContent[selectedIndex].type === "table" && (
+                          <>
+                            {/* Header Controls */}
+                            <h4>Header Styles</h4>
+                            <ColorPicker
+                              label="Header Text Color"
+                              objectKey="headerStyle.color"
+                              previewContent={previewContent}
+                              selectedIndex={selectedIndex}
+                              updateContent={updateContent}
+                            />
+                            <ColorPicker
+                              label="Header Background"
+                              objectKey="headerStyle.backgroundColor"
+                              previewContent={previewContent}
+                              selectedIndex={selectedIndex}
+                              updateContent={updateContent}
+                            />
+
+                            {/* Cell Controls */}
+                            <h4>Cell Styles</h4>
+                            <ColorPicker
+                              label="Cell Text Color"
+                              objectKey="cellStyle.color"
+                              previewContent={previewContent}
+                              selectedIndex={selectedIndex}
+                              updateContent={updateContent}
+                            />
+                            <ColorPicker
+                              label="Cell Background"
+                              objectKey="cellStyle.backgroundColor"
+                              previewContent={previewContent}
+                              selectedIndex={selectedIndex}
+                              updateContent={updateContent}
+                            />
+
+                            {/* Row/Column Controls */}
+                            <div className="table-edit-controls">
+                              {/* Row Controls */}
+                              <div className="table-edit-row-controls">
+                                <button
+                                  className="table-edit-btn"
+                                  title="Add Row"
+                                  onClick={() => {
+                                    const newContent = [
+                                      ...previewContent[selectedIndex].content,
+                                    ];
+                                    const newRow = Array(
+                                      newContent[0]?.length || 1
+                                    ).fill("New Cell");
+                                    updateContent(selectedIndex, {
+                                      content: [...newContent, newRow],
+                                    });
+                                  }}
+                                >
+                                  ➕ Row
+                                </button>
+                                <button
+                                  className="table-edit-btn"
+                                  title="Delete Row"
+                                  onClick={() => {
+                                    const newContent = [
+                                      ...previewContent[selectedIndex].content,
+                                    ];
+                                    if (newContent.length > 1) {
+                                      newContent.pop();
+                                      updateContent(selectedIndex, {
+                                        content: newContent,
+                                      });
+                                    }
+                                  }}
+                                >
+                                  ➖ Row
+                                </button>
+                              </div>
+
+                              {/* Column Controls */}
+                              <div className="table-edit-column-controls">
+                                <button
+                                  className="table-edit-btn"
+                                  title="Add Column"
+                                  onClick={() => {
+                                    const newContent = previewContent[
+                                      selectedIndex
+                                    ].content.map((row) => [
+                                      ...row,
+                                      "New Column",
+                                    ]);
+                                    updateContent(selectedIndex, {
+                                      content: newContent,
+                                    });
+                                  }}
+                                >
+                                  ➕ Column
+                                </button>
+                                <button
+                                  className="table-edit-btn"
+                                  title="Delete Column"
+                                  onClick={() => {
+                                    const currentContent =
+                                      previewContent[selectedIndex].content;
+                                    if (currentContent[0]?.length > 1) {
+                                      const newContent = currentContent.map(
+                                        (row) => row.slice(0, -1)
+                                      );
+                                      updateContent(selectedIndex, {
+                                        content: newContent,
+                                      });
+                                    }
+                                  }}
+                                >
+                                  ➖ Column
+                                </button>
+                              </div>
+                            </div>
                           </>
                         )}
 
@@ -4701,34 +5500,40 @@ const spamWords = [
                                 }
                               />
                             </div>
+                            <GradientBackgroundPicker
+                              label="Gradient Text Background"
+                              objectKey="style.backgroundColor"
+                              previewContent={previewContent}
+                              selectedIndex={selectedIndex}
+                              updateContent={updateContent}
+                            />
                             <label>Border Radius (%):</label>
-                                  <input
-                                    type="range"
-                                    min="0"
-                                    max="50"
-                                    value={parseInt(
-                                      previewContent[
-                                        selectedIndex
-                                      ].style.borderRadius.replace("px", "")
-                                    )}
-                                    onChange={(e) =>
-                                      updateContent(selectedIndex, {
-                                        style: {
-                                          ...previewContent[selectedIndex]
-                                            .style,
-                                          borderRadius: `${e.target.value}px`,
-                                        },
-                                      })
-                                    }
-                                  />
-                                  <span>
-                                    {parseInt(
-                                      previewContent[
-                                        selectedIndex
-                                      ].style.borderRadius.replace("%", "")
-                                    )}
-                                    %
-                                  </span>
+                            <input
+                              type="range"
+                              min="0"
+                              max="50"
+                              value={parseInt(
+                                previewContent[
+                                  selectedIndex
+                                ].style.borderRadius.replace("px", "")
+                              )}
+                              onChange={(e) =>
+                                updateContent(selectedIndex, {
+                                  style: {
+                                    ...previewContent[selectedIndex].style,
+                                    borderRadius: `${e.target.value}px`,
+                                  },
+                                })
+                              }
+                            />
+                            <span>
+                              {parseInt(
+                                previewContent[
+                                  selectedIndex
+                                ].style.borderRadius.replace("%", "")
+                              )}
+                              %
+                            </span>
                             <label>Text Alignment:</label>
                             <select
                               value={
@@ -6034,6 +6839,13 @@ const spamWords = [
                                 }
                               />
                             </div>
+                            <GradientBackgroundPicker
+                              label="Gradient Background"
+                              objectKey="style.backgroundColor"
+                              previewContent={previewContent}
+                              selectedIndex={selectedIndex}
+                              updateContent={updateContent}
+                            />
 
                             <label>Link:</label>
                             <input
@@ -6129,6 +6941,13 @@ const spamWords = [
                                 }
                               />
                             </div>
+                            <GradientBackgroundPicker
+                              label="Gradient Background"
+                              objectKey="style.backgroundColor"
+                              previewContent={previewContent}
+                              selectedIndex={selectedIndex}
+                              updateContent={updateContent}
+                            />
                           </>
                         )}
 
@@ -6439,6 +7258,13 @@ const spamWords = [
                                 }
                               />
                             </div>
+                            <GradientBackgroundPicker
+                              label="Gradient Background"
+                              objectKey="style.backgroundColor"
+                              previewContent={previewContent}
+                              selectedIndex={selectedIndex}
+                              updateContent={updateContent}
+                            />
                           </>
                         )}
                       </div>
@@ -6493,7 +7319,7 @@ const spamWords = [
                               setSelectedContent(item.content); // Store the correct content
                               setIsModalOpen(true); // Open the modal
                             }}
-                            style={item.style}
+                            style={resolveBackgroundStyle(item.style)}
                             dangerouslySetInnerHTML={{ __html: item.content }}
                           />
                           {isModalOpen && selectedIndex === index && (
@@ -6736,25 +7562,83 @@ const spamWords = [
                             )}
                         </div>
                       ) : null}
+                      {item.type === "cardbtn" && (
+                        <div className="card-btn-container" style={item.style}>
+                          <img
+                            src={item.src1}
+                            style={item.style}
+                            alt="Editable"
+                            className="card-image"
+                            title="Upload Image"
+                            onClick={() => handleopenFiles(index, 1)}
+                          />
+
+                          <a
+                            href={item.link}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="button-preview card-btn"
+                            style={item.buttonStyle}
+                          >
+                            {item.content}
+                          </a>
+                        </div>
+                      )}
+                      {item.type === "table" && (
+                        <>
+                          <div className="table-component">
+                            <table style={item.style}>
+                              <tbody>
+                                {item.content.map((row, rowIndex) => (
+                                  <tr key={rowIndex}>
+                                    {row.map((cell, cellIndex) => {
+                                      const isHeader = rowIndex === 0;
+                                      const cellStyleToUse = isHeader
+                                        ? item.headerStyle
+                                        : item.cellStyle;
+                                      const CellTag = isHeader ? "th" : "td";
+
+                                      return (
+                                        <CellTag
+                                          key={cellIndex}
+                                          style={cellStyleToUse}
+                                          contentEditable
+                                          suppressContentEditableWarning
+                                          onBlur={(e) => {
+                                            const newContent = [
+                                              ...item.content,
+                                            ];
+                                            newContent[rowIndex][cellIndex] =
+                                              e.target.textContent;
+                                            updateContent(index, {
+                                              content: newContent,
+                                            });
+                                          }}
+                                        >
+                                          {cell}
+                                        </CellTag>
+                                      );
+                                    })}
+                                  </tr>
+                                ))}
+                              </tbody>
+                            </table>
+                          </div>
+                        </>
+                      )}
 
                       {item.type === "head" && (
                         <div ref={dropdownRef}>
                           <p
-                            className="border"
+                            className="border-head"
                             contentEditable
                             suppressContentEditableWarning
-                            onBlur={(e) =>
-                              updateContent(index, {
-                                content: e.target.textContent,
-                              })
-                            }
-                            onMouseUp={(e) => handleCursorPosition(e, index)}
-                            onSelect={(e) => handleCursorPosition(e, index)}
-                            style={item.style}
-                          >
-                            {item.content}
-                          </p>
-
+                            style={{
+                              whiteSpace: "pre-wrap", // ✅ preserves line breaks and spacing
+                              ...resolveBackgroundStyle(item.style),
+                            }}
+                            dangerouslySetInnerHTML={{ __html: item.content }} // ✅ render saved HTML
+                          />
                           {/* Local state for each heading */}
                           <div className="select-group-container">
                             {/* Select Group */}
@@ -6821,7 +7705,7 @@ const spamWords = [
                               }
                               alt="Editable"
                               className="img"
-                              style={item.style}
+                              style={resolveBackgroundStyle(item.style)}
                               onClick={() => handleopenFiles(index, 1)}
                               title="Upload Image"
                             />
@@ -6834,7 +7718,7 @@ const spamWords = [
                             src={item.src || "https://via.placeholder.com/200"}
                             alt="Editable"
                             className="img"
-                            style={item.style}
+                            style={resolveBackgroundStyle(item.style)}
                             onClick={() => handleopenFiles(index, 1)}
                             title="Upload Image"
                           />
@@ -6971,7 +7855,7 @@ const spamWords = [
                             src={item.src || "https://via.placeholder.com/200"}
                             alt="Editable"
                             className="img"
-                            style={item.style}
+                            style={resolveBackgroundStyle(item.style)}
                             title="Upload Image (1200 x 400)"
                             onClick={() => handleopenFiles(index, 1)}
                           />
@@ -7030,7 +7914,7 @@ const spamWords = [
                             src={item.src || "https://via.placeholder.com/200"}
                             alt="Editable"
                             className="logo"
-                            style={item.style}
+                            style={resolveBackgroundStyle(item.style)}
                             onClick={() => handleopenFiles(index, 1)}
                             title="Upload Image"
                           />
@@ -7135,10 +8019,10 @@ const spamWords = [
                                   contentEditable
                                   suppressContentEditableWarning
                                   onClick={() => {
-                                    setSelectedIndex(index);
+                                    // setSelectedIndex(index);
                                     setIsModalOpen(true); // Open the modal
                                   }}
-                                  style={item.style}
+                                  style={resolveBackgroundStyle(item.style)}
                                   dangerouslySetInnerHTML={{
                                     __html: item.content,
                                   }} // Render HTML content here
@@ -7232,7 +8116,7 @@ const spamWords = [
                                   }
                                   alt="Editable"
                                   className="img"
-                                  style={item.style}
+                                  style={resolveBackgroundStyle(item.style)}
                                 />
                               </div>
                             )}
@@ -7391,28 +8275,91 @@ const spamWords = [
                                 )}
                               </div>
                             ) : null}
+                            {item.type === "cardbtn" && (
+                              <div
+                                className="card-btn-container"
+                                style={item.style}
+                              >
+                                <img
+                                  src={item.src1}
+                                  style={item.style}
+                                  alt="Editable"
+                                  className="card-image"
+                                  title="Upload Image"
+                                  // onClick={() => handleopenFiles(index, 1)}
+                                />
 
+                                <a
+                                  href={item.link}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="button-preview card-btn"
+                                  style={item.buttonStyle}
+                                >
+                                  {item.content}
+                                </a>
+                              </div>
+                            )}
+
+                            {item.type === "table" && (
+                              <>
+                                <div className="table-component">
+                                  <table style={item.style}>
+                                    <tbody>
+                                      {item.content.map((row, rowIndex) => (
+                                        <tr key={rowIndex}>
+                                          {row.map((cell, cellIndex) => {
+                                            const isHeader = rowIndex === 0;
+                                            const cellStyleToUse = isHeader
+                                              ? item.headerStyle
+                                              : item.cellStyle;
+                                            const CellTag = isHeader
+                                              ? "th"
+                                              : "td";
+
+                                            return (
+                                              <CellTag
+                                                key={cellIndex}
+                                                style={cellStyleToUse}
+                                                contentEditable
+                                                suppressContentEditableWarning
+                                                onBlur={(e) => {
+                                                  const newContent = [
+                                                    ...item.content,
+                                                  ];
+                                                  newContent[rowIndex][
+                                                    cellIndex
+                                                  ] = e.target.textContent;
+                                                  updateContent(index, {
+                                                    content: newContent,
+                                                  });
+                                                }}
+                                              >
+                                                {cell}
+                                              </CellTag>
+                                            );
+                                          })}
+                                        </tr>
+                                      ))}
+                                    </tbody>
+                                  </table>
+                                </div>
+                              </>
+                            )}
                             {item.type === "head" && (
                               <div>
                                 <p
-                                  className="border"
+                                  className="border-head"
                                   contentEditable
                                   suppressContentEditableWarning
-                                  onBlur={(e) =>
-                                    updateContent(index, {
-                                      content: e.target.textContent,
-                                    })
-                                  }
-                                  onMouseUp={(e) =>
-                                    handleCursorPosition(e, index)
-                                  }
-                                  onSelect={(e) =>
-                                    handleCursorPosition(e, index)
-                                  }
-                                  style={item.style}
-                                >
-                                  {item.content}
-                                </p>
+                                  style={{
+                                    whiteSpace: "pre-wrap", // ✅ preserves line breaks and spacing
+                                    ...resolveBackgroundStyle(item.style),
+                                  }}
+                                  dangerouslySetInnerHTML={{
+                                    __html: item.content,
+                                  }} // ✅ render saved HTML
+                                />
                               </div>
                             )}
 
@@ -7429,7 +8376,7 @@ const spamWords = [
                                     }
                                     alt="Editable"
                                     className="img"
-                                    style={item.style}
+                                    style={resolveBackgroundStyle(item.style)}
                                   />
                                 </a>
                               </div>
@@ -7443,7 +8390,7 @@ const spamWords = [
                                   }
                                   alt="Editable"
                                   className="img"
-                                  style={item.style}
+                                  style={resolveBackgroundStyle(item.style)}
                                 />
                               </div>
                             )}
@@ -7668,7 +8615,7 @@ const spamWords = [
                                   }
                                   alt="Editable"
                                   className="logo"
-                                  style={item.style}
+                                  style={resolveBackgroundStyle(item.style)}
                                 />
                               </div>
                             )}
@@ -7761,14 +8708,13 @@ const spamWords = [
             </div>
           )}
 
+          {/* Show Warning Modal */}
 
-{/* Show Warning Modal */}
-
-           <WarningModal
-        isOpen={showWarningModal}
-        onConfirm={handleConfirmRefresh}
-        onCancel={handleCancel}
-      />
+          <WarningModal
+            isOpen={showWarningModal}
+            onConfirm={handleConfirmRefresh}
+            onCancel={handleCancel}
+          />
           {/* Show SendBulkModal when button is clicked */}
           {showSendModal && (
             <SendbulkModal
@@ -8014,28 +8960,29 @@ const spamWords = [
                     setEmailData({ ...emailData, subject: e.target.value })
                   }
                 />
-                        {spamResult === "empty" && (
-  <div className="spam-check-message warning">
-    ⚠️ Please enter a subject to check for spam.
-  </div>
-)}
+                {spamResult === "empty" && (
+                  <div className="spam-check-message warning">
+                    ⚠️ Please enter a subject to check for spam.
+                  </div>
+                )}
 
-{spamResult === "spam" && (
-  <div className="spam-check-message warning">
-    ⚠️ Spam content found: <strong>{spamWordsFound.join(", ")}</strong> 
-  </div>
-)}
+                {spamResult === "spam" && (
+                  <div className="spam-check-message warning">
+                    ⚠️ Spam content found:{" "}
+                    <strong>{spamWordsFound.join(", ")}</strong>
+                  </div>
+                )}
 
-{spamResult === "clean" && (
-  <div className="spam-check-message success">
-    ✅ No spam detected!
-  </div>
-)}
+                {spamResult === "clean" && (
+                  <div className="spam-check-message success">
+                    ✅ No spam detected!
+                  </div>
+                )}
                 <div className="alias-container-add-button">
-      <button type="button"onClick={handleSpamCheck}>
-         Spam Check
-      </button>
-      </div>
+                  <button type="button" onClick={handleSpamCheck}>
+                    Spam Check
+                  </button>
+                </div>
                 <label htmlFor="preview-text">Preview Text:</label>
                 <input
                   type="text"

@@ -266,30 +266,38 @@ const spamWords = [
     // Reset selected group dropdown properly
     setSelectedGroupsub(false);
   };
-  
-  useEffect(() => {
-    if (!user?.id) {
-      console.warn("User ID is missing. Skipping data fetch.");
-      return;
+  // Fetch Groups
+useEffect(() => {
+  if (!user?.id) return;
+
+  const fetchGroups = async () => {
+    try {
+      const response = await axios.get(`${apiConfig.baseURL}/api/stud/groups/${user.id}`);
+      setGroups(response.data);
+    } catch (err) {
+      console.error('Error fetching groups:', err);
     }
-    const fetchGroupsAndStudents = async () => {
-      try {
-        
-        const [groupsResponse, studentsResponse] = await Promise.all([
-          axios.get(`${apiConfig.baseURL}/api/stud/groups/${user.id}`),
-          axios.get(`${apiConfig.baseURL}/api/stud/students?user=${user.id}`)
-        ]);
+  };
 
-        setGroups(groupsResponse.data);
-        setStudents(studentsResponse.data);
-      } catch (err) {
-        console.error('Fetch error:', err);
-        console.log('Failed to load data. Please try again.');
-      }
-    };
+  fetchGroups();
+}, [user?.id]);
 
-    fetchGroupsAndStudents(); 
-  }, [user?.id]);
+// Fetch Students
+useEffect(() => {
+  if (!user?.id) return;
+
+  const fetchStudents = async () => {
+    try {
+      const response = await axios.get(`${apiConfig.baseURL}/api/stud/students?user=${user.id}`);
+      setStudents(response.data);
+    } catch (err) {
+      console.error('Error fetching students:', err);
+    }
+  };
+
+  fetchStudents();
+}, [user?.id]);
+
   
   // useEffect(() => {
   //   if (isOpen) {
@@ -321,7 +329,7 @@ const spamWords = [
              toast.error(`Please fill in Link 2 in ${item.type}`);
              hasInvalidLink = true;
            }
-         } else if (item.type === "video-icon" || item.type === "button") {
+         } else if (item.type === "video-icon" || item.type === "button" || item.type === "cardbtn") {
            if (!item.link?.trim()) {
              toast.error(`Please fill in the Link in ${item.type}`);
              hasInvalidLink = true;
@@ -447,7 +455,7 @@ const handleSend = async () => {
              toast.error(`Please fill in Link 2 in ${item.type}`);
              hasInvalidLink = true;
            }
-         } else if (item.type === "video-icon" || item.type === "button") {
+         } else if (item.type === "video-icon" || item.type === "button" || item.type === "cardbtn") {
            if (!item.link?.trim()) {
              toast.error(`Please fill in the Link in ${item.type}`);
              hasInvalidLink = true;
