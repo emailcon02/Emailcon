@@ -359,38 +359,35 @@ const generateEngagementTimeline = () => {
       setCampaigns(filteredCampaigns);
       filterCampaigns(filteredCampaigns);
 
-      const metrics = {};
-      await Promise.all(
-        filteredCampaigns.map(async (campaign) => {
-          try {
-            const [openRes, clickRes] = await Promise.all([
-              axios.get(
-                `${apiConfig.baseURL}/api/stud/get-email-open-count?userId=${user.id}&campaignId=${campaign._id}`
-              ),
-              axios.get(
-                `${apiConfig.baseURL}/api/stud/get-click?userId=${user.id}&campaignId=${campaign._id}`
-              ),
-            ]);
+      setCampaignMetrics({});
 
-            metrics[campaign._id] = {
-              openCount: openRes.data.count || 0,
-              clickCount: clickRes.data.count || 0,
-            };
-          } catch (e) {
-            console.error(`Failed to fetch metrics for ${campaign._id}`, e);
-            metrics[campaign._id] = {
-              openCount: 0,
-              clickCount: 0,
-            };
-          }
-        })
-      );
-
-      setCampaignMetrics(metrics);
     } catch (error) {
       console.error("Failed to fetch campaigns:", error);
     }
   };
+useEffect(() => {
+  if (!!user?.id || !campaignId) return;
+
+  const fetchMetrics = async () => {
+    try {
+      const [openRes, clickRes] = await Promise.all([
+        axios.get(`${apiConfig.baseURL}/api/stud/get-email-open-count?userId=${user.id}&campaignId=${activeCampaignId}`),
+        axios.get(`${apiConfig.baseURL}/api/stud/get-click?userId=${user.id}&campaignId=${activeCampaignId}`),
+      ]);
+
+      setCampaignMetrics({
+        [campaignId]: {
+          openCount: openRes.data.count || 0,
+          clickCount: clickRes.data.count || 0,
+        }
+      });
+    } catch (e) {
+      console.error("Error fetching metrics for selected campaign", e);
+    }
+  };
+
+  fetchMetrics();
+}, [user?.id, activeCampaignId]);
 
   const handleOpenModal = (campaignId, scheduledTime) => {
     console.log(
@@ -697,19 +694,14 @@ const generateEngagementTimeline = () => {
     setShowClickModal(true);
   };
 
-  const handleRefreshAndCloseModals = (e) => {
-    e.stopPropagation();
-    setShowModal(false);
-    setShowdelModal(false);
-    setShowunsubModal(false);
-    setShowfailModal(false);
-    setShowClickModal(false);
-    setShowallClickModal(false);
-    setShowOverallClickModal(false);
-    setTimeout(() => {
-      window.location.reload();
-    }, 1000);
-  };
+const handleRefreshAndCloseModals = async (e) => {
+  e.stopPropagation();
+  await fetchEmailDetails();
+  await fetchClickData();
+  await fetchUnsubscribeCount();
+  await fetchCampaigns(); 
+
+};
 
   const handleCloseClickModal = () => {
     setShowClickModal(false);
