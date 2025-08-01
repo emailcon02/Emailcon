@@ -630,22 +630,14 @@ const Mainpage = () => {
     setIsOpentemplate((prev) => !prev);
   };
   const styleControlsRef = useRef(null);
-useEffect(() => {
-  if (selectedIndex !== null) {
-    setTimeout(() => {
-      const editorContainer = document.querySelector(".editor");
-      const styleControlsElement = styleControlsRef.current;
-
-      if (editorContainer && styleControlsElement) {
-        const scrollTop = styleControlsElement.offsetTop - editorContainer.offsetTop;
-        editorContainer.scrollTo({
-          top: scrollTop,
-          behavior: "smooth",
-        });
-      }
-    }, 200); // delay to ensure rendering
-  }
-}, [selectedIndex]);
+ useEffect(() => {
+    if (selectedIndex !== null && styleControlsRef.current) {
+      styleControlsRef.current.scrollIntoView({
+        behavior: "smooth",
+        block: "center",
+      });
+    }
+  }, [selectedIndex]);
 
 
   useEffect(() => {
@@ -1281,16 +1273,14 @@ useEffect(() => {
     setSelectedIndex(index); // Set the selected index when an item is clicked
     // Scroll to style controls after a short delay to ensure rendering
     setTimeout(() => {
-      const container = document.querySelector(".editor");
       const styleControlsElement = document.querySelector(".style-controls");
-
-      if (container && styleControlsElement) {
-        container.scrollTo({
-          top: styleControlsElement.offsetTop - container.offsetTop,
+      if (styleControlsElement) {
+        styleControlsElement.scrollIntoView({
           behavior: "smooth",
+          block: "center",
         });
       }
-    }, 1000);
+    }, 100);
   };
   const handleItemClickdesktop = (index) => {
     setSelectedIndex(index); // Set the selected index when an item is clicked

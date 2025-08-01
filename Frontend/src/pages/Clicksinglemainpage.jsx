@@ -777,24 +777,15 @@ const Clicksinglemainpage = () => {
     event.stopPropagation(); // Prevent event from bubbling up
     setIsOpentemplate((prev) => !prev);
   };
-  const styleControlsRef = useRef(null);
-
+   const styleControlsRef = useRef(null);
   useEffect(() => {
-    if (selectedIndex !== null && styleControlsRef.current) {
-      const editorContainer = document.querySelector(".editor");
-      const styleControlsElement = styleControlsRef.current;
-
-      if (editorContainer && styleControlsElement) {
-        const scrollTop =
-          styleControlsElement.offsetTop - editorContainer.offsetTop;
-
-        editorContainer.scrollTo({
-          top: scrollTop,
-          behavior: "smooth",
-        });
-      }
-    }
-  }, [selectedIndex]);
+     if (selectedIndex !== null && styleControlsRef.current) {
+       styleControlsRef.current.scrollIntoView({
+         behavior: "smooth",
+         block: "center",
+       });
+     }
+   }, [selectedIndex]);
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -1420,22 +1411,19 @@ const Clicksinglemainpage = () => {
     updated[index] = { ...updated[index], ...newContent };
     setPreviewContent(updated);
   };
-
-  const handleItemClick = (index) => {
-    setSelectedIndex(index); // Set the selected index when an item is clicked
-    // Scroll to style controls after a short delay to ensure rendering
+const handleItemClick = (index) => {
+    setSelectedIndex(index); 
     setTimeout(() => {
-      const container = document.querySelector(".editor");
       const styleControlsElement = document.querySelector(".style-controls");
-
-      if (container && styleControlsElement) {
-        container.scrollTo({
-          top: styleControlsElement.offsetTop - container.offsetTop,
+      if (styleControlsElement) {
+        styleControlsElement.scrollIntoView({
           behavior: "smooth",
+          block: "center",
         });
       }
-    }, 1000);
+    }, 100);
   };
+ 
   const handleItemClickdesktop = (index) => {
     setSelectedIndex(index); // Set the selected index when an item is clicked
   };
@@ -7927,7 +7915,7 @@ const Clicksinglemainpage = () => {
                         </button>
                         <button
                           className="edit-desktop-btn"
-                          onClick={() => handleItemClickdesktop(index)}
+                          onClick={() => handleItemClick(index)}
                         >
                           <FiEdit />
                         </button>
