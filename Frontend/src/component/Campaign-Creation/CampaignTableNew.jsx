@@ -699,9 +699,10 @@ const handleRefreshAndCloseModals = async (e) => {
   await fetchEmailDetails();
   await fetchClickData();
   await fetchUnsubscribeCount();
-  await fetchCampaigns(); 
-
+  await fetchCampaigns();
+  window.location.reload(); // reloads the page
 };
+
 
   const handleCloseClickModal = () => {
     setShowClickModal(false);

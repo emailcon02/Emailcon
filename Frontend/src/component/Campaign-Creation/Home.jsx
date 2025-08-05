@@ -79,7 +79,6 @@ const Home = () => {
   const [templateName, setTemplateName] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [isFromSavedTemplate, setIsFromSavedTemplate] = useState(false);
-
   const [showfileGroupModal, setShowfileGroupModal] = useState(false);
   const [showfilesingleGroupModal, setShowfilesingleGroupModal] =
     useState(false);
@@ -168,11 +167,19 @@ const Home = () => {
   const [showDeleteModaltemall, setShowDeleteModaltemall] = useState(false);
   const [showDeleteModalbirthtemall, setShowDeleteModalbirthtemall] =
     useState(false);
-  const handleSelectTemplate = (id) => {
-    setSelectedTemplates((prev) =>
-      prev.includes(id) ? prev.filter((_id) => _id !== id) : [...prev, id]
-    );
-  };
+const handleSelectTemplate = (id) => {
+  setSelectedTemplates((prev) => {
+    const newSelected = prev.includes(id)
+      ? prev.filter((_id) => _id !== id)
+      : [...prev, id];
+
+    // Update selectAll state based on whether all templates are selected
+    setSelectAll(newSelected.length === templates.length);
+
+    return newSelected;
+  });
+};
+
 
   const handleSelectAll = () => {
     if (selectAll) {
@@ -195,7 +202,6 @@ const Home = () => {
       setTemplates((prev) =>
         prev.filter((t) => !selectedTemplates.includes(t._id))
       );
-      setSelectedTemplates([]);
       setSelectAll(false);
       setShowDeleteModaltemall(false);
 
@@ -218,7 +224,6 @@ const Home = () => {
       setTemplates((prev) =>
         prev.filter((t) => !selectedTemplates.includes(t._id))
       );
-      setSelectedTemplates([]);
       setSelectAll(false);
       setShowDeleteModalbirthtemall(false);
 
@@ -4187,6 +4192,7 @@ useEffect(() => {
 
                 <div className="saved-template-gallery">
                   {templates.map((template, index) => (
+                    
                     <div
                       key={index}
                       className="template-thumbnail-container"
@@ -4705,17 +4711,20 @@ useEffect(() => {
                           </div>
                         ))}
                       </div>
-                      <div className="template-name">
-                        <input
-                          type="checkbox"
-                          checked={selectedTemplates.includes(template._id)}
-                          onClick={(e) => e.stopPropagation()} // stop click bubbling
-                          onChange={() => handleSelectTemplate(template._id)} // handle state
-                          className="template-checkbox"
-                        />
+                     <div className="template-name">
+  {/* Show checkbox only for user-created templates */}
+  {template._id && (
+    <input
+      type="checkbox"
+      checked={selectedTemplates.includes(template._id)}
+      onClick={(e) => e.stopPropagation()} // prevent card click
+      onChange={() => handleSelectTemplate(template._id)} // toggle selection
+      className="template-checkbox"
+    />
+  )}
+  <h4>{template.temname}</h4>
+</div>
 
-                        <h4>{template.temname}</h4>
-                      </div>
                     </div>
                   ))}
                 </div>
@@ -5281,16 +5290,19 @@ useEffect(() => {
                           </div>
                         ))}
                       </div>
-                      <div className="template-name">
-                        <input
-                          type="checkbox"
-                          checked={selectedTemplates.includes(template._id)}
-                          onClick={(e) => e.stopPropagation()} // stop click bubbling
-                          onChange={() => handleSelectTemplate(template._id)} // handle state
-                          className="template-checkbox"
-                        />
-                        <h4>{template.temname}</h4>
-                      </div>
+                     <div className="template-name">
+  {template._id && (
+    <input
+      type="checkbox"
+      checked={selectedTemplates.includes(template._id)}
+      onClick={(e) => e.stopPropagation()} 
+      onChange={() => handleSelectTemplate(template._id)} 
+      className="template-checkbox"
+    />
+  )}
+  <h4>{template.temname}</h4>
+</div>
+
                     </div>
                   ))}
                 </div>
