@@ -3,7 +3,7 @@ import axios from "axios";
 import "./Mainpage.css";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { FaBars, FaFileExport, FaTimes } from "react-icons/fa";
+import { FaArrowsAlt, FaBars, FaFileExport, FaTable, FaTimes } from "react-icons/fa";
 import { FiEdit } from "react-icons/fi"; // Importing icons
 
 import {
@@ -1165,7 +1165,7 @@ const Birthdayeditor = () => {
 
         ContentStyle: {
           width: "100%",
-          backgroundColor: "white",
+          backgroundColor: "#ffffff",
           borderRadius: "0px",
           textAlign: "center",
         },
@@ -7673,6 +7673,15 @@ const Birthdayeditor = () => {
                         </div>
                       )}
                       <div className="del-edit-btn">
+                         <button
+                            draggable
+                            onDragStart={() => handleDragStart(index)}
+                            title="Drag"
+                            className="drag-icon-main"
+                            
+                          >
+                           <FaArrowsAlt/>
+                                                  </button>
                         <button
                           className="delete-btn"
                           onClick={() => deleteContent(index)}

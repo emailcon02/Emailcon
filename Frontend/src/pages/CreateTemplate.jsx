@@ -4,10 +4,12 @@ import "./Mainpage.css";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import {
+  FaArrowsAlt,
   FaBars,
   FaCheckCircle,
   FaFileExport,
   FaFolderOpen,
+  FaTable,
   FaTimes,
   FaTrash,
 } from "react-icons/fa";
@@ -1170,7 +1172,7 @@ const CreateTemplate = () => {
 
         ContentStyle: {
           width: "100%",
-          backgroundColor: "white",
+          backgroundColor: "#ffffff",
           borderRadius: "0px",
           textAlign: "center",
         },
@@ -7681,6 +7683,15 @@ const CreateTemplate = () => {
                         </div>
                       )}
                       <div className="del-edit-btn">
+                         <button
+                            draggable
+                            onDragStart={() => handleDragStart(index)}
+                            title="Drag"
+                            className="drag-icon-main"
+                            
+                          >
+                           <FaArrowsAlt/>
+                                                  </button>
                         <button
                           className="delete-btn"
                           onClick={() => deleteContent(index)}

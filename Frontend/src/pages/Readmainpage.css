@@ -422,13 +422,11 @@ button[data-tooltip]:hover::after {
 }
 
 .content-item {
-    /* margin-bottom: 10px; */
     display: flex;
-    /* padding: 10px; */
-    background-color: transparent !important;
     width: 100%;
     touch-action: manipulation;
-        border: 2px solid transparent;
+    border: 2px solid transparent;
+    background-color: transparent !important;
 
 
 }

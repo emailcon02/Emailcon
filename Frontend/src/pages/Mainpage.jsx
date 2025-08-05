@@ -846,12 +846,12 @@ const Mainpage = () => {
         src2: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTjCoUtOal33JWLqals1Wq7p6GGCnr3o-lwpQ&s",
         link1: "",
         link2: "",
-        title1: "Name of the product", // Title for the first section
-        title2: "Name of the product", // Title for the second section
-        originalPrice1: "9000", // Original price for the first section
-        originalPrice2: "8000", // Original price for the second section
-        offerPrice1: "5999", // Offer price for the first section
-        offerPrice2: "4999", // Offer price for the second section
+        title1: "Name of the product",
+        title2: "Name of the product", 
+        originalPrice1: "9000", 
+        originalPrice2: "8000", 
+        offerPrice1: "5999", 
+        offerPrice2: "4999", 
         buttonStyle1: {
           textAlign: "center",
           padding: isMobile ? "8px 8px" : "12px 15px", // Adjust padding based on screen size
@@ -1174,7 +1174,7 @@ const Mainpage = () => {
 
         ContentStyle: {
           width: "100%",
-          backgroundColor: "white",
+          backgroundColor: "#ffffff",
           borderRadius: "0px",
           textAlign: "center",
         },

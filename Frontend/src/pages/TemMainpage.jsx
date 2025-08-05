@@ -5,10 +5,12 @@ import { useLocation } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import {
+  FaArrowsAlt,
   FaBars,
   FaCheckCircle,
   FaFileExport,
   FaFolderOpen,
+  FaTable,
   FaTimes,
   FaTrash,
 } from "react-icons/fa";
@@ -1187,7 +1189,7 @@ const TemMainpage = () => {
 
         ContentStyle: {
           width: "100%",
-          backgroundColor: "white",
+          backgroundColor: "#ffffff",
           borderRadius: "0px",
           textAlign: "center",
         },
@@ -1283,8 +1285,7 @@ const TemMainpage = () => {
   };
 
  const handleItemClick = (index) => {
-    setSelectedIndex(index); // Set the selected index when an item is clicked
-    // Scroll to style controls after a short delay to ensure rendering
+    setSelectedIndex(index); 
     setTimeout(() => {
       const styleControlsElement = document.querySelector(".style-controls");
       if (styleControlsElement) {
@@ -7827,6 +7828,15 @@ const TemMainpage = () => {
                         </div>
                       )}
                       <div className="del-edit-btn">
+                         <button
+                            draggable
+                            onDragStart={() => handleDragStart(index)}
+                            title="Drag"
+                            className="drag-icon-main"
+                            
+                          >
+                           <FaArrowsAlt/>
+                                                  </button>
                         <button
                           className="delete-btn"
                           onClick={() => deleteContent(index)}
