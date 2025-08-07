@@ -270,7 +270,7 @@ function Signup() {
                 className="signups-button signup-alt-button"
               >
                 Already have an account?{" "}
-                <span style={{ color: "#2f327d" }}>Login</span>
+                <span className="span-signup" style={{ color: "#2f327d" }}>Login</span>
               </button>
             </div>
           </form>

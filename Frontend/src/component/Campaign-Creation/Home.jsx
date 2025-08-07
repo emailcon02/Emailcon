@@ -1305,7 +1305,9 @@ useEffect(() => {
         setCampaignName("");
 
         if (window.innerWidth <= 768) {
-          navigate("/campaign"); // Mobile
+          navigate("/campaign",{
+                        state: { previewContenttem, bgColortem, selectedTemplatepre },
+          }); // Mobile
         } else {
           navigate("/TemMainpage", {
             state: { previewContenttem, bgColortem, selectedTemplatepre },
@@ -3093,6 +3095,57 @@ useEffect(() => {
                           </a>
                         </div>
                       )}
+{item.type === "sign" ? (
+                        <div className="sign-container">
+                          <div className="sign-wrapper-content" style={item.style}>
+                            <img
+                              src={item.src1 || "https://via.placeholder.com/200"}
+                              alt="User"
+                              className="sign-image"
+                              title="Upload Image"
+                              onClick={() => handleopenFiles(index, 1)}
+                            />
+                            <div className="sign-collector-con">
+                              <div className="sign-text">
+                                <span
+                                  className="sign-name"
+                                  // contentEditable
+                                  suppressContentEditableWarning
+                                  onClick={() => {
+                                    setModalIndex(index);
+                                    setIsModalOpen(true);
+                                  }}
+                                >
+                                  {item.Name}
+                                </span>
+                                <span
+                                  className="sign-designation"
+                                  // contentEditable
+                                  suppressContentEditableWarning
+                                >
+                                  ({item.Designation})
+                                </span>
+                              </div>
+                              <div className="sign-icons">
+                                <a href={item.links1} target="_blank" rel="noopener noreferrer" className="sign-icon-item" style={item.style}>
+                                  <img src={item.iconsrc1} style={item.styleicon1} alt="icon1"  className="phoneicon"/>
+                                  <p className="sign-icon-text">{item.text1 || "9743869034"}</p>
+                                </a>
+                                <a href={item.links2} target="_blank" rel="noopener noreferrer" className="sign-icon-item" style={item.style}>
+                                  <img src={item.iconsrc2} style={item.styleicon2} alt="icon2" className="phoneicon"/>
+                                  <p className="sign-icon-text">{item.text2 || "www.google.com"}</p>
+                                </a>
+                                <span className="sign-icon-item" style={item.style}>
+                                  <img src={item.iconsrc3} style={item.styleicon3} alt="icon3" className="phoneicon"/>
+                                  <p  className="sign-icon-text">{item.text3 || "Salem"}</p>
+                              </span>
+                              </div>
+
+                            </div>
+                          </div>
+                        </div>
+                      ) : null}
+
 
 
                                       {/* Paragraph */}
@@ -4292,6 +4345,57 @@ useEffect(() => {
                           </a>
                         </div>
                       )}
+{item.type === "sign" ? (
+                        <div className="sign-container">
+                          <div className="sign-wrapper-content" style={item.style}>
+                            <img
+                              src={item.src1 || "https://via.placeholder.com/200"}
+                              alt="User"
+                              className="sign-image"
+                              title="Upload Image"
+                              onClick={() => handleopenFiles(index, 1)}
+                            />
+                            <div className="sign-collector-con">
+                              <div className="sign-text">
+                                <span
+                                  className="sign-name"
+                                  // contentEditable
+                                  suppressContentEditableWarning
+                                  onClick={() => {
+                                    setModalIndex(index);
+                                    setIsModalOpen(true);
+                                  }}
+                                >
+                                  {item.Name}
+                                </span>
+                                <span
+                                  className="sign-designation"
+                                  // contentEditable
+                                  suppressContentEditableWarning
+                                >
+                                  ({item.Designation})
+                                </span>
+                              </div>
+                              <div className="sign-icons">
+                                <a href={item.links1} target="_blank" rel="noopener noreferrer" className="sign-icon-item" style={item.style}>
+                                  <img src={item.iconsrc1} style={item.styleicon1} alt="icon1"  className="phoneicon"/>
+                                  <p className="sign-icon-text">{item.text1 || "9743869034"}</p>
+                                </a>
+                                <a href={item.links2} target="_blank" rel="noopener noreferrer" className="sign-icon-item" style={item.style}>
+                                  <img src={item.iconsrc2} style={item.styleicon2} alt="icon2" className="phoneicon"/>
+                                  <p className="sign-icon-text">{item.text2 || "www.google.com"}</p>
+                                </a>
+                                <span className="sign-icon-item" style={item.style}>
+                                  <img src={item.iconsrc3} style={item.styleicon3} alt="icon3" className="phoneicon"/>
+                                  <p  className="sign-icon-text">{item.text3 || "Salem"}</p>
+                              </span>
+                              </div>
+
+                            </div>
+                          </div>
+                        </div>
+                      ) : null}
+
 
 
                             {/* Paragraph */}
@@ -4871,6 +4975,57 @@ useEffect(() => {
                       )}
 
 
+{item.type === "sign" ? (
+                        <div className="sign-container">
+                          <div className="sign-wrapper-content" style={item.style}>
+                            <img
+                              src={item.src1 || "https://via.placeholder.com/200"}
+                              alt="User"
+                              className="sign-image"
+                              title="Upload Image"
+                              onClick={() => handleopenFiles(index, 1)}
+                            />
+                            <div className="sign-collector-con">
+                              <div className="sign-text">
+                                <span
+                                  className="sign-name"
+                                  // contentEditable
+                                  suppressContentEditableWarning
+                                  onClick={() => {
+                                    setModalIndex(index);
+                                    setIsModalOpen(true);
+                                  }}
+                                >
+                                  {item.Name}
+                                </span>
+                                <span
+                                  className="sign-designation"
+                                  // contentEditable
+                                  suppressContentEditableWarning
+                                >
+                                  ({item.Designation})
+                                </span>
+                              </div>
+                              <div className="sign-icons">
+                                <a href={item.links1} target="_blank" rel="noopener noreferrer" className="sign-icon-item" style={item.style}>
+                                  <img src={item.iconsrc1} style={item.styleicon1} alt="icon1"  className="phoneicon"/>
+                                  <p className="sign-icon-text">{item.text1 || "9743869034"}</p>
+                                </a>
+                                <a href={item.links2} target="_blank" rel="noopener noreferrer" className="sign-icon-item" style={item.style}>
+                                  <img src={item.iconsrc2} style={item.styleicon2} alt="icon2" className="phoneicon"/>
+                                  <p className="sign-icon-text">{item.text2 || "www.google.com"}</p>
+                                </a>
+                                <span className="sign-icon-item" style={item.style}>
+                                  <img src={item.iconsrc3} style={item.styleicon3} alt="icon3" className="phoneicon"/>
+                                  <p  className="sign-icon-text">{item.text3 || "Salem"}</p>
+                              </span>
+                              </div>
+
+                            </div>
+                          </div>
+                        </div>
+                      ) : null}
+
 
                             {/* Paragraph */}
                             {item.type === "para" && (
@@ -5400,6 +5555,58 @@ useEffect(() => {
                           </a>
                         </div>
                       )}
+
+{item.type === "sign" ? (
+                        <div className="sign-container">
+                          <div className="sign-wrapper-content" style={item.style}>
+                            <img
+                              src={item.src1 || "https://via.placeholder.com/200"}
+                              alt="User"
+                              className="sign-image"
+                              title="Upload Image"
+                              onClick={() => handleopenFiles(index, 1)}
+                            />
+                            <div className="sign-collector-con">
+                              <div className="sign-text">
+                                <span
+                                  className="sign-name"
+                                  // contentEditable
+                                  suppressContentEditableWarning
+                                  onClick={() => {
+                                    setModalIndex(index);
+                                    setIsModalOpen(true);
+                                  }}
+                                >
+                                  {item.Name}
+                                </span>
+                                <span
+                                  className="sign-designation"
+                                  // contentEditable
+                                  suppressContentEditableWarning
+                                >
+                                  ({item.Designation})
+                                </span>
+                              </div>
+                              <div className="sign-icons">
+                                <a href={item.links1} target="_blank" rel="noopener noreferrer" className="sign-icon-item" style={item.style}>
+                                  <img src={item.iconsrc1} style={item.styleicon1} alt="icon1"  className="phoneicon"/>
+                                  <p className="sign-icon-text">{item.text1 || "9743869034"}</p>
+                                </a>
+                                <a href={item.links2} target="_blank" rel="noopener noreferrer" className="sign-icon-item" style={item.style}>
+                                  <img src={item.iconsrc2} style={item.styleicon2} alt="icon2" className="phoneicon"/>
+                                  <p className="sign-icon-text">{item.text2 || "www.google.com"}</p>
+                                </a>
+                                <span className="sign-icon-item" style={item.style}>
+                                  <img src={item.iconsrc3} style={item.styleicon3} alt="icon3" className="phoneicon"/>
+                                  <p  className="sign-icon-text">{item.text3 || "Salem"}</p>
+                              </span>
+                              </div>
+
+                            </div>
+                          </div>
+                        </div>
+                      ) : null}
+
 
                           {item.type === "para" && (
                             <>
@@ -6104,6 +6311,58 @@ useEffect(() => {
                           </a>
                         </div>
                       )}
+
+{item.type === "sign" ? (
+                        <div className="sign-container">
+                          <div className="sign-wrapper-content" style={item.style}>
+                            <img
+                              src={item.src1 || "https://via.placeholder.com/200"}
+                              alt="User"
+                              className="sign-image"
+                              title="Upload Image"
+                              onClick={() => handleopenFiles(index, 1)}
+                            />
+                            <div className="sign-collector-con">
+                              <div className="sign-text">
+                                <span
+                                  className="sign-name"
+                                  // contentEditable
+                                  suppressContentEditableWarning
+                                  onClick={() => {
+                                    setModalIndex(index);
+                                    setIsModalOpen(true);
+                                  }}
+                                >
+                                  {item.Name}
+                                </span>
+                                <span
+                                  className="sign-designation"
+                                  // contentEditable
+                                  suppressContentEditableWarning
+                                >
+                                  ({item.Designation})
+                                </span>
+                              </div>
+                              <div className="sign-icons">
+                                <a href={item.links1} target="_blank" rel="noopener noreferrer" className="sign-icon-item" style={item.style}>
+                                  <img src={item.iconsrc1} style={item.styleicon1} alt="icon1"  className="phoneicon"/>
+                                  <p className="sign-icon-text">{item.text1 || "9743869034"}</p>
+                                </a>
+                                <a href={item.links2} target="_blank" rel="noopener noreferrer" className="sign-icon-item" style={item.style}>
+                                  <img src={item.iconsrc2} style={item.styleicon2} alt="icon2" className="phoneicon"/>
+                                  <p className="sign-icon-text">{item.text2 || "www.google.com"}</p>
+                                </a>
+                                <span className="sign-icon-item" style={item.style}>
+                                  <img src={item.iconsrc3} style={item.styleicon3} alt="icon3" className="phoneicon"/>
+                                  <p  className="sign-icon-text">{item.text3 || "Salem"}</p>
+                              </span>
+                              </div>
+
+                            </div>
+                          </div>
+                        </div>
+                      ) : null}
+
 
                           {item.type === "para" && (
                             <>
@@ -6876,6 +7135,58 @@ useEffect(() => {
                         </div>
                       )}
 
+{item.type === "sign" ? (
+                        <div className="sign-container">
+                          <div className="sign-wrapper-content" style={item.style}>
+                            <img
+                              src={item.src1 || "https://via.placeholder.com/200"}
+                              alt="User"
+                              className="sign-image"
+                              title="Upload Image"
+                              onClick={() => handleopenFiles(index, 1)}
+                            />
+                            <div className="sign-collector-con">
+                              <div className="sign-text">
+                                <span
+                                  className="sign-name"
+                                  // contentEditable
+                                  suppressContentEditableWarning
+                                  onClick={() => {
+                                    setModalIndex(index);
+                                    setIsModalOpen(true);
+                                  }}
+                                >
+                                  {item.Name}
+                                </span>
+                                <span
+                                  className="sign-designation"
+                                  // contentEditable
+                                  suppressContentEditableWarning
+                                >
+                                  ({item.Designation})
+                                </span>
+                              </div>
+                              <div className="sign-icons">
+                                <a href={item.links1} target="_blank" rel="noopener noreferrer" className="sign-icon-item" style={item.style}>
+                                  <img src={item.iconsrc1} style={item.styleicon1} alt="icon1"  className="phoneicon"/>
+                                  <p className="sign-icon-text">{item.text1 || "9743869034"}</p>
+                                </a>
+                                <a href={item.links2} target="_blank" rel="noopener noreferrer" className="sign-icon-item" style={item.style}>
+                                  <img src={item.iconsrc2} style={item.styleicon2} alt="icon2" className="phoneicon"/>
+                                  <p className="sign-icon-text">{item.text2 || "www.google.com"}</p>
+                                </a>
+                                <span className="sign-icon-item" style={item.style}>
+                                  <img src={item.iconsrc3} style={item.styleicon3} alt="icon3" className="phoneicon"/>
+                                  <p  className="sign-icon-text">{item.text3 || "Salem"}</p>
+                              </span>
+                              </div>
+
+                            </div>
+                          </div>
+                        </div>
+                      ) : null}
+
+
                           {item.type === "para" && (
                             <>
                               <p
@@ -6892,7 +7203,7 @@ useEffect(() => {
                                   __html: item.content,
                                 }}
                               />
-                              {isModalOpen && selectedIndex === index && (
+                              {isModalOpen  && (
                                 <ParaEditor
                                   isOpen={isModalOpen}
                                   content={selectedContent} // Pass the correct content

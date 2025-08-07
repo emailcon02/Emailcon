@@ -34,7 +34,7 @@ export const educationalTemplate = {
           textAlign: "center",
           color: "#000000",
           backgroundColor: "#ffffffff",
-          padding: "10px 10px",
+          padding: "10px 0px",
         },
     },
     {
@@ -70,7 +70,7 @@ export const educationalTemplate = {
           textAlign: "center",
           color: "#000000",
           backgroundColor: "#ffffffff",
-          padding: "5px 10px",
+          padding: "5px 0px",
         },
     },
       {
@@ -210,7 +210,7 @@ export const educationalTemplate = {
           textAlign: "center",
           color: "#000000",
           backgroundColor: "#ffffffff",
-          padding: "10px 10px",
+          padding: "10px 0px",
         },
     },
     {
@@ -287,7 +287,7 @@ export const educationalTemplate = {
           textAlign: "center",
           color: "#000000",
           backgroundColor: "#ffffffff",
-          padding: "10px 10px",
+          padding: "10px 0px",
         },
     },
   ],

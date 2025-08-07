@@ -90,7 +90,7 @@ export const gymTemplate = {
         textAlign: "center",
         color: "#000000",
         backgroundColor: "#ffffff",
-        padding: "10px 10px",
+        padding: "10px 0px",
       },
     },
     {
@@ -242,7 +242,7 @@ export const gymTemplate = {
         textAlign: "center",
         color: "#000000",
         backgroundColor: "#ffffff",
-        padding: "10px 10px",
+        padding: "10px 0px",
       },
     },
   ],

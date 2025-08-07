@@ -106,7 +106,7 @@
   text-align: center;
 }
 
-.logins-button:hover {
+.logins-button:hover .span-login{
   text-decoration: underline;
   color: rgb(64, 64, 64);
 }

@@ -3,7 +3,7 @@ export const travelTemplate = {
   previewContent: [
     {
       type: "banner",
-      src:"https://ik.imagekit.io/w1dqqzgef/flat-landing-page-template-travel-agency.png",
+      src: "https://ik.imagekit.io/w1dqqzgef/flat-landing-page-template-travel-agency.png",
       style: {
         width: "100%",
         height: "auto",
@@ -22,22 +22,22 @@ export const travelTemplate = {
         fontWeight: "bold",
       },
     },
-    {
-      type: "para",
-      content:
-        "The world is waiting — beaches, mountains, ancient cities, and vibrant cultures. With Sunset Holidays, every journey is crafted to perfection. All-inclusive stays, flight deals, and local guides ensure your trip is unforgettable. Let the sunset guide your next adventure.",
-      style: {
-        fontSize: "15px",
-        color: "#3d3d3d",
-        backgroundColor: "#fff0e1",
-        padding: "15px",
-        textAlign: "center",
-      },
-    },
+  {
+  type: "para",
+  content: "The world is waiting — beaches, mountains, ancient cities, and vibrant cultures. With Sunset Holidays, every journey is crafted to perfection. All-inclusive stays, flight deals, and local guides ensure your trip is unforgettable. Let the sunset guide your next adventure.",
+  style: {
+    fontSize: "15px",
+    borderRadius: "0px",
+    textAlign: "center",
+    color: "#3d3d3d",
+    backgroundColor: "#fff0e1",
+    padding: "15px",
+  },
+},
     {
       type: "multipleimage",
-      src1:"https://ik.imagekit.io/w1dqqzgef/2633.jpg?updatedAt=1753427879587",
-      src2:"https://ik.imagekit.io/w1dqqzgef/2633.jpg?updatedAt=1753427879587",
+      src1: "https://ik.imagekit.io/w1dqqzgef/2633.jpg?updatedAt=1753427879587",
+      src2: "https://ik.imagekit.io/w1dqqzgef/2633.jpg?updatedAt=1753427879587",
       style: {
         width: "100%",
         height: "auto",
@@ -45,7 +45,6 @@ export const travelTemplate = {
         textAlign: "center",
       },
     },
-   
     {
       type: "imagewithtext",
       src1: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2073&q=80",
@@ -59,12 +58,11 @@ export const travelTemplate = {
         lineHeight: "1.6",
       }
     },
-
     {
       type: "textwithimage",
       src2: "https://images.unsplash.com/photo-1516426122078-c23e76319801?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2068&q=80",
       content2: "Embark on the ultimate African safari adventure where wildlife roams free and nature reigns supreme. Witness the Big Five in their natural habitat, stay in luxury eco-lodges, and experience the raw beauty of the African wilderness under starlit skies.",
-      style: { 
+      style: {
         backgroundColor: "#fff0e1",
         color: "#333",
         borderRadius: "10px",
@@ -75,7 +73,7 @@ export const travelTemplate = {
     },
     {
       type: "image",
-      src:"https://ik.imagekit.io/w1dqqzgef/travel-images.jpg",
+      src: "https://ik.imagekit.io/w1dqqzgef/travel-images.jpg",
       url: "https://sunsetholidays.com/family-trips",
       style: {
         width: "100%",
@@ -96,11 +94,10 @@ export const travelTemplate = {
         paddingTop: "10px",
       },
     },
-   
     {
       type: "multi-image-card",
-      src1:"https://ik.imagekit.io/w1dqqzgef/trending%20destination.jpg",
-      src2:"https://ik.imagekit.io/w1dqqzgef/trending%20destination.jpg",
+      src1: "https://ik.imagekit.io/w1dqqzgef/trending%20destination.jpg",
+      src2: "https://ik.imagekit.io/w1dqqzgef/trending%20destination.jpg",
       title1: "Thailand Adventure",
       title2: "Bali Beach Bliss",
       originalPrice1: "₹60,000",
@@ -140,8 +137,8 @@ export const travelTemplate = {
     },
     {
       type: "multi-image-card",
-      src1:"https://ik.imagekit.io/w1dqqzgef/playa-y-acantilados-en-bali-indonesia-1.jpg",
-      src2:"https://ik.imagekit.io/w1dqqzgef/playa-y-acantilados-en-bali-indonesia-1.jpg",
+      src1: "https://ik.imagekit.io/w1dqqzgef/playa-y-acantilados-en-bali-indonesia-1.jpg",
+      src2: "https://ik.imagekit.io/w1dqqzgef/playa-y-acantilados-en-bali-indonesia-1.jpg",
       title1: "Thailand Adventure",
       title2: "Bali Beach Bliss",
       originalPrice1: "₹60,000",
@@ -188,18 +185,19 @@ export const travelTemplate = {
         color: "#cc3300",
         fontWeight: "bold",
       },
-    },
-    {
-      type: "para",
-      content: "Book before July 31st and get up to 40% off + a free travel kit with every booking!",
-      style: {
-        fontSize: "16px",
-        textAlign: "center",
-        backgroundColor: "#fff0e5",
-        color: "#000000",
-        padding: "12px",
-      },
-    },
+    },{
+  type: "para",
+  content: "Book before July 31st and get up to 40% off + a free travel kit with every booking!",
+  style: {
+    fontSize: "15px",
+    borderRadius: "0px",
+    textAlign: "center",
+    color: "#3d3d3d",
+    backgroundColor: "#fff0e1",
+    padding: "15px",
+  },
+},
+    
     {
       type: "button",
       content: "Explore All Packages",
@@ -241,18 +239,19 @@ export const travelTemplate = {
         textAlign: "center",
       },
     },
-    {
-      type: "para",
-      content:
-        "© 2025 Your Company. All rights reserved. You received this email because you're subscribed to travel updates.",
-      style: {
-        fontSize: "14px",
-        color: "#444",
-        textAlign: "center",
-        backgroundColor: "#ffffff",
-        padding: "10px",
-      },
-    },
+   {
+  type: "para",
+  content: "© 2025 Your Company. All rights reserved. You received this email because you're subscribed to travel updates.",
+  style: {
+    fontSize: "14px",
+    borderRadius: "0px",
+    textAlign: "center",
+    color: "#444",
+    backgroundColor: "#ffffff",
+    padding: "10px",
+  },
+},
   ],
   bgColor: "#ffffff",
 };
+

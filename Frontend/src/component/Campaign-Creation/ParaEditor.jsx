@@ -183,8 +183,28 @@ const ParaEditor = ({ isOpen, content, onSave, onClose }) => {
             font_size_formats:
               "8px 10px 12px 14px 16px 18px 20px 24px 28px 32px 36px 48px",
             font_family_formats:
-              "Andale Mono=andale mono,times; Arial=arial,helvetica,sans-serif; Arial Black=arial black,avant garde; Book Antiqua=book antiqua,palatino; Comic Sans MS=comic sans ms,sans-serif; Courier New=courier new,courier; Georgia=georgia,palatino; Helvetica=helvetica; Impact=impact,chicago; Symbol=symbol; Tahoma=tahoma,arial,helvetica,sans-serif; Terminal=terminal,monaco; Times New Roman=times new roman,times; Trebuchet MS=trebuchet ms,geneva; Verdana=verdana,geneva; Webdings=webdings; Wingdings=wingdings,zapf dingbats",
-            forced_root_block: "p",
+  "Andale Mono=andale mono,times;" +
+  "Arial=arial,helvetica,sans-serif;" +
+  "Arial Black=arial black,avant garde;" +
+  "Book Antiqua=book antiqua,palatino;" +
+  "Comic Sans MS=comic sans ms,sans-serif;" +
+  "Courier New=courier new,courier;" +
+  "Georgia=georgia,palatino;" +
+  "Helvetica=helvetica;" +
+  "Impact=impact,chicago;" +
+  "Lato=lato,sans-serif;" +
+  "Open Sans=open sans,sans-serif;" +
+  "Poppins=poppins,sans-serif;" +
+  "Roboto=roboto,sans-serif;" +
+  "Source Sans Pro=source sans pro,sans-serif;" +
+  "Tahoma=tahoma,arial,helvetica,sans-serif;" +
+  "Terminal=terminal,monaco;" +
+  "Times New Roman=times new roman,times;" +
+  "Trebuchet MS=trebuchet ms,geneva;" +
+  "Verdana=verdana,geneva;" +
+  "Webdings=webdings;" +
+  "Wingdings=wingdings,zapf dingbats",
+         forced_root_block: "p",
             skin: "oxide",
             content_css: "default",
           }}

@@ -443,6 +443,43 @@ else if (item.type === 'multi-image-card') {
         </tr>
     </table>`
       }
+else if (item.type === "sign") {
+  return `
+  <table role="presentation" align="center" cellpadding="0" cellspacing="0" style="background-color: ${item.style?.backgroundColor || "#c22323"}; color: ${item.style?.color || "#ffffff"}; border-radius:  ${item.style?.borderRadius || "8px"}; padding: 20px; width: 100%; max-width: 600px; ">
+    <tr>
+      <td style="width: 140px; text-align: center;">
+        <img src="${item.src1}" alt="User Image" width="120" height="120" style="border-radius: 50%; border: 5px solid #000; background-color: #fff;" />
+      </td>
+      <td style="padding-left: 20px; vertical-align: middle;">
+        <!-- Name and Designation in one line -->
+        <p style="font-size: 20px; font-weight: bold; margin: 0;">
+          ${item.Name} <span style="font-weight: normal;">(${item.Designation})</span>
+        </p>
+
+        <!-- Phone -->
+        <p style="margin: 15px 0 10px; display: flex; align-items: center;">
+          <img src="${item.iconsrc1}" alt="Phone Icon" width="18" height="18" style="vertical-align: middle; margin-right: 8px;" />
+          <a href="${generateTrackingLink(item.links1, userId, campaignId, emailData.recipient)}" style="color: inherit; text-decoration: none;">${item.text1}</a>
+        </p>
+
+        <!-- Website -->
+        <p style="margin: 0 0 10px; display: flex; align-items: center;">
+          <img src="${item.iconsrc2}" alt="Web Icon" width="18" height="18" style="vertical-align: middle; margin-right: 8px;" />
+          <a href="${generateTrackingLink(item.links2, userId, campaignId, emailData.recipient)}" style="color: inherit; text-decoration: none;">${item.text2}</a>
+        </p>
+
+        <!-- Address -->
+        <p style="margin: 0; display: flex; align-items: center;">
+          <img src="${item.iconsrc3}" alt="Pin Icon" width="18" height="18" style="vertical-align: middle; margin-right: 8px;" />
+          <span>${item.text3}</span>
+        </p>
+      </td>
+    </tr>
+  </table>
+  `;
+}
+
+
       else if (item.type === 'link-image') {
         return `<div style="text-align:${item.style.textAlign};margin:10px auto !important">
         <a href="${generateTrackingLink(item.link, userId, campaignId, emailData.recipient)}" taget="_blank" style="text-decoration:none;"><img src="${item.src}" style="margin-top:10px;width:${item.style.width};text-align:${item.style.textAlign};pointer-events:none;height:${item.style.height};border-radius:${item.style.borderRadius};background-color:${item.style.backgroundColor}"/></a>
@@ -1351,6 +1388,7 @@ function generateHtml(element, userId, campaignId, recipientEmail) {
         src2,
         src,
         style,
+        Name, Designation, text1, text2, text3,
         style1, style2, style3, style4,
         link, links1, links2, links3, links4,
         ContentStyle,
@@ -1406,6 +1444,36 @@ function generateHtml(element, userId, campaignId, recipientEmail) {
           </td>
       </tr>
   </table>`;
+case "sign":
+  return `
+    <table role="presentation" align="center" cellpadding="0" cellspacing="0" style="background-color: ${style?.backgroundColor || "#c22323"}; color: ${style?.color || "#ffffff"}; border-radius: ${style?.borderRadius || "8px"}; padding: 20px; width: 100%; max-width: 600px;">
+      <tr>
+        <td style="width: 140px; text-align: center;">
+          <img src="${src1}" alt="User Image" width="120" height="120" style="border-radius: 50%; border: 5px solid #000; background-color: #fff;" />
+        </td>
+        <td style="padding-left: 20px; vertical-align: middle;">
+          <p style="font-size: 20px; font-weight: bold; margin: 0;">
+            ${Name} <span style="font-weight: normal;">(${Designation})</span>
+          </p>
+
+          <p style="margin: 15px 0 10px; display: flex; align-items: center;">
+            <img src="${iconsrc1}" alt="Phone Icon" width="18" height="18" style="vertical-align: middle; margin-right: 8px;" />
+            <a href="${generateTrackingLink(links1, userId, campaignId, recipientEmail)}" style="color: inherit; text-decoration: none;">${text1}</a>
+          </p>
+
+          <p style="margin: 0 0 10px; display: flex; align-items: center;">
+            <img src="${iconsrc2}" alt="Web Icon" width="18" height="18" style="vertical-align: middle; margin-right: 8px;" />
+            <a href="${generateTrackingLink(links2, userId, campaignId, recipientEmail)}" style="color: inherit; text-decoration: none;">${text2}</a>
+          </p>
+
+          <p style="margin: 0; display: flex; align-items: center;">
+            <img src="${iconsrc3}" alt="Pin Icon" width="18" height="18" style="vertical-align: middle; margin-right: 8px;" />
+            <span>${text3}</span>
+          </p>
+        </td>
+      </tr>
+    </table>
+  `;
 
   
 case 'break':
@@ -2148,6 +2216,7 @@ if (student.isUnsubscribed) {
         src2,
         src,
         style,
+        Name, Designation, text1, text2, text3,
         style1, style2, style3, style4,
         link, links1, links2, links3, links4,
         ContentStyle,
@@ -2210,6 +2279,37 @@ case 'break':
       </td>
     </tr>
   </table>`;
+
+case "sign":
+  return `
+    <table role="presentation" align="center" cellpadding="0" cellspacing="0" style="background-color: ${style?.backgroundColor || "#c22323"}; color: ${style?.color || "#ffffff"}; border-radius: ${style?.borderRadius || "8px"}; padding: 20px; width: 100%; max-width: 600px;">
+      <tr>
+        <td style="width: 140px; text-align: center;">
+          <img src="${src1}" alt="User Image" width="120" height="120" style="border-radius: 50%; border: 5px solid #000; background-color: #fff;" />
+        </td>
+        <td style="padding-left: 20px; vertical-align: middle;">
+          <p style="font-size: 20px; font-weight: bold; margin: 0;">
+            ${Name} <span style="font-weight: normal;">(${Designation})</span>
+          </p>
+
+          <p style="margin: 15px 0 10px; display: flex; align-items: center;">
+            <img src="${iconsrc1}" alt="Phone Icon" width="18" height="18" style="vertical-align: middle; margin-right: 8px;" />
+            <a href="${generateTrackingLink(links1, userId, campaignId, recipientEmail)}" style="color: inherit; text-decoration: none;">${text1}</a>
+          </p>
+
+          <p style="margin: 0 0 10px; display: flex; align-items: center;">
+            <img src="${iconsrc2}" alt="Web Icon" width="18" height="18" style="vertical-align: middle; margin-right: 8px;" />
+            <a href="${generateTrackingLink(links2, userId, campaignId, recipientEmail)}" style="color: inherit; text-decoration: none;">${text2}</a>
+          </p>
+
+          <p style="margin: 0; display: flex; align-items: center;">
+            <img src="${iconsrc3}" alt="Pin Icon" width="18" height="18" style="vertical-align: middle; margin-right: 8px;" />
+            <span>${text3}</span>
+          </p>
+        </td>
+      </tr>
+    </table>
+  `;
 
     case 'banner':
           return `<div style="margin:20px auto !important;${styleString};">

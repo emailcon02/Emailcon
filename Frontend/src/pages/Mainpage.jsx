@@ -10,6 +10,7 @@ import {
   FaFileExport,
   FaFolderOpen,
   FaGripLines,
+  FaSignature,
   FaTable,
   FaTimes,
   FaTrash,
@@ -124,20 +125,22 @@ const Mainpage = () => {
   const [shouldRefresh, setShouldRefresh] = useState(false);
   const [spamResult, setSpamResult] = useState(null);
   const [spamWordsFound, setSpamWordsFound] = useState([]);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+const [deleteIndex, setDeleteIndex] = useState(null);
 
   useEffect(() => {
     const handleBeforeUnload = (e) => {
-      e.preventDefault(); // Needed for some browsers
-      e.returnValue = ""; // Show default browser message (won't appear if using custom modal)
+      e.preventDefault(); 
+      e.returnValue = ""; 
       setShowWarningModal(true);
-      return ""; // This is required for Chrome
+      return ""; 
     };
 
     const handleKeyPress = (e) => {
       if (
-        e.key === "F5" || // F5
-        (e.ctrlKey && e.key === "r") || // Ctrl+R
-        (e.metaKey && e.key === "r") // Cmd+R (Mac)
+        e.key === "F5" || 
+        (e.ctrlKey && e.key === "r") || 
+        (e.metaKey && e.key === "r") 
       ) {
         e.preventDefault();
         setShowWarningModal(true);
@@ -766,6 +769,40 @@ const Mainpage = () => {
     }
     setIsOpen(true);
   };
+
+
+const addSign = () => {
+    setPreviewContent([
+      ...previewContent,
+      {
+        type: "sign",
+        src1: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTjCoUtOal33JWLqals1Wq7p6GGCnr3o-lwpQ&s",
+        Name: "Enter Your Name",
+        Designation: "Designation",
+
+        iconsrc1: "https://ik.imagekit.io/w1dqqzgef/phone.png?updatedAt=1754385742710",
+        styleicon1: { width: "20px", height: "20px" },
+        links1: "tel:9743869034",
+        text1: "9743869034",
+
+        iconsrc2: "https://ik.imagekit.io/w1dqqzgef/web.png?updatedAt=1754385742710",
+        styleicon2: { width: "20px", height: "20px" },
+        links2: "https://www.google.com",
+        text2: "www.google.com",
+
+        iconsrc3: "https://ik.imagekit.io/w1dqqzgef/pin.png?updatedAt=1754385742751",
+        styleicon3: { width: "20px", height: "20px" },
+        text3: "Salem",
+
+        style: {
+          color: "#000000",
+          backgroundColor: "#ffffff",
+          borderRadius: "0px",
+        },
+      },
+    ]);
+  };
+
   // Add new text
   const addText = () => {
     saveToUndoStack(); // Save the current state before deleting
@@ -1942,6 +1979,7 @@ const Mainpage = () => {
     e.preventDefault();
     const type = dragIndex.current;
     if (type === "para") addText();
+    else if (type === "sign") addSign();
     else if (type === "head") addHeading();
     else if (type === "table") addTable();
     else if (type === "image") addImage();
@@ -2376,6 +2414,14 @@ const Mainpage = () => {
                   <FaGlobe />
                   Social Icons
                 </button>
+                <button
+                  onClick={addSign}
+                  className="editor-button"
+                  draggable
+                  onDragStart={(e) => handleDragStart("sign")}
+                >
+                  <FaSignature /> Signature
+                </button>
 
                 <button
                   onClick={addBreak}
@@ -2412,13 +2458,16 @@ const Mainpage = () => {
                   <FaPlusSquare /> Button
                 </button>
 
-                {isMobilestylecolor ? (
+              
+              </div>
+            </div>
+              {isMobilestylecolor ? (
                   <ColorPalettePicker
                     label={bgColor}
                     onChange={(color) => setBgColor(color)}
                   />
                 ) : (
-                  <button className="editor-button">
+                  <button className="file-manager-btn">
                     <input
                       type="color"
                       value={bgColor}
@@ -2428,8 +2477,6 @@ const Mainpage = () => {
                     Template-Bg
                   </button>
                 )}
-              </div>
-            </div>
             <button
               onClick={() => setActiveTablayout(true)}
               className="file-manager-btn"
@@ -2838,6 +2885,109 @@ const Mainpage = () => {
                               </button>
                             </div>
                             <div className="style-item">
+                        {previewContent[selectedIndex]?.type === "sign" && (
+  <>
+                          <div className="editor-sign-controls">
+                             <ColorPicker
+                                    label="Text Color"
+                                    objectKey="style.color"
+                                    previewContent={previewContent}
+                                    selectedIndex={selectedIndex}
+                                    updateContent={updateContent}
+                                  />
+                                  <ColorPicker
+                                    label="Text Background"
+                                    objectKey="style.backgroundColor"
+                                    previewContent={previewContent}
+                                    selectedIndex={selectedIndex}
+                                    updateContent={updateContent}
+                                  />
+                                             <label>Border Radius (%):</label>
+                            <input
+                              type="range"
+                              min="0"
+                              max="50"
+                              value={parseInt(
+                                previewContent[
+                                  selectedIndex
+                                ].style.borderRadius.replace("px", "")
+                              )}
+                              onChange={(e) =>
+                                updateContent(selectedIndex, {
+                                  style: {
+                                    ...previewContent[selectedIndex].style,
+                                    borderRadius: `${e.target.value}px`,
+                                  },
+                                })
+                              }
+                            />
+                            <span>
+                              {parseInt(
+                                previewContent[
+                                  selectedIndex
+                                ].style.borderRadius.replace("%", "")
+                              )}
+                              %
+                            </span>
+                            <div>
+                              Name:
+                              <input
+                                type="text"
+                                value={previewContent[selectedIndex].Name}
+                                onChange={(e) =>
+                                  updateContent(selectedIndex, { Name: e.target.value })
+                                }
+                              />
+                            </div>
+
+                            <div>
+                              Designation:
+                              <input
+                                type="text"
+                                value={previewContent[selectedIndex].Designation}
+                                onChange={(e) =>
+                                  updateContent(selectedIndex, { Designation: e.target.value })
+                                }
+                              />
+                            </div>
+
+                            <div>
+                              Phone Number:
+                              <input
+                                type="text"
+                                value={previewContent[selectedIndex].text1}
+                                onChange={(e) =>
+                                  updateContent(selectedIndex, { text1: e.target.value })
+                                }
+                              />
+                            </div>
+
+                            <div>
+                              Website:
+                              <input
+                                type="text"
+                                value={previewContent[selectedIndex].text2}
+                                onChange={(e) =>
+                                  updateContent(selectedIndex, { text2: e.target.value })
+                                }
+                              />
+                            </div>
+
+                            <div>
+                              Address:
+                              <input
+                                type="text"
+                                value={previewContent[selectedIndex].text3}
+                                onChange={(e) =>
+                                  updateContent(selectedIndex, { text3: e.target.value })
+                                }
+                              />
+                            </div>
+                            
+                          </div>
+                          </>
+                        )}
+
                               {previewContent[selectedIndex].type ===
                                 "para" && (
                                 <>
@@ -4904,6 +5054,7 @@ const Mainpage = () => {
                     <div className="style-controls" ref={styleControlsRef}>
                       <h3>Style Controls</h3>
                       <div className="style-item">
+                        
                         {previewContent[selectedIndex].type === "para" && (
                           <>
                             <div className="editor-bg">
@@ -4979,7 +5130,108 @@ const Mainpage = () => {
                             </span>
                           </>
                         )}
+{previewContent[selectedIndex]?.type === "sign" && (
+  <>
+                          <div className="editor-sign-controls">
+                            <ColorPicker
+                                    label="Text Color"
+                                    objectKey="style.color"
+                                    previewContent={previewContent}
+                                    selectedIndex={selectedIndex}
+                                    updateContent={updateContent}
+                                  />
+                                  <ColorPicker
+                                    label="Text Background"
+                                    objectKey="style.backgroundColor"
+                                    previewContent={previewContent}
+                                    selectedIndex={selectedIndex}
+                                    updateContent={updateContent}
+                                  />
+                                             <label>Border Radius (%):</label>
+                            <input
+                              type="range"
+                              min="0"
+                              max="50"
+                              value={parseInt(
+                                previewContent[
+                                  selectedIndex
+                                ].style.borderRadius.replace("px", "")
+                              )}
+                              onChange={(e) =>
+                                updateContent(selectedIndex, {
+                                  style: {
+                                    ...previewContent[selectedIndex].style,
+                                    borderRadius: `${e.target.value}px`,
+                                  },
+                                })
+                              }
+                            />
+                            <span>
+                              {parseInt(
+                                previewContent[
+                                  selectedIndex
+                                ].style.borderRadius.replace("%", "")
+                              )}
+                              %
+                            </span>
+                            <div>
+                              Name:
+                              <input
+                                type="text"
+                                value={previewContent[selectedIndex].Name}
+                                onChange={(e) =>
+                                  updateContent(selectedIndex, { Name: e.target.value })
+                                }
+                              />
+                            </div>
 
+                            <div>
+                              Designation:
+                              <input
+                                type="text"
+                                value={previewContent[selectedIndex].Designation}
+                                onChange={(e) =>
+                                  updateContent(selectedIndex, { Designation: e.target.value })
+                                }
+                              />
+                            </div>
+
+                            <div>
+                              Phone Number:
+                              <input
+                                type="text"
+                                value={previewContent[selectedIndex].text1}
+                                onChange={(e) =>
+                                  updateContent(selectedIndex, { text1: e.target.value })
+                                }
+                              />
+                            </div>
+
+                            <div>
+                              Website:
+                              <input
+                                type="text"
+                                value={previewContent[selectedIndex].text2}
+                                onChange={(e) =>
+                                  updateContent(selectedIndex, { text2: e.target.value })
+                                }
+                              />
+                            </div>
+
+                            <div>
+                              Address:
+                              <input
+                                type="text"
+                                value={previewContent[selectedIndex].text3}
+                                onChange={(e) =>
+                                  updateContent(selectedIndex, { text3: e.target.value })
+                                }
+                              />
+                            </div>
+                             
+                          </div>
+                          </>
+                        )}
                         {previewContent[selectedIndex].type === "cardbtn" && (
                           <>
                             <label>Card Size (%):</label>
@@ -7189,6 +7441,61 @@ const Mainpage = () => {
                       onClick={() => handleItemClick(index)}
                       style={item.style}
                     >
+                      
+{item.type === "sign" ? (
+                        <div className="sign-container">
+                          <div className="sign-wrapper-content" style={item.style}>
+                            <img
+                              src={item.src1 || "https://via.placeholder.com/200"}
+                              alt="User"
+                              className="sign-image"
+                              title="Upload Image"
+                              onClick={() => handleopenFiles(index, 1)}
+                            />
+                            <div className="sign-collector-con">
+                              <div className="sign-text">
+                                <span
+                                  className="sign-name"
+                                  // contentEditable
+                                  suppressContentEditableWarning
+                                  onClick={() => {
+                                    setModalIndex(index);
+                                    setIsModalOpen(true);
+                                  }}
+                                >
+                                  {item.Name}
+                                </span>
+                                <span
+                                  className="sign-designation"
+                                  // contentEditable
+                                  suppressContentEditableWarning
+                                >
+                                  ({item.Designation})
+                                </span>
+                              </div>
+                              <div className="sign-icons">
+                                <a href={item.links1} target="_blank" rel="noopener noreferrer" className="sign-icon-item" style={item.style}>
+                                  <img src={item.iconsrc1} style={item.styleicon1} alt="icon1"  className="phoneicon"/>
+                                  <p className="sign-icon-text">{item.text1 || "9743869034"}</p>
+                                </a>
+                                <a href={item.links2} target="_blank" rel="noopener noreferrer" className="sign-icon-item" style={item.style}>
+                                  <img src={item.iconsrc2} style={item.styleicon2} alt="icon2" className="phoneicon"/>
+                                  <p className="sign-icon-text">{item.text2 || "www.google.com"}</p>
+                                </a>
+                                <span className="sign-icon-item" style={item.style}>
+                                  <img src={item.iconsrc3} style={item.styleicon3} alt="icon3" className="phoneicon"/>
+                                  <p  className="sign-icon-text">{item.text3 || "Salem"}</p>
+                              </span>
+                              </div>
+
+                            </div>
+                          </div>
+                        </div>
+                      ) : null}
+
+
+
+
                       {item.type === "para" && (
                         <>
                           <p
@@ -7847,13 +8154,18 @@ const Mainpage = () => {
   >
    <FaArrowsAlt/>
                           </button>
-                        <button
-                          className="delete-btn"
-                          onClick={() => deleteContent(index)}
-                          title="Delete"
-                        >
-                          <FiTrash2 />
-                        </button>
+                    <button
+    className="delete-btn"
+  onClick={(e) => {
+  e.preventDefault(); 
+  setShowDeleteModal(true);
+  setDeleteIndex(index);
+}}
+
+    title="Delete"
+  >
+    <FiTrash2 />
+  </button>
                         <button
                           className="edit-desktop-btn"
                           onClick={() => handleItemClick(index)}
@@ -7874,6 +8186,67 @@ const Mainpage = () => {
               </div>
             </div>
           </div>
+
+{/* delete confirm modal */}
+{showDeleteModal && (
+  <div
+    style={{
+      position: "fixed",
+      top: 0,
+      left: 0,
+      width: "100%",
+      height: "100%",
+      background: "rgb(0 0 0 / 99%)",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      zIndex: 99999,
+    }}
+  >
+    <div
+      style={{
+        background: "#fff",
+        padding: "50px",
+        borderRadius: "10px",
+        width: "300px",
+        textAlign: "center",
+      }}
+    >
+      <p>Are you sure you want to delete this content?</p>
+      <div style={{ marginTop: "15px" }}>
+        <button
+          style={{
+            marginRight: "10px",
+            padding: "8px  22px",
+            backgroundColor: "#ccc",
+            border: "none",
+            borderRadius: "4px",
+            cursor: "pointer",
+          }}
+          onClick={() => setShowDeleteModal(false)}
+        >
+          Cancel
+        </button>
+        <button
+          style={{
+            padding: "8px  22px",
+            backgroundColor: "#2f327D",
+            color: "white",
+            border: "none",
+            borderRadius: "4px",
+            cursor: "pointer",
+          }}
+          onClick={() => {
+            deleteContent(deleteIndex);
+            setShowDeleteModal(false);
+          }}
+        >
+          Delete
+        </button>
+      </div>
+    </div>
+  </div>
+)}
 
           {/* Modal for preview Content */}
           {/* Right Preview */}
@@ -7912,6 +8285,62 @@ const Mainpage = () => {
                           <hr style={item.style} />
                         </div>
                       )}
+                      
+{item.type === "sign" ? (
+                        <div className="sign-container">
+                          <div className="sign-wrapper-content" style={item.style}>
+                            <img
+                              src={item.src1 || "https://via.placeholder.com/200"}
+                              alt="User"
+                              className="sign-image"
+                              title="Upload Image"
+                              onClick={() => handleopenFiles(index, 1)}
+                            />
+                            <div className="sign-collector-con">
+                              <div className="sign-text">
+                                <span
+                                  className="sign-name"
+                                  // contentEditable
+                                  suppressContentEditableWarning
+                                  onClick={() => {
+                                    setModalIndex(index);
+                                    setIsModalOpen(true);
+                                  }}
+                                >
+                                  {item.Name}
+                                </span>
+                                <span
+                                  className="sign-designation"
+                                  // contentEditable
+                                  suppressContentEditableWarning
+                                >
+                                  ({item.Designation})
+                                </span>
+                              </div>
+                              <div className="sign-icons">
+                                <a href={item.links1} target="_blank" rel="noopener noreferrer" className="sign-icon-item" style={item.style}>
+                                  <img src={item.iconsrc1} style={item.styleicon1} alt="icon1"  className="phoneicon"/>
+                                  <p className="sign-icon-text">{item.text1 || "9743869034"}</p>
+                                </a>
+                                <a href={item.links2} target="_blank" rel="noopener noreferrer" className="sign-icon-item" style={item.style}>
+                                  <img src={item.iconsrc2} style={item.styleicon2} alt="icon2" className="phoneicon"/>
+                                  <p className="sign-icon-text">{item.text2 || "www.google.com"}</p>
+                                </a>
+                                <span className="sign-icon-item" style={item.style}>
+                                  <img src={item.iconsrc3} style={item.styleicon3} alt="icon3" className="phoneicon"/>
+                                  <p  className="sign-icon-text">{item.text3 || "Salem"}</p>
+                              </span>
+                              </div>
+
+                            </div>
+                          </div>
+                        </div>
+                      ) : null}
+
+
+
+
+
                             {item.type === "para" && (
                               <>
                                 <p
@@ -8562,11 +8991,11 @@ const Mainpage = () => {
 
           {/* Show Warning Modal */}
 
-          <WarningModal
+          {/* <WarningModal
             isOpen={showWarningModal}
             onConfirm={handleConfirmRefresh}
             onCancel={handleCancel}
-          />
+          /> */}
 
           {/* Show SendBulkModal when button is clicked */}
           {showSendModal && (

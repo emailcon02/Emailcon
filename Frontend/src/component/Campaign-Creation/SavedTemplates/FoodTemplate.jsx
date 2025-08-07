@@ -56,7 +56,7 @@ export const foodTemplate = {
           textAlign: "center",
           color: "#66717c",
           backgroundColor: "#ffffffff",
-          padding: "10px 10px",
+          padding: "10px 0px",
         },
     },
     {
@@ -315,7 +315,7 @@ export const foodTemplate = {
           textAlign: "center",
           color: "#000000",
           backgroundColor: "#ffffffff",
-          padding: "10px 10px",
+          padding: "10px 0px",
         },
     },
   ],

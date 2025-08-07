@@ -9,8 +9,6 @@ import logimg from "../../Images/mail.png";
 import { FaEye, FaEyeSlash,FaArrowLeft } from "react-icons/fa";
 import logo from "../../Images/emailcon_svg_logo.svg";
 
-
-
 function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -214,10 +212,11 @@ function Login() {
 
             <div className="log-sign">
               <button onClick={() => navigate("/signup")} className="logins-button">
-                Don't have an account? <span style={{ color: "#2f327d" }}>Signup</span>
+                Don't have an account? <span className="span-login" style={{ color: "#2f327d" }}>Signup</span>
               </button>
             </div>
-{/* 
+            
+   {/* 
             <div className="log-sign">
               <button onClick={() => navigate("/admin-login")} className="login-button login-submit">
                 Way to Admin Login

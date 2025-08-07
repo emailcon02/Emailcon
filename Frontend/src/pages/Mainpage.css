@@ -111,8 +111,8 @@ input[type="color"] {
 
 
 .bg-color-pic {
-    width: 25px !important;
-    height: 25px !important;
+    width: 15px !important;
+    height: 15px !important;
 
 }
 
@@ -435,6 +435,57 @@ button[data-tooltip]:hover::after {
     /* padding: 20px; */
     border-radius: 10px;
     /* border: 1px solid rgb(231, 230, 230); */
+}
+
+
+.sign-text{
+    display:flex;  
+    gap:10px;
+}
+
+.sign-collector-con{
+     display:flex;
+     flex-direction: column;
+}
+.sign-wrapper-content{
+     display:flex;
+
+}
+.sign-collector-con{
+    padding: 20px 10px;
+}
+.sign-icons{
+    display: flex;
+    flex-direction: column;
+    
+    margin-top: 20px;
+}
+.sign-image{
+    border-radius: 50%;
+    margin:18px 10px 0px 10px;
+    width:140px;
+    height: 140px;
+    cursor: pointer;
+
+}
+.sign-icon-item{
+    text-decoration: none;
+    color: #000;
+    display: flex;
+    gap:10px;
+    margin-bottom: 10px;
+}
+
+.sign-icon-item p{
+    margin-top: 5px;
+}
+.sign-name{
+    font-size: 20px;
+    font-weight: 550;
+}
+
+.sign-designation{
+    font-size: 20px;
 }
 
 .content-item {

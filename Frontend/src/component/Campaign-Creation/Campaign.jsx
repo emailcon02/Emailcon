@@ -1,14 +1,25 @@
 import React from "react";
 import Lookingimg from "../../Images/hand-drawn-step-illustration.png";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import "./Campaign.css";
 
 function Campaign() {
   const navigate = useNavigate(); 
+    const location = useLocation();
+    const previewContenttem = location.state?.previewContenttem || [];
+    const bgColortem = location.state?.bgColortem || "ffffff";
+    const selectedTemplatepre = location.state?.selectedTemplatepre || "";
 
-  const handleToggle = () => {
+const handleToggle = () => {
+  if (previewContenttem && previewContenttem.length > 0) {
+    navigate("/TemMainpage", {
+      state: { previewContenttem, bgColortem, selectedTemplatepre},
+    });
+  } else {
     navigate("/editor");
-  };
+  }
+};
+
 
   return (
     <div className="campaign-Mobile-page">

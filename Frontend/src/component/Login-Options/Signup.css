@@ -101,7 +101,7 @@
   transition: background 0.3s ease;
 }
 
-.signups-button:hover {
+.signups-button:hover .span-signup{
   text-decoration: underline;
   color: rgb(64, 64, 64);
 }
