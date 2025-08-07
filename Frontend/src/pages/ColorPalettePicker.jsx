@@ -25,7 +25,7 @@ const ColorPalettePicker = ({ label, onChange }) => {
   return (
     <div style={{ marginBottom: "10px", position: "relative" }} ref={pickerRef}>
       <button
-        className="editor-button"
+        className="editor-button bg-color-palete"
         onClick={() => setShowPicker(!showPicker)}
         style={{
           display: "flex",
@@ -41,6 +41,7 @@ const ColorPalettePicker = ({ label, onChange }) => {
         <div style={{
           width: "20px",
           height: "20px",
+          marginLeft:"22px",
           backgroundColor: label,
           borderRadius: "50%",
           border: "1px solid #aaa"

@@ -2459,16 +2459,14 @@ const addSign = () => {
                 >
                   <FaPlusSquare /> Button
                 </button>
-
-              </div>
-            </div>
-             {isMobilestylecolor ? (
-                              <ColorPalettePicker
+          <ColorPalettePicker className="bg-color-palete"
                                 label={bgColor}
                                 onChange={(color) => setBgColor(color)}
                               />
-                            ) : (
-                              <button className="file-manager-btn">
+              </div>
+            </div>
+                             
+                              <button className="tem-bg-btn">
                                 <input
                                   type="color"
                                   value={bgColor}
@@ -2477,7 +2475,6 @@ const addSign = () => {
                                 />
                                 Template-Bg
                               </button>
-                            )}
             <button
               onClick={() => setActiveTablayout(true)}
               className="file-manager-btn"
