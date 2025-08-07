@@ -3036,43 +3036,42 @@ useEffect(() => {
   />
 
                                       )}
-                                       {item.type === "table" && (
-  <>
-  <div className="table-component">
-
-  
-                              <table style={item.style}>
-                                <tbody>
-                                  {item.content.map((row, rowIndex) => (
-                                    <tr key={rowIndex}>
-                                      {row.map((cell, cellIndex) => {
-                                        const isHeader = rowIndex === 0;
-                                        const cellStyleToUse = isHeader ? item.headerStyle : item.cellStyle;
-                                        const CellTag = isHeader ? "th" : "td";
-
-                                        return (
-                                          <CellTag
-                                            key={cellIndex}
-                                            style={cellStyleToUse}
-                                            contentEditable
-                                            suppressContentEditableWarning
-                                            onBlur={(e) => {
-                                              const newContent = [...item.content];
-                                              newContent[rowIndex][cellIndex] = e.target.textContent;
-                                              updateContent(index, { content: newContent });
-                                            }}
-                                          >
-                                            {cell}
-                                          </CellTag>
-                                        );
-                                      })}
-                                    </tr>
-                                  ))}
-                                </tbody>
-                              </table>
-                              </div>
-                              </>
-                            )}
+{item.type === "table" && (
+                        <div className="table-component">
+                          <table style={item.style}>
+                            <tbody>
+                              {item.content.map((row, rowIndex) => (
+                                <tr key={rowIndex}>
+                                  {row.map((cell, cellIndex) => {
+                                    const isHeader = rowIndex === 0;
+                                    const cellStyleToUse = isHeader
+                                      ? item.headerStyle
+                                      : item.cellStyle;
+                                    const CellTag = isHeader ? "th" : "td";
+                                    return (
+                                      <CellTag
+                                        key={cellIndex}
+                                        style={cellStyleToUse}
+                                        contentEditable
+                                        suppressContentEditableWarning
+                                        onBlur={(e) => {
+                                          const newContent = [...item.content];
+                                          newContent[rowIndex][cellIndex] = e.target.textContent;
+                                          updateContent(index, {
+                                            content: newContent,
+                                          });
+                                        }}
+                                      >
+                                        {cell}
+                                      </CellTag>
+                                    );
+                                  })}
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+                      )}
                                       {item.type === "cardbtn" && (
                         <div className="card-btn-container" style={item.style}>
                           <img
@@ -4286,43 +4285,42 @@ useEffect(() => {
   />
                               </div>
                             )}
- {item.type === "table" && (
-  <>
-  <div className="table-component">
-
-  
-                              <table style={item.style}>
-                                <tbody>
-                                  {item.content.map((row, rowIndex) => (
-                                    <tr key={rowIndex}>
-                                      {row.map((cell, cellIndex) => {
-                                        const isHeader = rowIndex === 0;
-                                        const cellStyleToUse = isHeader ? item.headerStyle : item.cellStyle;
-                                        const CellTag = isHeader ? "th" : "td";
-
-                                        return (
-                                          <CellTag
-                                            key={cellIndex}
-                                            style={cellStyleToUse}
-                                            contentEditable
-                                            suppressContentEditableWarning
-                                            onBlur={(e) => {
-                                              const newContent = [...item.content];
-                                              newContent[rowIndex][cellIndex] = e.target.textContent;
-                                              updateContent(index, { content: newContent });
-                                            }}
-                                          >
-                                            {cell}
-                                          </CellTag>
-                                        );
-                                      })}
-                                    </tr>
-                                  ))}
-                                </tbody>
-                              </table>
-                              </div>
-                              </>
-                            )}
+{item.type === "table" && (
+                        <div className="table-component">
+                          <table style={item.style}>
+                            <tbody>
+                              {item.content.map((row, rowIndex) => (
+                                <tr key={rowIndex}>
+                                  {row.map((cell, cellIndex) => {
+                                    const isHeader = rowIndex === 0;
+                                    const cellStyleToUse = isHeader
+                                      ? item.headerStyle
+                                      : item.cellStyle;
+                                    const CellTag = isHeader ? "th" : "td";
+                                    return (
+                                      <CellTag
+                                        key={cellIndex}
+                                        style={cellStyleToUse}
+                                        contentEditable
+                                        suppressContentEditableWarning
+                                        onBlur={(e) => {
+                                          const newContent = [...item.content];
+                                          newContent[rowIndex][cellIndex] = e.target.textContent;
+                                          updateContent(index, {
+                                            content: newContent,
+                                          });
+                                        }}
+                                      >
+                                        {cell}
+                                      </CellTag>
+                                    );
+                                  })}
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+                      )}
                             {item.type === "cardbtn" && (
                         <div className="card-btn-container" style={item.style}>
                           <img
@@ -4914,43 +4912,42 @@ useEffect(() => {
   />
                               </div>
                             )}
- {item.type === "table" && (
-  <>
-  <div className="table-component">
-
-  
-                              <table style={item.style}>
-                                <tbody>
-                                  {item.content.map((row, rowIndex) => (
-                                    <tr key={rowIndex}>
-                                      {row.map((cell, cellIndex) => {
-                                        const isHeader = rowIndex === 0;
-                                        const cellStyleToUse = isHeader ? item.headerStyle : item.cellStyle;
-                                        const CellTag = isHeader ? "th" : "td";
-
-                                        return (
-                                          <CellTag
-                                            key={cellIndex}
-                                            style={cellStyleToUse}
-                                            contentEditable
-                                            suppressContentEditableWarning
-                                            onBlur={(e) => {
-                                              const newContent = [...item.content];
-                                              newContent[rowIndex][cellIndex] = e.target.textContent;
-                                              updateContent(index, { content: newContent });
-                                            }}
-                                          >
-                                            {cell}
-                                          </CellTag>
-                                        );
-                                      })}
-                                    </tr>
-                                  ))}
-                                </tbody>
-                              </table>
-                              </div>
-                              </>
-                            )}
+{item.type === "table" && (
+                        <div className="table-component">
+                          <table style={item.style}>
+                            <tbody>
+                              {item.content.map((row, rowIndex) => (
+                                <tr key={rowIndex}>
+                                  {row.map((cell, cellIndex) => {
+                                    const isHeader = rowIndex === 0;
+                                    const cellStyleToUse = isHeader
+                                      ? item.headerStyle
+                                      : item.cellStyle;
+                                    const CellTag = isHeader ? "th" : "td";
+                                    return (
+                                      <CellTag
+                                        key={cellIndex}
+                                        style={cellStyleToUse}
+                                        contentEditable
+                                        suppressContentEditableWarning
+                                        onBlur={(e) => {
+                                          const newContent = [...item.content];
+                                          newContent[rowIndex][cellIndex] = e.target.textContent;
+                                          updateContent(index, {
+                                            content: newContent,
+                                          });
+                                        }}
+                                      >
+                                        {cell}
+                                      </CellTag>
+                                    );
+                                  })}
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+                      )}
                              {item.type === "cardbtn" && (
                         <div className="card-btn-container" style={item.style}>
                           <img
@@ -5497,43 +5494,42 @@ useEffect(() => {
                           style={item.style}
                           key={index}
                         >
-                           {item.type === "table" && (
-  <>
-  <div className="table-component">
-
-  
-                              <table style={item.style}>
-                                <tbody>
-                                  {item.content.map((row, rowIndex) => (
-                                    <tr key={rowIndex}>
-                                      {row.map((cell, cellIndex) => {
-                                        const isHeader = rowIndex === 0;
-                                        const cellStyleToUse = isHeader ? item.headerStyle : item.cellStyle;
-                                        const CellTag = isHeader ? "th" : "td";
-
-                                        return (
-                                          <CellTag
-                                            key={cellIndex}
-                                            style={cellStyleToUse}
-                                            contentEditable
-                                            suppressContentEditableWarning
-                                            onBlur={(e) => {
-                                              const newContent = [...item.content];
-                                              newContent[rowIndex][cellIndex] = e.target.textContent;
-                                              updateContent(index, { content: newContent });
-                                            }}
-                                          >
-                                            {cell}
-                                          </CellTag>
-                                        );
-                                      })}
-                                    </tr>
-                                  ))}
-                                </tbody>
-                              </table>
-                              </div>
-                              </>
-                            )}
+{item.type === "table" && (
+                        <div className="table-component">
+                          <table style={item.style}>
+                            <tbody>
+                              {item.content.map((row, rowIndex) => (
+                                <tr key={rowIndex}>
+                                  {row.map((cell, cellIndex) => {
+                                    const isHeader = rowIndex === 0;
+                                    const cellStyleToUse = isHeader
+                                      ? item.headerStyle
+                                      : item.cellStyle;
+                                    const CellTag = isHeader ? "th" : "td";
+                                    return (
+                                      <CellTag
+                                        key={cellIndex}
+                                        style={cellStyleToUse}
+                                        contentEditable
+                                        suppressContentEditableWarning
+                                        onBlur={(e) => {
+                                          const newContent = [...item.content];
+                                          newContent[rowIndex][cellIndex] = e.target.textContent;
+                                          updateContent(index, {
+                                            content: newContent,
+                                          });
+                                        }}
+                                      >
+                                        {cell}
+                                      </CellTag>
+                                    );
+                                  })}
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+                      )}
                           {item.type === "cardbtn" && (
                         <div className="card-btn-container" style={item.style}>
                           <img
@@ -6253,43 +6249,42 @@ useEffect(() => {
                           style={item.style}
                           key={index}
                         >
-                           {item.type === "table" && (
-  <>
-  <div className="table-component">
-
-  
-                              <table style={item.style}>
-                                <tbody>
-                                  {item.content.map((row, rowIndex) => (
-                                    <tr key={rowIndex}>
-                                      {row.map((cell, cellIndex) => {
-                                        const isHeader = rowIndex === 0;
-                                        const cellStyleToUse = isHeader ? item.headerStyle : item.cellStyle;
-                                        const CellTag = isHeader ? "th" : "td";
-
-                                        return (
-                                          <CellTag
-                                            key={cellIndex}
-                                            style={cellStyleToUse}
-                                            contentEditable
-                                            suppressContentEditableWarning
-                                            onBlur={(e) => {
-                                              const newContent = [...item.content];
-                                              newContent[rowIndex][cellIndex] = e.target.textContent;
-                                              updateContent(index, { content: newContent });
-                                            }}
-                                          >
-                                            {cell}
-                                          </CellTag>
-                                        );
-                                      })}
-                                    </tr>
-                                  ))}
-                                </tbody>
-                              </table>
-                              </div>
-                              </>
-                            )}
+{item.type === "table" && (
+                        <div className="table-component">
+                          <table style={item.style}>
+                            <tbody>
+                              {item.content.map((row, rowIndex) => (
+                                <tr key={rowIndex}>
+                                  {row.map((cell, cellIndex) => {
+                                    const isHeader = rowIndex === 0;
+                                    const cellStyleToUse = isHeader
+                                      ? item.headerStyle
+                                      : item.cellStyle;
+                                    const CellTag = isHeader ? "th" : "td";
+                                    return (
+                                      <CellTag
+                                        key={cellIndex}
+                                        style={cellStyleToUse}
+                                        contentEditable
+                                        suppressContentEditableWarning
+                                        onBlur={(e) => {
+                                          const newContent = [...item.content];
+                                          newContent[rowIndex][cellIndex] = e.target.textContent;
+                                          updateContent(index, {
+                                            content: newContent,
+                                          });
+                                        }}
+                                      >
+                                        {cell}
+                                      </CellTag>
+                                    );
+                                  })}
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+                      )}
                           {item.type === "cardbtn" && (
                         <div className="card-btn-container" style={item.style}>
                           <img
@@ -7076,43 +7071,42 @@ useEffect(() => {
                           style={item.style}
                           key={index}
                         >
-                           {item.type === "table" && (
-  <>
-  <div className="table-component">
-
-  
-                              <table style={item.style}>
-                                <tbody>
-                                  {item.content.map((row, rowIndex) => (
-                                    <tr key={rowIndex}>
-                                      {row.map((cell, cellIndex) => {
-                                        const isHeader = rowIndex === 0;
-                                        const cellStyleToUse = isHeader ? item.headerStyle : item.cellStyle;
-                                        const CellTag = isHeader ? "th" : "td";
-
-                                        return (
-                                          <CellTag
-                                            key={cellIndex}
-                                            style={cellStyleToUse}
-                                            contentEditable
-                                            suppressContentEditableWarning
-                                            onBlur={(e) => {
-                                              const newContent = [...item.content];
-                                              newContent[rowIndex][cellIndex] = e.target.textContent;
-                                              updateContent(index, { content: newContent });
-                                            }}
-                                          >
-                                            {cell}
-                                          </CellTag>
-                                        );
-                                      })}
-                                    </tr>
-                                  ))}
-                                </tbody>
-                              </table>
-                              </div>
-                              </>
-                            )}
+{item.type === "table" && (
+                        <div className="table-component">
+                          <table style={item.style}>
+                            <tbody>
+                              {item.content.map((row, rowIndex) => (
+                                <tr key={rowIndex}>
+                                  {row.map((cell, cellIndex) => {
+                                    const isHeader = rowIndex === 0;
+                                    const cellStyleToUse = isHeader
+                                      ? item.headerStyle
+                                      : item.cellStyle;
+                                    const CellTag = isHeader ? "th" : "td";
+                                    return (
+                                      <CellTag
+                                        key={cellIndex}
+                                        style={cellStyleToUse}
+                                        contentEditable
+                                        suppressContentEditableWarning
+                                        onBlur={(e) => {
+                                          const newContent = [...item.content];
+                                          newContent[rowIndex][cellIndex] = e.target.textContent;
+                                          updateContent(index, {
+                                            content: newContent,
+                                          });
+                                        }}
+                                      >
+                                        {cell}
+                                      </CellTag>
+                                    );
+                                  })}
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+                      )}
                           {item.type === "cardbtn" && (
                         <div className="card-btn-container" style={item.style}>
                           <img

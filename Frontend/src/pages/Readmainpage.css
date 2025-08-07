@@ -108,6 +108,7 @@ input[type="color"] {
     overflow: hidden;
 }
 
+
 .bg-color-pic {
     width: 15px !important;
     height: 15px !important;
@@ -1511,6 +1512,17 @@ input:checked+.slider-send:before {
     .editor-bg {
         width: 90%;
     }
+    .sign-image{
+    width: 80px;
+    height: 80px;
+    margin: 20px 0px !important;
+}
+.sign-name,.sign-designation{
+    font-size: 15px;
+}
+.sign-icon-text{
+    font-size: 14px;
+}
 
     .style-item select {
         width: 95%;

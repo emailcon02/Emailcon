@@ -192,14 +192,14 @@ else if (item.type === 'table') {
                      color: ${item.headerStyle?.color || '#000000'};
                      padding: 8px;
                      border: 1px solid #ccc;
-                     text-align: left;
+                     text-align: ${item.headerStyle?.textAlign || 'left'};
                      `
                   : `
                      background-color: ${item.cellStyle?.backgroundColor || '#ffffff'};
                      color: ${item.cellStyle?.color || '#000000'};
                      padding: 8px;
                      border: 1px solid #ccc;
-                     text-align: left;
+                     text-align: ${item.cellStyle?.textAlign || 'left'};
                      `;
 
                 return `<${Tag} style="${cellStyle}">${cell}</${Tag}>`;
@@ -1687,14 +1687,14 @@ case 'table':
                     color: ${headerStyle?.color || '#000000'};
                     padding: 8px;
                     border: 1px solid #ccc;
-                    text-align: left;
+                    text-align: ${headerStyle?.textAlign || 'left'};
                     `
                   : `
                     background-color: ${cellStyle?.backgroundColor || '#ffffff'};
                     color: ${cellStyle?.color || '#000000'};
                     padding: 8px;
                     border: 1px solid #ccc;
-                    text-align: left;
+                    text-align: ${cellStyle?.textAlign || 'left'};
                     `;
 
                 return `<${Tag} style="${cellStyleStr}">${cell}</${Tag}>`;
@@ -2212,6 +2212,8 @@ if (student.isUnsubscribed) {
         content,
         content1,
         content2,
+        headerStyle,
+        cellStyle,
         src1,
         src2,
         src,
@@ -2459,14 +2461,14 @@ case "sign":
                     color: ${headerStyle?.color || '#000000'};
                     padding: 8px;
                     border: 1px solid #ccc;
-                    text-align: left;
+                    text-align: ${headerStyle?.textAlign || 'left'};
                     `
                   : `
                     background-color: ${cellStyle?.backgroundColor || '#ffffff'};
                     color: ${cellStyle?.color || '#000000'};
                     padding: 8px;
                     border: 1px solid #ccc;
-                    text-align: left;
+                    text-align: ${cellStyle?.textAlign || 'left'};
                     `;
 
                 return `<${Tag} style="${cellStyleStr}">${cell}</${Tag}>`;

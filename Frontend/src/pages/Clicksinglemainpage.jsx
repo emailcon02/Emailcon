@@ -2,6 +2,8 @@ import React, { useState, useRef, useEffect, useCallback } from "react";
 import axios from "axios";
 import "./Readmainpage.css";
 import { ToastContainer, toast } from "react-toastify";
+import * as XLSX from "xlsx";
+
 import "react-toastify/dist/ReactToastify.css";
 import {
   FaArrowsAlt,
@@ -2552,25 +2554,22 @@ const handleItemClick = (index) => {
                   <FaPlusSquare /> Button
                 </button>
 
-             
-              </div>
-            </div>
-             {isMobilestylecolor ? (
-                              <ColorPalettePicker
-                                label={bgColor}
-                                onChange={(color) => setBgColor(color)}
-                              />
-                            ) : (
-                              <button className="file-manager-btn">
-                                <input
-                                  type="color"
-                                  value={bgColor}
-                                  onChange={(e) => setBgColor(e.target.value)}
-                                  className="bg-color-pic"
-                                />
-                                Template-Bg
-                              </button>
-                            )}
+                     <ColorPalettePicker className="bg-color-palete"
+                                             label={bgColor}
+                                             onChange={(color) => setBgColor(color)}
+                                           />
+                           </div>
+                         </div>
+                                          
+                                           <button className="tem-bg-btn">
+                                             <input
+                                               type="color"
+                                               value={bgColor}
+                                               onChange={(e) => setBgColor(e.target.value)}
+                                               className="bg-color-pic"
+                                             />
+                                             Template-Bg
+                                           </button>
             <button
               onClick={() => setActiveTablayout(true)}
               className="file-manager-btn"
@@ -3324,8 +3323,7 @@ const handleItemClick = (index) => {
                                   />
                                 </>
                               )}
-                              {previewContent[selectedIndex].type ===
-                                "table" && (
+                  {previewContent[selectedIndex].type === "table" && (
                                 <>
                                   {/* Header Controls */}
                                   <h4>Header Styles</h4>
@@ -3343,6 +3341,27 @@ const handleItemClick = (index) => {
                                     selectedIndex={selectedIndex}
                                     updateContent={updateContent}
                                   />
+                                    <label>Header Text Alignment:</label>
+                                  <select
+                                    value={
+                                      previewContent[selectedIndex]?.headerStyle
+                                        ?.textAlign || ""
+                                    }
+                                    onChange={(e) =>
+                                      updateContent(selectedIndex, {
+                                        headerStyle: {
+                                          ...previewContent[selectedIndex]
+                                            .headerStyle,
+                                          textAlign: e.target.value,
+                                        },
+                                      })
+                                    }
+                                  >
+                                    <option value="left">Left</option>
+                                    <option value="center">Center</option>
+                                    <option value="right">Right</option>
+                                  </select>
+
 
                                   {/* Cell Controls */}
                                   <h4>Cell Styles</h4>
@@ -3360,6 +3379,27 @@ const handleItemClick = (index) => {
                                     selectedIndex={selectedIndex}
                                     updateContent={updateContent}
                                   />
+                                    <label>Cell Text Alignment:</label>
+                                  <select
+                                    value={
+                                      previewContent[selectedIndex]?.cellStyle
+                                        ?.textAlign || ""
+                                    }
+                                    onChange={(e) =>
+                                      updateContent(selectedIndex, {
+                                        cellStyle: {
+                                          ...previewContent[selectedIndex]
+                                            .cellStyle,
+                                          textAlign: e.target.value,
+                                        },
+                                      })
+                                    }
+                                  >
+                                    <option value="left">Left</option>
+                                    <option value="center">Center</option>
+                                    <option value="right">Right</option>
+                                  </select>
+
 
                                   {/* Row/Column Controls */}
                                   <div className="table-edit-controls">
@@ -3369,13 +3409,8 @@ const handleItemClick = (index) => {
                                         className="table-edit-btn"
                                         title="Add Row"
                                         onClick={() => {
-                                          const newContent = [
-                                            ...previewContent[selectedIndex]
-                                              .content,
-                                          ];
-                                          const newRow = Array(
-                                            newContent[0]?.length || 1
-                                          ).fill("New Cell");
+                                          const newContent = [...previewContent[selectedIndex].content];
+                                          const newRow = Array(newContent[0]?.length || 1).fill("New Cell");
                                           updateContent(selectedIndex, {
                                             content: [...newContent, newRow],
                                           });
@@ -3387,10 +3422,7 @@ const handleItemClick = (index) => {
                                         className="table-edit-btn"
                                         title="Delete Row"
                                         onClick={() => {
-                                          const newContent = [
-                                            ...previewContent[selectedIndex]
-                                              .content,
-                                          ];
+                                          const newContent = [...previewContent[selectedIndex].content];
                                           if (newContent.length > 1) {
                                             newContent.pop();
                                             updateContent(selectedIndex, {
@@ -3409,12 +3441,9 @@ const handleItemClick = (index) => {
                                         className="table-edit-btn"
                                         title="Add Column"
                                         onClick={() => {
-                                          const newContent = previewContent[
-                                            selectedIndex
-                                          ].content.map((row) => [
-                                            ...row,
-                                            "New Column",
-                                          ]);
+                                          const newContent = previewContent[selectedIndex].content.map(
+                                            (row) => [...row, "New Column"]
+                                          );
                                           updateContent(selectedIndex, {
                                             content: newContent,
                                           });
@@ -3426,14 +3455,11 @@ const handleItemClick = (index) => {
                                         className="table-edit-btn"
                                         title="Delete Column"
                                         onClick={() => {
-                                          const currentContent =
-                                            previewContent[selectedIndex]
-                                              .content;
+                                          const currentContent = previewContent[selectedIndex].content;
                                           if (currentContent[0]?.length > 1) {
-                                            const newContent =
-                                              currentContent.map((row) =>
-                                                row.slice(0, -1)
-                                              );
+                                            const newContent = currentContent.map((row) =>
+                                              row.slice(0, -1)
+                                            );
                                             updateContent(selectedIndex, {
                                               content: newContent,
                                             });
@@ -3443,6 +3469,38 @@ const handleItemClick = (index) => {
                                         ➖ Column
                                       </button>
                                     </div>
+                                    {/* Upload Button */}
+                                      <label className="file-manager-btn" style={{textAlign:"center"}}>
+                                        Upload Excel
+                                        <input
+                                          type="file"
+                                          accept=".xlsx, .xls, .csv"
+                                          onChange={(e) => {
+                                            const file = e.target.files[0];
+                                            if (!file) return;
+
+                                            const reader = new FileReader();
+                                            reader.onload = (event) => {
+                                              const data = new Uint8Array(event.target.result);
+                                              const workbook = XLSX.read(data, { type: "array" });
+                                              const sheetName = workbook.SheetNames[0];
+                                              const worksheet = workbook.Sheets[sheetName];
+                                              const jsonData = XLSX.utils.sheet_to_json(worksheet, {
+                                                header: 1,
+                                                defval: "", // prevent `undefined` cells
+                                              });
+
+                                              updateContent(selectedIndex, {
+                                                content: jsonData,
+                                              });
+                                            };
+                                            reader.readAsArrayBuffer(file);
+                                            // Reset the input value so uploading the same file again will retrigger onChange
+                                            e.target.value = null;
+                                          }}
+                                          style={{ display: "none" }}
+                                        />
+                                      </label>
                                   </div>
                                 </>
                               )}
@@ -5546,123 +5604,187 @@ const handleItemClick = (index) => {
                             />
                           </>
                         )}
-                        {previewContent[selectedIndex].type === "table" && (
-                          <>
-                            {/* Header Controls */}
-                            <h4>Header Styles</h4>
-                            <ColorPicker
-                              label="Header Text Color"
-                              objectKey="headerStyle.color"
-                              previewContent={previewContent}
-                              selectedIndex={selectedIndex}
-                              updateContent={updateContent}
-                            />
-                            <ColorPicker
-                              label="Header Background"
-                              objectKey="headerStyle.backgroundColor"
-                              previewContent={previewContent}
-                              selectedIndex={selectedIndex}
-                              updateContent={updateContent}
-                            />
-
-                            {/* Cell Controls */}
-                            <h4>Cell Styles</h4>
-                            <ColorPicker
-                              label="Cell Text Color"
-                              objectKey="cellStyle.color"
-                              previewContent={previewContent}
-                              selectedIndex={selectedIndex}
-                              updateContent={updateContent}
-                            />
-                            <ColorPicker
-                              label="Cell Background"
-                              objectKey="cellStyle.backgroundColor"
-                              previewContent={previewContent}
-                              selectedIndex={selectedIndex}
-                              updateContent={updateContent}
-                            />
-
-                            {/* Row/Column Controls */}
-                            <div className="table-edit-controls">
-                              {/* Row Controls */}
-                              <div className="table-edit-row-controls">
-                                <button
-                                  className="table-edit-btn"
-                                  title="Add Row"
-                                  onClick={() => {
-                                    const newContent = [
-                                      ...previewContent[selectedIndex].content,
-                                    ];
-                                    const newRow = Array(
-                                      newContent[0]?.length || 1
-                                    ).fill("New Cell");
-                                    updateContent(selectedIndex, {
-                                      content: [...newContent, newRow],
-                                    });
-                                  }}
-                                >
-                                  ➕ Row
-                                </button>
-                                <button
-                                  className="table-edit-btn"
-                                  title="Delete Row"
-                                  onClick={() => {
-                                    const newContent = [
-                                      ...previewContent[selectedIndex].content,
-                                    ];
-                                    if (newContent.length > 1) {
-                                      newContent.pop();
-                                      updateContent(selectedIndex, {
-                                        content: newContent,
-                                      });
+                  {previewContent[selectedIndex].type === "table" && (
+                                <>
+                                  {/* Header Controls */}
+                                  <h4>Header Styles</h4>
+                                  <ColorPicker
+                                    label="Header Text Color"
+                                    objectKey="headerStyle.color"
+                                    previewContent={previewContent}
+                                    selectedIndex={selectedIndex}
+                                    updateContent={updateContent}
+                                  />
+                                  <ColorPicker
+                                    label="Header Background"
+                                    objectKey="headerStyle.backgroundColor"
+                                    previewContent={previewContent}
+                                    selectedIndex={selectedIndex}
+                                    updateContent={updateContent}
+                                  />
+                                    <label>Header Text Alignment:</label>
+                                  <select
+                                    value={
+                                      previewContent[selectedIndex]?.headerStyle
+                                        ?.textAlign || ""
                                     }
-                                  }}
-                                >
-                                  ➖ Row
-                                </button>
-                              </div>
-
-                              {/* Column Controls */}
-                              <div className="table-edit-column-controls">
-                                <button
-                                  className="table-edit-btn"
-                                  title="Add Column"
-                                  onClick={() => {
-                                    const newContent = previewContent[
-                                      selectedIndex
-                                    ].content.map((row) => [
-                                      ...row,
-                                      "New Column",
-                                    ]);
-                                    updateContent(selectedIndex, {
-                                      content: newContent,
-                                    });
-                                  }}
-                                >
-                                  ➕ Column
-                                </button>
-                                <button
-                                  className="table-edit-btn"
-                                  title="Delete Column"
-                                  onClick={() => {
-                                    const currentContent =
-                                      previewContent[selectedIndex].content;
-                                    if (currentContent[0]?.length > 1) {
-                                      const newContent = currentContent.map(
-                                        (row) => row.slice(0, -1)
-                                      );
+                                    onChange={(e) =>
                                       updateContent(selectedIndex, {
-                                        content: newContent,
-                                      });
+                                        headerStyle: {
+                                          ...previewContent[selectedIndex]
+                                            .headerStyle,
+                                          textAlign: e.target.value,
+                                        },
+                                      })
                                     }
-                                  }}
-                                >
-                                  ➖ Column
-                                </button>
-                              </div>
-                            </div>
-                          </>
-                        )}
+                                  >
+                                    <option value="left">Left</option>
+                                    <option value="center">Center</option>
+                                    <option value="right">Right</option>
+                                  </select>
+
+
+                                  {/* Cell Controls */}
+                                  <h4>Cell Styles</h4>
+                                  <ColorPicker
+                                    label="Cell Text Color"
+                                    objectKey="cellStyle.color"
+                                    previewContent={previewContent}
+                                    selectedIndex={selectedIndex}
+                                    updateContent={updateContent}
+                                  />
+                                  <ColorPicker
+                                    label="Cell Background"
+                                    objectKey="cellStyle.backgroundColor"
+                                    previewContent={previewContent}
+                                    selectedIndex={selectedIndex}
+                                    updateContent={updateContent}
+                                  />
+                                    <label>Cell Text Alignment:</label>
+                                  <select
+                                    value={
+                                      previewContent[selectedIndex]?.cellStyle
+                                        ?.textAlign || ""
+                                    }
+                                    onChange={(e) =>
+                                      updateContent(selectedIndex, {
+                                        cellStyle: {
+                                          ...previewContent[selectedIndex]
+                                            .cellStyle,
+                                          textAlign: e.target.value,
+                                        },
+                                      })
+                                    }
+                                  >
+                                    <option value="left">Left</option>
+                                    <option value="center">Center</option>
+                                    <option value="right">Right</option>
+                                  </select>
+
+
+                                  {/* Row/Column Controls */}
+                                  <div className="table-edit-controls">
+                                    {/* Row Controls */}
+                                    <div className="table-edit-row-controls">
+                                      <button
+                                        className="table-edit-btn"
+                                        title="Add Row"
+                                        onClick={() => {
+                                          const newContent = [...previewContent[selectedIndex].content];
+                                          const newRow = Array(newContent[0]?.length || 1).fill("New Cell");
+                                          updateContent(selectedIndex, {
+                                            content: [...newContent, newRow],
+                                          });
+                                        }}
+                                      >
+                                        ➕ Row
+                                      </button>
+                                      <button
+                                        className="table-edit-btn"
+                                        title="Delete Row"
+                                        onClick={() => {
+                                          const newContent = [...previewContent[selectedIndex].content];
+                                          if (newContent.length > 1) {
+                                            newContent.pop();
+                                            updateContent(selectedIndex, {
+                                              content: newContent,
+                                            });
+                                          }
+                                        }}
+                                      >
+                                        ➖ Row
+                                      </button>
+                                    </div>
+
+                                    {/* Column Controls */}
+                                    <div className="table-edit-column-controls">
+                                      <button
+                                        className="table-edit-btn"
+                                        title="Add Column"
+                                        onClick={() => {
+                                          const newContent = previewContent[selectedIndex].content.map(
+                                            (row) => [...row, "New Column"]
+                                          );
+                                          updateContent(selectedIndex, {
+                                            content: newContent,
+                                          });
+                                        }}
+                                      >
+                                        ➕ Column
+                                      </button>
+                                      <button
+                                        className="table-edit-btn"
+                                        title="Delete Column"
+                                        onClick={() => {
+                                          const currentContent = previewContent[selectedIndex].content;
+                                          if (currentContent[0]?.length > 1) {
+                                            const newContent = currentContent.map((row) =>
+                                              row.slice(0, -1)
+                                            );
+                                            updateContent(selectedIndex, {
+                                              content: newContent,
+                                            });
+                                          }
+                                        }}
+                                      >
+                                        ➖ Column
+                                      </button>
+                                    </div>
+                                    {/* Upload Button */}
+                                      <label className="file-manager-btn" style={{textAlign:"center"}}>
+                                        Upload Excel
+                                        <input
+                                          type="file"
+                                          accept=".xlsx, .xls, .csv"
+                                          onChange={(e) => {
+                                            const file = e.target.files[0];
+                                            if (!file) return;
+
+                                            const reader = new FileReader();
+                                            reader.onload = (event) => {
+                                              const data = new Uint8Array(event.target.result);
+                                              const workbook = XLSX.read(data, { type: "array" });
+                                              const sheetName = workbook.SheetNames[0];
+                                              const worksheet = workbook.Sheets[sheetName];
+                                              const jsonData = XLSX.utils.sheet_to_json(worksheet, {
+                                                header: 1,
+                                                defval: "", // prevent `undefined` cells
+                                              });
+
+                                              updateContent(selectedIndex, {
+                                                content: jsonData,
+                                              });
+                                            };
+                                            reader.readAsArrayBuffer(file);
+                                            // Reset the input value so uploading the same file again will retrigger onChange
+                                            e.target.value = null;
+                                          }}
+                                          style={{ display: "none" }}
+                                        />
+                                      </label>
+                                  </div>
+                                </>
+                              )}
 
                         {previewContent[selectedIndex].type === "head" && (
                           <>
@@ -7846,47 +7968,41 @@ const handleItemClick = (index) => {
                         </div>
                       )}
 
-                      {item.type === "table" && (
-                        <>
-                          <div className="table-component">
-                            <table style={item.style}>
-                              <tbody>
-                                {item.content.map((row, rowIndex) => (
-                                  <tr key={rowIndex}>
-                                    {row.map((cell, cellIndex) => {
-                                      const isHeader = rowIndex === 0;
-                                      const cellStyleToUse = isHeader
-                                        ? item.headerStyle
-                                        : item.cellStyle;
-                                      const CellTag = isHeader ? "th" : "td";
-
-                                      return (
-                                        <CellTag
-                                          key={cellIndex}
-                                          style={cellStyleToUse}
-                                          contentEditable
-                                          suppressContentEditableWarning
-                                          onBlur={(e) => {
-                                            const newContent = [
-                                              ...item.content,
-                                            ];
-                                            newContent[rowIndex][cellIndex] =
-                                              e.target.textContent;
-                                            updateContent(index, {
-                                              content: newContent,
-                                            });
-                                          }}
-                                        >
-                                          {cell}
-                                        </CellTag>
-                                      );
-                                    })}
-                                  </tr>
-                                ))}
-                              </tbody>
-                            </table>
-                          </div>
-                        </>
+{item.type === "table" && (
+                        <div className="table-component">
+                          <table style={item.style}>
+                            <tbody>
+                              {item.content.map((row, rowIndex) => (
+                                <tr key={rowIndex}>
+                                  {row.map((cell, cellIndex) => {
+                                    const isHeader = rowIndex === 0;
+                                    const cellStyleToUse = isHeader
+                                      ? item.headerStyle
+                                      : item.cellStyle;
+                                    const CellTag = isHeader ? "th" : "td";
+                                    return (
+                                      <CellTag
+                                        key={cellIndex}
+                                        style={cellStyleToUse}
+                                        contentEditable
+                                        suppressContentEditableWarning
+                                        onBlur={(e) => {
+                                          const newContent = [...item.content];
+                                          newContent[rowIndex][cellIndex] = e.target.textContent;
+                                          updateContent(index, {
+                                            content: newContent,
+                                          });
+                                        }}
+                                      >
+                                        {cell}
+                                      </CellTag>
+                                    );
+                                  })}
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
                       )}
                       {item.type === "head" && (
                         <div ref={dropdownRef}>
@@ -8662,51 +8778,42 @@ const handleItemClick = (index) => {
                                 </a>
                               </div>
                             )}
-                            {item.type === "table" && (
-                              <>
-                                <div className="table-component">
-                                  <table style={item.style}>
-                                    <tbody>
-                                      {item.content.map((row, rowIndex) => (
-                                        <tr key={rowIndex}>
-                                          {row.map((cell, cellIndex) => {
-                                            const isHeader = rowIndex === 0;
-                                            const cellStyleToUse = isHeader
-                                              ? item.headerStyle
-                                              : item.cellStyle;
-                                            const CellTag = isHeader
-                                              ? "th"
-                                              : "td";
-
-                                            return (
-                                              <CellTag
-                                                key={cellIndex}
-                                                style={cellStyleToUse}
-                                                contentEditable
-                                                suppressContentEditableWarning
-                                                onBlur={(e) => {
-                                                  const newContent = [
-                                                    ...item.content,
-                                                  ];
-                                                  newContent[rowIndex][
-                                                    cellIndex
-                                                  ] = e.target.textContent;
-                                                  updateContent(index, {
-                                                    content: newContent,
-                                                  });
-                                                }}
-                                              >
-                                                {cell}
-                                              </CellTag>
-                                            );
-                                          })}
-                                        </tr>
-                                      ))}
-                                    </tbody>
-                                  </table>
-                                </div>
-                              </>
-                            )}
+{item.type === "table" && (
+                        <div className="table-component">
+                          <table style={item.style}>
+                            <tbody>
+                              {item.content.map((row, rowIndex) => (
+                                <tr key={rowIndex}>
+                                  {row.map((cell, cellIndex) => {
+                                    const isHeader = rowIndex === 0;
+                                    const cellStyleToUse = isHeader
+                                      ? item.headerStyle
+                                      : item.cellStyle;
+                                    const CellTag = isHeader ? "th" : "td";
+                                    return (
+                                      <CellTag
+                                        key={cellIndex}
+                                        style={cellStyleToUse}
+                                        contentEditable
+                                        suppressContentEditableWarning
+                                        onBlur={(e) => {
+                                          const newContent = [...item.content];
+                                          newContent[rowIndex][cellIndex] = e.target.textContent;
+                                          updateContent(index, {
+                                            content: newContent,
+                                          });
+                                        }}
+                                      >
+                                        {cell}
+                                      </CellTag>
+                                    );
+                                  })}
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+                      )}
 
                             {item.type === "head" && (
                               <div>
