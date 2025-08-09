@@ -2444,33 +2444,38 @@ case "sign":
         </tr>
     </table>`;
 
-    case 'table':
+case 'table': {
+  // Ensure content is parsed correctly
+  let tableContent = content;
+  if (typeof tableContent === 'string') {
+    try {
+      tableContent = JSON.parse(tableContent);
+    } catch {
+      tableContent = [];
+    }
+  }
+  if (!Array.isArray(tableContent)) tableContent = [];
+
   return `
     <div style="max-width: 600px; max-height: 200px; overflow: auto; margin: 10px auto;">
       <table style="width: 100%; border-collapse: collapse;">
         <tbody>
-          ${content.map((row, rowIndex) => `
+          ${tableContent.map((row, rowIndex) => `
             <tr>
               ${row.map((cell, cellIndex) => {
                 const isHeader = rowIndex === 0;
                 const Tag = isHeader ? 'th' : 'td';
-
                 const cellStyleStr = isHeader 
-                  ? `
-                    background-color: ${headerStyle?.backgroundColor || '#f4f4f4'};
-                    color: ${headerStyle?.color || '#000000'};
-                    padding: 8px;
-                    border: 1px solid #ccc;
-                    text-align: ${headerStyle?.textAlign || 'left'};
-                    `
-                  : `
-                    background-color: ${cellStyle?.backgroundColor || '#ffffff'};
-                    color: ${cellStyle?.color || '#000000'};
-                    padding: 8px;
-                    border: 1px solid #ccc;
-                    text-align: ${cellStyle?.textAlign || 'left'};
-                    `;
-
+                  ? `background-color: ${headerStyle.backgroundColor || '#f4f4f4'};
+                     color: ${headerStyle.color || '#000000'};
+                     padding: 8px;
+                     border: 1px solid #ccc;
+                     text-align: ${headerStyle.textAlign || 'left'};`
+                  : `background-color: ${cellStyle.backgroundColor || '#ffffff'};
+                     color: ${cellStyle.color || '#000000'};
+                     padding: 8px;
+                     border: 1px solid #ccc;
+                     text-align: ${cellStyle.textAlign || 'left'};`;
                 return `<${Tag} style="${cellStyleStr}">${cell}</${Tag}>`;
               }).join('')}
             </tr>
@@ -2479,6 +2484,7 @@ case "sign":
       </table>
     </div>
   `;
+}
 
         case 'link-image':
           return `<div class="img-case" style="margin:10px auto !important;${styleString};">

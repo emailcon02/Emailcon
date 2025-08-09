@@ -463,7 +463,9 @@ border-bottom: 1px solid #ebe6dd;
   border-radius: 5px;
   text-align: center;
 }
-
+.modal-content-schedule h3{
+  margin-bottom: 15px;
+}
 .modal-actions-schedule {
   margin-top: 20px;
 }

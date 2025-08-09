@@ -36,7 +36,7 @@ const sendEmailToStudent = async ({ student, campaignId, userId, subject, attach
   await axios.post(`${apiConfig.baseURL}/api/stud/sendbulkEmail`, emailData);
 };
 
-cron.schedule('*/10 * * * *', async () => {
+cron.schedule('*/2 * * * *', async () => {
   try {
     const nowUTC = new Date();
     nowUTC.setSeconds(0, 0);
@@ -120,19 +120,34 @@ cron.schedule('*/10 * * * *', async () => {
         for (const student of batch) {
           try {
             // Personalize content
-            const personalizedContent = camhistory.previewContent.map((item) => {
-              const personalizedItem = { ...item };
-              if (item.content) {
-                Object.entries(student).forEach(([key, value]) => {
-                  const regex = new RegExp(`\\{${key}\\}`, "gi");
-                  personalizedItem.content = personalizedItem.content.replace(
-                    regex,
-                    value != null ? String(value).trim() : ""
-                  );
-                });
-              }
-              return personalizedItem;
-            });
+const personalizedContent = camhistory.previewContent.map((item) => {
+  const personalizedItem = { ...item };
+
+  if (Array.isArray(item.content)) {
+    // Table format → loop through rows & cells
+    personalizedItem.content = item.content.map(row =>
+      row.map(cell => {
+        let cellText = String(cell ?? "");
+        Object.entries(student).forEach(([key, value]) => {
+          const regex = new RegExp(`\\{${key}\\}`, "gi");
+          cellText = cellText.replace(regex, value != null ? String(value).trim() : "");
+        });
+        return cellText;
+      })
+    );
+  } else if (typeof item.content === "string") {
+    // Normal text, banner, etc.
+    Object.entries(student).forEach(([key, value]) => {
+      const regex = new RegExp(`\\{${key}\\}`, "gi");
+      personalizedItem.content = personalizedItem.content.replace(
+        regex,
+        value != null ? String(value).trim() : ""
+      );
+    });
+  }
+
+  return personalizedItem;
+});
 
             // Personalize subject
             let personalizedSubject = camhistory.subject;

@@ -64,6 +64,7 @@ const CampaignTableNew = ({ onSelect = () => {}, className = "" }) => {
   const [showDeleteAllConfirm, setShowDeleteAllConfirm] = useState(false);
   const [campaignMetrics, setCampaignMetrics] = useState({});
   const [fromDate, setFromDate] = useState(null);
+      const [loading, setLoading] = useState(false);
   const [toDate, setToDate] = useState(null);
   const [filteredCampaigns, setFilteredCampaigns] = useState([]);
   const [campaigns, setCampaigns] = useState([]);
@@ -403,7 +404,6 @@ useEffect(() => {
 
   const handleTimeChange = (e, campaignId) => {
     const selectedTime = e.target.value;
-    console.log("Selected Time:", selectedTime, campaignId);
     setNewTime((prev) => ({ ...prev, [campaignId]: selectedTime })); // Store per campaign
   };
   const handleSaveTime = async () => {
@@ -431,6 +431,7 @@ useEffect(() => {
       );
       toast.success("Scheduled time updated successfully!");
       setIsModalOpen(false); // Close modal after save
+      window.location.reload();
     } catch (error) {
       console.error("Error updating scheduled time:", error);
       toast.error("Failed to update scheduled time");
@@ -993,322 +994,177 @@ useEffect(() => {
     const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return re.test(String(email).toLowerCase());
   };
+const handleResend = async () => {
+  setLoading(true);
+  try {
+    const response = await axios.get(
+      `${apiConfig.baseURL}/api/stud/getcamhistory/${campaignId}`
+    );
+    const campaign = response.data;
 
-  const handleResend = async () => {
-    try {
-      // Fetch campaign details
-      const response = await axios.get(
-        `${apiConfig.baseURL}/api/stud/getcamhistory/${campaignId}`
+    if (!campaign?.failedEmails?.length) {
+      toast.warning("No failed emails to resend.");
+      return;
+    }
+
+    const validFailedEmails = campaign.failedEmails.filter(
+      (email) => email && isValidEmail(email) && email !== "missing"
+    );
+    const invalidEmails = campaign.failedEmails.filter(
+      (email) => !email || !isValidEmail(email) || email === "missing"
+    );
+
+    if (!validFailedEmails.length) {
+      toast.warning("No valid failed emails to resend.");
+      return;
+    }
+
+    let sentEmails = [];
+    let failedEmails = [...invalidEmails];
+
+    // --- Shared placeholder replacement ---
+    const replacePlaceholders = (content, data) => {
+      if (typeof content === "string") {
+        let updated = content;
+        Object.entries(data).forEach(([key, value]) => {
+          const regex = new RegExp(`\\{${key}\\}`, "gi");
+          updated = updated.replace(regex, value != null ? String(value).trim() : "");
+        });
+        return updated;
+      }
+      return content;
+    };
+
+    // --- Shared table processor ---
+    const processTableContent = (tableContent, studentData) => {
+      if (!tableContent?.content || !Array.isArray(tableContent.content)) return tableContent;
+
+      const processedContent = tableContent.content.map((row) =>
+        row.map((cell) => {
+          if (typeof cell === "number" && cell > 10000) {
+            const date = new Date((cell - 25569) * 86400 * 1000);
+            cell = date.toLocaleDateString();
+          }
+          let cellValue = cell != null ? String(cell) : "";
+          if (studentData) {
+            Object.entries(studentData).forEach(([key, value]) => {
+              const regex = new RegExp(`\\{${key}\\}`, "gi");
+              cellValue = cellValue.replace(regex, value != null ? String(value).trim() : "");
+            });
+          }
+          return cellValue;
+        })
       );
-      const campaign = response.data;
-      if (
-        !campaign ||
-        !campaign.failedEmails ||
-        campaign.failedEmails.length === 0
-      ) {
-        toast.warning("No failed emails to resend.");
-        return;
-      }
-      // Validate and filter emails before processing
-      const validFailedEmails = campaign.failedEmails.filter(
-        (email) => email && isValidEmail(email) && email !== "missing"
+
+      return {
+        ...tableContent,
+        content: processedContent,
+        headerStyle: tableContent.headerStyle || {},
+        cellStyle: tableContent.cellStyle || {},
+      };
+    };
+
+    // --- Function to send one email ---
+    const sendPersonalizedEmail = async (email, studentData) => {
+      const personalizedContent = campaign.previewContent.map((item) =>
+        item.type === "table"
+          ? processTableContent(item, studentData)
+          : { ...item, content: replacePlaceholders(item.content, studentData) }
       );
-      const invalidEmails = campaign.failedEmails.filter(
-        (email) => !email || !isValidEmail(email) || email === "missing"
-      );
 
-      if (validFailedEmails.length === 0) {
-        toast.warning("No valid failed emails to resend.");
-        return;
+      const emailData = {
+        recipientEmail: email,
+        subject: replacePlaceholders(campaign.subject, studentData),
+        body: JSON.stringify(personalizedContent),
+        bgColor: campaign.bgColor,
+        previewtext: campaign.previewtext,
+        attachments: campaign.attachments,
+        aliasName: campaign.aliasName,
+        replyTo: campaign.replyTo,
+        userId: campaign.user,
+        groupId: campaign.groupname,
+        campaignId,
+      };
+
+      try {
+        await axios.post(`${apiConfig.baseURL}/api/stud/sendbulkEmail`, emailData);
+        sentEmails.push(email);
+      } catch (err) {
+        console.error(`Failed to send email to ${email}:`, err);
+        failedEmails.push(email);
       }
+    };
 
-      let sentEmails = [];
-      let failedEmails = [...invalidEmails]; // Start with invalid emails
+    // --- Update campaign to Pending before sending ---
+    await axios.put(`${apiConfig.baseURL}/api/stud/camhistory/${campaignId}`, {
+      status: "Pending",
+    });
 
-      // If groupId is a string (e.g., "no group"), send only to failedEmails and return early
-      if (!campaign.groupId || campaign.groupId === "no group") {
-        console.log("No group found, sending emails directly.");
-
-        // Update status to 'Pending' before resending
-        await axios.put(
-          `${apiConfig.baseURL}/api/stud/camhistory/${campaignId}`,
-          {
-            status: "Pending",
-          }
-        );
-
-        for (const email of campaign.failedEmails) {
-          const personalizedContent = campaign.previewContent.map((item) => {
-            const personalizedItem = { ...item };
-
-            if (item.content) {
-              const placeholderRegex = new RegExp(`\\{?Email\\}?`, "g");
-              personalizedItem.content = personalizedItem.content.replace(
-                placeholderRegex,
-                email
-              );
-            }
-            return personalizedItem;
-          });
-
-          const emailData = {
-            recipientEmail: email,
-            subject: campaign.subject,
-            aliasName: campaign.aliasName,
-            replyTo: campaign.replyTo,
-            body: JSON.stringify(personalizedContent),
-            bgColor: campaign.bgColor,
-            previewtext: campaign.previewtext,
-            attachments: campaign.attachments,
-            userId: campaign.user,
-            groupId: campaign.groupname,
-            campaignId: campaignId,
-          };
-
-          try {
-            await axios.post(
-              `${apiConfig.baseURL}/api/stud/sendbulkEmail`,
-              emailData
-            );
-            sentEmails.push(email);
-          } catch (error) {
-            console.error(`Failed to send email to ${email}:`, error);
-            failedEmails.push(email);
-          }
-        }
-
-        // ✅ Final status & progress calculation
-        const totalEmails = campaign.totalcount;
-        const successCount = sentEmails.length;
-        const failureCount = failedEmails.length;
-        let finalStatus, finalProgress;
-
-        if (failureCount > 0) {
-          finalStatus = "Failed";
-          finalProgress = Math.round((failureCount / totalEmails) * 100);
-        } else {
-          finalStatus = "Success";
-          finalProgress = 100;
-        }
-
-        await axios.put(
-          `${apiConfig.baseURL}/api/stud/camhistory/${campaignId}`,
-          {
-            sendcount: Number(campaign.sendcount) + successCount,
-            sentEmails: [...campaign.sentEmails, ...sentEmails],
-            failedEmails: failedEmails.length > 0 ? [...failedEmails] : 0,
-            failedcount: failedEmails.length > 0 ? failedEmails.length : 0,
-            status: finalStatus,
-            progress: finalProgress,
-          }
-        );
-
-        console.log("Emails resent successfully!");
-        return;
+    // ---------------- Case 1: No groupId or "no group" ----------------
+    if (!campaign.groupId || campaign.groupId === "no group") {
+      for (const email of validFailedEmails) {
+        await sendPersonalizedEmail(email, { Email: email });
       }
+    }
 
-      // If groupId is a string (e.g., "No id"), send only to failedEmails and return early
-      if (!campaign.groupId || campaign.groupId === "No id") {
-        console.log("No group found, sending emails directly.");
-
-        // Update status to 'Pending' before resending
-        await axios.put(
-          `${apiConfig.baseURL}/api/stud/camhistory/${campaignId}`,
-          {
-            status: "Pending",
-          }
-        );
-
-        for (const email of campaign.failedEmails) {
-          // Find the corresponding student
-          const student = campaign.exceldata.find((s) => s.Email === email);
-          if (!student) {
-            console.warn(`No matching student found for email: ${email}`);
-            failedEmails.push(email);
-            return;
-          }
-
-          // Personalize email content with student details
-          const personalizedContent = campaign.previewContent.map((item) => {
-            const personalizedItem = { ...item };
-
-            if (item.content) {
-              Object.entries(student).forEach(([key, value]) => {
-                const placeholderRegex = new RegExp(`\\{?${key}\\}?`, "g");
-                const cellValue = value != null ? String(value).trim() : "";
-                personalizedItem.content = personalizedItem.content.replace(
-                  placeholderRegex,
-                  cellValue
-                );
-              });
-            }
-            return personalizedItem;
-          });
-
-          const emailData = {
-            recipientEmail: email,
-            subject: campaign.subject,
-            body: JSON.stringify(personalizedContent),
-            bgColor: campaign.bgColor,
-            previewtext: campaign.previewtext,
-            aliasName: campaign.aliasName,
-            replyTo: campaign.replyTo,
-            attachments: campaign.attachments,
-            userId: campaign.user,
-            groupId: campaign.groupname,
-            campaignId: campaignId,
-          };
-
-          try {
-            await axios.post(
-              `${apiConfig.baseURL}/api/stud/sendbulkEmail`,
-              emailData
-            );
-            sentEmails.push(email);
-          } catch (error) {
-            console.error(`Failed to send email to ${email}:`, error);
-            failedEmails.push(email);
-          }
+    // ---------------- Case 2: No groupId or "No id" ----------------
+    else if (!campaign.groupId || campaign.groupId === "No id") {
+      for (const email of validFailedEmails) {
+        const student = campaign.exceldata.find((s) => s.Email === email);
+        if (!student) {
+          failedEmails.push(email);
+          continue;
         }
-
-        // ✅ Final status & progress calculation
-        const totalEmails = campaign.totalcount;
-        const successCount = sentEmails.length;
-        const failureCount = failedEmails.length;
-        let finalStatus, finalProgress;
-
-        if (failureCount > 0) {
-          finalStatus = "Failed";
-          finalProgress = Math.round((failureCount / totalEmails) * 100);
-        } else {
-          finalStatus = "Success";
-          finalProgress = 100;
-        }
-
-        await axios.put(
-          `${apiConfig.baseURL}/api/stud/camhistory/${campaignId}`,
-          {
-            sendcount: Number(campaign.sendcount) + successCount,
-            sentEmails: [...campaign.sentEmails, ...sentEmails],
-            failedEmails: failedEmails.length > 0 ? [...failedEmails] : 0,
-            failedcount: failedEmails.length > 0 ? failedEmails.length : 0,
-            status: finalStatus,
-            progress: finalProgress,
-          }
-        );
-
-        console.log("Emails resent successfully!");
-
-        return;
+        await sendPersonalizedEmail(email, student);
       }
+    }
 
-      // If groupId exists, fetch students and follow existing logic
+    // ---------------- Case 3: groupId exists ----------------
+    else {
       const studentsResponse = await axios.get(
         `${apiConfig.baseURL}/api/stud/groups/${campaign.groupId}/students`
       );
       const students = studentsResponse.data;
 
-      // Update status to 'Pending' before resending
-      await axios.put(
-        `${apiConfig.baseURL}/api/stud/camhistory/${campaignId}`,
-        {
-          status: "Pending",
-        }
-      );
-
-      for (const email of campaign.failedEmails) {
-        // Find the corresponding student
+      for (const email of validFailedEmails) {
         const student = students.find((s) => s.Email === email);
         if (!student) {
-          console.warn(`No matching student found for email: ${email}`);
           failedEmails.push(email);
-          return;
+          continue;
         }
-        // Replace placeholders in subject
-        let personalizedSubject = campaign.subject;
-        Object.entries(student).forEach(([key, value]) => {
-          const placeholderRegex = new RegExp(`\\{?${key}\\}?`, "g");
-          const cellValue = value != null ? String(value).trim() : "";
-          personalizedSubject = personalizedSubject.replace(
-            placeholderRegex,
-            cellValue
-          );
-        });
-        // Personalize email content with student details
-        const personalizedContent = campaign.previewContent.map((item) => {
-          const personalizedItem = { ...item };
-
-          if (item.content) {
-            Object.entries(student).forEach(([key, value]) => {
-              const placeholderRegex = new RegExp(`\\{?${key}\\}?`, "g");
-              const cellValue = value != null ? String(value).trim() : "";
-              personalizedItem.content = personalizedItem.content.replace(
-                placeholderRegex,
-                cellValue
-              );
-            });
-          }
-          return personalizedItem;
-        });
-
-        const emailData = {
-          recipientEmail: email,
-          subject: personalizedSubject,
-          body: JSON.stringify(personalizedContent),
-          bgColor: campaign.bgColor,
-          previewtext: campaign.previewtext,
-          attachments: campaign.attachments,
-          aliasName: campaign.aliasName,
-          replyTo: campaign.replyTo,
-          userId: campaign.user,
-          groupId: campaign.groupname,
-          campaignId: campaignId,
-        };
-
-        try {
-          await axios.post(
-            `${apiConfig.baseURL}/api/stud/sendbulkEmail`,
-            emailData
-          );
-          sentEmails.push(email);
-        } catch (error) {
-          console.error(`Failed to send email to ${email}:`, error);
-          failedEmails.push(email);
-        }
-      }
-      // ✅ Final status & progress calculation
-      const totalEmails = campaign.totalcount;
-      const successCount = sentEmails.length;
-      const failureCount = failedEmails.length;
-      let finalStatus, finalProgress;
-
-      if (failureCount > 0) {
-        finalStatus = "Failed";
-        finalProgress = Math.round((failureCount / totalEmails) * 100);
-      } else {
-        finalStatus = "Success";
-        finalProgress = 100;
-      }
-
-      await axios.put(
-        `${apiConfig.baseURL}/api/stud/camhistory/${campaignId}`,
-        {
-          sendcount: Number(campaign.sendcount) + successCount,
-          sentEmails: [...campaign.sentEmails, ...sentEmails],
-          failedEmails: failedEmails.length > 0 ? [...failedEmails] : 0,
-          failedcount: failedEmails.length > 0 ? failedEmails.length : 0,
-          status: finalStatus,
-          progress: finalProgress,
-        }
-      );
-      console.log("Emails resent successfully!");
-    } catch (error) {
-      console.error("Error resending emails:", error);
-      if (error.response) {
-        toast.error(`Failed to resend emails: ${error.response.data.message}`);
+        await sendPersonalizedEmail(email, student);
       }
     }
-  };
+
+    // --- Final Status Update ---
+    const totalEmails = campaign.totalcount;
+    const successCount = sentEmails.length;
+    const failureCount = failedEmails.length;
+
+    const finalStatus = failureCount > 0 ? "Failed" : "Success";
+    const finalProgress =
+      failureCount > 0
+        ? Math.round((failureCount / totalEmails) * 100)
+        : 100;
+
+    await axios.put(`${apiConfig.baseURL}/api/stud/camhistory/${campaignId}`, {
+      sendcount: Number(campaign.sendcount) + successCount,
+      sentEmails: [...campaign.sentEmails, ...sentEmails],
+      failedEmails: failureCount > 0 ? failedEmails : 0,
+      failedcount: failureCount > 0 ? failureCount : 0,
+      status: finalStatus,
+      progress: finalProgress,
+    });
+
+    toast.success(`Resent ${successCount} emails successfully!`);
+  } catch (error) {
+    console.error("Error resending emails:", error);
+    toast.error(`Failed to resend emails: ${error.response?.data?.message || error.message}`);
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   return (
     <>
@@ -2137,10 +1993,15 @@ useEffect(() => {
                 </button>
                 <button
                   onClick={() => handleResend(campaignId)}
-                  className="target-modal-read"
-                >
-                  Resend
-                </button>
+      className="target-modal-read"
+      disabled={loading}
+    >
+      {loading ? (
+        <span className="loader"></span>
+      ) : (
+        "Resend"
+      )}
+    </button>
               </div>
               <button
                 className="close-modal-read"
