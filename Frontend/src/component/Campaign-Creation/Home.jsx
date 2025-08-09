@@ -2088,7 +2088,7 @@ useEffect(() => {
           </div>
         </div>
 
-        {isModalOpen && (
+        {/* {isModalOpen && (
           <div className="auto-overlay-unique">
             <div className="auto-modal-unique">
               <button className="auto-close-unique" onClick={handleCloseModal}>
@@ -2115,7 +2115,6 @@ useEffect(() => {
                 </button>
               </div>
 
-              {/* Birthday Remainder */}
               {activeOption === "birthday" && (
                 <div className="auto-section-unique">
                   <label>Select Template:</label>
@@ -2174,7 +2173,6 @@ useEffect(() => {
                     placeholder="Enter your message here"
                   />
                   <div className="select-group-container-sub" ref={dropdownRef}>
-                    {/* Select Group */}
                     <select
                       onChange={(e) => handleGroupChangesubject(e)}
                       value=""
@@ -2193,7 +2191,6 @@ useEffect(() => {
                       ))}
                     </select>
 
-                    {/* Show fields only for the selected heading */}
                     {selectedGroupsub && (
                       <div className="dropdown-container-sub">
                         <p className="template-title">
@@ -2228,9 +2225,7 @@ useEffect(() => {
                     onChange={(e) => setPreviewtext(e.target.value)}
                     placeholder="Enter your Preview text here"
                   />
-                  {/* Attachment File Input */}
                   <label htmlFor="attachments">Attach Files(Max-10):</label>
-                  {/* Attachment File Input */}
                   <input
                     type="file"
                     multiple
@@ -2250,7 +2245,6 @@ useEffect(() => {
                     }}
                   />
 
-                  {/* Display Attached Files */}
                   <div className="file-list">
                     {emailData.attachments &&
                     emailData.attachments.length > 0 ? (
@@ -2310,7 +2304,6 @@ useEffect(() => {
                 </div>
               )}
 
-              {/* Payment Reminder */}
               {activeOption === "payment" && (
                 <div className="auto-section-unique">
                   <label>Select Template:</label>
@@ -2361,9 +2354,7 @@ useEffect(() => {
                     onChange={(e) => setPreviewtext(e.target.value)}
                     placeholder="Enter Preview Text"
                   />
-                  {/* Attachment File Input */}
                   <label htmlFor="attachments">Attach Files(Max-10):</label>
-                  {/* Attachment File Input */}
                   <input
                     type="file"
                     multiple
@@ -2383,7 +2374,6 @@ useEffect(() => {
                     }}
                   />
 
-                  {/* Display Attached Files */}
                   <div className="file-list">
                     {emailData.attachments &&
                     emailData.attachments.length > 0 ? (
@@ -2424,7 +2414,6 @@ useEffect(() => {
                         style={{ cursor: "pointer", marginLeft: "5px" }}
                       />
                     </h4>
-                    {/* Modal */}
                     {isRuleOpen && (
                       <div className="rule-modal-overlay">
                         <div className="rule-modal-container">
@@ -2547,7 +2536,7 @@ useEffect(() => {
               )}
             </div>
           </div>
-        )}
+        )} */}
 
         {/* Main Content */}
 
@@ -2938,7 +2927,7 @@ useEffect(() => {
                       </ResponsiveContainer>
                     </div>
                   </div>
-                  {/* --------------------------------- saved template new content ------------------------------------- */}
+            {/* --------------------------------- saved template new content ------------------------------------- */}
                   <div className="saved-template-display">
                     <div>
                       <h2 className="header-saved-template">Saved Template</h2>
@@ -2963,7 +2952,7 @@ useEffect(() => {
 
                           const metrics =
                             latestCampaign &&
-                            campaignMetrics[latestCampaign._id]
+                              campaignMetrics[latestCampaign._id]
                               ? campaignMetrics[latestCampaign._id]
                               : {};
 
@@ -2998,8 +2987,8 @@ useEffect(() => {
 
                           const lastUsedDate = latestCampaign?.createdAt
                             ? new Date(
-                                latestCampaign.createdAt
-                              ).toLocaleDateString()
+                              latestCampaign.createdAt
+                            ).toLocaleDateString()
                             : "N/A";
 
                           return (
@@ -3007,7 +2996,7 @@ useEffect(() => {
                               <div className="template-thumbnail-wrapper">
                                 <div
                                   className="template-thumbnail-home"
-                                 
+
                                 >
                                   {template.previewContent?.map((item, idx) => (
                                     <div
@@ -3016,134 +3005,134 @@ useEffect(() => {
                                         fontSize: "12px",
                                         marginBottom: "6px",
                                         backgroundColor:
-                                      template.bgColor || "#ffffff",
+                                          template.bgColor || "#ffffff",
                                       }}
-                                      
+
                                       className="new-item-gallery-item"
                                     >
                                       {/* Heading */}
                                       {item.type === "head" && (
                                         <p
-    className="border-head"
-    contentEditable
-    suppressContentEditableWarning
-    style={{
-      whiteSpace: "pre-wrap", 
-      ...resolveBackgroundStyle(item.style),
-    }}
-    
-    dangerouslySetInnerHTML={{ __html: item.content }} // ✅ render saved HTML
-  />
+                                          className="border-head"
+                                          contentEditable
+                                          suppressContentEditableWarning
+                                          style={{
+                                            whiteSpace: "pre-wrap",
+                                            ...resolveBackgroundStyle(item.style),
+                                          }}
+
+                                          dangerouslySetInnerHTML={{ __html: item.content }} // ✅ render saved HTML
+                                        />
 
                                       )}
-{item.type === "table" && (
-                        <div className="table-component">
-                          <table style={item.style}>
-                            <tbody>
-                              {item.content.map((row, rowIndex) => (
-                                <tr key={rowIndex}>
-                                  {row.map((cell, cellIndex) => {
-                                    const isHeader = rowIndex === 0;
-                                    const cellStyleToUse = isHeader
-                                      ? item.headerStyle
-                                      : item.cellStyle;
-                                    const CellTag = isHeader ? "th" : "td";
-                                    return (
-                                      <CellTag
-                                        key={cellIndex}
-                                        style={cellStyleToUse}
-                                        contentEditable
-                                        suppressContentEditableWarning
-                                        onBlur={(e) => {
-                                          const newContent = [...item.content];
-                                          newContent[rowIndex][cellIndex] = e.target.textContent;
-                                          updateContent(index, {
-                                            content: newContent,
-                                          });
-                                        }}
-                                      >
-                                        {cell}
-                                      </CellTag>
-                                    );
-                                  })}
-                                </tr>
-                              ))}
-                            </tbody>
-                          </table>
-                        </div>
-                      )}
+                                      {item.type === "table" && (
+                                        <div className="table-component">
+                                          <table style={item.style}>
+                                            <tbody>
+                                              {item.content.map((row, rowIndex) => (
+                                                <tr key={rowIndex}>
+                                                  {row.map((cell, cellIndex) => {
+                                                    const isHeader = rowIndex === 0;
+                                                    const cellStyleToUse = isHeader
+                                                      ? item.headerStyle
+                                                      : item.cellStyle;
+                                                    const CellTag = isHeader ? "th" : "td";
+                                                    return (
+                                                      <CellTag
+                                                        key={cellIndex}
+                                                        style={cellStyleToUse}
+                                                        contentEditable
+                                                        suppressContentEditableWarning
+                                                      // onBlur={(e) => {
+                                                      //   const newContent = [...item.content];
+                                                      //   newContent[rowIndex][cellIndex] = e.target.textContent;
+                                                      //   updateContent(index, {
+                                                      //     content: newContent,
+                                                      //   });
+                                                      // }}
+                                                      >
+                                                        {cell}
+                                                      </CellTag>
+                                                    );
+                                                  })}
+                                                </tr>
+                                              ))}
+                                            </tbody>
+                                          </table>
+                                        </div>
+                                      )}
                                       {item.type === "cardbtn" && (
-                        <div className="card-btn-container" style={item.style}>
-                          <img
-                            src={item.src1}
-                            style={item.style}
-                            alt="Editable"
-                            className="card-image"
-                            title="Upload Image"
-                           
-                          />
+                                        <div className="card-btn-container" style={item.style}>
+                                          <img
+                                            src={item.src1}
+                                            style={item.style}
+                                            alt="Editable"
+                                            className="card-image"
+                                            title="Upload Image"
 
-                          <a
-                            href={item.link}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="button-preview card-btn"
-                            style={item.buttonStyle}
-                          >
-                            {item.content}
-                          </a>
-                        </div>
-                      )}
-{item.type === "sign" ? (
-                        <div className="sign-container">
-                          <div className="sign-wrapper-content" style={item.style}>
-                            <img
-                              src={item.src1 || "https://via.placeholder.com/200"}
-                              alt="User"
-                              className="sign-image"
-                              title="Upload Image"
-                              onClick={() => handleopenFiles(index, 1)}
-                            />
-                            <div className="sign-collector-con">
-                              <div className="sign-text">
-                                <span
-                                  className="sign-name"
-                                  // contentEditable
-                                  suppressContentEditableWarning
-                                  onClick={() => {
-                                    setModalIndex(index);
-                                    setIsModalOpen(true);
-                                  }}
-                                >
-                                  {item.Name}
-                                </span>
-                                <span
-                                  className="sign-designation"
-                                  // contentEditable
-                                  suppressContentEditableWarning
-                                >
-                                  ({item.Designation})
-                                </span>
-                              </div>
-                              <div className="sign-icons">
-                                <a href={item.links1} target="_blank" rel="noopener noreferrer" className="sign-icon-item" style={item.style}>
-                                  <img src={item.iconsrc1} style={item.styleicon1} alt="icon1"  className="phoneicon"/>
-                                  <p className="sign-icon-text">{item.text1 || "9743869034"}</p>
-                                </a>
-                                <a href={item.links2} target="_blank" rel="noopener noreferrer" className="sign-icon-item" style={item.style}>
-                                  <img src={item.iconsrc2} style={item.styleicon2} alt="icon2" className="phoneicon"/>
-                                  <p className="sign-icon-text">{item.text2 || "www.google.com"}</p>
-                                </a>
-                                <span className="sign-icon-item" style={item.style}>
-                                  <img src={item.iconsrc3} style={item.styleicon3} alt="icon3" className="phoneicon"/>
-                                  <p  className="sign-icon-text">{item.text3 || "Salem"}</p>
-                              </span>
-                              </div>
+                                          />
 
-                            </div>
-                          </div>
-                        </div>
-                      ) : null}
+                                          <a
+                                            href={item.link}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="button-preview card-btn"
+                                            style={item.buttonStyle}
+                                          >
+                                            {item.content}
+                                          </a>
+                                        </div>
+                                      )}
+                                      {item.type === "sign" ? (
+                                        <div className="sign-container">
+                                          <div className="sign-wrapper-content" style={item.style}>
+                                            <img
+                                              src={item.src1 || "https://via.placeholder.com/200"}
+                                              alt="User"
+                                              className="sign-image"
+                                              title="Upload Image"
+                                              onClick={() => handleopenFiles(index, 1)}
+                                            />
+                                            <div className="sign-collector-con">
+                                              <div className="sign-text">
+                                                <span
+                                                  className="sign-name"
+                                                  // contentEditable
+                                                  suppressContentEditableWarning
+                                                  onClick={() => {
+                                                    setModalIndex(index);
+                                                    setIsModalOpen(true);
+                                                  }}
+                                                >
+                                                  {item.Name}
+                                                </span>
+                                                <span
+                                                  className="sign-designation"
+                                                  // contentEditable
+                                                  suppressContentEditableWarning
+                                                >
+                                                  ({item.Designation})
+                                                </span>
+                                              </div>
+                                              <div className="sign-icons">
+                                                <a href={item.links1} target="_blank" rel="noopener noreferrer" className="sign-icon-item" style={item.style}>
+                                                  <img src={item.iconsrc1} style={item.styleicon1} alt="icon1" className="phoneicon" />
+                                                  <p className="sign-icon-text">{item.text1 || "9743869034"}</p>
+                                                </a>
+                                                <a href={item.links2} target="_blank" rel="noopener noreferrer" className="sign-icon-item" style={item.style}>
+                                                  <img src={item.iconsrc2} style={item.styleicon2} alt="icon2" className="phoneicon" />
+                                                  <p className="sign-icon-text">{item.text2 || "www.google.com"}</p>
+                                                </a>
+                                                <span className="sign-icon-item" style={item.style}>
+                                                  <img src={item.iconsrc3} style={item.styleicon3} alt="icon3" className="phoneicon" />
+                                                  <p className="sign-icon-text">{item.text3 || "Salem"}</p>
+                                                </span>
+                                              </div>
+
+                                            </div>
+                                          </div>
+                                        </div>
+                                      ) : null}
 
 
 
@@ -3171,7 +3160,7 @@ useEffect(() => {
                                         <div className="border">
                                           <img
                                             src={
-                                              item.src 
+                                              item.src
                                             }
                                             alt="Preview"
                                             className="img gallery-img-image"
@@ -3185,7 +3174,7 @@ useEffect(() => {
                                         <div className="border">
                                           <img
                                             src={
-                                              item.src 
+                                              item.src
                                             }
                                             alt="Preview"
                                             className="img gallery-img-banner "
@@ -3214,14 +3203,14 @@ useEffect(() => {
                                                   ? "Connect on WhatsApp"
                                                   : item.buttonType ===
                                                     "contact"
-                                                  ? "Call Now"
-                                                  : "Visit Link")}
+                                                    ? "Call Now"
+                                                    : "Visit Link")}
                                             </a>
                                           </div>
                                         </div>
                                       )}
 
-                                    
+
                                       {/* Link */}
                                       {item.type === "link-image" && (
                                         <div className="border">
@@ -3233,7 +3222,7 @@ useEffect(() => {
                                           >
                                             <img
                                               src={
-                                                item.src 
+                                                item.src
                                               }
                                               alt="Editable"
                                               className="img gallery-img-image"
@@ -3260,7 +3249,7 @@ useEffect(() => {
                                           <div style={item.styles}></div>
                                         </div>
                                       )}
-                                     
+
 
                                       {item.type === "cardimage" ? (
                                         <div
@@ -3269,7 +3258,7 @@ useEffect(() => {
                                         >
                                           <img
                                             src={
-                                              item.src1 
+                                              item.src1
                                             }
                                             style={item.style}
                                             alt="Editable"
@@ -3302,14 +3291,14 @@ useEffect(() => {
                                         <div className="border">
                                           <img
                                             src={
-                                              item.src 
+                                              item.src
                                             }
                                             alt="Editable"
                                             className="logo gallery-img"
                                             style={resolveBackgroundStyle(item.style)}
-                                            onClick={() =>
-                                              handleopenFiles(index, 1)
-                                            }
+                                            // onClick={() =>
+                                            //   handleopenFiles(index, 1)
+                                            // }
                                             title="Upload Image"
                                           />
                                         </div>
@@ -3325,7 +3314,7 @@ useEffect(() => {
                                           >
                                             <img
                                               src={
-                                                item.src1 
+                                                item.src1
                                               }
                                               alt="Preview"
                                               className="image-item gallery-img-text-img"
@@ -3356,7 +3345,7 @@ useEffect(() => {
                                             </p>
                                             <img
                                               src={
-                                                item.src2 
+                                                item.src2
                                               }
                                               alt="Preview"
                                               className="image-item gallery-img-text-img"
@@ -3370,7 +3359,7 @@ useEffect(() => {
                                           <div className="Layout multi-gallery">
                                             <img
                                               src={
-                                                item.src1 
+                                                item.src1
                                               }
                                               alt="Editable"
                                               className="multiimg gallery-img-multi"
@@ -3394,7 +3383,7 @@ useEffect(() => {
                                           <div className="Layout multi-gallery">
                                             <img
                                               src={
-                                                item.src2 
+                                                item.src2
                                               }
                                               alt="Editable"
                                               className="multiimg gallery-img-multi"
@@ -3423,7 +3412,7 @@ useEffect(() => {
                                           <div className="Layout multi-gallery">
                                             <img
                                               src={
-                                                item.src1 
+                                                item.src1
                                               }
                                               alt="Preview"
                                               className="multiimgcard gallery-img-multi"
@@ -3456,7 +3445,7 @@ useEffect(() => {
                                           <div className="Layout multi-gallery">
                                             <img
                                               src={
-                                                item.src2 
+                                                item.src2
                                               }
                                               alt="Preview"
                                               className="multiimgcard"
@@ -3494,7 +3483,7 @@ useEffect(() => {
                                           <div className="Layout multi-gallery">
                                             <img
                                               src={
-                                                item.src1 
+                                                item.src1
                                               }
                                               alt="Preview"
                                               className="multiple-img gallery-img-multi"
@@ -3504,7 +3493,7 @@ useEffect(() => {
                                           <div className="Layout multi-gallery">
                                             <img
                                               src={
-                                                item.src2 
+                                                item.src2
                                               }
                                               alt="Preview"
                                               className="multiple-img gallery-img-multi"
@@ -3519,7 +3508,7 @@ useEffect(() => {
                                         <div className="video-icon">
                                           <img
                                             src={
-                                              item.src1 
+                                              item.src1
                                             }
                                             alt="Preview"
                                             className="videoimg video-img"
@@ -3676,9 +3665,8 @@ useEffect(() => {
                         (_, index) => (
                           <span
                             key={index}
-                            className={`dot ${
-                              currentPage === index + 1 ? "active" : ""
-                            }`}
+                            className={`dot ${currentPage === index + 1 ? "active" : ""
+                              }`}
                             onClick={() => setCurrentPage(index + 1)}
                           ></span>
                         )
@@ -4111,7 +4099,7 @@ useEffect(() => {
                     {/* Display Attached Files */}
                     <div className="file-list">
                       {emailData.attachments &&
-                      emailData.attachments.length > 0 ? (
+                        emailData.attachments.length > 0 ? (
                         <ol>
                           {emailData.attachments.map((file, index) => (
                             <li key={index}>
@@ -4244,7 +4232,7 @@ useEffect(() => {
 
                 <div className="saved-template-gallery">
                   {templates.map((template, index) => (
-                    
+
                     <div
                       key={index}
                       className="template-thumbnail-container"
@@ -4272,127 +4260,127 @@ useEffect(() => {
                             {/* Heading */}
                             {item.type === "head" && (
                               <div ref={dropdownRef}>
-                                 <p
-    className="border-head"
-    contentEditable
-    suppressContentEditableWarning
-    style={{
-      whiteSpace: "pre-wrap", 
-      ...resolveBackgroundStyle(item.style),
-    }}
-    
-    dangerouslySetInnerHTML={{ __html: item.content }} 
-  />
+                                <p
+                                  className="border-head"
+                                  contentEditable
+                                  suppressContentEditableWarning
+                                  style={{
+                                    whiteSpace: "pre-wrap",
+                                    ...resolveBackgroundStyle(item.style),
+                                  }}
+
+                                  dangerouslySetInnerHTML={{ __html: item.content }}
+                                />
                               </div>
                             )}
-{item.type === "table" && (
-                        <div className="table-component">
-                          <table style={item.style}>
-                            <tbody>
-                              {item.content.map((row, rowIndex) => (
-                                <tr key={rowIndex}>
-                                  {row.map((cell, cellIndex) => {
-                                    const isHeader = rowIndex === 0;
-                                    const cellStyleToUse = isHeader
-                                      ? item.headerStyle
-                                      : item.cellStyle;
-                                    const CellTag = isHeader ? "th" : "td";
-                                    return (
-                                      <CellTag
-                                        key={cellIndex}
-                                        style={cellStyleToUse}
-                                        contentEditable
+                            {item.type === "table" && (
+                              <div className="table-component">
+                                <table style={item.style}>
+                                  <tbody>
+                                    {item.content.map((row, rowIndex) => (
+                                      <tr key={rowIndex}>
+                                        {row.map((cell, cellIndex) => {
+                                          const isHeader = rowIndex === 0;
+                                          const cellStyleToUse = isHeader
+                                            ? item.headerStyle
+                                            : item.cellStyle;
+                                          const CellTag = isHeader ? "th" : "td";
+                                          return (
+                                            <CellTag
+                                              key={cellIndex}
+                                              style={cellStyleToUse}
+                                              contentEditable
+                                              suppressContentEditableWarning
+                                            // onBlur={(e) => {
+                                            //   const newContent = [...item.content];
+                                            //   newContent[rowIndex][cellIndex] = e.target.textContent;
+                                            //   updateContent(index, {
+                                            //     content: newContent,
+                                            //   });
+                                            // }}
+                                            >
+                                              {cell}
+                                            </CellTag>
+                                          );
+                                        })}
+                                      </tr>
+                                    ))}
+                                  </tbody>
+                                </table>
+                              </div>
+                            )}
+                            {item.type === "cardbtn" && (
+                              <div className="card-btn-container" style={item.style}>
+                                <img
+                                  src={item.src1}
+                                  style={item.style}
+                                  alt="Editable"
+                                  className="card-image"
+                                  title="Upload Image"
+
+                                />
+
+                                <a
+                                  href={item.link}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="button-preview card-btn"
+                                  style={item.buttonStyle}
+                                >
+                                  {item.content}
+                                </a>
+                              </div>
+                            )}
+                            {item.type === "sign" ? (
+                              <div className="sign-container">
+                                <div className="sign-wrapper-content" style={item.style}>
+                                  <img
+                                    src={item.src1 || "https://via.placeholder.com/200"}
+                                    alt="User"
+                                    className="sign-image"
+                                    title="Upload Image"
+                                    onClick={() => handleopenFiles(index, 1)}
+                                  />
+                                  <div className="sign-collector-con">
+                                    <div className="sign-text">
+                                      <span
+                                        className="sign-name"
+                                        // contentEditable
                                         suppressContentEditableWarning
-                                        onBlur={(e) => {
-                                          const newContent = [...item.content];
-                                          newContent[rowIndex][cellIndex] = e.target.textContent;
-                                          updateContent(index, {
-                                            content: newContent,
-                                          });
+                                        onClick={() => {
+                                          setModalIndex(index);
+                                          setIsModalOpen(true);
                                         }}
                                       >
-                                        {cell}
-                                      </CellTag>
-                                    );
-                                  })}
-                                </tr>
-                              ))}
-                            </tbody>
-                          </table>
-                        </div>
-                      )}
-                            {item.type === "cardbtn" && (
-                        <div className="card-btn-container" style={item.style}>
-                          <img
-                            src={item.src1}
-                            style={item.style}
-                            alt="Editable"
-                            className="card-image"
-                            title="Upload Image"
-                           
-                          />
+                                        {item.Name}
+                                      </span>
+                                      <span
+                                        className="sign-designation"
+                                        // contentEditable
+                                        suppressContentEditableWarning
+                                      >
+                                        ({item.Designation})
+                                      </span>
+                                    </div>
+                                    <div className="sign-icons">
+                                      <a href={item.links1} target="_blank" rel="noopener noreferrer" className="sign-icon-item" style={item.style}>
+                                        <img src={item.iconsrc1} style={item.styleicon1} alt="icon1" className="phoneicon" />
+                                        <p className="sign-icon-text">{item.text1 || "9743869034"}</p>
+                                      </a>
+                                      <a href={item.links2} target="_blank" rel="noopener noreferrer" className="sign-icon-item" style={item.style}>
+                                        <img src={item.iconsrc2} style={item.styleicon2} alt="icon2" className="phoneicon" />
+                                        <p className="sign-icon-text">{item.text2 || "www.google.com"}</p>
+                                      </a>
+                                      <span className="sign-icon-item" style={item.style}>
+                                        <img src={item.iconsrc3} style={item.styleicon3} alt="icon3" className="phoneicon" />
+                                        <p className="sign-icon-text">{item.text3 || "Salem"}</p>
+                                      </span>
+                                    </div>
 
-                          <a
-                            href={item.link}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="button-preview card-btn"
-                            style={item.buttonStyle}
-                          >
-                            {item.content}
-                          </a>
-                        </div>
-                      )}
-{item.type === "sign" ? (
-                        <div className="sign-container">
-                          <div className="sign-wrapper-content" style={item.style}>
-                            <img
-                              src={item.src1 || "https://via.placeholder.com/200"}
-                              alt="User"
-                              className="sign-image"
-                              title="Upload Image"
-                              onClick={() => handleopenFiles(index, 1)}
-                            />
-                            <div className="sign-collector-con">
-                              <div className="sign-text">
-                                <span
-                                  className="sign-name"
-                                  // contentEditable
-                                  suppressContentEditableWarning
-                                  onClick={() => {
-                                    setModalIndex(index);
-                                    setIsModalOpen(true);
-                                  }}
-                                >
-                                  {item.Name}
-                                </span>
-                                <span
-                                  className="sign-designation"
-                                  // contentEditable
-                                  suppressContentEditableWarning
-                                >
-                                  ({item.Designation})
-                                </span>
+                                  </div>
+                                </div>
                               </div>
-                              <div className="sign-icons">
-                                <a href={item.links1} target="_blank" rel="noopener noreferrer" className="sign-icon-item" style={item.style}>
-                                  <img src={item.iconsrc1} style={item.styleicon1} alt="icon1"  className="phoneicon"/>
-                                  <p className="sign-icon-text">{item.text1 || "9743869034"}</p>
-                                </a>
-                                <a href={item.links2} target="_blank" rel="noopener noreferrer" className="sign-icon-item" style={item.style}>
-                                  <img src={item.iconsrc2} style={item.styleicon2} alt="icon2" className="phoneicon"/>
-                                  <p className="sign-icon-text">{item.text2 || "www.google.com"}</p>
-                                </a>
-                                <span className="sign-icon-item" style={item.style}>
-                                  <img src={item.iconsrc3} style={item.styleicon3} alt="icon3" className="phoneicon"/>
-                                  <p  className="sign-icon-text">{item.text3 || "Salem"}</p>
-                              </span>
-                              </div>
-
-                            </div>
-                          </div>
-                        </div>
-                      ) : null}
+                            ) : null}
 
 
 
@@ -4420,7 +4408,7 @@ useEffect(() => {
                               <div className="border">
                                 <img
                                   src={
-                                    item.src 
+                                    item.src
                                   }
                                   alt="Preview"
                                   className="img gallery-img-image"
@@ -4434,7 +4422,7 @@ useEffect(() => {
                               <div className="border">
                                 <img
                                   src={
-                                    item.src 
+                                    item.src
                                   }
                                   alt="Preview"
                                   className="img gallery-img-banner"
@@ -4462,14 +4450,14 @@ useEffect(() => {
                                       (item.buttonType === "whatsapp"
                                         ? "Connect on WhatsApp"
                                         : item.buttonType === "contact"
-                                        ? "Call Now"
-                                        : "Visit Link")}
+                                          ? "Call Now"
+                                          : "Visit Link")}
                                   </a>
                                 </div>
                               </div>
                             )}
 
-                           
+
 
                             {/* Link */}
                             {item.type === "link-image" && (
@@ -4480,7 +4468,7 @@ useEffect(() => {
                                 >
                                   <img
                                     src={
-                                      item.src 
+                                      item.src
                                     }
                                     alt="Editable"
                                     className="img gallery-img-image"
@@ -4505,7 +4493,7 @@ useEffect(() => {
                                 <div style={item.styles}></div>
                               </div>
                             )}
-                           
+
                             {item.type === "cardimage" ? (
                               <div
                                 className="card-image-container"
@@ -4513,7 +4501,7 @@ useEffect(() => {
                               >
                                 <img
                                   src={
-                                    item.src1 
+                                    item.src1
                                   }
                                   style={item.style}
                                   alt="Editable"
@@ -4544,12 +4532,12 @@ useEffect(() => {
                               <div className="border">
                                 <img
                                   src={
-                                    item.src 
+                                    item.src
                                   }
                                   alt="Editable"
                                   className="logo gallery-img"
                                   style={resolveBackgroundStyle(item.style)}
-                                  onClick={() => handleopenFiles(index, 1)}
+                                  // onClick={() => handleopenFiles(index, 1)}
                                   title="Upload Image"
                                 />
                               </div>
@@ -4565,7 +4553,7 @@ useEffect(() => {
                                 >
                                   <img
                                     src={
-                                      item.src1 
+                                      item.src1
                                     }
                                     alt="Preview"
                                     className="image-item gallery-img-text-img"
@@ -4596,7 +4584,7 @@ useEffect(() => {
                                   </p>
                                   <img
                                     src={
-                                      item.src2 
+                                      item.src2
                                     }
                                     alt="Preview"
                                     className="image-item gallery-img-text-img"
@@ -4610,7 +4598,7 @@ useEffect(() => {
                                 <div className="Layout multi-gallery">
                                   <img
                                     src={
-                                      item.src1 
+                                      item.src1
                                     }
                                     alt="Editable"
                                     className="multiimg gallery-img-multi"
@@ -4632,7 +4620,7 @@ useEffect(() => {
                                 <div className="Layout multi-gallery">
                                   <img
                                     src={
-                                      item.src2 
+                                      item.src2
                                     }
                                     alt="Editable"
                                     className="multiimg gallery-img-multi"
@@ -4659,7 +4647,7 @@ useEffect(() => {
                                 <div className="Layout multi-gallery">
                                   <img
                                     src={
-                                      item.src1 
+                                      item.src1
                                     }
                                     alt="Preview"
                                     className="multiimgcard gallery-img-multi"
@@ -4692,7 +4680,7 @@ useEffect(() => {
                                 <div className="Layout multi-gallery">
                                   <img
                                     src={
-                                      item.src2 
+                                      item.src2
                                     }
                                     alt="Preview"
                                     className="multiimgcard"
@@ -4730,7 +4718,7 @@ useEffect(() => {
                                 <div className="Layout multi-gallery">
                                   <img
                                     src={
-                                      item.src1 
+                                      item.src1
                                     }
                                     alt="Preview"
                                     className="multiple-img gallery-img-multi"
@@ -4740,7 +4728,7 @@ useEffect(() => {
                                 <div className="Layout multi-gallery">
                                   <img
                                     src={
-                                      item.src2 
+                                      item.src2
                                     }
                                     alt="Preview"
                                     className="multiple-img gallery-img-multi"
@@ -4755,7 +4743,7 @@ useEffect(() => {
                               <div className="video-icon">
                                 <img
                                   src={
-                                    item.src1 
+                                    item.src1
                                   }
                                   alt="Preview"
                                   className="videoimg video-img"
@@ -4813,19 +4801,19 @@ useEffect(() => {
                           </div>
                         ))}
                       </div>
-                     <div className="template-name">
-  {/* Show checkbox only for user-created templates */}
-  {template._id && (
-    <input
-      type="checkbox"
-      checked={selectedTemplates.includes(template._id)}
-      onClick={(e) => e.stopPropagation()} // prevent card click
-      onChange={() => handleSelectTemplate(template._id)} // toggle selection
-      className="template-checkbox"
-    />
-  )}
-  <h4>{template.temname}</h4>
-</div>
+                      <div className="template-name">
+                        {/* Show checkbox only for user-created templates */}
+                        {template._id && (
+                          <input
+                            type="checkbox"
+                            checked={selectedTemplates.includes(template._id)}
+                            onClick={(e) => e.stopPropagation()} // prevent card click
+                            onChange={() => handleSelectTemplate(template._id)} // toggle selection
+                            className="template-checkbox"
+                          />
+                        )}
+                        <h4>{template.temname}</h4>
+                      </div>
 
                     </div>
                   ))}
@@ -4900,128 +4888,128 @@ useEffect(() => {
                             {item.type === "head" && (
                               <div ref={dropdownRef}>
                                 <p
-    className="border-head"
-    contentEditable
-    suppressContentEditableWarning
-    style={{
-      whiteSpace: "pre-wrap", // ✅ preserves line breaks and spacing
-      ...resolveBackgroundStyle(item.style),
-    }}
-    
-    dangerouslySetInnerHTML={{ __html: item.content }} // ✅ render saved HTML
-  />
+                                  className="border-head"
+                                  contentEditable
+                                  suppressContentEditableWarning
+                                  style={{
+                                    whiteSpace: "pre-wrap", // ✅ preserves line breaks and spacing
+                                    ...resolveBackgroundStyle(item.style),
+                                  }}
+
+                                  dangerouslySetInnerHTML={{ __html: item.content }} // ✅ render saved HTML
+                                />
                               </div>
                             )}
-{item.type === "table" && (
-                        <div className="table-component">
-                          <table style={item.style}>
-                            <tbody>
-                              {item.content.map((row, rowIndex) => (
-                                <tr key={rowIndex}>
-                                  {row.map((cell, cellIndex) => {
-                                    const isHeader = rowIndex === 0;
-                                    const cellStyleToUse = isHeader
-                                      ? item.headerStyle
-                                      : item.cellStyle;
-                                    const CellTag = isHeader ? "th" : "td";
-                                    return (
-                                      <CellTag
-                                        key={cellIndex}
-                                        style={cellStyleToUse}
-                                        contentEditable
+                            {item.type === "table" && (
+                              <div className="table-component">
+                                <table style={item.style}>
+                                  <tbody>
+                                    {item.content.map((row, rowIndex) => (
+                                      <tr key={rowIndex}>
+                                        {row.map((cell, cellIndex) => {
+                                          const isHeader = rowIndex === 0;
+                                          const cellStyleToUse = isHeader
+                                            ? item.headerStyle
+                                            : item.cellStyle;
+                                          const CellTag = isHeader ? "th" : "td";
+                                          return (
+                                            <CellTag
+                                              key={cellIndex}
+                                              style={cellStyleToUse}
+                                              contentEditable
+                                              suppressContentEditableWarning
+                                            // onBlur={(e) => {
+                                            //   const newContent = [...item.content];
+                                            //   newContent[rowIndex][cellIndex] = e.target.textContent;
+                                            //   updateContent(index, {
+                                            //     content: newContent,
+                                            //   });
+                                            // }}
+                                            >
+                                              {cell}
+                                            </CellTag>
+                                          );
+                                        })}
+                                      </tr>
+                                    ))}
+                                  </tbody>
+                                </table>
+                              </div>
+                            )}
+                            {item.type === "cardbtn" && (
+                              <div className="card-btn-container" style={item.style}>
+                                <img
+                                  src={item.src1}
+                                  style={item.style}
+                                  alt="Editable"
+                                  className="card-image"
+                                  title="Upload Image"
+
+                                />
+
+                                <a
+                                  href={item.link}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="button-preview card-btn"
+                                  style={item.buttonStyle}
+                                >
+                                  {item.content}
+                                </a>
+                              </div>
+                            )}
+
+
+                            {item.type === "sign" ? (
+                              <div className="sign-container">
+                                <div className="sign-wrapper-content" style={item.style}>
+                                  <img
+                                    src={item.src1 || "https://via.placeholder.com/200"}
+                                    alt="User"
+                                    className="sign-image"
+                                    title="Upload Image"
+                                    onClick={() => handleopenFiles(index, 1)}
+                                  />
+                                  <div className="sign-collector-con">
+                                    <div className="sign-text">
+                                      <span
+                                        className="sign-name"
+                                        // contentEditable
                                         suppressContentEditableWarning
-                                        onBlur={(e) => {
-                                          const newContent = [...item.content];
-                                          newContent[rowIndex][cellIndex] = e.target.textContent;
-                                          updateContent(index, {
-                                            content: newContent,
-                                          });
+                                        onClick={() => {
+                                          setModalIndex(index);
+                                          setIsModalOpen(true);
                                         }}
                                       >
-                                        {cell}
-                                      </CellTag>
-                                    );
-                                  })}
-                                </tr>
-                              ))}
-                            </tbody>
-                          </table>
-                        </div>
-                      )}
-                             {item.type === "cardbtn" && (
-                        <div className="card-btn-container" style={item.style}>
-                          <img
-                            src={item.src1}
-                            style={item.style}
-                            alt="Editable"
-                            className="card-image"
-                            title="Upload Image"
-                           
-                          />
+                                        {item.Name}
+                                      </span>
+                                      <span
+                                        className="sign-designation"
+                                        // contentEditable
+                                        suppressContentEditableWarning
+                                      >
+                                        ({item.Designation})
+                                      </span>
+                                    </div>
+                                    <div className="sign-icons">
+                                      <a href={item.links1} target="_blank" rel="noopener noreferrer" className="sign-icon-item" style={item.style}>
+                                        <img src={item.iconsrc1} style={item.styleicon1} alt="icon1" className="phoneicon" />
+                                        <p className="sign-icon-text">{item.text1 || "9743869034"}</p>
+                                      </a>
+                                      <a href={item.links2} target="_blank" rel="noopener noreferrer" className="sign-icon-item" style={item.style}>
+                                        <img src={item.iconsrc2} style={item.styleicon2} alt="icon2" className="phoneicon" />
+                                        <p className="sign-icon-text">{item.text2 || "www.google.com"}</p>
+                                      </a>
+                                      <span className="sign-icon-item" style={item.style}>
+                                        <img src={item.iconsrc3} style={item.styleicon3} alt="icon3" className="phoneicon" />
+                                        <p className="sign-icon-text">{item.text3 || "Salem"}</p>
+                                      </span>
+                                    </div>
 
-                          <a
-                            href={item.link}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="button-preview card-btn"
-                            style={item.buttonStyle}
-                          >
-                            {item.content}
-                          </a>
-                        </div>
-                      )}
-
-
-{item.type === "sign" ? (
-                        <div className="sign-container">
-                          <div className="sign-wrapper-content" style={item.style}>
-                            <img
-                              src={item.src1 || "https://via.placeholder.com/200"}
-                              alt="User"
-                              className="sign-image"
-                              title="Upload Image"
-                              onClick={() => handleopenFiles(index, 1)}
-                            />
-                            <div className="sign-collector-con">
-                              <div className="sign-text">
-                                <span
-                                  className="sign-name"
-                                  // contentEditable
-                                  suppressContentEditableWarning
-                                  onClick={() => {
-                                    setModalIndex(index);
-                                    setIsModalOpen(true);
-                                  }}
-                                >
-                                  {item.Name}
-                                </span>
-                                <span
-                                  className="sign-designation"
-                                  // contentEditable
-                                  suppressContentEditableWarning
-                                >
-                                  ({item.Designation})
-                                </span>
+                                  </div>
+                                </div>
                               </div>
-                              <div className="sign-icons">
-                                <a href={item.links1} target="_blank" rel="noopener noreferrer" className="sign-icon-item" style={item.style}>
-                                  <img src={item.iconsrc1} style={item.styleicon1} alt="icon1"  className="phoneicon"/>
-                                  <p className="sign-icon-text">{item.text1 || "9743869034"}</p>
-                                </a>
-                                <a href={item.links2} target="_blank" rel="noopener noreferrer" className="sign-icon-item" style={item.style}>
-                                  <img src={item.iconsrc2} style={item.styleicon2} alt="icon2" className="phoneicon"/>
-                                  <p className="sign-icon-text">{item.text2 || "www.google.com"}</p>
-                                </a>
-                                <span className="sign-icon-item" style={item.style}>
-                                  <img src={item.iconsrc3} style={item.styleicon3} alt="icon3" className="phoneicon"/>
-                                  <p  className="sign-icon-text">{item.text3 || "Salem"}</p>
-                              </span>
-                              </div>
-
-                            </div>
-                          </div>
-                        </div>
-                      ) : null}
+                            ) : null}
 
 
                             {/* Paragraph */}
@@ -5048,7 +5036,7 @@ useEffect(() => {
                               <div className="border">
                                 <img
                                   src={
-                                    item.src 
+                                    item.src
                                   }
                                   alt="Preview"
                                   className="img gallery-img-image"
@@ -5062,7 +5050,7 @@ useEffect(() => {
                               <div className="border">
                                 <img
                                   src={
-                                    item.src 
+                                    item.src
                                   }
                                   alt="Preview"
                                   className="img gallery-img-banner"
@@ -5090,14 +5078,14 @@ useEffect(() => {
                                       (item.buttonType === "whatsapp"
                                         ? "Connect on WhatsApp"
                                         : item.buttonType === "contact"
-                                        ? "Call Now"
-                                        : "Visit Link")}
+                                          ? "Call Now"
+                                          : "Visit Link")}
                                   </a>
                                 </div>
                               </div>
                             )}
 
-                           
+
 
                             {/* Link */}
                             {item.type === "link-image" && (
@@ -5108,7 +5096,7 @@ useEffect(() => {
                                 >
                                   <img
                                     src={
-                                      item.src 
+                                      item.src
                                     }
                                     alt="Editable"
                                     className="img gallery-img-image"
@@ -5133,7 +5121,7 @@ useEffect(() => {
                                 <div style={item.styles}></div>
                               </div>
                             )}
-                           
+
 
                             {item.type === "cardimage" ? (
                               <div
@@ -5142,7 +5130,7 @@ useEffect(() => {
                               >
                                 <img
                                   src={
-                                    item.src1 
+                                    item.src1
                                   }
                                   style={item.style}
                                   alt="Editable"
@@ -5173,12 +5161,12 @@ useEffect(() => {
                               <div className="border">
                                 <img
                                   src={
-                                    item.src 
+                                    item.src
                                   }
                                   alt="Editable"
                                   className="logo gallery-img"
                                   style={resolveBackgroundStyle(item.style)}
-                                  onClick={() => handleopenFiles(index, 1)}
+                                  // onClick={() => handleopenFiles(index, 1)}
                                   title="Upload Image"
                                 />
                               </div>
@@ -5194,7 +5182,7 @@ useEffect(() => {
                                 >
                                   <img
                                     src={
-                                      item.src1 
+                                      item.src1
                                     }
                                     alt="Preview"
                                     className="image-item gallery-img-text-img"
@@ -5225,7 +5213,7 @@ useEffect(() => {
                                   </p>
                                   <img
                                     src={
-                                      item.src2 
+                                      item.src2
                                     }
                                     alt="Preview"
                                     className="image-item gallery-img-text-img"
@@ -5239,7 +5227,7 @@ useEffect(() => {
                                 <div className="Layout multi-gallery">
                                   <img
                                     src={
-                                      item.src1 
+                                      item.src1
                                     }
                                     alt="Editable"
                                     className="multiimg gallery-img-multi"
@@ -5261,7 +5249,7 @@ useEffect(() => {
                                 <div className="Layout multi-gallery">
                                   <img
                                     src={
-                                      item.src2 
+                                      item.src2
                                     }
                                     alt="Editable"
                                     className="multiimg gallery-img-multi"
@@ -5288,7 +5276,7 @@ useEffect(() => {
                                 <div className="Layout multi-gallery">
                                   <img
                                     src={
-                                      item.src1 
+                                      item.src1
                                     }
                                     alt="Preview"
                                     className="multiimgcard gallery-img-multi"
@@ -5321,7 +5309,7 @@ useEffect(() => {
                                 <div className="Layout multi-gallery">
                                   <img
                                     src={
-                                      item.src2 
+                                      item.src2
                                     }
                                     alt="Preview"
                                     className="multiimgcard"
@@ -5359,7 +5347,7 @@ useEffect(() => {
                                 <div className="Layout multi-gallery">
                                   <img
                                     src={
-                                      item.src1 
+                                      item.src1
                                     }
                                     alt="Preview"
                                     className="multiple-img gallery-img-multi"
@@ -5369,7 +5357,7 @@ useEffect(() => {
                                 <div className="Layout multi-gallery">
                                   <img
                                     src={
-                                      item.src2 
+                                      item.src2
                                     }
                                     alt="Preview"
                                     className="multiple-img gallery-img-multi"
@@ -5384,7 +5372,7 @@ useEffect(() => {
                               <div className="video-icon">
                                 <img
                                   src={
-                                    item.src1 
+                                    item.src1
                                   }
                                   alt="Preview"
                                   className="videoimg video-img"
@@ -5442,18 +5430,18 @@ useEffect(() => {
                           </div>
                         ))}
                       </div>
-                     <div className="template-name">
-  {template._id && (
-    <input
-      type="checkbox"
-      checked={selectedTemplates.includes(template._id)}
-      onClick={(e) => e.stopPropagation()} 
-      onChange={() => handleSelectTemplate(template._id)} 
-      className="template-checkbox"
-    />
-  )}
-  <h4>{template.temname}</h4>
-</div>
+                      <div className="template-name">
+                        {template._id && (
+                          <input
+                            type="checkbox"
+                            checked={selectedTemplates.includes(template._id)}
+                            onClick={(e) => e.stopPropagation()}
+                            onChange={() => handleSelectTemplate(template._id)}
+                            className="template-checkbox"
+                          />
+                        )}
+                        <h4>{template.temname}</h4>
+                      </div>
 
                     </div>
                   ))}
@@ -5494,155 +5482,135 @@ useEffect(() => {
                           style={item.style}
                           key={index}
                         >
-{item.type === "table" && (
-                        <div className="table-component">
-                          <table style={item.style}>
-                            <tbody>
-                              {item.content.map((row, rowIndex) => (
-                                <tr key={rowIndex}>
-                                  {row.map((cell, cellIndex) => {
-                                    const isHeader = rowIndex === 0;
-                                    const cellStyleToUse = isHeader
-                                      ? item.headerStyle
-                                      : item.cellStyle;
-                                    const CellTag = isHeader ? "th" : "td";
-                                    return (
-                                      <CellTag
-                                        key={cellIndex}
-                                        style={cellStyleToUse}
-                                        contentEditable
-                                        suppressContentEditableWarning
-                                        onBlur={(e) => {
-                                          const newContent = [...item.content];
-                                          newContent[rowIndex][cellIndex] = e.target.textContent;
-                                          updateContent(index, {
-                                            content: newContent,
-                                          });
-                                        }}
-                                      >
-                                        {cell}
-                                      </CellTag>
-                                    );
-                                  })}
-                                </tr>
-                              ))}
-                            </tbody>
-                          </table>
-                        </div>
-                      )}
-                          {item.type === "cardbtn" && (
-                        <div className="card-btn-container" style={item.style}>
-                          <img
-                            src={item.src1}
-                            style={item.style}
-                            alt="Editable"
-                            className="card-image"
-                            title="Upload Image"
-                          />
-
-                          <a
-                            href={item.link}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="button-preview card-btn"
-                            style={item.buttonStyle}
-                          >
-                            {item.content}
-                          </a>
-                        </div>
-                      )}
-
-{item.type === "sign" ? (
-                        <div className="sign-container">
-                          <div className="sign-wrapper-content" style={item.style}>
-                            <img
-                              src={item.src1 || "https://via.placeholder.com/200"}
-                              alt="User"
-                              className="sign-image"
-                              title="Upload Image"
-                              onClick={() => handleopenFiles(index, 1)}
-                            />
-                            <div className="sign-collector-con">
-                              <div className="sign-text">
-                                <span
-                                  className="sign-name"
-                                  // contentEditable
-                                  suppressContentEditableWarning
-                                  onClick={() => {
-                                    setModalIndex(index);
-                                    setIsModalOpen(true);
-                                  }}
-                                >
-                                  {item.Name}
-                                </span>
-                                <span
-                                  className="sign-designation"
-                                  // contentEditable
-                                  suppressContentEditableWarning
-                                >
-                                  ({item.Designation})
-                                </span>
-                              </div>
-                              <div className="sign-icons">
-                                <a href={item.links1} target="_blank" rel="noopener noreferrer" className="sign-icon-item" style={item.style}>
-                                  <img src={item.iconsrc1} style={item.styleicon1} alt="icon1"  className="phoneicon"/>
-                                  <p className="sign-icon-text">{item.text1 || "9743869034"}</p>
-                                </a>
-                                <a href={item.links2} target="_blank" rel="noopener noreferrer" className="sign-icon-item" style={item.style}>
-                                  <img src={item.iconsrc2} style={item.styleicon2} alt="icon2" className="phoneicon"/>
-                                  <p className="sign-icon-text">{item.text2 || "www.google.com"}</p>
-                                </a>
-                                <span className="sign-icon-item" style={item.style}>
-                                  <img src={item.iconsrc3} style={item.styleicon3} alt="icon3" className="phoneicon"/>
-                                  <p  className="sign-icon-text">{item.text3 || "Salem"}</p>
-                              </span>
-                              </div>
-
+                          {item.type === "table" && (
+                            <div className="table-component">
+                              <table style={item.style}>
+                                <tbody>
+                                  {item.content.map((row, rowIndex) => (
+                                    <tr key={rowIndex}>
+                                      {row.map((cell, cellIndex) => {
+                                        const isHeader = rowIndex === 0;
+                                        const cellStyleToUse = isHeader
+                                          ? item.headerStyle
+                                          : item.cellStyle;
+                                        const CellTag = isHeader ? "th" : "td";
+                                        return (
+                                          <CellTag
+                                            key={cellIndex}
+                                            style={cellStyleToUse}
+                                            contentEditable
+                                            suppressContentEditableWarning
+                                          // onBlur={(e) => {
+                                          //   const newContent = [...item.content];
+                                          //   newContent[rowIndex][cellIndex] = e.target.textContent;
+                                          //   updateContent(index, {
+                                          //     content: newContent,
+                                          //   });
+                                          // }}
+                                          >
+                                            {cell}
+                                          </CellTag>
+                                        );
+                                      })}
+                                    </tr>
+                                  ))}
+                                </tbody>
+                              </table>
                             </div>
-                          </div>
-                        </div>
-                      ) : null}
+                          )}
+                          {item.type === "cardbtn" && (
+                            <div className="card-btn-container" style={item.style}>
+                              <img
+                                src={item.src1}
+                                style={item.style}
+                                alt="Editable"
+                                className="card-image"
+                                title="Upload Image"
+                              />
+
+                              <a
+                                href={item.link}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="button-preview card-btn"
+                                style={item.buttonStyle}
+                              >
+                                {item.content}
+                              </a>
+                            </div>
+                          )}
+
+                          {item.type === "sign" ? (
+                            <div className="sign-container">
+                              <div className="sign-wrapper-content" style={item.style}>
+                                <img
+                                  src={item.src1 || "https://via.placeholder.com/200"}
+                                  alt="User"
+                                  className="sign-image"
+                                  title="Upload Image"
+                                  onClick={() => handleopenFiles(index, 1)}
+                                />
+                                <div className="sign-collector-con">
+                                  <div className="sign-text">
+                                    <span
+                                      className="sign-name"
+                                      // contentEditable
+                                      suppressContentEditableWarning
+                                      onClick={() => {
+                                        setModalIndex(index);
+                                        setIsModalOpen(true);
+                                      }}
+                                    >
+                                      {item.Name}
+                                    </span>
+                                    <span
+                                      className="sign-designation"
+                                      // contentEditable
+                                      suppressContentEditableWarning
+                                    >
+                                      ({item.Designation})
+                                    </span>
+                                  </div>
+                                  <div className="sign-icons">
+                                    <a href={item.links1} target="_blank" rel="noopener noreferrer" className="sign-icon-item" style={item.style}>
+                                      <img src={item.iconsrc1} style={item.styleicon1} alt="icon1" className="phoneicon" />
+                                      <p className="sign-icon-text">{item.text1 || "9743869034"}</p>
+                                    </a>
+                                    <a href={item.links2} target="_blank" rel="noopener noreferrer" className="sign-icon-item" style={item.style}>
+                                      <img src={item.iconsrc2} style={item.styleicon2} alt="icon2" className="phoneicon" />
+                                      <p className="sign-icon-text">{item.text2 || "www.google.com"}</p>
+                                    </a>
+                                    <span className="sign-icon-item" style={item.style}>
+                                      <img src={item.iconsrc3} style={item.styleicon3} alt="icon3" className="phoneicon" />
+                                      <p className="sign-icon-text">{item.text3 || "Salem"}</p>
+                                    </span>
+                                  </div>
+
+                                </div>
+                              </div>
+                            </div>
+                          ) : null}
 
 
                           {item.type === "para" && (
-                            <>
-                              <p
-                                className="border"
-                                contentEditable
-                                suppressContentEditableWarning
-                                onClick={() => {
-                                  // setSelectedIndex(index);
-                                  setSelectedContent(item.content); // Store the correct content
-                                  setIsModalOpen(true); // Open the modal
-                                }}
-                                style={resolveBackgroundStyle(item.style)}
-                                dangerouslySetInnerHTML={{
-                                  __html: item.content,
-                                }}
-                              />
-                              {isModalOpen && selectedIndex === index && (
-                                <ParaEditor
-                                  isOpen={isModalOpen}
-                                  content={selectedContent} // Pass the correct content
-                                  style={item.style}
-                                  onSave={(newContent) => {
-                                    updateContent(index, {
-                                      content: newContent,
-                                    }); // Save the new content
-                                    setIsModalOpen(false);
-                                  }}
-                                  onClose={() => setIsModalOpen(false)}
-                                />
-                              )}
-                            </>
+                            <p
+                              className="border"
+                              contentEditable={false} // Not editable
+                              suppressContentEditableWarning
+                              style={resolveBackgroundStyle(item.style)}
+                              dangerouslySetInnerHTML={{
+                                __html: item.content,
+                              }}
+                            />
                           )}
+
 
                           {item.type === "multi-image-card" ? (
                             <div className="Layout-img">
                               <div className="Layout">
                                 <img
                                   src={
-                                    item.src1 
+                                    item.src1
                                   }
                                   alt="Editable"
                                   className="multiimgcard"
@@ -5679,7 +5647,7 @@ useEffect(() => {
                               <div className="Layout">
                                 <img
                                   src={
-                                    item.src2 
+                                    item.src2
                                   }
                                   alt="Editable"
                                   className="multiimgcard"
@@ -5720,7 +5688,7 @@ useEffect(() => {
                               <div className="Layout">
                                 <img
                                   src={
-                                    item.src1 
+                                    item.src1
                                   }
                                   alt="Editable"
                                   className="multiple-img"
@@ -5733,7 +5701,7 @@ useEffect(() => {
                               <div className="Layout">
                                 <img
                                   src={
-                                    item.src2 
+                                    item.src2
                                   }
                                   alt="Editable"
                                   className="multiple-img"
@@ -5750,7 +5718,7 @@ useEffect(() => {
                               <div className="Layout">
                                 <img
                                   src={
-                                    item.src1 
+                                    item.src1
                                   }
                                   alt="Editable"
                                   className="multiimg"
@@ -5772,7 +5740,7 @@ useEffect(() => {
                               <div className="Layout">
                                 <img
                                   src={
-                                    item.src2 
+                                    item.src2
                                   }
                                   alt="Editable"
                                   className="multiimg"
@@ -5797,7 +5765,7 @@ useEffect(() => {
                             <div className="video-icon">
                               <img
                                 src={
-                                  item.src1 
+                                  item.src1
                                 }
                                 alt="Editable"
                                 className="videoimg"
@@ -5826,7 +5794,7 @@ useEffect(() => {
                             >
                               <img
                                 src={
-                                  item.src1 
+                                  item.src1
                                 }
                                 style={item.style}
                                 alt="Editable"
@@ -5863,17 +5831,17 @@ useEffect(() => {
 
                           {item.type === "head" && (
                             <div ref={dropdownRef}>
-                             <p
-    className="border-head"
-    contentEditable
-    suppressContentEditableWarning
-    style={{
-      whiteSpace: "pre-wrap", // ✅ preserves line breaks and spacing
-      ...resolveBackgroundStyle(item.style),
-    }}
-    
-    dangerouslySetInnerHTML={{ __html: item.content }} // ✅ render saved HTML
-  />
+                              <p
+                                className="border-head"
+                                contentEditable
+                                suppressContentEditableWarning
+                                style={{
+                                  whiteSpace: "pre-wrap", // ✅ preserves line breaks and spacing
+                                  ...resolveBackgroundStyle(item.style),
+                                }}
+
+                                dangerouslySetInnerHTML={{ __html: item.content }} // ✅ render saved HTML
+                              />
                               {/* Local state for each heading */}
                               <div className="select-group-container">
                                 {/* Select Group */}
@@ -5907,7 +5875,7 @@ useEffect(() => {
                                         <span>Add</span> Variable
                                       </p>
                                       {fieldNames[index] &&
-                                      fieldNames[index].length > 0 ? (
+                                        fieldNames[index].length > 0 ? (
                                         <div>
                                           {fieldNames[index].map(
                                             (field, idx) => (
@@ -5944,7 +5912,7 @@ useEffect(() => {
                               >
                                 <img
                                   src={
-                                    item.src 
+                                    item.src
                                   }
                                   alt="Editable"
                                   className="img"
@@ -5959,7 +5927,7 @@ useEffect(() => {
                             <div className="border">
                               <img
                                 src={
-                                  item.src 
+                                  item.src
                                 }
                                 alt="Editable"
                                 className="img"
@@ -6064,7 +6032,7 @@ useEffect(() => {
                               >
                                 <img
                                   src={
-                                    item.src1 
+                                    item.src1
                                   }
                                   alt="Editable"
                                   className="image-item"
@@ -6102,7 +6070,7 @@ useEffect(() => {
                             <div className="border">
                               <img
                                 src={
-                                  item.src 
+                                  item.src
                                 }
                                 alt="Editable"
                                 className="img"
@@ -6130,7 +6098,7 @@ useEffect(() => {
                                 />
                                 <img
                                   src={
-                                    item.src2 
+                                    item.src2
                                   }
                                   alt="Editable"
                                   className="image-item"
@@ -6158,12 +6126,12 @@ useEffect(() => {
                             <div className="border">
                               <img
                                 src={
-                                  item.src 
+                                  item.src
                                 }
                                 alt="Editable"
                                 className="logo"
                                 style={resolveBackgroundStyle(item.style)}
-                                onClick={() => handleopenFiles(index, 1)}
+                                // onClick={() => handleopenFiles(index, 1)}
                                 title="Upload Image"
                               />
                             </div>
@@ -6249,155 +6217,135 @@ useEffect(() => {
                           style={item.style}
                           key={index}
                         >
-{item.type === "table" && (
-                        <div className="table-component">
-                          <table style={item.style}>
-                            <tbody>
-                              {item.content.map((row, rowIndex) => (
-                                <tr key={rowIndex}>
-                                  {row.map((cell, cellIndex) => {
-                                    const isHeader = rowIndex === 0;
-                                    const cellStyleToUse = isHeader
-                                      ? item.headerStyle
-                                      : item.cellStyle;
-                                    const CellTag = isHeader ? "th" : "td";
-                                    return (
-                                      <CellTag
-                                        key={cellIndex}
-                                        style={cellStyleToUse}
-                                        contentEditable
-                                        suppressContentEditableWarning
-                                        onBlur={(e) => {
-                                          const newContent = [...item.content];
-                                          newContent[rowIndex][cellIndex] = e.target.textContent;
-                                          updateContent(index, {
-                                            content: newContent,
-                                          });
-                                        }}
-                                      >
-                                        {cell}
-                                      </CellTag>
-                                    );
-                                  })}
-                                </tr>
-                              ))}
-                            </tbody>
-                          </table>
-                        </div>
-                      )}
-                          {item.type === "cardbtn" && (
-                        <div className="card-btn-container" style={item.style}>
-                          <img
-                            src={item.src1}
-                            style={item.style}
-                            alt="Editable"
-                            className="card-image"
-                            title="Upload Image"
-                          />
-
-                          <a
-                            href={item.link}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="button-preview card-btn"
-                            style={item.buttonStyle}
-                          >
-                            {item.content}
-                          </a>
-                        </div>
-                      )}
-
-{item.type === "sign" ? (
-                        <div className="sign-container">
-                          <div className="sign-wrapper-content" style={item.style}>
-                            <img
-                              src={item.src1 || "https://via.placeholder.com/200"}
-                              alt="User"
-                              className="sign-image"
-                              title="Upload Image"
-                              onClick={() => handleopenFiles(index, 1)}
-                            />
-                            <div className="sign-collector-con">
-                              <div className="sign-text">
-                                <span
-                                  className="sign-name"
-                                  // contentEditable
-                                  suppressContentEditableWarning
-                                  onClick={() => {
-                                    setModalIndex(index);
-                                    setIsModalOpen(true);
-                                  }}
-                                >
-                                  {item.Name}
-                                </span>
-                                <span
-                                  className="sign-designation"
-                                  // contentEditable
-                                  suppressContentEditableWarning
-                                >
-                                  ({item.Designation})
-                                </span>
-                              </div>
-                              <div className="sign-icons">
-                                <a href={item.links1} target="_blank" rel="noopener noreferrer" className="sign-icon-item" style={item.style}>
-                                  <img src={item.iconsrc1} style={item.styleicon1} alt="icon1"  className="phoneicon"/>
-                                  <p className="sign-icon-text">{item.text1 || "9743869034"}</p>
-                                </a>
-                                <a href={item.links2} target="_blank" rel="noopener noreferrer" className="sign-icon-item" style={item.style}>
-                                  <img src={item.iconsrc2} style={item.styleicon2} alt="icon2" className="phoneicon"/>
-                                  <p className="sign-icon-text">{item.text2 || "www.google.com"}</p>
-                                </a>
-                                <span className="sign-icon-item" style={item.style}>
-                                  <img src={item.iconsrc3} style={item.styleicon3} alt="icon3" className="phoneicon"/>
-                                  <p  className="sign-icon-text">{item.text3 || "Salem"}</p>
-                              </span>
-                              </div>
-
+                          {item.type === "table" && (
+                            <div className="table-component">
+                              <table style={item.style}>
+                                <tbody>
+                                  {item.content.map((row, rowIndex) => (
+                                    <tr key={rowIndex}>
+                                      {row.map((cell, cellIndex) => {
+                                        const isHeader = rowIndex === 0;
+                                        const cellStyleToUse = isHeader
+                                          ? item.headerStyle
+                                          : item.cellStyle;
+                                        const CellTag = isHeader ? "th" : "td";
+                                        return (
+                                          <CellTag
+                                            key={cellIndex}
+                                            style={cellStyleToUse}
+                                            contentEditable
+                                            suppressContentEditableWarning
+                                          // onBlur={(e) => {
+                                          //   const newContent = [...item.content];
+                                          //   newContent[rowIndex][cellIndex] = e.target.textContent;
+                                          //   updateContent(index, {
+                                          //     content: newContent,
+                                          //   });
+                                          // }}
+                                          >
+                                            {cell}
+                                          </CellTag>
+                                        );
+                                      })}
+                                    </tr>
+                                  ))}
+                                </tbody>
+                              </table>
                             </div>
-                          </div>
-                        </div>
-                      ) : null}
+                          )}
+                          {item.type === "cardbtn" && (
+                            <div className="card-btn-container" style={item.style}>
+                              <img
+                                src={item.src1}
+                                style={item.style}
+                                alt="Editable"
+                                className="card-image"
+                                title="Upload Image"
+                              />
+
+                              <a
+                                href={item.link}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="button-preview card-btn"
+                                style={item.buttonStyle}
+                              >
+                                {item.content}
+                              </a>
+                            </div>
+                          )}
+
+                          {item.type === "sign" ? (
+                            <div className="sign-container">
+                              <div className="sign-wrapper-content" style={item.style}>
+                                <img
+                                  src={item.src1 || "https://via.placeholder.com/200"}
+                                  alt="User"
+                                  className="sign-image"
+                                  title="Upload Image"
+                                  onClick={() => handleopenFiles(index, 1)}
+                                />
+                                <div className="sign-collector-con">
+                                  <div className="sign-text">
+                                    <span
+                                      className="sign-name"
+                                      // contentEditable
+                                      suppressContentEditableWarning
+                                      onClick={() => {
+                                        setModalIndex(index);
+                                        setIsModalOpen(true);
+                                      }}
+                                    >
+                                      {item.Name}
+                                    </span>
+                                    <span
+                                      className="sign-designation"
+                                      // contentEditable
+                                      suppressContentEditableWarning
+                                    >
+                                      ({item.Designation})
+                                    </span>
+                                  </div>
+                                  <div className="sign-icons">
+                                    <a href={item.links1} target="_blank" rel="noopener noreferrer" className="sign-icon-item" style={item.style}>
+                                      <img src={item.iconsrc1} style={item.styleicon1} alt="icon1" className="phoneicon" />
+                                      <p className="sign-icon-text">{item.text1 || "9743869034"}</p>
+                                    </a>
+                                    <a href={item.links2} target="_blank" rel="noopener noreferrer" className="sign-icon-item" style={item.style}>
+                                      <img src={item.iconsrc2} style={item.styleicon2} alt="icon2" className="phoneicon" />
+                                      <p className="sign-icon-text">{item.text2 || "www.google.com"}</p>
+                                    </a>
+                                    <span className="sign-icon-item" style={item.style}>
+                                      <img src={item.iconsrc3} style={item.styleicon3} alt="icon3" className="phoneicon" />
+                                      <p className="sign-icon-text">{item.text3 || "Salem"}</p>
+                                    </span>
+                                  </div>
+
+                                </div>
+                              </div>
+                            </div>
+                          ) : null}
 
 
                           {item.type === "para" && (
-                            <>
-                              <p
-                                className="border"
-                                contentEditable
-                                suppressContentEditableWarning
-                                onClick={() => {
-                                  // setSelectedIndex(index);
-                                  setSelectedContent(item.content); // Store the correct content
-                                  setIsModalOpen(true); // Open the modal
-                                }}
-                                style={resolveBackgroundStyle(item.style)}
-                                dangerouslySetInnerHTML={{
-                                  __html: item.content,
-                                }}
-                              />
-                              {isModalOpen && selectedIndex === index && (
-                                <ParaEditor
-                                  isOpen={isModalOpen}
-                                  content={selectedContent} // Pass the correct content
-                                  style={item.style}
-                                  onSave={(newContent) => {
-                                    updateContent(index, {
-                                      content: newContent,
-                                    }); // Save the new content
-                                    setIsModalOpen(false);
-                                  }}
-                                  onClose={() => setIsModalOpen(false)}
-                                />
-                              )}
-                            </>
+                            <p
+                              className="border"
+                              contentEditable={false} // Not editable
+                              suppressContentEditableWarning
+                              style={resolveBackgroundStyle(item.style)}
+                              dangerouslySetInnerHTML={{
+                                __html: item.content,
+                              }}
+                            />
                           )}
+
 
                           {item.type === "multi-image-card" ? (
                             <div className="Layout-img">
                               <div className="Layout">
                                 <img
                                   src={
-                                    item.src1 
+                                    item.src1
                                   }
                                   alt="Editable"
                                   className="multiimgcard"
@@ -6434,7 +6382,7 @@ useEffect(() => {
                               <div className="Layout">
                                 <img
                                   src={
-                                    item.src2 
+                                    item.src2
                                   }
                                   alt="Editable"
                                   className="multiimgcard"
@@ -6475,7 +6423,7 @@ useEffect(() => {
                               <div className="Layout">
                                 <img
                                   src={
-                                    item.src1 
+                                    item.src1
                                   }
                                   alt="Editable"
                                   className="multiple-img"
@@ -6488,7 +6436,7 @@ useEffect(() => {
                               <div className="Layout">
                                 <img
                                   src={
-                                    item.src2 
+                                    item.src2
                                   }
                                   alt="Editable"
                                   className="multiple-img"
@@ -6505,7 +6453,7 @@ useEffect(() => {
                               <div className="Layout">
                                 <img
                                   src={
-                                    item.src1 
+                                    item.src1
                                   }
                                   alt="Editable"
                                   className="multiimg"
@@ -6527,7 +6475,7 @@ useEffect(() => {
                               <div className="Layout">
                                 <img
                                   src={
-                                    item.src2 
+                                    item.src2
                                   }
                                   alt="Editable"
                                   className="multiimg"
@@ -6552,7 +6500,7 @@ useEffect(() => {
                             <div className="video-icon">
                               <img
                                 src={
-                                  item.src1 
+                                  item.src1
                                 }
                                 alt="Editable"
                                 className="videoimg"
@@ -6581,7 +6529,7 @@ useEffect(() => {
                             >
                               <img
                                 src={
-                                  item.src1 
+                                  item.src1
                                 }
                                 style={item.style}
                                 alt="Editable"
@@ -6618,17 +6566,17 @@ useEffect(() => {
 
                           {item.type === "head" && (
                             <div ref={dropdownRef}>
-                               <p
-    className="border-head"
-    contentEditable
-    suppressContentEditableWarning
-    style={{
-      whiteSpace: "pre-wrap", // ✅ preserves line breaks and spacing
-      ...resolveBackgroundStyle(item.style),
-    }}
-    
-    dangerouslySetInnerHTML={{ __html: item.content }} // ✅ render saved HTML
-  />
+                              <p
+                                className="border-head"
+                                contentEditable
+                                suppressContentEditableWarning
+                                style={{
+                                  whiteSpace: "pre-wrap", // ✅ preserves line breaks and spacing
+                                  ...resolveBackgroundStyle(item.style),
+                                }}
+
+                                dangerouslySetInnerHTML={{ __html: item.content }} // ✅ render saved HTML
+                              />
                               {/* Local state for each heading */}
                               <div className="select-group-container">
                                 {/* Select Group */}
@@ -6662,7 +6610,7 @@ useEffect(() => {
                                         <span>Add</span> Variable
                                       </p>
                                       {fieldNames[index] &&
-                                      fieldNames[index].length > 0 ? (
+                                        fieldNames[index].length > 0 ? (
                                         <div>
                                           {fieldNames[index].map(
                                             (field, idx) => (
@@ -6699,7 +6647,7 @@ useEffect(() => {
                               >
                                 <img
                                   src={
-                                    item.src 
+                                    item.src
                                   }
                                   alt="Editable"
                                   className="img"
@@ -6714,7 +6662,7 @@ useEffect(() => {
                             <div className="border">
                               <img
                                 src={
-                                  item.src 
+                                  item.src
                                 }
                                 alt="Editable"
                                 className="img"
@@ -6819,7 +6767,7 @@ useEffect(() => {
                               >
                                 <img
                                   src={
-                                    item.src1 
+                                    item.src1
                                   }
                                   alt="Editable"
                                   className="image-item"
@@ -6857,7 +6805,7 @@ useEffect(() => {
                             <div className="border">
                               <img
                                 src={
-                                  item.src 
+                                  item.src
                                 }
                                 alt="Editable"
                                 className="img"
@@ -6885,7 +6833,7 @@ useEffect(() => {
                                 />
                                 <img
                                   src={
-                                    item.src2 
+                                    item.src2
                                   }
                                   alt="Editable"
                                   className="image-item"
@@ -6913,12 +6861,12 @@ useEffect(() => {
                             <div className="border">
                               <img
                                 src={
-                                  item.src 
+                                  item.src
                                 }
                                 alt="Editable"
                                 className="logo"
                                 style={resolveBackgroundStyle(item.style)}
-                                onClick={() => handleopenFiles(index, 1)}
+                                // onClick={() => handleopenFiles(index, 1)}
                                 title="Upload Image"
                               />
                             </div>
@@ -7071,155 +7019,135 @@ useEffect(() => {
                           style={item.style}
                           key={index}
                         >
-{item.type === "table" && (
-                        <div className="table-component">
-                          <table style={item.style}>
-                            <tbody>
-                              {item.content.map((row, rowIndex) => (
-                                <tr key={rowIndex}>
-                                  {row.map((cell, cellIndex) => {
-                                    const isHeader = rowIndex === 0;
-                                    const cellStyleToUse = isHeader
-                                      ? item.headerStyle
-                                      : item.cellStyle;
-                                    const CellTag = isHeader ? "th" : "td";
-                                    return (
-                                      <CellTag
-                                        key={cellIndex}
-                                        style={cellStyleToUse}
-                                        contentEditable
-                                        suppressContentEditableWarning
-                                        onBlur={(e) => {
-                                          const newContent = [...item.content];
-                                          newContent[rowIndex][cellIndex] = e.target.textContent;
-                                          updateContent(index, {
-                                            content: newContent,
-                                          });
-                                        }}
-                                      >
-                                        {cell}
-                                      </CellTag>
-                                    );
-                                  })}
-                                </tr>
-                              ))}
-                            </tbody>
-                          </table>
-                        </div>
-                      )}
-                          {item.type === "cardbtn" && (
-                        <div className="card-btn-container" style={item.style}>
-                          <img
-                            src={item.src1}
-                            style={item.style}
-                            alt="Editable"
-                            className="card-image"
-                            title="Upload Image"
-                          />
-
-                          <a
-                            href={item.link}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="button-preview card-btn"
-                            style={item.buttonStyle}
-                          >
-                            {item.content}
-                          </a>
-                        </div>
-                      )}
-
-{item.type === "sign" ? (
-                        <div className="sign-container">
-                          <div className="sign-wrapper-content" style={item.style}>
-                            <img
-                              src={item.src1 || "https://via.placeholder.com/200"}
-                              alt="User"
-                              className="sign-image"
-                              title="Upload Image"
-                              onClick={() => handleopenFiles(index, 1)}
-                            />
-                            <div className="sign-collector-con">
-                              <div className="sign-text">
-                                <span
-                                  className="sign-name"
-                                  // contentEditable
-                                  suppressContentEditableWarning
-                                  onClick={() => {
-                                    setModalIndex(index);
-                                    setIsModalOpen(true);
-                                  }}
-                                >
-                                  {item.Name}
-                                </span>
-                                <span
-                                  className="sign-designation"
-                                  // contentEditable
-                                  suppressContentEditableWarning
-                                >
-                                  ({item.Designation})
-                                </span>
-                              </div>
-                              <div className="sign-icons">
-                                <a href={item.links1} target="_blank" rel="noopener noreferrer" className="sign-icon-item" style={item.style}>
-                                  <img src={item.iconsrc1} style={item.styleicon1} alt="icon1"  className="phoneicon"/>
-                                  <p className="sign-icon-text">{item.text1 || "9743869034"}</p>
-                                </a>
-                                <a href={item.links2} target="_blank" rel="noopener noreferrer" className="sign-icon-item" style={item.style}>
-                                  <img src={item.iconsrc2} style={item.styleicon2} alt="icon2" className="phoneicon"/>
-                                  <p className="sign-icon-text">{item.text2 || "www.google.com"}</p>
-                                </a>
-                                <span className="sign-icon-item" style={item.style}>
-                                  <img src={item.iconsrc3} style={item.styleicon3} alt="icon3" className="phoneicon"/>
-                                  <p  className="sign-icon-text">{item.text3 || "Salem"}</p>
-                              </span>
-                              </div>
-
+                          {item.type === "table" && (
+                            <div className="table-component">
+                              <table style={item.style}>
+                                <tbody>
+                                  {item.content.map((row, rowIndex) => (
+                                    <tr key={rowIndex}>
+                                      {row.map((cell, cellIndex) => {
+                                        const isHeader = rowIndex === 0;
+                                        const cellStyleToUse = isHeader
+                                          ? item.headerStyle
+                                          : item.cellStyle;
+                                        const CellTag = isHeader ? "th" : "td";
+                                        return (
+                                          <CellTag
+                                            key={cellIndex}
+                                            style={cellStyleToUse}
+                                            contentEditable
+                                            suppressContentEditableWarning
+                                          // onBlur={(e) => {
+                                          //   const newContent = [...item.content];
+                                          //   newContent[rowIndex][cellIndex] = e.target.textContent;
+                                          //   updateContent(index, {
+                                          //     content: newContent,
+                                          //   });
+                                          // }}
+                                          >
+                                            {cell}
+                                          </CellTag>
+                                        );
+                                      })}
+                                    </tr>
+                                  ))}
+                                </tbody>
+                              </table>
                             </div>
-                          </div>
-                        </div>
-                      ) : null}
+                          )}
+                          {item.type === "cardbtn" && (
+                            <div className="card-btn-container" style={item.style}>
+                              <img
+                                src={item.src1}
+                                style={item.style}
+                                alt="Editable"
+                                className="card-image"
+                                title="Upload Image"
+                              />
+
+                              <a
+                                href={item.link}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="button-preview card-btn"
+                                style={item.buttonStyle}
+                              >
+                                {item.content}
+                              </a>
+                            </div>
+                          )}
+
+                          {item.type === "sign" ? (
+                            <div className="sign-container">
+                              <div className="sign-wrapper-content" style={item.style}>
+                                <img
+                                  src={item.src1 || "https://via.placeholder.com/200"}
+                                  alt="User"
+                                  className="sign-image"
+                                  title="Upload Image"
+                                  onClick={() => handleopenFiles(index, 1)}
+                                />
+                                <div className="sign-collector-con">
+                                  <div className="sign-text">
+                                    <span
+                                      className="sign-name"
+                                      // contentEditable
+                                      suppressContentEditableWarning
+                                      onClick={() => {
+                                        setModalIndex(index);
+                                        setIsModalOpen(true);
+                                      }}
+                                    >
+                                      {item.Name}
+                                    </span>
+                                    <span
+                                      className="sign-designation"
+                                      // contentEditable
+                                      suppressContentEditableWarning
+                                    >
+                                      ({item.Designation})
+                                    </span>
+                                  </div>
+                                  <div className="sign-icons">
+                                    <a href={item.links1} target="_blank" rel="noopener noreferrer" className="sign-icon-item" style={item.style}>
+                                      <img src={item.iconsrc1} style={item.styleicon1} alt="icon1" className="phoneicon" />
+                                      <p className="sign-icon-text">{item.text1 || "9743869034"}</p>
+                                    </a>
+                                    <a href={item.links2} target="_blank" rel="noopener noreferrer" className="sign-icon-item" style={item.style}>
+                                      <img src={item.iconsrc2} style={item.styleicon2} alt="icon2" className="phoneicon" />
+                                      <p className="sign-icon-text">{item.text2 || "www.google.com"}</p>
+                                    </a>
+                                    <span className="sign-icon-item" style={item.style}>
+                                      <img src={item.iconsrc3} style={item.styleicon3} alt="icon3" className="phoneicon" />
+                                      <p className="sign-icon-text">{item.text3 || "Salem"}</p>
+                                    </span>
+                                  </div>
+
+                                </div>
+                              </div>
+                            </div>
+                          ) : null}
 
 
                           {item.type === "para" && (
-                            <>
-                              <p
-                                className="border"
-                                contentEditable
-                                suppressContentEditableWarning
-                                onClick={() => {
-                                  // setSelectedIndex(index);
-                                  setSelectedContent(item.content); // Store the correct content
-                                  setIsModalOpen(true); // Open the modal
-                                }}
-                                style={resolveBackgroundStyle(item.style)}
-                                dangerouslySetInnerHTML={{
-                                  __html: item.content,
-                                }}
-                              />
-                              {isModalOpen  && (
-                                <ParaEditor
-                                  isOpen={isModalOpen}
-                                  content={selectedContent} // Pass the correct content
-                                  style={item.style}
-                                  onSave={(newContent) => {
-                                    updateContent(index, {
-                                      content: newContent,
-                                    }); // Save the new content
-                                    setIsModalOpen(false);
-                                  }}
-                                  onClose={() => setIsModalOpen(false)}
-                                />
-                              )}
-                            </>
+                            <p
+                              className="border"
+                              contentEditable={false} // Not editable
+                              suppressContentEditableWarning
+                              style={resolveBackgroundStyle(item.style)}
+                              dangerouslySetInnerHTML={{
+                                __html: item.content,
+                              }}
+                            />
                           )}
+
 
                           {item.type === "multi-image-card" ? (
                             <div className="Layout-img">
                               <div className="Layout">
                                 <img
                                   src={
-                                    item.src1 
+                                    item.src1
                                   }
                                   alt="Editable"
                                   className="multiimgcard"
@@ -7256,7 +7184,7 @@ useEffect(() => {
                               <div className="Layout">
                                 <img
                                   src={
-                                    item.src2 
+                                    item.src2
                                   }
                                   alt="Editable"
                                   className="multiimgcard"
@@ -7297,7 +7225,7 @@ useEffect(() => {
                               <div className="Layout">
                                 <img
                                   src={
-                                    item.src1 
+                                    item.src1
                                   }
                                   alt="Editable"
                                   className="multiple-img"
@@ -7310,7 +7238,7 @@ useEffect(() => {
                               <div className="Layout">
                                 <img
                                   src={
-                                    item.src2 
+                                    item.src2
                                   }
                                   alt="Editable"
                                   className="multiple-img"
@@ -7327,7 +7255,7 @@ useEffect(() => {
                               <div className="Layout">
                                 <img
                                   src={
-                                    item.src1 
+                                    item.src1
                                   }
                                   alt="Editable"
                                   className="multiimg"
@@ -7349,7 +7277,7 @@ useEffect(() => {
                               <div className="Layout">
                                 <img
                                   src={
-                                    item.src2 
+                                    item.src2
                                   }
                                   alt="Editable"
                                   className="multiimg"
@@ -7374,7 +7302,7 @@ useEffect(() => {
                             <div className="video-icon">
                               <img
                                 src={
-                                  item.src1 
+                                  item.src1
                                 }
                                 alt="Editable"
                                 className="videoimg"
@@ -7403,7 +7331,7 @@ useEffect(() => {
                             >
                               <img
                                 src={
-                                  item.src1 
+                                  item.src1
                                 }
                                 style={item.style}
                                 alt="Editable"
@@ -7441,16 +7369,16 @@ useEffect(() => {
                           {item.type === "head" && (
                             <div ref={dropdownRef}>
                               <p
-    className="border-head"
-    contentEditable
-    suppressContentEditableWarning
-    style={{
-      whiteSpace: "pre-wrap", // ✅ preserves line breaks and spacing
-      ...resolveBackgroundStyle(item.style),
-    }}
-    
-    dangerouslySetInnerHTML={{ __html: item.content }} // ✅ render saved HTML
-  />
+                                className="border-head"
+                                contentEditable
+                                suppressContentEditableWarning
+                                style={{
+                                  whiteSpace: "pre-wrap", // ✅ preserves line breaks and spacing
+                                  ...resolveBackgroundStyle(item.style),
+                                }}
+
+                                dangerouslySetInnerHTML={{ __html: item.content }} // ✅ render saved HTML
+                              />
                               {/* Local state for each heading */}
                               <div className="select-group-container">
                                 {/* Select Group */}
@@ -7484,7 +7412,7 @@ useEffect(() => {
                                         <span>Add</span> Variable
                                       </p>
                                       {fieldNames[index] &&
-                                      fieldNames[index].length > 0 ? (
+                                        fieldNames[index].length > 0 ? (
                                         <div>
                                           {fieldNames[index].map(
                                             (field, idx) => (
@@ -7521,7 +7449,7 @@ useEffect(() => {
                               >
                                 <img
                                   src={
-                                    item.src 
+                                    item.src
                                   }
                                   alt="Editable"
                                   className="img"
@@ -7536,7 +7464,7 @@ useEffect(() => {
                             <div className="border">
                               <img
                                 src={
-                                  item.src 
+                                  item.src
                                 }
                                 alt="Editable"
                                 className="img"
@@ -7641,7 +7569,7 @@ useEffect(() => {
                               >
                                 <img
                                   src={
-                                    item.src1 
+                                    item.src1
                                   }
                                   alt="Editable"
                                   className="image-item"
@@ -7679,7 +7607,7 @@ useEffect(() => {
                             <div className="border">
                               <img
                                 src={
-                                  item.src 
+                                  item.src
                                 }
                                 alt="Editable"
                                 className="img"
@@ -7735,12 +7663,12 @@ useEffect(() => {
                             <div className="border">
                               <img
                                 src={
-                                  item.src 
+                                  item.src
                                 }
                                 alt="Editable"
                                 className="logo"
                                 style={resolveBackgroundStyle(item.style)}
-                                onClick={() => handleopenFiles(index, 1)}
+                                // onClick={() => handleopenFiles(index, 1)}
                                 title="Upload Image"
                               />
                             </div>
@@ -7788,26 +7716,26 @@ useEffect(() => {
                   >
                     Cancel
                   </button>
-                 {selectedTemplatepre && 
-   ![foodTemplate, educationalTemplate, agricultureTemplate,travelTemplate,pharmacyTemplate,gymTemplate].includes(selectedTemplatepre) && (
-    <button
-      className="preview-create-button"
-      disabled={isDeleting}
-      onClick={() => {
-        setDeleteTemplateId(selectedTemplatepre._id);
-        setShowDeleteModal(true);
-      }}
-    >
-      {isDeleting ? (
-        <span
-          style={{ color: "#ffffff" }}
-          className="loader-create"
-        ></span>
-      ) : (
-        "Delete"
-      )}
-    </button>
-  )}
+                  {selectedTemplatepre &&
+                    ![foodTemplate, educationalTemplate, agricultureTemplate, travelTemplate, pharmacyTemplate, gymTemplate].includes(selectedTemplatepre) && (
+                      <button
+                        className="preview-create-button"
+                        disabled={isDeleting}
+                        onClick={() => {
+                          setDeleteTemplateId(selectedTemplatepre._id);
+                          setShowDeleteModal(true);
+                        }}
+                      >
+                        {isDeleting ? (
+                          <span
+                            style={{ color: "#ffffff" }}
+                            className="loader-create"
+                          ></span>
+                        ) : (
+                          "Delete"
+                        )}
+                      </button>
+                    )}
 
                 </div>
               </div>
